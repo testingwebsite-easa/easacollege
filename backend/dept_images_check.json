@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "69887fca901a540439f3252a",
+    "slug": "agri",
+    "name": "Agriculture Engineering",
+    "heroImage": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
+  },
+  {
+    "_id": "69887fca901a540439f32524",
+    "slug": "cse-cyber-security",
+    "name": "CSE (Cyber Security)",
+    "heroImage": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
+  },
+  {
+    "_id": "69887fca901a540439f32516",
+    "slug": "ece",
+    "name": "Electronics and Communication Engineering",
+    "heroImage": "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
+  },
+  {
+    "_id": "69887fca901a540439f32530",
+    "slug": "manufacturing",
+    "name": "Manufacturing Engineering",
+    "heroImage": "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
+  },
+  {
+    "_id": "69887fca901a540439f32518",
+    "slug": "mech",
+    "name": "Mechanical Engineering",
+    "heroImage": "https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"
+  }
+]

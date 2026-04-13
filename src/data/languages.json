@@ -1,0 +1,18 @@
+[
+    {
+        "name": "English",
+        "code": "EN"
+    },
+    {
+        "name": "Tamil",
+        "code": "TA"
+    },
+    {
+        "name": "Malayalam",
+        "code": "ML"
+    },
+    {
+        "name": "Hindi",
+        "code": "HI"
+    }
+]

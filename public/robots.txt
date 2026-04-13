@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://easacollege.ac.in/sitemap.xml

@@ -1,0 +1,15 @@
+Server:  dns.google
+Address:  8.8.8.8
+
+Name:    EASAcollege-shard-00-00.a1hb46h.mongodb.net
+
+Server:  dns.google
+Address:  8.8.8.8
+
+Name:    EASAcollege-shard-00-01.a1hb46h.mongodb.net
+
+Server:  dns.google
+Address:  8.8.8.8
+
+Name:    EASAcollege-shard-00-02.a1hb46h.mongodb.net
+
