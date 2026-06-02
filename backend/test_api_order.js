@@ -1,6 +1,6 @@
 const http = require('http');
 
-const url = 'https://easa-college-nun5.onrender.com/api/departments';
+const url = 'http://localhost:5000/api/departments';
 
 http.get(url, (res) => {
     let data = '';

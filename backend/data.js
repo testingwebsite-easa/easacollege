@@ -1425,7 +1425,7 @@ const resourcesData = [
         title: "Autonomous Regulations Handbook",
         category: "Regulations",
         description: "Official handbook detailing the academic policies, curriculum structure, and examination rules under the autonomous system.",
-        fileUrl: "https://easa-college-nun5.onrender.com/docs/autonomous_regulations.pdf",
+        fileUrl: "http://localhost:5000/docs/autonomous_regulations.pdf",
         date: new Date()
     },
     {
