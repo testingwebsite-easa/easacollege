@@ -27,9 +27,7 @@ const AcademicCalendarPage = () => {
         <div className="resource-page" style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
 
-            <div style={{
-                position: 'relative', height: '40vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'var(--bg-section)', paddingTop: '80px',
-            }}>
+            <div className="page-hero">
                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url(${missionBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed', zIndex: 0 }} />
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)', backgroundSize: '50px 50px', opacity: 0.5, zIndex: 0 }} />
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 2rem', width: '100%', maxWidth: '1000px' }}>
@@ -48,7 +46,7 @@ const AcademicCalendarPage = () => {
                     style={{ padding: '2rem', border: '1px solid var(--glass-border)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)', overflowX: 'auto' }}
                 >
                     <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
-                        <thead>
+                        <thead style={{ background: 'transparent' }}>
                             <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
                                 <th style={{ padding: '1rem', color: 'var(--primary)', fontWeight: 'bold' }}>Academic Year</th>
                                 <th style={{ padding: '1rem', color: 'var(--primary)', fontWeight: 'bold' }}>Semester</th>

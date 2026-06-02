@@ -1333,3 +1333,33 @@ a {
     transform: translateY(0);
   }
 }
+
+/* Page Hero styles for subpages with fixed header */
+.page-hero {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-section);
+  /* Responsive paddingTop to clear the fixed navbar */
+  padding-top: 260px; /* Default for desktop with large logo header */
+  padding-bottom: 4rem;
+  min-height: 420px;
+}
+
+@media (max-width: 1100px) {
+  .page-hero {
+    padding-top: 180px; /* Tablet view / smaller navbar */
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-hero {
+    padding-top: 140px; /* Mobile view / compact navbar */
+    padding-bottom: 3rem;
+    min-height: 300px;
+  }
+}

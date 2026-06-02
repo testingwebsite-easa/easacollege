@@ -9,6 +9,7 @@ import useScrollAnimation from '../hooks/useScrollAnimation';
 import SEO from '../components/SEO';
 import { motion } from 'framer-motion';
 import { FaBus, FaMapMarkedAlt, FaClock, FaUserCheck, FaShieldAlt } from 'react-icons/fa';
+import busImage from '../assets/BUS.jpeg';
 
 function TransportPage() {
     useScrollAnimation();
@@ -97,7 +98,7 @@ function TransportPage() {
                             border: '1px solid var(--glass-border)'
                         }}>
                             <img
-                                src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2069&auto=format&fit=crop"
+                                src={busImage}
                                 alt="College Bus"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />

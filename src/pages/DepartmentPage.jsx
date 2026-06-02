@@ -61,19 +61,55 @@ const DepartmentPage = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        const dept = getDepartment(id);
-        if (dept) {
-            // Redirect if the current ID is an abbreviation (e.g., 'cse' -> 'computer-science-and-engineering')
-            if (dept.slug !== id) {
-                navigate(`/department/${dept.slug}`, { replace: true });
-                return;
-            }
-            setDepartment(dept);
-        } else {
-            setDepartment(null);
-        }
-        setLoading(false);
-        setActiveSection('overview');
+        setLoading(true);
+
+        // Fetch live department data from backend
+        fetch(`${API_BASE_URL}/api/departments/${id}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Backend response not ok");
+                return res.json();
+            })
+            .then(data => {
+                const staticDept = getDepartment(id);
+                // Ensure we have a valid static department
+                if (!staticDept) {
+                    setDepartment(null);
+                    return;
+                }
+                
+                // If the static dept's slug differs from the URL id, redirect
+                if (staticDept.slug !== id) {
+                    navigate(`/department/${staticDept.slug}`, { replace: true });
+                    return;
+                }
+                
+                // Merge the live data with the static data
+                if (data && (data.mission?.length > 0 || data.vision?.length > 0 || data.peo?.length > 0 || data.pso?.length > 0 || data.po?.length > 0)) {
+                    setDepartment({
+                        ...staticDept,
+                        mission: data.mission?.length > 0 ? data.mission : staticDept.mission || [],
+                        vision: data.vision?.length > 0 ? data.vision : staticDept.vision || [],
+                        peo: data.peo?.length > 0 ? data.peo : staticDept.peo || [],
+                        pso: data.pso?.length > 0 ? data.pso : staticDept.pso || [],
+                        po: data.po?.length > 0 ? data.po : staticDept.po || []
+                    });
+                } else {
+                    setDepartment(staticDept);
+                }
+            })
+            .catch(err => {
+                console.warn("Could not fetch live department data, using static fallback:", err);
+                const staticDept = getDepartment(id);
+                if (staticDept && staticDept.slug !== id) {
+                    navigate(`/department/${staticDept.slug}`, { replace: true });
+                    return;
+                }
+                setDepartment(staticDept || null);
+            })
+            .finally(() => {
+                setLoading(false);
+                setActiveSection('overview');
+            });
     }, [id, navigate]);
 
     const renderVisionMission = () => (
@@ -83,7 +119,18 @@ const DepartmentPage = () => {
                 <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-main)' }}>
                     <span style={{ padding: '0.6rem', background: 'var(--glass-highlight)', borderRadius: '12px', color: 'var(--secondary)', display: 'flex' }}><FaGlobe size={24} /></span> Vision
                 </h3>
-                <p style={{ fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--text-muted)' }}>{department.vision}</p>
+                {Array.isArray(department.vision) ? (
+                    <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                        {department.vision.map((item, idx) => (
+                            <li key={idx} style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-start', fontSize: '1.15rem', color: 'var(--text-muted)' }}>
+                                <span style={{ minWidth: '10px', height: '10px', background: 'var(--secondary)', borderRadius: '50%', marginTop: '10px' }}></span>
+                                <span>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p style={{ fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--text-muted)' }}>{department.vision}</p>
+                )}
             </div>
             <div className="vision-mission-card" style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '3rem', border: '1px solid var(--glass-border)', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '10rem', color: 'var(--secondary)', opacity: 0.05 }}><FaRocket /></div>
@@ -111,15 +158,17 @@ const DepartmentPage = () => {
                     </h3>
                     <div style={{ display: 'grid', gap: '1.5rem' }}>
                         {department.po.map((po, idx) => {
-                            const [title, ...descParts] = po.split(':');
-                            const description = descParts.join(':').trim();
+                            const hasColon = po.includes(':');
+                            const title = hasColon ? po.split(':')[0] : `PO ${idx + 1}`;
+                            const description = hasColon ? po.split(':').slice(1).join(':').trim() : po.trim();
+
                             return (
                                 <div key={idx} style={{ padding: '2rem', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '20px', display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
                                     <div style={{ minWidth: '100px', fontSize: '1.2rem', fontWeight: '900', color: 'var(--secondary)', background: 'var(--glass-highlight)', padding: '0.5rem 1rem', borderRadius: '12px', textAlign: 'center' }}>
                                         {title.split(' ')[0]}
                                     </div>
                                     <div>
-                                        <h4 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{title.split(' ').slice(1).join(' ')}</h4>
+                                        <h4 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{title.split(' ').slice(1).join(' ') || 'Outcome Objective'}</h4>
                                         <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>{description}</p>
                                     </div>
                                 </div>
@@ -487,10 +536,10 @@ const DepartmentPage = () => {
                 </motion.div>
             ) : (
                 department.mou.map((mou, idx) => (
-                    <div key={idx} style={{ 
-                        background: 'var(--bg-card)', 
-                        padding: '2.5rem', 
-                        borderRadius: '24px', 
+                    <div key={idx} style={{
+                        background: 'var(--bg-card)',
+                        padding: '2.5rem',
+                        borderRadius: '24px',
                         border: '1px solid var(--glass-border)',
                         display: 'flex',
                         gap: '2.5rem',
@@ -498,13 +547,13 @@ const DepartmentPage = () => {
                         position: 'relative',
                         overflow: 'hidden'
                     }}>
-                        <div style={{ 
-                            width: '100px', 
-                            height: '100px', 
-                            background: 'var(--glass-highlight)', 
-                            borderRadius: '20px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                        <div style={{
+                            width: '100px',
+                            height: '100px',
+                            background: 'var(--glass-highlight)',
+                            borderRadius: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
                             justifyContent: 'center',
                             flexShrink: 0,
                             color: 'var(--secondary)'
@@ -533,8 +582,6 @@ const DepartmentPage = () => {
 
     const sections = [
         { id: 'overview', label: 'Overview', icon: <FaUniversity /> },
-        { id: 'vision-mission', label: 'Vision & Mission', icon: <FaGlobe /> },
-        { id: 'outcomes', label: 'Program Outcomes', icon: <FaGraduationCap /> },
         { id: 'labs', label: 'Laboratories', icon: <FaFlask /> },
         { id: 'hod', label: 'HOD\'s Message', icon: <FaChalkboardTeacher /> },
         { id: 'faculty', label: 'Faculty', icon: <FaUsers /> },
@@ -609,7 +656,7 @@ const DepartmentPage = () => {
                                     <h2 className="section-title" style={{ fontSize: '3rem', fontWeight: '900', color: 'var(--text-main)' }}>Overview</h2>
                                     <div className="overview-card" style={{ background: 'var(--bg-card)', borderRadius: '32px', padding: '3.5rem', border: '1px solid var(--glass-border)', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }}>
                                         <p style={{ fontSize: '1.25rem', lineHeight: '1.9', color: 'var(--text-muted)', marginBottom: '3rem' }}>{department.overview}</p>
-                                         {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '2rem' }}>
+                                        {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '2rem' }}>
                                             
                                             <div style={{ padding: '2rem', background: 'var(--bg-section)', borderRadius: '20px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
                                                 <FaChalkboardTeacher style={{ fontSize: '2rem', color: 'var(--secondary)', marginBottom: '1rem' }} />
@@ -626,8 +673,6 @@ const DepartmentPage = () => {
                                 </div>
                             )}
 
-                            {activeSection === 'vision-mission' && renderVisionMission()}
-                            {activeSection === 'outcomes' && renderPEO()}
                             {activeSection === 'labs' && renderLabs()}
                             {activeSection === 'hod' && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>

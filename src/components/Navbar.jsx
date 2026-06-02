@@ -156,6 +156,7 @@ const NAV_ITEMS = [
         title: 'RESOURCES',
         children: [
             { title: 'Regulations', href: '/resources/regulations' },
+            // { title: 'Syllabus & Curriculum', href: '/resources/syllabus-curriculum' },
             { title: 'Statutory and Non-Statutory Bodies', href: '/resources/statutory-bodies' },
             { title: 'Forms', href: '/resources/forms' },
             { title: 'Institute Academic Calendar', href: '/resources/academic-calendar' },

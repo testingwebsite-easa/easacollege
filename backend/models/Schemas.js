@@ -194,6 +194,20 @@ const FacultySchema = new mongoose.Schema({
     order: { type: Number, default: 0 }
 });
 
+// PROGRAM OUTCOMES SCHEMA
+const ProgramOutcomeSchema = new mongoose.Schema({
+    department: { type: String, required: true, index: true }, // Department slug
+    type: { type: String, required: true, enum: ['PO', 'PEO', 'PSO', 'WK'], index: true },
+    code: { type: String, required: true }, // e.g., "PO1", "PEO2", etc.
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+    createdBy: String, // User ID
+    lastModifiedBy: String // User ID
+});
+ProgramOutcomeSchema.index({ department: 1, type: 1 });
+
 module.exports = {
     FacultyStat: mongoose.model('FacultyStat', FacultyStatSchema),
     NewsEvent: mongoose.model('NewsEvent', NewsEventSchema),
@@ -209,9 +223,17 @@ module.exports = {
     Faculty: mongoose.model('Faculty', FacultySchema), // Export Faculty
     User: mongoose.model('User', new mongoose.Schema({
         username: { type: String, required: true, unique: true },
+        email: { type: String, required: true, unique: true },
         password: { type: String, required: true },
-        role: { type: String, default: 'admin', enum: ['admin', 'superadmin'] },
-        createdAt: { type: Date, default: Date.now }
+        role: { type: String, required: true, enum: ['admin', 'hod', 'staff', 'student'] },
+        department: { type: String }, // For HOD, Staff, Student
+        employeeId: { type: String }, // For Staff
+        studentId: { type: String }, // For Student
+        name: { type: String },
+        phone: { type: String },
+        isApproved: { type: Boolean, default: false }, // For HOD/Staff/Student, needs admin approval
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now }
     })),
     Alumni: mongoose.model('Alumni', new mongoose.Schema({
         name: String,
@@ -291,10 +313,11 @@ module.exports = {
             icon: String
         }],
         vision: String,
-        mission: [String],
-        peo: [String],
-        pso: [String],
-        po: [String],
+        mission: { type: [String], default: [] },
+        peo: { type: [String], default: [] },
+        pso: { type: [String], default: [] },
+        po: { type: [String], default: [] },
+        wk: { type: [String], default: [] },
         milestones: [{
             year: String,
             desc: String
@@ -586,6 +609,78 @@ module.exports = {
             date: Date
         }],
         updatedAt: { type: Date, default: Date.now }
+    })),
+    ProgramOutcome: mongoose.model('ProgramOutcome', ProgramOutcomeSchema),
+    DepartmentData: mongoose.model('DepartmentData', new mongoose.Schema({
+        departmentSlug: { type: String, required: true, unique: true },
+        mission: [String],
+        vision: [String],
+        peo: [String],
+        pso: [String],
+        po: [String],
+        bosMeetingDate: { type: String, default: "29.10.2024" },
+        acMeetingDate: { type: String, default: "25.11.2024" },
+        regulation: { type: String, default: "R-2023" },
+        subjects: [{
+            semester: Number,
+            vertical: Number,
+            verticalName: String,
+            category: String,
+            code: String,
+            title: String,
+            categoryType: String,
+            l: Number,
+            t: Number,
+            p: Number,
+            contactPeriods: Number,
+            credits: Number,
+            cia: Number,
+            ese: Number,
+            total: Number,
+            isOpenElective: { type: Boolean, default: false },
+            offeringDept: String,
+            prerequisites: { type: String, default: '' },
+            categoryName: { type: String, default: '' },
+            subtitle: { type: String, default: '' },
+            objectives: { type: [String], default: [] },
+            outcomes: [{
+                coNo: String,
+                outcome: String,
+                rbtLevel: String
+            }],
+            units: [{
+                unitNo: String,
+                title: String,
+                topics: [String]
+            }],
+            textbooks: { type: [String], default: [] },
+            references: { type: [String], default: [] },
+            webReferences: { type: [String], default: [] },
+            coPoMapping: [{
+                coNo: String,
+                po1: { type: String, default: '-' },
+                po2: { type: String, default: '-' },
+                po3: { type: String, default: '-' },
+                po4: { type: String, default: '-' },
+                po5: { type: String, default: '-' },
+                po6: { type: String, default: '-' },
+                po7: { type: String, default: '-' },
+                po8: { type: String, default: '-' },
+                po9: { type: String, default: '-' },
+                po10: { type: String, default: '-' },
+                po11: { type: String, default: '-' },
+                po12: { type: String, default: '-' },
+                pso1: { type: String, default: '-' },
+                pso2: { type: String, default: '-' },
+                pso3: { type: String, default: '-' }
+            }],
+            experiments: [{
+                sNo: String,
+                name: String,
+                co: String,
+                rbtLevel: String
+            }]
+        }],
+        updatedAt: { type: Date, default: Date.now }
     }))
-
 };

@@ -5,6 +5,13 @@ const path = require('path');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
+// Import auth routes
+const { router: authRouter } = require('./routes/auth');
+// Import outcomes routes
+const { router: outcomesRouter, setProgramOutcomeModel } = require('./routes/outcomes');
+// Import departments routes
+const departmentsRouter = require('./routes/departments');
+
 // Load env vars from the same directory as index.js
 console.log("IMPORTED SCHEMAS KEYS:", Object.keys(require('./models/Schemas')));
 const {
@@ -15,7 +22,7 @@ const {
     Institution, Infrastructure, Sustainability, CommunityOutreach, Alumni,
     Enquiry, TickerAlert, LibraryData, Scholarship, PopupAlert, PlacementPage,
     VideoGallery, Grievance, VirtualTour, PageHero, Sport, Moment, Advice,
-    FestPage, User
+    FestPage, User, ProgramOutcome
 } = require('./models/Schemas');
 console.log("FestPage Check:", FestPage);
 
@@ -123,12 +130,18 @@ app.post('/api/upload', (req, res) => {
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use('/docs', express.static(path.join(__dirname, 'public/docs')));
 
+// Register routes
+app.use('/api/auth', authRouter);
+app.use('/api/outcomes', outcomesRouter);
+app.use('/api/departments', departmentsRouter);
+
 app.get('/', (req, res) => {
     res.send('Welcome to EASA College API');
 });
 
 // --- Authentication ---
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'EasaAdmin2024';
+// Default development admin password (matches QUICK_START.md)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_key';
 const jwt = require('jsonwebtoken');
 
@@ -368,11 +381,12 @@ const seedAdmin = async () => {
     try {
         const count = await User.countDocuments();
         if (count === 0) {
-            const adminPass = process.env.ADMIN_PASSWORD || 'Easa@2024';
+            const adminPass = ADMIN_PASSWORD;
             const admin = new User({
                 username: 'admin',
                 password: hashPassword(adminPass), // Hash password
-                role: 'admin'
+                role: 'admin',
+                isApproved: true
             });
             await admin.save();
             console.log('Initial admin user seeded.');
@@ -1513,6 +1527,68 @@ app.patch('/api/admissions/:id', async (req, res) => {
     }
 });
 
+const OUTCOME_FIELDS = new Set(['po', 'peo', 'pso', 'wk']);
+
+const normalizeOutcomeType = (type) => {
+    const normalizedType = String(type || '').toLowerCase();
+    return OUTCOME_FIELDS.has(normalizedType) ? normalizedType : null;
+};
+
+const getOutcomeText = (body) => {
+    const value = body?.text ?? body?.point ?? body?.value ?? '';
+    return String(value).trim();
+};
+
+const getOutcomePoints = (department, type) => {
+    return Array.isArray(department[type]) ? [...department[type]] : [];
+};
+
+const findDepartmentByIdentifier = async (identifier) => {
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+        return Department.findOne({ $or: [{ _id: identifier }, { slug: identifier }] });
+    }
+    return Department.findOne({ slug: identifier });
+};
+
+const updateDepartmentOutcomePoint = async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+
+    const type = normalizeOutcomeType(req.params.type);
+    if (!type) {
+        return res.status(400).json({ error: "Invalid outcome type. Use po, peo, pso, or wk." });
+    }
+
+    const pointText = getOutcomeText(req.body);
+    if (!pointText) {
+        return res.status(400).json({ error: "Point text is required" });
+    }
+
+    const pointIndex = Number.parseInt(req.params.index, 10);
+    if (!Number.isInteger(pointIndex) || pointIndex < 0) {
+        return res.status(400).json({ error: "Invalid point index" });
+    }
+
+    try {
+        const department = await findDepartmentByIdentifier(req.params.identifier);
+        if (!department) return res.status(404).json({ error: "Department not found" });
+
+        const points = getOutcomePoints(department, type);
+        if (pointIndex >= points.length) {
+            return res.status(404).json({ error: "Point not found" });
+        }
+
+        points[pointIndex] = pointText;
+        department[type] = points;
+        await department.save();
+        clearCache('departments');
+
+        res.json(department);
+    } catch (err) {
+        console.error("Error updating department outcome point:", err);
+        res.status(500).json({ error: "Failed to update point" });
+    }
+};
+
 // Department Routes
 app.get('/api/departments', async (req, res) => {
     const cached = getCache('departments');
@@ -1531,6 +1607,125 @@ app.get('/api/departments', async (req, res) => {
     }
 });
 
+app.get('/api/departments/:identifier/outcomes', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const department = await findDepartmentByIdentifier(req.params.identifier);
+        if (!department) return res.status(404).json({ error: "Department not found" });
+
+        res.json({
+            departmentId: department._id,
+            slug: department.slug,
+            name: department.name,
+            po: getOutcomePoints(department, 'po'),
+            peo: getOutcomePoints(department, 'peo'),
+            pso: getOutcomePoints(department, 'pso'),
+            wk: getOutcomePoints(department, 'wk')
+        });
+    } catch (err) {
+        console.error("Error fetching department outcomes:", err);
+        res.status(500).json({ error: "Failed to fetch outcomes" });
+    }
+});
+
+app.get('/api/departments/:identifier/outcomes/:type', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+
+    const type = normalizeOutcomeType(req.params.type);
+    if (!type) {
+        return res.status(400).json({ error: "Invalid outcome type. Use po, peo, pso, or wk." });
+    }
+
+    try {
+        const department = await findDepartmentByIdentifier(req.params.identifier);
+        if (!department) return res.status(404).json({ error: "Department not found" });
+
+        res.json({
+            departmentId: department._id,
+            slug: department.slug,
+            name: department.name,
+            type,
+            points: getOutcomePoints(department, type)
+        });
+    } catch (err) {
+        console.error("Error fetching department outcome points:", err);
+        res.status(500).json({ error: "Failed to fetch points" });
+    }
+});
+
+app.post('/api/departments/:identifier/outcomes/:type', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+
+    const type = normalizeOutcomeType(req.params.type);
+    if (!type) {
+        return res.status(400).json({ error: "Invalid outcome type. Use po, peo, pso, or wk." });
+    }
+
+    const pointText = getOutcomeText(req.body);
+    if (!pointText) {
+        return res.status(400).json({ error: "Point text is required" });
+    }
+
+    try {
+        const department = await findDepartmentByIdentifier(req.params.identifier);
+        if (!department) return res.status(404).json({ error: "Department not found" });
+
+        const points = getOutcomePoints(department, type);
+        const insertAt = Number.parseInt(req.body?.position, 10);
+        if (Number.isInteger(insertAt) && insertAt >= 0 && insertAt <= points.length) {
+            points.splice(insertAt, 0, pointText);
+        } else {
+            points.push(pointText);
+        }
+
+        department[type] = points;
+        await department.save();
+        clearCache('departments');
+
+        res.status(201).json(department);
+    } catch (err) {
+        console.error("Error adding department outcome point:", err);
+        res.status(500).json({ error: "Failed to add point" });
+    }
+});
+
+app.put('/api/departments/:identifier/outcomes/:type/:index', updateDepartmentOutcomePoint);
+app.patch('/api/departments/:identifier/outcomes/:type/:index', updateDepartmentOutcomePoint);
+
+app.delete('/api/departments/:identifier/outcomes/:type/:index', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+
+    const type = normalizeOutcomeType(req.params.type);
+    if (!type) {
+        return res.status(400).json({ error: "Invalid outcome type. Use po, peo, pso, or wk." });
+    }
+
+    const pointIndex = Number.parseInt(req.params.index, 10);
+    if (!Number.isInteger(pointIndex) || pointIndex < 0) {
+        return res.status(400).json({ error: "Invalid point index" });
+    }
+
+    try {
+        const department = await findDepartmentByIdentifier(req.params.identifier);
+        if (!department) return res.status(404).json({ error: "Department not found" });
+
+        const points = getOutcomePoints(department, type);
+        if (pointIndex >= points.length) {
+            return res.status(404).json({ error: "Point not found" });
+        }
+
+        points.splice(pointIndex, 1);
+        department[type] = points;
+        await department.save();
+        clearCache('departments');
+
+        res.json(department);
+    } catch (err) {
+        console.error("Error deleting department outcome point:", err);
+        res.status(500).json({ error: "Failed to delete point" });
+    }
+});
+
 app.get('/api/departments/:slug', async (req, res) => {
     if (!isConnected) {
         const dept = departmentsData.find(d => d.slug === req.params.slug);
@@ -1545,7 +1740,7 @@ app.get('/api/departments/:slug', async (req, res) => {
     }
 });
 
-app.post('/api/departments', async (req, res) => {
+app.post('/api/departments', verifyToken, async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = new Department(req.body);
@@ -1557,7 +1752,7 @@ app.post('/api/departments', async (req, res) => {
     }
 });
 
-app.put('/api/departments/:id', async (req, res) => {
+app.put('/api/departments/:id', verifyToken, async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = await Department.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -1568,7 +1763,7 @@ app.put('/api/departments/:id', async (req, res) => {
     }
 });
 
-app.patch('/api/departments/:id', async (req, res) => {
+app.patch('/api/departments/:id', verifyToken, async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = await Department.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
@@ -1579,7 +1774,7 @@ app.patch('/api/departments/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/departments/:id', async (req, res) => {
+app.delete('/api/departments/:id', verifyToken, async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         await Department.findByIdAndDelete(req.params.id);

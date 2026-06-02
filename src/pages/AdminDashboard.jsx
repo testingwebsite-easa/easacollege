@@ -1578,6 +1578,7 @@ const AdminDashboard = () => {
                                         >
                                             <option value="Digital Library">Digital Library</option>
                                             <option value="Regulations">Regulations</option>
+                                            <option value="Syllabus & Curriculum">Syllabus & Curriculum</option>
                                             <option value="Statutory Bodies">Statutory Bodies</option>
                                             <option value="Forms">Forms</option>
                                             <option value="Academic Calendar">Academic Calendar</option>
@@ -2935,6 +2936,7 @@ const AdminDashboard = () => {
                                                 <option value="">All Categories</option>
                                                 <option value="Digital Library">Digital Library</option>
                                                 <option value="Regulations">Regulations</option>
+                                                <option value="Syllabus & Curriculum">Syllabus & Curriculum</option>
                                                 <option value="Statutory Bodies">Statutory Bodies</option>
                                                 <option value="Forms">Forms</option>
                                                 <option value="Academic Calendar">Academic Calendar</option>

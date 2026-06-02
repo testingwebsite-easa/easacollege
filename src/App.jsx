@@ -1,8 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import MissionPage from './pages/MissionPage';
 import CoreBeliefsPage from './pages/CoreBeliefsPage';
 import InstitutionPage from './pages/InstitutionPage';
+import LoginPage from './pages/LoginPage';
+import SyllabusDashboard from './pages/SyllabusDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 
 import ManagementPage from './pages/ManagementPage';
@@ -14,8 +18,6 @@ import AdministrationPage from './pages/AdministrationPage';
 import PrincipalPage from './pages/PrincipalPage';
 import SustainabilityPage from './pages/SustainabilityPage';
 import CommunityOutreachPage from './pages/CommunityOutreachPage';
-import AdminDashboard from './pages/AdminDashboard';
-import Login from './pages/Login';
 // 
 import DepartmentPage from './pages/DepartmentPage';
 // 
@@ -28,7 +30,8 @@ import FormsPage from './pages/resources/FormsPage';
 import AcademicCalendarPage from './pages/resources/AcademicCalendarPage';
 import FacultyHandbookPage from './pages/resources/FacultyHandbookPage';
 import StudentHandbookPage from './pages/resources/StudentHandbookPage';
-import StickyContactBar from './components/StickyContactBar';
+import SyllabusPage from './pages/resources/SyllabusPage';
+
 import ScrollToTop from './components/ScrollToTop';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import LoadingBar from './components/LoadingBar';
@@ -86,30 +89,37 @@ import NirfPage from './pages/NirfPage';
 
 
 function App() {
-
   return (
-    <ThemeProvider>
-      <LoadingBar />
-      <Router>
-        <PopupAlert />
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/professional-chapters" element={<ProfessionalChaptersPage />} />
-          <Route path="/mission-vision" element={<MissionPage />} />
-          <Route path="/core-beliefs" element={<CoreBeliefsPage />} />
-          <Route path="/institution" element={<InstitutionPage />} />
-          <Route path="/management" element={<ManagementPage />} />
-          <Route path="/media-press" element={<MediaPressPage />} />
-          <Route path="/milestones" element={<MilestonesPage />} />
-          <Route path="/leadership" element={<LeadershipPage />} />
-          <Route path="/governance" element={<GovernancePage />} />
-          <Route path="/administration" element={<AdministrationPage />} />
-          <Route path="/principal" element={<PrincipalPage />} />
-          <Route path="/sustainability" element={<SustainabilityPage />} />
-          <Route path="/community-outreach" element={<CommunityOutreachPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+    <AuthProvider>
+      <ThemeProvider>
+        <LoadingBar />
+        <Router>
+          <PopupAlert />
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/professional-chapters" element={<ProfessionalChaptersPage />} />
+            <Route path="/mission-vision" element={<MissionPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute requiredRoles={['admin', 'hod', 'staff', 'student']}>
+                  <SyllabusDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/core-beliefs" element={<CoreBeliefsPage />} />
+            <Route path="/institution" element={<InstitutionPage />} />
+            <Route path="/management" element={<ManagementPage />} />
+            <Route path="/media-press" element={<MediaPressPage />} />
+            <Route path="/milestones" element={<MilestonesPage />} />
+            <Route path="/leadership" element={<LeadershipPage />} />
+            <Route path="/governance" element={<GovernancePage />} />
+            <Route path="/administration" element={<AdministrationPage />} />
+            <Route path="/principal" element={<PrincipalPage />} />
+            <Route path="/sustainability" element={<SustainabilityPage />} />
+            <Route path="/community-outreach" element={<CommunityOutreachPage />} />
           <Route path="/admin/applications" element={<JobApplicationsView />} />
           <Route path="/research" element={<ResearchPage />} />
           <Route path="/department/:id" element={<DepartmentPage />} />
@@ -127,6 +137,7 @@ function App() {
           <Route path="/resources/statutory-bodies" element={<StatutoryBodiesPage />} />
           <Route path="/resources/forms" element={<FormsPage />} />
           <Route path="/resources/academic-calendar" element={<AcademicCalendarPage />} />
+          <Route path="/resources/syllabus-curriculum" element={<SyllabusPage />} />
           <Route path="/resources/handbook/faculty" element={<FacultyHandbookPage />} />
           <Route path="/resources/handbook/student" element={<StudentHandbookPage />} />
           {/* Career Page Route */}
@@ -194,9 +205,10 @@ function App() {
 
         </Routes>
         <ScrollToTopButton />
-        <StickyContactBar />
+
       </Router>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

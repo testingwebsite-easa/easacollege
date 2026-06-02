@@ -175,7 +175,7 @@ const Footer = ({ onOpenAdmission }) => {
                         <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {[
                                 { name: 'Library', path: '/page/library' },
-                                { name: 'MOU', path: '/page/mou' },
+                                { name: 'MOU', path: 'https://docs.google.com/document/d/1APC44Ed6-unX82A5RonU4qU54ykSuiF_exREfvrzJMg/edit?usp=sharing' },
                                 { name: 'Faculty Portal', path: 'https://portal.easacollege.com/Login', external: true },
                                 { name: 'Student Portal', path: 'https://portal.easacollege.com/Login', external: true },
                                 { name: 'Center of Excellence', path: '/page/center-of-excellence' },
