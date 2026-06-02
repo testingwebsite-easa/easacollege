@@ -84,7 +84,7 @@ const NaacCommittee = () => {
             {/* Scroll Menu */}
             <section className="scroll-menu-container">
                 <ul className="scroll-menu-list">
-                    <li className="ssr-link-item"><a href="/assets/naac/ssr.pdf" target="_blank" rel="noreferrer">SSR</a></li>
+                    <li className="ssr-link-item"><a href="https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/ssr.pdf" target="_blank" rel="noreferrer">SSR</a></li>
                     <li><a href="/naac-dvv-clarifications"><FaLeaf className="menu-icon" /> DVV Clarification</a></li>
                     <li><a href="/naac-extended-profile"><FaLeaf className="menu-icon" /> Extended Profile</a></li>
                     <li><a href="/naac-committee" className="active"><FaLeaf className="menu-icon" /> Committees</a></li>
@@ -111,7 +111,7 @@ const NaacCommittee = () => {
 
                                 <div className="document-action-box">
                                     <button
-                                        onClick={(e) => handleViewPdf(e, "/assets/naac/committees-list.pdf")}
+                                        onClick={(e) => handleViewPdf(e, "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/committees-list.pdf")}
                                         className="view-btn-large"
                                     >
                                         <FaFilePdf style={{ marginRight: '12px' }} />

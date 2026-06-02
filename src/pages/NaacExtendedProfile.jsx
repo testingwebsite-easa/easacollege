@@ -9,10 +9,10 @@ import { FaFilePdf, FaLeaf, FaInfoCircle } from "react-icons/fa";
 import "./inner1.css";
 
 const profileData = [
-    { metric: "1.1", parameter: "Number of students year wise during the last five years", link: "/assets/naac/dvv-clarification/extended-profile/1.1/viewpage.pdf" },
-    { metric: "2.1", parameter: "Number of teaching staff / full time teachers during the last five years (Without repeat count)", link: "/assets/naac/dvv-clarification/extended-profile/2.1/viewpage.pdf" },
-    { metric: "2.2", parameter: "Number of teaching staff / full time teachers year wise during the last five years", link: "/assets/naac/dvv-clarification/extended-profile/2.2/viewpage.pdf" },
-    { metric: "3.1", parameter: "Expenditure excluding salary component year wise during the last five years (INR in lakhs)", link: "/assets/naac/dvv-clarification/extended-profile/3.1/viewpage.pdf" }
+    { metric: "1.1", parameter: "Number of students year wise during the last five years", link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/dvv-clarification/extended-profile/1.1/viewpage.pdf" },
+    { metric: "2.1", parameter: "Number of teaching staff / full time teachers during the last five years (Without repeat count)", link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/dvv-clarification/extended-profile/2.1/viewpage.pdf" },
+    { metric: "2.2", parameter: "Number of teaching staff / full time teachers year wise during the last five years", link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/dvv-clarification/extended-profile/2.2/viewpage.pdf" },
+    { metric: "3.1", parameter: "Expenditure excluding salary component year wise during the last five years (INR in lakhs)", link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/dvv-clarification/extended-profile/3.1/viewpage.pdf" }
 ];
 
 const NaacExtendedProfile = () => {
@@ -91,7 +91,7 @@ const NaacExtendedProfile = () => {
             {/* Scroll Menu */}
             <section className="scroll-menu-container">
                 <ul className="scroll-menu-list">
-                    <li className="ssr-link-item"><a href="/assets/naac/ssr.pdf" target="_blank" rel="noreferrer">SSR</a></li>
+                    <li className="ssr-link-item"><a href="https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/ssr.pdf" target="_blank" rel="noreferrer">SSR</a></li>
                     <li><a href="/naac-dvv-clarifications"><FaLeaf className="menu-icon" /> DVV Clarification</a></li>
                     <li><a href="/naac-extended-profile" className="active"><FaLeaf className="menu-icon" /> Extended Profile</a></li>
                     <li><a href="/naac-committee"><FaLeaf className="menu-icon" /> Committees</a></li>

@@ -32,19 +32,19 @@ const NaacBestPractices = () => {
         {
             title: "Best Practice - I",
             subtitle: "Innovative Teaching & Learning Process",
-            link: "/assets/naac/Best Practice 1.pdf",
+            link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/Best Practice 1.pdf",
             color: "#e6b627"
         },
         {
             title: "Best Practice - II",
             subtitle: "Holistic Development through Community Engagement",
-            link: "/assets/naac/Best Practice 2.pdf",
+            link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/Best Practice 2.pdf",
             color: "#4ade80"
         },
         {
             title: "Summary Document",
             subtitle: "Overview of Institutional Best Practices",
-            link: "/assets/naac/best-practices.pdf",
+            link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/best-practices.pdf",
             color: "#60a5fa"
         }
     ];
@@ -105,7 +105,7 @@ const NaacBestPractices = () => {
             {/* Scroll Menu */}
             <section className="scroll-menu-container">
                 <ul className="scroll-menu-list">
-                    <li className="ssr-link-item"><a href="/assets/naac/ssr.pdf" target="_blank" rel="noreferrer">SSR</a></li>
+                    <li className="ssr-link-item"><a href="https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/ssr.pdf" target="_blank" rel="noreferrer">SSR</a></li>
                     <li><a href="/naac-dvv-clarifications"><FaLeaf className="menu-icon" /> DVV Clarification</a></li>
                     <li><a href="/naac-extended-profile"><FaLeaf className="menu-icon" /> Extended Profile</a></li>
                     <li><a href="/naac-committee"><FaLeaf className="menu-icon" /> Committees</a></li>

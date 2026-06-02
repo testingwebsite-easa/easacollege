@@ -1,6 +1,6 @@
 const http = require('http');
 
-const url = 'http://localhost:5000/api/departments';
+const url = 'https://easa-backend.onrender.com/api/departments';
 
 http.get(url, (res) => {
     let data = '';

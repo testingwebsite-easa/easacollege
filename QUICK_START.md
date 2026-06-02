@@ -120,8 +120,7 @@ After following the steps above:
 Create a `.env` file in the root directory:
 
 ```env
-VITE_API_URL=http://localhost:5000
-```
+VITE_API_URL=https://easa-backend.onrender.com
 
 Create a `.env` file in `backend/` directory:
 
