@@ -246,18 +246,19 @@ table {
 }
 
 table thead {
-    background: #f9f9f9;
-    border-bottom: 2px solid #e0e0e0;
+    background: var(--glass-highlight, #f9f9f9);
+    border-bottom: 2px solid var(--glass-border, #e0e0e0);
 }
 
 table th {
     padding: 16px;
     text-align: left;
     font-weight: 600;
-    color: #333;
+    color: var(--text-main, #333);
     font-size: 13px;
     text-transform: uppercase;
 }
+
 
 table td {
     padding: 14px 16px;
