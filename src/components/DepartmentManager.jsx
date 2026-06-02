@@ -4,6 +4,7 @@ import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaFilePdf, FaBook } from 'rea
 import { departments as staticDepartments } from '../data/departmentsData';
 import { getDetailedSyllabusForSubject } from '../data/syllabusData';
 import collegeLogo from '../assets/EASA College Logo.jpg';
+import API_BASE_URL from '../api';
 
 const getRomanNumeral = (num) => {
     const roman = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -1751,7 +1752,7 @@ const DepartmentManager = () => {
     const [instVisionMission, setInstVisionMission] = useState({ vision: '', mission: [] });
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/mission-vision')
+        fetch(`${API_BASE_URL}/api/mission-vision`)
             .then(res => res.json())
             .then(data => {
                 if (data) setInstVisionMission(data);
@@ -1927,7 +1928,7 @@ const DepartmentManager = () => {
     const fetchDepartmentData = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/departments/${selectedDept}`);
+            const res = await fetch(`${API_BASE_URL}/api/departments/${selectedDept}`);
             if (res.ok) {
                 const json = await res.json();
                 if (json) {
@@ -1960,7 +1961,7 @@ const DepartmentManager = () => {
 
     const fetchCreditDetails = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/api/departments/${selectedDept}/details`);
+            const res = await fetch(`${API_BASE_URL}/api/departments/${selectedDept}/details`);
             if (res.ok) {
                 const json = await res.json();
                 setCreditDetails(json);
@@ -1976,7 +1977,7 @@ const DepartmentManager = () => {
     const updateBackend = async (updatedData) => {
         try {
             const token = localStorage.getItem('authToken');
-            const res = await fetch(`http://localhost:5000/api/departments/${selectedDept}`, {
+            const res = await fetch(`${API_BASE_URL}/api/departments/${selectedDept}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
