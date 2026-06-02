@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: easa-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run start
+    envVars:
+      - key: MONGO_URI
+        fromSecret: MONGO_URI
+      - key: BASE_URL
+        fromSecret: BASE_URL
+      - key: AWS_ACCESS_KEY_ID
+        fromSecret: AWS_ACCESS_KEY_ID
+      - key: AWS_SECRET_ACCESS_KEY
+        fromSecret: AWS_SECRET_ACCESS_KEY
+      - key: AWS_REGION
+        fromSecret: AWS_REGION
+      - key: AWS_BUCKET_NAME
+        fromSecret: AWS_BUCKET_NAME
+      - key: SMTP_HOST
+        fromSecret: SMTP_HOST
+      - key: SMTP_PORT
+        fromSecret: SMTP_PORT
+      - key: SMTP_USER
+        fromSecret: SMTP_USER
+      - key: SMTP_PASS
+        fromSecret: SMTP_PASS
+      - key: SMTP_TO
+        fromSecret: SMTP_TO
