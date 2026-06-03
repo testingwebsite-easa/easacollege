@@ -731,7 +731,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             <div style="margin-top: 15px; margin-bottom: 12px;">
                 ${isPurePractical 
                     ? renderExperimentsTableHTML(firstHalfExperiments, "List of Exercises (Part I)")
-                    : units.slice(0, 2).map((unit, uIdx) => {
+                    : units.slice(0, 5).map((unit, uIdx) => {
                         const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][uIdx] || (uIdx + 1)}`;
                         const unitTitle = unit.title ? unit.title.toUpperCase() : '';
                         const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
@@ -766,8 +766,8 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             <div style="margin-top: 10px; margin-bottom: 12px;">
                 ${isPurePractical 
                     ? renderExperimentsTableHTML(secondHalfExperiments, "List of Exercises (Part II)")
-                    : units.slice(2).map((unit, uIdx) => {
-                        const actualIdx = uIdx + 2;
+                    : units.slice(5).map((unit, uIdx) => {
+                        const actualIdx = uIdx + 5;
                         const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][actualIdx] || (actualIdx + 1)}`;
                         const unitTitle = unit.title ? unit.title.toUpperCase() : '';
                         const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
