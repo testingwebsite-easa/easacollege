@@ -1423,6 +1423,25 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 .page:first-of-type {
                     margin-top: 60px;
                 }
+                .print-table {
+                    display: block;
+                    width: 100%;
+                }
+                .print-table > thead, .print-table > tfoot {
+                    display: none !important;
+                }
+                .print-table > tbody {
+                    display: block;
+                    width: 100%;
+                }
+                .print-table > tbody > tr {
+                    display: block;
+                    width: 100%;
+                }
+                .print-table > tbody > tr > td {
+                    display: block;
+                    width: 100%;
+                }
             }
             
             /* Print settings */
@@ -1435,13 +1454,53 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 .preview-bar {
                     display: none !important;
                 }
+                .print-table {
+                    display: table !important;
+                    width: 100%;
+                    border-collapse: collapse;
+                    border: none;
+                }
+                .print-table > thead {
+                    display: table-header-group !important;
+                }
+                .print-table > tfoot {
+                    display: table-footer-group !important;
+                }
+                .print-table > tbody {
+                    display: table-row-group !important;
+                }
+                .print-table > tbody > tr {
+                    display: table-row !important;
+                }
+                .print-table > tbody > tr > td {
+                    display: table-cell !important;
+                    border: none !important;
+                    padding: 0 !important;
+                }
                 .page {
                     width: auto !important;
-                    min-height: 260mm !important;
+                    height: auto !important;
+                    min-height: auto !important;
                     margin: 0 !important;
                     box-shadow: none !important;
-                    padding-top: 40px !important;
-                    padding-bottom: 30px !important;
+                    padding-top: 0 !important;
+                    padding-bottom: 0 !important;
+                    page-break-after: always;
+                }
+                .page > .pdf-header, .page > .pdf-footer {
+                    display: none !important;
+                }
+                .print-table tfoot .pdf-footer {
+                    position: relative !important;
+                    bottom: auto !important;
+                    left: auto !important;
+                    right: auto !important;
+                    width: 100% !important;
+                    margin-top: 20px !important;
+                    display: flex !important;
+                }
+                .page-number::after {
+                    content: counter(page);
                 }
             }
         </style>
@@ -1497,6 +1556,33 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             </div>
         </div>
     
+        <!-- PRINT TABLE WRAPPER FOR PAGE 2 ONWARDS -->
+        <table class="print-table" style="width: 100%; border-collapse: collapse; border: none;">
+            <thead>
+                <tr>
+                    <td style="border: none; padding: 0;">
+                        <div class="pdf-header">
+                            <div class="left-col">EASA College of Engineering and Technology</div>
+                            <div class="right-col">${degreePrefix} ${deptName} (${regYear})</div>
+                        </div>
+                    </td>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td style="border: none; padding: 0;">
+                        <div class="pdf-footer" style="position: relative; display: flex; justify-content: space-between; align-items: flex-end; font-size: 9pt; font-family: Arial, sans-serif; font-style: italic; color: #000; margin-top: 20px; width: 100%;">
+                            <div class="footer-left">Passed in Board of Studies Meeting on ${bosMeetingDate}</div>
+                            <div class="footer-center" style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center; font-style: normal; font-weight: bold;"><span class="page-number"></span></div>
+                            <div class="footer-right">Approved in Academic Council Meeting on ${acMeetingDate}</div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <tr>
+                    <td style="border: none; padding: 0;">
+        
         <!-- PAGE 2: INSTITUTION VISION & MISSION -->
         <div class="page">
             ${getHeaderHTML()}
@@ -1782,6 +1868,11 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         ` : ''}
         ${subjects && subjects.length > 0 ? getCreditDistributionHTML(subjects, pageTracker, bosMeetingDate, acMeetingDate) : ''}
         ${subjects && subjects.length > 0 ? getDetailedSyllabiHTML(subjects, regYear, pageTracker, bosMeetingDate, acMeetingDate, deptData.po, deptData.pso) : ''}
+        
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         
         <script>
             function getRomanNumeral(num) {
