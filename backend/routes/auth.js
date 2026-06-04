@@ -261,4 +261,61 @@ router.delete('/reject-user/:userId', verifyToken, async (req, res) => {
     }
 });
 
+// ADMIN: Create a new user (auto-approved)
+router.post('/admin-create-user', verifyToken, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Only admins can create users directly' });
+        }
+
+        const { username, email, password, role, department, employeeId, studentId, name, phone } = req.body;
+
+        // Validation
+        if (!username || !email || !password || !role) {
+            return res.status(400).json({ error: 'Username, email, password, and role are required' });
+        }
+
+        if (!['admin', 'hod', 'staff', 'student'].includes(role)) {
+            return res.status(400).json({ error: 'Invalid role. Must be admin, hod, staff, or student' });
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Username or email already exists' });
+        }
+
+        // Create new user (automatically approved since created by admin)
+        const hashedPassword = hashPassword(password);
+        const newUser = new User({
+            username,
+            email,
+            password: hashedPassword,
+            role,
+            department: role !== 'admin' ? department : undefined,
+            employeeId: role === 'staff' ? employeeId : undefined,
+            studentId: role === 'student' ? studentId : undefined,
+            name,
+            phone,
+            isApproved: true // Admin created, so auto-approve
+        });
+
+        await newUser.save();
+
+        return res.status(201).json({
+            message: 'User created successfully',
+            user: {
+                id: newUser._id,
+                username: newUser.username,
+                email: newUser.email,
+                role: newUser.role,
+                isApproved: newUser.isApproved
+            }
+        });
+    } catch (error) {
+        console.error('Admin create user error:', error);
+        res.status(500).json({ error: 'User creation failed', details: error.message });
+    }
+});
+
 module.exports = { router, verifyToken };

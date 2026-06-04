@@ -16,6 +16,21 @@ const AdminDashboard = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
+    // User Creation States
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [createUserData, setCreateUserData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        role: 'student',
+        name: '',
+        phone: '',
+        department: '',
+        employeeId: '',
+        studentId: ''
+    });
+    const [createLoading, setCreateLoading] = useState(false);
+
     // Department Management States
     const [departmentsList, setDepartmentsList] = useState([]);
     const [deptLoading, setDeptLoading] = useState(false);
@@ -246,6 +261,63 @@ const AdminDashboard = () => {
         logout();
     };
 
+    const handleCreateUserChange = (e) => {
+        setCreateUserData({ ...createUserData, [e.target.name]: e.target.value });
+        setError('');
+    };
+
+    const handleCreateUser = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccessMessage('');
+
+        if (createUserData.password.length < 6) {
+            setError('Password must be at least 6 characters long');
+            return;
+        }
+
+        setCreateLoading(true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/admin-create-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(createUserData)
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Failed to create user');
+            }
+
+            setSuccessMessage('User created successfully!');
+            setShowCreateForm(false);
+            setCreateUserData({
+                username: '',
+                email: '',
+                password: '',
+                role: 'student',
+                name: '',
+                phone: '',
+                department: '',
+                employeeId: '',
+                studentId: ''
+            });
+
+            // Refresh user list
+            fetchAllUsers();
+            
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setCreateLoading(false);
+        }
+    };
+
     return (
         <div className="dashboard admin-dashboard">
             {/* Header */}
@@ -354,9 +426,173 @@ const AdminDashboard = () => {
                             </div>
                         )}
                     </div>
-                ) : activeTab === 'users' ? (
+                                ) : activeTab === 'users' ? (
                     <div className="tab-content">
-                        <h2>All Users</h2>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h2>All Users</h2>
+                            {!showCreateForm && (
+                                <button className="btn btn-primary" onClick={() => setShowCreateForm(true)}>
+                                    + Add New User
+                                </button>
+                            )}
+                        </div>
+
+                        {showCreateForm && (
+                            <form onSubmit={handleCreateUser} className="syllabus-form" style={{ marginBottom: '30px', border: '1px solid #e0e0e0' }}>
+                                <h3 style={{ margin: '0 0 20px 0', color: '#333' }}>Create New User Account</h3>
+                                
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Full Name *</label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            placeholder="Enter full name"
+                                            value={createUserData.name}
+                                            onChange={handleCreateUserChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Email Address *</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            placeholder="Enter email address"
+                                            value={createUserData.email}
+                                            onChange={handleCreateUserChange}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row" style={{ marginTop: '15px' }}>
+                                    <div className="form-group">
+                                        <label>Username *</label>
+                                        <input
+                                            type="text"
+                                            name="username"
+                                            placeholder="Choose a username"
+                                            value={createUserData.username}
+                                            onChange={handleCreateUserChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Role *</label>
+                                        <select
+                                            name="role"
+                                            value={createUserData.role}
+                                            onChange={handleCreateUserChange}
+                                            required
+                                        >
+                                            <option value="student">Student</option>
+                                            <option value="staff">Staff</option>
+                                            <option value="hod">HOD (Head of Department)</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-row" style={{ marginTop: '15px' }}>
+                                    <div className="form-group">
+                                        <label>Password *</label>
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            placeholder="At least 6 characters"
+                                            value={createUserData.password}
+                                            onChange={handleCreateUserChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Phone Number</label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            placeholder="Enter phone number"
+                                            value={createUserData.phone}
+                                            onChange={handleCreateUserChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row" style={{ marginTop: '15px' }}>
+                                    {createUserData.role !== 'admin' && (
+                                        <div className="form-group">
+                                            <label>Department *</label>
+                                            <select
+                                                name="department"
+                                                value={createUserData.department}
+                                                onChange={handleCreateUserChange}
+                                                required
+                                            >
+                                                <option value="">Select Department</option>
+                                                {staticDepartments.map(d => (
+                                                    <option key={d.id} value={d.name}>{d.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    {createUserData.role === 'staff' && (
+                                        <div className="form-group">
+                                            <label>Employee ID *</label>
+                                            <input
+                                                type="text"
+                                                name="employeeId"
+                                                placeholder="Enter employee ID"
+                                                value={createUserData.employeeId}
+                                                onChange={handleCreateUserChange}
+                                                required
+                                            />
+                                        </div>
+                                    )}
+
+                                    {createUserData.role === 'student' && (
+                                        <div className="form-group">
+                                            <label>Student ID *</label>
+                                            <input
+                                                type="text"
+                                                name="studentId"
+                                                placeholder="Enter student ID"
+                                                value={createUserData.studentId}
+                                                onChange={handleCreateUserChange}
+                                                required
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+                                    <button type="submit" className="btn btn-success" disabled={createLoading}>
+                                        {createLoading ? 'Creating User...' : 'Create User'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={() => {
+                                            setShowCreateForm(false);
+                                            setCreateUserData({
+                                                username: '',
+                                                email: '',
+                                                password: '',
+                                                role: 'student',
+                                                name: '',
+                                                phone: '',
+                                                department: '',
+                                                employeeId: '',
+                                                studentId: ''
+                                            });
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+
                         {allUsers.length === 0 ? (
                             <p className="no-data">No users found</p>
                         ) : (

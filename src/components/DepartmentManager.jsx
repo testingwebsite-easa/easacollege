@@ -1835,26 +1835,69 @@ const getDefaultOutcomes = (code, title) => {
 const DepartmentManager = () => {
     const { user } = useAuth();
 
+    const getDeptSlug = (userDeptName) => {
+        if (!userDeptName) return '';
+        const lower = userDeptName.toLowerCase().trim();
+        let found = staticDepartments.find(d => 
+            d.slug.toLowerCase() === lower || 
+            d.id.toLowerCase() === lower || 
+            d.name.toLowerCase() === lower
+        );
+        if (found) return found.slug;
+
+        if (lower === 'cse') return 'computer-science-and-engineering';
+        if (lower === 'eee') return 'electrical-and-electronics-engineering';
+        if (lower === 'ece') return 'electronics-and-communication-engineering';
+        if (lower === 'it') return 'information-technology';
+        if (lower === 'aids' || lower === 'ai & ds' || lower === 'ai/ds') return 'artificial-intelligence-and-data-science';
+        if (lower === 'bme') return 'biomedical-engineering';
+        if (lower === 'mech') return 'mechanical-engineering';
+        if (lower === 'agri') return 'agriculture-engineering';
+        if (lower === 'mba') return 'master-of-business-administration';
+
+        found = staticDepartments.find(d => 
+            d.name.toLowerCase().includes(lower) || 
+            lower.includes(d.name.toLowerCase())
+        );
+        if (found) return found.slug;
+
+        return '';
+    };
+
+    const isHOD = user?.role === 'hod';
+    const hodDeptSlug = isHOD ? getDeptSlug(user?.department) : '';
+    const hodDeptObj = isHOD ? staticDepartments.find(d => d.slug === hodDeptSlug) : null;
+
     // Filter States
-    const [academicLevel, setAcademicLevel] = useState("UG");
+    const [academicLevel, setAcademicLevel] = useState(isHOD && hodDeptObj ? hodDeptObj.type : "UG");
 
     // Extract available departments based on Level
     const filteredDepts = staticDepartments.filter(d => d.type === academicLevel);
 
     // Determine initial department based on user role if needed, defaulting to CS
-    const initialDept = filteredDepts.length > 0 ? filteredDepts[0].slug : 'computer-science-and-engineering';
+    const initialDept = isHOD && hodDeptSlug
+        ? hodDeptSlug
+        : (filteredDepts.length > 0 ? filteredDepts[0].slug : 'computer-science-and-engineering');
 
     const [selectedDept, setSelectedDept] = useState(initialDept);
 
-    // Automatically ensure selected department is valid when Level changes
+    // Enforce selectedDept for HODs
     useEffect(() => {
+        if (isHOD && hodDeptSlug && selectedDept !== hodDeptSlug) {
+            setSelectedDept(hodDeptSlug);
+        }
+    }, [selectedDept, isHOD, hodDeptSlug]);
+
+    // Automatically ensure selected department is valid when Level changes (only for non-HODs)
+    useEffect(() => {
+        if (isHOD) return;
         if (filteredDepts.length > 0) {
             const hasCurrent = filteredDepts.some(d => d.slug === selectedDept);
             if (!hasCurrent) {
                 setSelectedDept(filteredDepts[0].slug);
             }
         }
-    }, [academicLevel, filteredDepts, selectedDept]);
+    }, [academicLevel, filteredDepts, selectedDept, isHOD]);
     const [deptData, setDeptData] = useState(null);
     const [creditDetails, setCreditDetails] = useState(null);
     const [data, setData] = useState({
@@ -2373,59 +2416,76 @@ const DepartmentManager = () => {
 
     return (
         <div className="department-manager-container">
-            {/* Department Selector */}
-            <div style={{
-                background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '12px',
-                border: '1px solid var(--glass-border)', marginBottom: '2rem',
-                display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center'
-            }}>
-                {/* Academic Level Toggle */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Academic Level</label>
-                    <div style={{ display: 'flex', background: 'var(--bg-section)', padding: '0.25rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                        <button
-                            onClick={() => setAcademicLevel("UG")}
-                            style={{
-                                flex: 1, padding: '0.6rem', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
-                                background: academicLevel === 'UG' ? 'var(--primary)' : 'transparent',
-                                color: academicLevel === 'UG' ? '#fff' : 'var(--text-main)',
-                                transition: 'all 0.3s ease'
-                            }}
-                        >
-                            Undergraduate (UG)
-                        </button>
-                        <button
-                            onClick={() => setAcademicLevel("PG")}
-                            style={{
-                                flex: 1, padding: '0.6rem', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
-                                background: academicLevel === 'PG' ? 'var(--primary)' : 'transparent',
-                                color: academicLevel === 'PG' ? '#fff' : 'var(--text-main)',
-                                transition: 'all 0.3s ease'
-                            }}
-                        >
-                            Postgraduate (PG)
-                        </button>
+            {isHOD ? (
+                <div style={{
+                    background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '12px',
+                    border: '1px solid var(--glass-border)', marginBottom: '2rem',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                }}>
+                    <div>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '0.25rem' }}>
+                            Your Department
+                        </span>
+                        <h2 style={{ color: 'var(--primary)', margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>
+                            {staticDepartments.find(d => d.slug === selectedDept)?.name || user?.department}
+                        </h2>
                     </div>
                 </div>
+            ) : (
+                /* Department Selector */
+                <div style={{
+                    background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '12px',
+                    border: '1px solid var(--glass-border)', marginBottom: '2rem',
+                    display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center'
+                }}>
+                    {/* Academic Level Toggle */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
+                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Academic Level</label>
+                        <div style={{ display: 'flex', background: 'var(--bg-section)', padding: '0.25rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                            <button
+                                onClick={() => setAcademicLevel("UG")}
+                                style={{
+                                    flex: 1, padding: '0.6rem', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
+                                    background: academicLevel === 'UG' ? 'var(--primary)' : 'transparent',
+                                    color: academicLevel === 'UG' ? '#fff' : 'var(--text-main)',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                Undergraduate (UG)
+                            </button>
+                            <button
+                                onClick={() => setAcademicLevel("PG")}
+                                style={{
+                                    flex: 1, padding: '0.6rem', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
+                                    background: academicLevel === 'PG' ? 'var(--primary)' : 'transparent',
+                                    color: academicLevel === 'PG' ? '#fff' : 'var(--text-main)',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                Postgraduate (PG)
+                            </button>
+                        </div>
+                    </div>
 
-                {/* Department Dropdown */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '2', minWidth: '300px' }}>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Select Department</label>
-                    <select
-                        value={selectedDept}
-                        onChange={(e) => setSelectedDept(e.target.value)}
-                        style={{
-                            padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)',
-                            background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none',
-                            fontWeight: '500', width: '100%', cursor: 'pointer', fontSize: '1rem'
-                        }}
-                    >
-                        {filteredDepts.map(dept => (
-                            <option key={dept.slug} value={dept.slug}>{dept.name}</option>
-                        ))}
-                    </select>
+                    {/* Department Dropdown */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '2', minWidth: '300px' }}>
+                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Select Department</label>
+                        <select
+                            value={selectedDept}
+                            onChange={(e) => setSelectedDept(e.target.value)}
+                            style={{
+                                padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)',
+                                background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none',
+                                fontWeight: '500', width: '100%', cursor: 'pointer', fontSize: '1rem'
+                            }}
+                        >
+                            {filteredDepts.map(dept => (
+                                <option key={dept.slug} value={dept.slug}>{dept.name}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Regulation & Meeting Dates Edit Section */}
             <div style={{
