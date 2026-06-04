@@ -1133,8 +1133,34 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     <head>
         <title>Curriculum and Syllabus - ${deptName}</title>
         <style>
-            * {
+            /* Default typography */
+            body {
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 10pt;
+            }
+            
+            /* Apply consistent font size and family to all elements on content pages (page 2 onwards) except headers and footers */
+            .print-table .page *:not(.pdf-header):not(.pdf-header *):not(.pdf-footer):not(.pdf-footer *),
+            .page:not(:first-of-type) *:not(.pdf-header):not(.pdf-header *):not(.pdf-footer):not(.pdf-footer *) {
                 font-family: 'Times New Roman', Times, serif !important;
+                font-size: 10pt !important;
+            }
+            
+            /* Header and Footer styles (exempt from the content page font/size overrides) */
+            .pdf-header, .pdf-header * {
+                font-family: Arial, sans-serif !important;
+                font-size: 9.5pt !important;
+                font-style: italic !important;
+                font-weight: bold !important;
+            }
+            .pdf-footer, .pdf-footer * {
+                font-family: Arial, sans-serif !important;
+                font-size: 9pt !important;
+                font-style: italic !important;
+            }
+            .pdf-footer .footer-center, .pdf-footer .footer-center * {
+                font-style: normal !important;
+                font-weight: bold !important;
             }
             @page {
                 size: A4;
@@ -1455,52 +1481,40 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     display: none !important;
                 }
                 .print-table {
-                    display: table !important;
-                    width: 100%;
-                    border-collapse: collapse;
-                    border: none;
+                    display: block !important;
+                    width: 100% !important;
+                    border: none !important;
                 }
-                .print-table > thead {
-                    display: table-header-group !important;
-                }
-                .print-table > tfoot {
-                    display: table-footer-group !important;
+                .print-table > thead, .print-table > tfoot {
+                    display: none !important;
                 }
                 .print-table > tbody {
-                    display: table-row-group !important;
+                    display: block !important;
+                    width: 100% !important;
                 }
                 .print-table > tbody > tr {
-                    display: table-row !important;
+                    display: block !important;
+                    width: 100% !important;
                 }
                 .print-table > tbody > tr > td {
-                    display: table-cell !important;
+                    display: block !important;
                     border: none !important;
                     padding: 0 !important;
                 }
                 .page {
-                    width: auto !important;
-                    height: auto !important;
-                    min-height: auto !important;
+                    width: 100% !important;
+                    height: 262mm !important; /* A4 height (297mm) minus top/bottom margins (15mm + 20mm) */
                     margin: 0 !important;
+                    padding: 40px 0 30px 0 !important;
+                    box-sizing: border-box !important;
+                    position: relative !important;
                     box-shadow: none !important;
-                    padding-top: 0 !important;
-                    padding-bottom: 0 !important;
-                    page-break-after: always;
+                    background: #fff !important;
+                    page-break-after: always !important;
+                    page-break-inside: avoid !important;
                 }
                 .page > .pdf-header, .page > .pdf-footer {
-                    display: none !important;
-                }
-                .print-table tfoot .pdf-footer {
-                    position: relative !important;
-                    bottom: auto !important;
-                    left: auto !important;
-                    right: auto !important;
-                    width: 100% !important;
-                    margin-top: 20px !important;
                     display: flex !important;
-                }
-                .page-number::after {
-                    content: counter(page);
                 }
             }
         </style>
