@@ -612,6 +612,13 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         const pValue = subj.p !== undefined ? subj.p : 0;
         const cValue = subj.credits !== undefined ? subj.credits : 0;
 
+        const lVal = Number(lValue) || 0;
+        const tVal = Number(tValue) || 0;
+        const pVal = Number(pValue) || 0;
+        const contactHrs = lVal + tVal + pVal;
+        const unitPeriods = contactHrs > 0 ? contactHrs * 3 : 9;
+        const totalPeriods = unitPeriods * 5;
+
         const pageNum1 = ++pageTracker.current;
         const pageNum2 = ++pageTracker.current;
 
@@ -685,10 +692,12 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                     <td style="border: 1.5px solid #000; padding: 3px; text-align: center; font-weight: bold;">${pValue}</td>
                     <td style="border: 1.5px solid #000; padding: 3px; text-align: center; font-weight: bold;">${cValue}</td>
                 </tr>
+                ${subj.isOpenElective ? '' : `
                 <tr>
                     <td style="border: 1.5px solid #000; padding: 5px; font-weight: bold;">Category</td>
                     <td colspan="5" style="border: 1.5px solid #000; padding: 5px;">${categoryName}</td>
                 </tr>
+                `}
                 <tr>
                     <td style="border: 1.5px solid #000; padding: 5px; font-weight: bold;">Pre requisites</td>
                     <td colspan="5" style="border: 1.5px solid #000; padding: 5px; text-align: justify;">${prerequisites}</td>
@@ -740,13 +749,18 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                             <div style="margin-bottom: 8px; text-align: justify; font-size: 9.5pt; line-height: 1.35;">
                                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
-                                    <span>9 Periods</span>
+                                    <span>${unitPeriods} Periods</span>
                                 </div>
                                 <span style="font-family: 'Times New Roman', Times, serif;">${topicsStr}</span>
                             </div>
                         ` : '';
                     }).join('')
                 }
+                ${!isPurePractical ? `
+                <div style="display: flex; justify-content: flex-end; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-top: 10px; margin-bottom: 10px; border-top: 1px dashed #ddd; padding-top: 5px;">
+                    <span>TOTAL: ${totalPeriods} PERIODS</span>
+                </div>
+                ` : ''}
             </div>
 
             <div class="pdf-footer" style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 9pt; font-family: Arial, sans-serif; font-style: italic; color: #000;">
@@ -776,7 +790,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                             <div style="margin-bottom: 8px; text-align: justify; font-size: 9.5pt; line-height: 1.35;">
                                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
-                                    <span>9 Periods</span>
+                                    <span>${unitPeriods} Periods</span>
                                 </div>
                                 <span style="font-family: 'Times New Roman', Times, serif;">${topicsStr}</span>
                             </div>

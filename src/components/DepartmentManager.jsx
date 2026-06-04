@@ -476,6 +476,13 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         const pValue = subj.p !== undefined ? subj.p : 0;
         const cValue = subj.credits !== undefined ? subj.credits : 0;
 
+        const lVal = Number(lValue) || 0;
+        const tVal = Number(tValue) || 0;
+        const pVal = Number(pValue) || 0;
+        const contactHrs = lVal + tVal + pVal;
+        const unitPeriods = contactHrs > 0 ? contactHrs * 3 : 9;
+        const totalPeriods = unitPeriods * 5;
+
         const pageNum1 = ++pageTracker.current;
         const pageNum2 = ++pageTracker.current;
 
@@ -549,10 +556,12 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                     <td style="border: 1.5px solid #000; padding: 3px; text-align: center; font-weight: bold;">${pValue}</td>
                     <td style="border: 1.5px solid #000; padding: 3px; text-align: center; font-weight: bold;">${cValue}</td>
                 </tr>
+                ${subj.isOpenElective ? '' : `
                 <tr>
                     <td style="border: 1.5px solid #000; padding: 5px; font-weight: bold;">Category</td>
                     <td colspan="5" style="border: 1.5px solid #000; padding: 5px;">${categoryName}</td>
                 </tr>
+                `}
                 <tr>
                     <td style="border: 1.5px solid #000; padding: 5px; font-weight: bold;">Pre requisites</td>
                     <td colspan="5" style="border: 1.5px solid #000; padding: 5px; text-align: justify;">${prerequisites}</td>
@@ -604,13 +613,18 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                             <div style="margin-bottom: 8px; text-align: justify; font-size: 9.5pt; line-height: 1.35;">
                                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
-                                    <span>9 Periods</span>
+                                    <span>${unitPeriods} Periods</span>
                                 </div>
                                 <span style="font-family: 'Times New Roman', Times, serif;">${topicsStr}</span>
                             </div>
                         ` : '';
                     }).join('')
                 }
+                ${!isPurePractical ? `
+                <div style="display: flex; justify-content: flex-end; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-top: 10px; margin-bottom: 10px; border-top: 1px dashed #ddd; padding-top: 5px;">
+                    <span>TOTAL: ${totalPeriods} PERIODS</span>
+                </div>
+                ` : ''}
             </div>
 
             <div class="pdf-footer" style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 9pt; font-family: Arial, sans-serif; font-style: italic; color: #000;">
@@ -638,9 +652,10 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                         
                         return topicsStr ? `
                             <div style="margin-bottom: 8px; text-align: justify; font-size: 9.5pt; line-height: 1.35;">
+                            
                                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
-                                    <span>9 Periods</span>
+                                    <span>${unitPeriods} Periods</span>
                                 </div>
                                 <span style="font-family: 'Times New Roman', Times, serif;">${topicsStr}</span>
                             </div>
@@ -651,7 +666,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
             ${textbooks.some(t => t.trim() !== '') ? `
             <div style="margin-top: 15px; margin-bottom: 8px;">
-                <h4 style="font-size: 10pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 5px 0; text-transform: uppercase;">Text Books</h4>
+                <h4 style="font-size: 10pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 5px 0; text-transform: uppercase;">Text Book</h4>
                 <ol style="margin: 0; padding-left: 20px; font-size: 9pt;">
                     ${textbooks.map(tb => tb.trim() ? `<li style="margin-bottom: 3px; text-align: justify; line-height: 1.35;">${tb}</li>` : '').join('')}
                 </ol>
@@ -1886,6 +1901,33 @@ const DepartmentManager = () => {
     });
 
     const [courseType, setCourseType] = useState('semester'); // 'semester', 'professional_elective', 'open_elective'
+    const [offeringDeptSubjects, setOfferingDeptSubjects] = useState([]);
+    const [loadingOfferingSubjects, setLoadingOfferingSubjects] = useState(false);
+
+    useEffect(() => {
+        const fetchOfferingDeptSubjects = async () => {
+            if (courseType !== 'open_elective' || !newSubject.offeringDept) {
+                setOfferingDeptSubjects([]);
+                return;
+            }
+            setLoadingOfferingSubjects(true);
+            try {
+                const offeringDeptObj = staticDepartments.find(d => d.name === newSubject.offeringDept);
+                if (offeringDeptObj) {
+                    const res = await fetch(`${API_BASE_URL}/api/departments/${offeringDeptObj.slug}`);
+                    if (res.ok) {
+                        const json = await res.json();
+                        setOfferingDeptSubjects(json.subjects || []);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching offering department subjects:', error);
+            } finally {
+                setLoadingOfferingSubjects(false);
+            }
+        };
+        fetchOfferingDeptSubjects();
+    }, [newSubject.offeringDept, courseType]);
 
     const updateNewSubjectField = (field, value) => {
         setNewSubject(prev => {
@@ -2479,6 +2521,166 @@ const DepartmentManager = () => {
                             </button>
                         </div>
 
+                        {/* Add Subject Form */}
+                        <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
+                            <h4 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Add New Subject</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Type</label>
+                                    <select
+                                        value={courseType}
+                                        onChange={e => setCourseType(e.target.value)}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                    >
+                                        <option value="semester">Semester Course</option>
+                                        <option value="professional_elective">Professional Elective (Vertical)</option>
+                                        <option value="open_elective">Open Elective Course</option>
+                                    </select>
+                                </div>
+                                 {courseType === 'semester' && (
+                                     <div>
+                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Semester</label>
+                                         <input type="number" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                     </div>
+                                 )}
+                                {courseType === 'professional_elective' && (
+                                    <>
+                                        <div>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vertical</label>
+                                            <input type="number" placeholder="e.g. 1" value={newSubject.vertical || ''} onChange={e => setNewSubject({ ...newSubject, vertical: e.target.value === '' ? '' : Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                        </div>
+                                        <div>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vertical Name</label>
+                                            <input type="text" placeholder="e.g. Cloud Computing" value={newSubject.verticalName || ''} onChange={e => setNewSubject({ ...newSubject, verticalName: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                        </div>
+                                    </>
+                                )}
+                                {courseType === 'semester' && (
+                                    <>
+                                        <div>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
+                                            <select
+                                                value={newSubject.category}
+                                                onChange={e => setNewSubject({ ...newSubject, category: e.target.value })}
+                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                            >
+                                                <option value="THEORY">THEORY</option>
+                                                <option value="PRACTICAL">PRACTICAL</option>
+                                                <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category Type</label>
+                                            <select
+                                                value={newSubject.categoryType || 'HSMC'}
+                                                onChange={e => setNewSubject({ ...newSubject, categoryType: e.target.value })}
+                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                            >
+                                                <option value="HSMC">HSMC</option>
+                                                <option value="BSC">BSC</option>
+                                                <option value="ESC">ESC</option>
+                                                <option value="PCC">PCC</option>
+                                                <option value="PEC">PEC</option>
+                                                <option value="OEC">OEC</option>
+                                                <option value="EEC">EEC</option>
+                                                <option value="MC">MC</option>
+                                            </select>
+                                        </div>
+                                    </>
+                                )}
+                                {courseType === 'open_elective' && (
+                                    <>
+                                        <div>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Offering Department</label>
+                                            <select
+                                                value={newSubject.offeringDept || ''}
+                                                onChange={e => setNewSubject({ ...newSubject, offeringDept: e.target.value })}
+                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                            >
+                                                <option value="">Select Offering Department</option>
+                                                {staticDepartments.map(dept => (
+                                                    <option key={dept.slug} value={dept.name}>{dept.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        {newSubject.offeringDept && (
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                                    {loadingOfferingSubjects ? 'Loading Courses...' : 'Select Course'}
+                                                </label>
+                                                <select
+                                                    value={newSubject.code || ''}
+                                                    onChange={e => {
+                                                        const selectedCode = e.target.value;
+                                                        if (!selectedCode) return;
+                                                        const selectedSubj = offeringDeptSubjects.find(s => s.code === selectedCode);
+                                                        if (selectedSubj) {
+                                                            setNewSubject(prev => ({
+                                                                ...prev,
+                                                                code: selectedSubj.code || '',
+                                                                title: selectedSubj.title || '',
+                                                                credits: selectedSubj.credits !== undefined ? selectedSubj.credits : 3,
+                                                                l: selectedSubj.l !== undefined ? selectedSubj.l : 0,
+                                                                t: selectedSubj.t !== undefined ? selectedSubj.t : 0,
+                                                                p: selectedSubj.p !== undefined ? selectedSubj.p : 0,
+                                                                contactPeriods: selectedSubj.contactPeriods !== undefined ? selectedSubj.contactPeriods : 0,
+                                                                cia: selectedSubj.cia !== undefined ? selectedSubj.cia : 40,
+                                                                ese: selectedSubj.ese !== undefined ? selectedSubj.ese : 60,
+                                                                total: selectedSubj.total !== undefined ? selectedSubj.total : 100,
+                                                                prerequisites: selectedSubj.prerequisites || '',
+                                                                categoryName: selectedSubj.categoryName || '',
+                                                                subtitle: selectedSubj.subtitle || '',
+                                                                objectives: selectedSubj.objectives || [],
+                                                                outcomes: selectedSubj.outcomes || [],
+                                                                units: selectedSubj.units || [],
+                                                                textbooks: selectedSubj.textbooks || [],
+                                                                references: selectedSubj.references || [],
+                                                                webReferences: selectedSubj.webReferences || [],
+                                                                coPoMapping: selectedSubj.coPoMapping || [],
+                                                                experiments: selectedSubj.experiments || [],
+                                                            }));
+                                                        }
+                                                    }}
+                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                >
+                                                    <option value="">-- Choose Course --</option>
+                                                    {offeringDeptSubjects.map(s => (
+                                                        <option key={s.code} value={s.code}>{s.code} - {s.title}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Code</label>
+                                    <input type="text" value={newSubject.code} onChange={e => setNewSubject({ ...newSubject, code: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Title</label>
+                                    <input type="text" value={newSubject.title} onChange={e => setNewSubject({ ...newSubject, title: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Credits</label>
+                                    <input type="number" value={newSubject.credits} onChange={e => setNewSubject({ ...newSubject, credits: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1rem', marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>L</label><input type="number" value={newSubject.l} onChange={e => { const val = e.target.value; updateNewSubjectField('l', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>T</label><input type="number" value={newSubject.t} onChange={e => { const val = e.target.value; updateNewSubjectField('t', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>P</label><input type="number" value={newSubject.p} onChange={e => { const val = e.target.value; updateNewSubjectField('p', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Periods</label><input type="number" value={newSubject.contactPeriods} readOnly style={{ width: '100%', padding: '0.4rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed' }} /></div>
+                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>CIA</label><input type="number" max="40" value={newSubject.cia} onChange={e => { const val = e.target.value; updateNewSubjectField('cia', val === '' ? '' : Math.min(40, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ESE</label><input type="number" max="60" value={newSubject.ese} onChange={e => { const val = e.target.value; updateNewSubjectField('ese', val === '' ? '' : Math.min(60, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total</label><input type="number" value={newSubject.total} readOnly style={{ width: '100%', padding: '0.4rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed' }} /></div>
+                            </div>
+
+                            <button onClick={handleAddSubject} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'fit-content' }}>
+                                <FaPlus /> Add Subject
+                            </button>
+                        </div>
+
                         {/* List of Subjects */}
                         {(data.subjects || []).length === 0 ? (
                             <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '1rem' }}>No subjects defined yet.</p>
@@ -2770,116 +2972,7 @@ const DepartmentManager = () => {
                             </div>
                         )}
 
-                        {/* Add Subject Form */}
-                        <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                            <h4 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Add New Subject</h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Type</label>
-                                    <select
-                                        value={courseType}
-                                        onChange={e => setCourseType(e.target.value)}
-                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                    >
-                                        <option value="semester">Semester Course</option>
-                                        <option value="professional_elective">Professional Elective (Vertical)</option>
-                                        <option value="open_elective">Open Elective Course</option>
-                                    </select>
-                                </div>
-                                 {courseType === 'semester' && (
-                                     <div>
-                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Semester</label>
-                                         <input type="number" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                     </div>
-                                 )}
-                                {courseType === 'professional_elective' && (
-                                    <>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vertical</label>
-                                            <input type="number" placeholder="e.g. 1" value={newSubject.vertical || ''} onChange={e => setNewSubject({ ...newSubject, vertical: e.target.value === '' ? '' : Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vertical Name</label>
-                                            <input type="text" placeholder="e.g. Cloud Computing" value={newSubject.verticalName || ''} onChange={e => setNewSubject({ ...newSubject, verticalName: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                        </div>
-                                    </>
-                                )}
-                                {courseType === 'semester' && (
-                                    <>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
-                                            <select
-                                                value={newSubject.category}
-                                                onChange={e => setNewSubject({ ...newSubject, category: e.target.value })}
-                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                            >
-                                                <option value="THEORY">THEORY</option>
-                                                <option value="PRACTICAL">PRACTICAL</option>
-                                                <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category Type</label>
-                                            <select
-                                                value={newSubject.categoryType || 'HSMC'}
-                                                onChange={e => setNewSubject({ ...newSubject, categoryType: e.target.value })}
-                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                            >
-                                                <option value="HSMC">HSMC</option>
-                                                <option value="BSC">BSC</option>
-                                                <option value="ESC">ESC</option>
-                                                <option value="PCC">PCC</option>
-                                                <option value="PEC">PEC</option>
-                                                <option value="OEC">OEC</option>
-                                                <option value="EEC">EEC</option>
-                                                <option value="MC">MC</option>
-                                            </select>
-                                        </div>
-                                    </>
-                                )}
-                                {courseType === 'open_elective' && (
-                                    <div>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Offering Department</label>
-                                        <select
-                                            value={newSubject.offeringDept || ''}
-                                            onChange={e => setNewSubject({ ...newSubject, offeringDept: e.target.value })}
-                                            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                        >
-                                            <option value="">Select Offering Department</option>
-                                            {staticDepartments.map(dept => (
-                                                <option key={dept.slug} value={dept.name}>{dept.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-                                <div>
-                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Code</label>
-                                    <input type="text" value={newSubject.code} onChange={e => setNewSubject({ ...newSubject, code: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Title</label>
-                                    <input type="text" value={newSubject.title} onChange={e => setNewSubject({ ...newSubject, title: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Credits</label>
-                                    <input type="number" value={newSubject.credits} onChange={e => setNewSubject({ ...newSubject, credits: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                </div>
-                            </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1rem', marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>L</label><input type="number" value={newSubject.l} onChange={e => { const val = e.target.value; updateNewSubjectField('l', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>T</label><input type="number" value={newSubject.t} onChange={e => { const val = e.target.value; updateNewSubjectField('t', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>P</label><input type="number" value={newSubject.p} onChange={e => { const val = e.target.value; updateNewSubjectField('p', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Periods</label><input type="number" value={newSubject.contactPeriods} readOnly style={{ width: '100%', padding: '0.4rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed' }} /></div>
-                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>CIA</label><input type="number" max="40" value={newSubject.cia} onChange={e => { const val = e.target.value; updateNewSubjectField('cia', val === '' ? '' : Math.min(40, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ESE</label><input type="number" max="60" value={newSubject.ese} onChange={e => { const val = e.target.value; updateNewSubjectField('ese', val === '' ? '' : Math.min(60, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total</label><input type="number" value={newSubject.total} readOnly style={{ width: '100%', padding: '0.4rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed' }} /></div>
-                            </div>
-
-                            <button onClick={handleAddSubject} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'fit-content' }}>
-                                <FaPlus /> Add Subject
-                            </button>
-                        </div>
                     </div>
                 </div>
             )}
