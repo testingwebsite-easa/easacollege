@@ -660,7 +660,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
             ${references.some(r => r.trim() !== '') ? `
             <div style="margin-bottom: 10px;">
-                <h4 style="font-size: 10pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 5px 0; text-transform: uppercase;">References</h4>
+                <h4 style="font-size: 10pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 5px 0; text-transform: uppercase;">References Books</h4>
                 <ol style="margin: 0; padding-left: 20px; font-size: 9pt;">
                     ${references.map(ref => ref.trim() ? `<li style="margin-bottom: 3px; text-align: justify; line-height: 1.35;">${ref}</li>` : '').join('')}
                 </ol>
@@ -669,7 +669,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
             ${webReferences.some(w => w.trim() !== '') ? `
             <div style="margin-bottom: 10px;">
-                <h4 style="font-size: 10pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 5px 0; text-transform: uppercase;">Additional / Web References</h4>
+                <h4 style="font-size: 10pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 5px 0; text-transform: uppercase;">Additional / Web References Links </h4>
                 <ol style="margin: 0; padding-left: 20px; font-size: 9pt;">
                     ${webReferences.map(web => web.trim() ? `<li style="margin-bottom: 3px; text-align: justify; line-height: 1.35;"><a href="${web}" target="_blank" style="color: #0000EE; text-decoration: underline;">${web}</a></li>` : '').join('')}
                 </ol>
