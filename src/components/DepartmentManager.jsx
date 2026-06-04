@@ -604,7 +604,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             <div style="margin-top: 15px; margin-bottom: 12px;">
                 ${isPurePractical 
                     ? renderExperimentsTableHTML(firstHalfExperiments, "List of Exercises (Part I)")
-                    : units.slice(0, 5).map((unit, uIdx) => {
+                    : units.slice(0, 3).map((unit, uIdx) => {
                         const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][uIdx] || (uIdx + 1)}`;
                         const unitTitle = unit.title ? unit.title.toUpperCase() : '';
                         const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
@@ -620,11 +620,6 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                         ` : '';
                     }).join('')
                 }
-                ${!isPurePractical ? `
-                <div style="display: flex; justify-content: flex-end; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-top: 10px; margin-bottom: 10px; border-top: 1px dashed #ddd; padding-top: 5px;">
-                    <span>TOTAL: ${totalPeriods} PERIODS</span>
-                </div>
-                ` : ''}
             </div>
 
             <div class="pdf-footer" style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 9pt; font-family: Arial, sans-serif; font-style: italic; color: #000;">
@@ -644,8 +639,8 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             <div style="margin-top: 10px; margin-bottom: 12px;">
                 ${isPurePractical 
                     ? renderExperimentsTableHTML(secondHalfExperiments, "List of Exercises (Part II)")
-                    : units.slice(5).map((unit, uIdx) => {
-                        const actualIdx = uIdx + 5;
+                    : units.slice(3).map((unit, uIdx) => {
+                        const actualIdx = uIdx + 3;
                         const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][actualIdx] || (actualIdx + 1)}`;
                         const unitTitle = unit.title ? unit.title.toUpperCase() : '';
                         const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
@@ -662,6 +657,11 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                         ` : '';
                     }).join('')
                 }
+                ${!isPurePractical ? `
+                <div style="display: flex; justify-content: flex-end; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-top: 10px; margin-bottom: 10px; border-top: 1px dashed #ddd; padding-top: 5px;">
+                    <span>TOTAL: ${totalPeriods} PERIODS</span>
+                </div>
+                ` : ''}
             </div>
 
             ${textbooks.some(t => t.trim() !== '') ? `
