@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaArrowRight, FaGraduationCap, FaUniversity } from 'react-icons/fa';
+import aboutMain from '../assets/about-main.jpg';
 
 const AboutSection = () => {
     return (
@@ -68,7 +69,7 @@ const AboutSection = () => {
                         <div className="about-image-corner bottom-right" style={{ position: 'absolute', bottom: '-20px', right: '-20px', width: '120px', height: '120px', borderBottom: '4px solid var(--secondary)', borderRight: '4px solid var(--secondary)', borderRadius: '20px' }}></div>
                         <div className="about-image-container" style={{ borderRadius: '30px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.2)' }}>
                             <img
-                                src="src/assets/about-main.JPG"
+                                src={aboutMain}
                                 alt="EASA College Campus"
                                 className="about-image"
                                 style={{ width: '110%', height: '550px', objectFit: 'cover' }}
