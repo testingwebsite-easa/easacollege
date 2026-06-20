@@ -5,6 +5,8 @@ import MissionPage from './pages/MissionPage';
 import CoreBeliefsPage from './pages/CoreBeliefsPage';
 import InstitutionPage from './pages/InstitutionPage';
 import LoginPage from './pages/LoginPage';
+import AdminDashboard from './pages/AdminDashboard';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import SyllabusDashboard from './pages/SyllabusDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -85,6 +87,7 @@ import AicteEoaPage from './pages/AicteEoaPage';
 import SdgsPage from './pages/SdgsPage';
 import ObePage from './pages/ObePage';
 import NirfPage from './pages/NirfPage';
+import Login from './pages/Login';
 
 
 
@@ -101,14 +104,20 @@ function App() {
             <Route path="/professional-chapters" element={<ProfessionalChaptersPage />} />
             <Route path="/mission-vision" element={<MissionPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route 
-              path="/dashboard" 
+            <Route path="/admin/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute requiredRoles={['admin', 'hod', 'staff', 'student']}>
                   <SyllabusDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="//admin" element={<AdminDashboard />} />
+            <Route path="//admin-dashboard" element={<AdminDashboard />} />
             <Route path="/core-beliefs" element={<CoreBeliefsPage />} />
             <Route path="/institution" element={<InstitutionPage />} />
             <Route path="/management" element={<ManagementPage />} />
@@ -120,93 +129,93 @@ function App() {
             <Route path="/principal" element={<PrincipalPage />} />
             <Route path="/sustainability" element={<SustainabilityPage />} />
             <Route path="/community-outreach" element={<CommunityOutreachPage />} />
-          <Route path="/admin/applications" element={<JobApplicationsView />} />
-          <Route path="/research" element={<ResearchPage />} />
-          <Route path="/department/:id" element={<DepartmentPage />} />
-          {/* Research Listing Routes */}
-          <Route path="/department-research" element={<ResearchListingPage />} />
-          <Route path="/student-research" element={<ResearchListingPage />} />
-          <Route path="/faculty-research" element={<ResearchListingPage />} />
-          <Route path="/industrial-research" element={<ResearchListingPage />} />
-          <Route path="/ipr-cell" element={<ResearchListingPage />} />
-          <Route path="/rd-projects" element={<ResearchListingPage />} />
-          <Route path="/patents" element={<ResearchListingPage />} />
-          {/* Resource Routes */}
-          <Route path="/resources/digital-library" element={<LibraryPage />} />
-          <Route path="/resources/regulations" element={<RegulationsPage />} />
-          <Route path="/resources/statutory-bodies" element={<StatutoryBodiesPage />} />
-          <Route path="/resources/forms" element={<FormsPage />} />
-          <Route path="/resources/academic-calendar" element={<AcademicCalendarPage />} />
-          <Route path="/resources/syllabus-curriculum" element={<SyllabusPage />} />
-          <Route path="/resources/handbook/faculty" element={<FacultyHandbookPage />} />
-          <Route path="/resources/handbook/student" element={<StudentHandbookPage />} />
-          {/* Career Page Route */}
-          <Route path="/careers" element={<CareerPage />} />
-          <Route path="/scholarships" element={<ScholarshipPage />} />
-          <Route path="/admissions" element={<AdmissionsPage />} />
-          <Route path="/admission" element={<AdmissionsPage />} />
-          <Route path="/alumni-registration" element={<AlumniRegistration />} />
-          <Route path="/alumni-social" element={<AlumniSocial />} />
+            <Route path="/admin/applications" element={<JobApplicationsView />} />
+            <Route path="/research" element={<ResearchPage />} />
+            <Route path="/department/:id" element={<DepartmentPage />} />
+            {/* Research Listing Routes */}
+            <Route path="/department-research" element={<ResearchListingPage />} />
+            <Route path="/student-research" element={<ResearchListingPage />} />
+            <Route path="/faculty-research" element={<ResearchListingPage />} />
+            <Route path="/industrial-research" element={<ResearchListingPage />} />
+            <Route path="/ipr-cell" element={<ResearchListingPage />} />
+            <Route path="/rd-projects" element={<ResearchListingPage />} />
+            <Route path="/patents" element={<ResearchListingPage />} />
+            {/* Resource Routes */}
+            <Route path="/resources/digital-library" element={<LibraryPage />} />
+            <Route path="/resources/regulations" element={<RegulationsPage />} />
+            <Route path="/resources/statutory-bodies" element={<StatutoryBodiesPage />} />
+            <Route path="/resources/forms" element={<FormsPage />} />
+            <Route path="/resources/academic-calendar" element={<AcademicCalendarPage />} />
+            <Route path="/resources/syllabus-curriculum" element={<SyllabusPage />} />
+            <Route path="/resources/handbook/faculty" element={<FacultyHandbookPage />} />
+            <Route path="/resources/handbook/student" element={<StudentHandbookPage />} />
+            {/* Career Page Route */}
+            <Route path="/careers" element={<CareerPage />} />
+            <Route path="/scholarships" element={<ScholarshipPage />} />
+            <Route path="/admissions" element={<AdmissionsPage />} />
+            <Route path="/admission" element={<AdmissionsPage />} />
+            <Route path="/alumni-registration" element={<AlumniRegistration />} />
+            <Route path="/alumni-social" element={<AlumniSocial />} />
 
-          {/* Gallery Pages */}
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/video-gallery" element={<VideoGalleryPage />} />
-          <Route path="/virtual-tour" element={<VirtualTourPage />} />
+            {/* Gallery Pages */}
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/video-gallery" element={<VideoGalleryPage />} />
+            <Route path="/virtual-tour" element={<VirtualTourPage />} />
 
-          {/* Grievance Pages */}
-          <Route path="/grievance/:type" element={<GrievancePage />} />
+            {/* Grievance Pages */}
+            <Route path="/grievance/:type" element={<GrievancePage />} />
 
-          {/* Dynamic Content Pages */}
-          <Route path="/page/library" element={<LibraryPage />} />
-          <Route path="/page/hostel" element={<HostelPage />} />
-          <Route path="/page/sports" element={<SportsPage />} />
-          <Route path="/page/amenities" element={<AmenitiesPage />} />
-          <Route path="/page/placement" element={<PlacementPage />} />
-          <Route path="/page/skilling" element={<SkillingPage />} />
+            {/* Dynamic Content Pages */}
+            <Route path="/page/library" element={<LibraryPage />} />
+            <Route path="/page/hostel" element={<HostelPage />} />
+            <Route path="/page/sports" element={<SportsPage />} />
+            <Route path="/page/amenities" element={<AmenitiesPage />} />
+            <Route path="/page/placement" element={<PlacementPage />} />
+            <Route path="/page/skilling" element={<SkillingPage />} />
 
-          <Route path="/page/fest" element={<DhruvaFestPage />} />
+            <Route path="/page/fest" element={<DhruvaFestPage />} />
 
-          <Route path="/page/cells" element={<StudentCellsPage />} />
+            <Route path="/page/cells" element={<StudentCellsPage />} />
 
-          {/* IQAC Pages */}
-          <Route path="/iqac-about" element={<IqacAboutPage />} />
-          <Route path="/iqac-committee" element={<IqacCommitteePage />} />
+            {/* IQAC Pages */}
+            <Route path="/iqac-about" element={<IqacAboutPage />} />
+            <Route path="/iqac-committee" element={<IqacCommitteePage />} />
 
-          <Route path="/page/associations" element={<AssociationsPage />} />
-          <Route path="/page/clubs" element={<CampusClubsPage />} />
-          <Route path="/page/gym" element={<GymPage />} />
-          <Route path="/page/yoga" element={<YogaPage />} />
-          <Route path="/page/store" element={<StorePage />} />
-          <Route path="/page/transport" element={<TransportPage />} />
-          <Route path="/page/medical" element={<MedicalPage />} />
-          <Route path="/naac" element={<Naac />} />
-          <Route path="/naac-dvv-clarifications" element={<NaacDvv />} />
-          <Route path="/naac-distinction" element={<NaacDistinction />} />
-          <Route path="/naac-best-practices" element={<NaacBestPractices />} />
-          <Route path="/naac-rti" element={<NaacRti />} />
-          <Route path="/naac-feedback" element={<NaacFeedback />} />
-          <Route path="/naac-extended-profile" element={<NaacExtendedProfile />} />
-          <Route path="/naac-committee" element={<NaacCommittee />} />
-          <Route path="/aicte" element={<AictePage />} />
-          <Route path="/aicte-eoa" element={<AicteEoaPage />} />
-          <Route path="/sdgs" element={<SdgsPage />} />
-          <Route path="/obe" element={<ObePage />} />
-          <Route path="/nirf" element={<NirfPage />} />
+            <Route path="/page/associations" element={<AssociationsPage />} />
+            <Route path="/page/clubs" element={<CampusClubsPage />} />
+            <Route path="/page/gym" element={<GymPage />} />
+            <Route path="/page/yoga" element={<YogaPage />} />
+            <Route path="/page/store" element={<StorePage />} />
+            <Route path="/page/transport" element={<TransportPage />} />
+            <Route path="/page/medical" element={<MedicalPage />} />
+            <Route path="/naac" element={<Naac />} />
+            <Route path="/naac-dvv-clarifications" element={<NaacDvv />} />
+            <Route path="/naac-distinction" element={<NaacDistinction />} />
+            <Route path="/naac-best-practices" element={<NaacBestPractices />} />
+            <Route path="/naac-rti" element={<NaacRti />} />
+            <Route path="/naac-feedback" element={<NaacFeedback />} />
+            <Route path="/naac-extended-profile" element={<NaacExtendedProfile />} />
+            <Route path="/naac-committee" element={<NaacCommittee />} />
+            <Route path="/aicte" element={<AictePage />} />
+            <Route path="/aicte-eoa" element={<AicteEoaPage />} />
+            <Route path="/sdgs" element={<SdgsPage />} />
+            <Route path="/obe" element={<ObePage />} />
+            <Route path="/nirf" element={<NirfPage />} />
 
 
-          <Route path="/page/cafeteria" element={<CafeteriaPage />} />
+            <Route path="/page/cafeteria" element={<CafeteriaPage />} />
 
-          <Route path="/page/food-court" element={<FoodCourtPage />} />
+            <Route path="/page/food-court" element={<FoodCourtPage />} />
 
-          <Route path="/page/:slug" element={<DynamicPage />} />
+            <Route path="/page/:slug" element={<DynamicPage />} />
 
-          {/* 404 Catch-all */}
-          <Route path="*" element={<NotFoundPage />} />
+            {/* 404 Catch-all */}
+            <Route path="*" element={<NotFoundPage />} />
 
-        </Routes>
-        <ScrollToTopButton />
+          </Routes>
+          <ScrollToTopButton />
 
-      </Router>
+        </Router>
       </ThemeProvider>
     </AuthProvider>
   );

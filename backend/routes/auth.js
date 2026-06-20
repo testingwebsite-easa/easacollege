@@ -30,7 +30,18 @@ const hashPassword = (password) => {
 };
 
 const verifyPassword = (inputPassword, hashedPassword) => {
-    return hashPassword(inputPassword) === hashedPassword;
+    if (hashedPassword && hashedPassword.includes(':')) {
+        // PBKDF2 check (used by index.js seeded users/admin)
+        const [salt, key] = hashedPassword.split(':');
+        const hash = crypto.pbkdf2Sync(inputPassword, salt, 1000, 64, 'sha512').toString('hex');
+        return key === hash;
+    }
+    // Check if simple SHA-256 match
+    if (hashPassword(inputPassword) === hashedPassword) {
+        return true;
+    }
+    // Fallback: plain text check
+    return inputPassword === hashedPassword;
 };
 
 // REGISTER - Create new user account
@@ -315,6 +326,103 @@ router.post('/admin-create-user', verifyToken, async (req, res) => {
     } catch (error) {
         console.error('Admin create user error:', error);
         res.status(500).json({ error: 'User creation failed', details: error.message });
+    }
+});
+
+// FORGOT PASSWORD - Generate token and send email
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: 'User with this email does not exist' });
+        }
+
+        // Generate reset token
+        const token = crypto.randomBytes(20).toString('hex');
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiration
+        await user.save();
+
+        // Send Email
+        const origin = req.headers.origin || 'http://localhost:5173';
+        const resetUrl = `${origin}/reset-password?token=${token}`;
+        
+        const mailOptions = {
+            to: user.email,
+            subject: 'EASA College - Password Reset Request',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                    <h2 style="color: #764ba2; text-align: center;">EASA College</h2>
+                    <p>Dear ${user.name || user.username},</p>
+                    <p>You are receiving this email because you (or someone else) have requested the reset of the password for your account.</p>
+                    <p>Please click on the following link, or paste this into your browser to complete the process within one hour of receiving it:</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${resetUrl}" style="background-color: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Reset Password</a>
+                    </div>
+                    <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+                    <hr style="border: 0; border-top: 1px solid #eeeeee; margin: 20px 0;" />
+                    <p style="font-size: 12px; color: #888888; text-align: center;">EASA College Syllabus Management System</p>
+                </div>
+            `
+        };
+
+        // In development/local testing, log the link to a local file
+        const fs = require('fs');
+        const path = require('path');
+        const logPath = path.join(__dirname, '../reset_links.log');
+        const logMessage = `[${new Date().toISOString()}] Email: ${user.email} | Link: ${resetUrl}\n`;
+        fs.appendFileSync(logPath, logMessage);
+        console.log(`PASSWORD RESET LINK GENERATED for ${user.email}: ${resetUrl}`);
+
+        try {
+            const { sendEmail } = require('../config/email');
+            await sendEmail(mailOptions);
+            res.json({ message: 'Password reset link sent to your email' });
+        } catch (mailError) {
+            console.error('SMTP Email sending failed, but token was successfully generated:', mailError.message);
+            res.json({ 
+                message: 'Password reset link generated! Check backend/reset_links.log (Email delivery failed: ' + mailError.message + ')' 
+            });
+        }
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({ error: 'Failed to generate reset link', details: error.message });
+    }
+});
+
+// RESET PASSWORD - Verify token and update password
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            return res.status(400).json({ error: 'Token and new password are required' });
+        }
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ error: 'Password reset token is invalid or has expired' });
+        }
+
+        // Set the new password
+        user.password = hashPassword(newPassword);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ message: 'Password has been reset successfully' });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ error: 'Failed to reset password', details: error.message });
     }
 });
 

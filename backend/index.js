@@ -153,13 +153,18 @@ const hashPassword = (password) => {
 };
 
 const verifyPassword = (password, storedHash) => {
-    if (!storedHash.includes(':')) {
-        // Legacy plain text check
-        return password === storedHash;
+    if (storedHash && storedHash.includes(':')) {
+        const [salt, key] = storedHash.split(':');
+        const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+        return key === hash;
     }
-    const [salt, key] = storedHash.split(':');
-    const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-    return key === hash;
+    // Check if simple SHA-256 match
+    const sha256Hash = crypto.createHash('sha256').update(password).digest('hex');
+    if (sha256Hash === storedHash) {
+        return true;
+    }
+    // Legacy plain text check
+    return password === storedHash;
 };
 
 console.log("----------------------");
@@ -565,7 +570,7 @@ const seedData = async () => {
         // Seeding Pages: Upsert to guarantee Gen Z content exists
         if (pagesData && pagesData.length > 0) {
             console.log("Seeding/Updating Pages Data...");
-            await Promise.all(pagesData.map(page => 
+            await Promise.all(pagesData.map(page =>
                 PageContent.findOneAndUpdate(
                     { slug: page.slug },
                     page,
@@ -1138,7 +1143,7 @@ app.patch('/api/fest-page', async (req, res) => {
 app.get('/api/placement-partners', async (req, res) => {
     const { split } = req.query;
     const cacheKey = `placement-partners${split === 'true' ? '-split' : ''}`;
-    
+
     const cached = getCache(cacheKey);
     if (cached) return res.json(cached);
 
@@ -2611,8 +2616,8 @@ app.post('/api/alumni', (req, res) => {
             }
 
             // Count existing alumni for this specific year to get the next sequence number
-            const countInYear = await Alumni.countDocuments({ 
-                alumniId: { $regex: `^ECET${passoutYear}` } 
+            const countInYear = await Alumni.countDocuments({
+                alumniId: { $regex: `^ECET${passoutYear}` }
             });
             const sequence = (countInYear + 1).toString().padStart(4, '0');
             alumniData.alumniId = `ECET${passoutYear}${sequence}`;

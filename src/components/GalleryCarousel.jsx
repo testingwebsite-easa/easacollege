@@ -104,7 +104,7 @@ const GalleryCarousel = () => {
                 <div className="gallery-slider-wrapper" style={{ paddingBottom: '4rem' }}>
                     <Slider {...settings}>
                         {galleryImages.map((item, index) => (
-                            <div key={item.id || index} style={{ padding: '1.5rem' }}>
+                            <div key={item.id || index}>
                                 <motion.div
                                     whileHover={{ y: -10 }}
                                     className="gallery-card"
@@ -197,6 +197,14 @@ const GalleryCarousel = () => {
 
                 .slick-dots li button:before { color: var(--text-muted) !important; font-size: 12px !important; transition: 0.3s; }
                 .slick-dots li.slick-active button:before { color: var(--secondary) !important; transform: scale(1.4); }
+                
+                .gallery-slider-wrapper .slick-slide {
+                    padding: 1.5rem !important;
+                    box-sizing: border-box;
+                }
+                .gallery-slider-wrapper .slick-list {
+                    margin: 0 -1.5rem !important;
+                }
                 
                 @media (max-width: 768px) {
                     .gallery-section {

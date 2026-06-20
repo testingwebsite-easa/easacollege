@@ -49,7 +49,7 @@ const JobApplicationsView = () => {
             const response = await fetch(`${baseUrl}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: credentials.password })
+                body: JSON.stringify({ username: credentials.username, password: credentials.password })
             });
 
             const data = await response.json();

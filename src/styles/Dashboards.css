@@ -246,15 +246,15 @@ table {
 }
 
 table thead {
-    background: var(--glass-highlight, #f9f9f9);
-    border-bottom: 2px solid var(--glass-border, #e0e0e0);
+    background: #f1f3f5;
+    border-bottom: 2px solid #e9ecef;
 }
 
 table th {
     padding: 16px;
     text-align: left;
     font-weight: 600;
-    color: var(--text-main, #333);
+    color: #495057;
     font-size: 13px;
     text-transform: uppercase;
 }

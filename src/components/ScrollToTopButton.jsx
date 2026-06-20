@@ -52,25 +52,7 @@ const ScrollToTopButton = () => {
                         exit={{ opacity: 0, scale: 0.5, y: 20 }}
                         onClick={scrollToTop}
                         title="Scroll to top"
-                        style={{
-                            position: 'fixed',
-                            bottom: isMobile ? '90px' : '30px',
-                            right: '25px',
-                            width: '50px',
-                            height: '50px',
-                            borderRadius: '15px',
-                            background: 'var(--secondary)',
-                            color: 'var(--bg-dark)',
-                            border: '1px solid var(--glass-border)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            zIndex: 9999,
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                            backdropFilter: 'blur(8px)',
-                            outline: 'none'
-                        }}
+                        className="scroll-to-top-btn"
                         whileHover={{
                             scale: 1.1,
                             background: 'var(--accent-yellow)',
