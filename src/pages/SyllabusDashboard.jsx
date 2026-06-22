@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import AdminDashboard from './dashboards/AdminDashboard';
+import AdminDashboard from './dashboards/AdminDashboard'
 import HODDashboard from './dashboards/HODDashboard';
 import StaffDashboard from './dashboards/StaffDashboard';
 import StudentDashboard from './dashboards/StudentDashboard';

@@ -517,18 +517,6 @@ const AdminDashboard = () => {
                     >
                         <FaBookOpen /> Manage Departments
                     </button>
-                    <button
-                        className={`admin-tab-btn ${activeTab === 'admissions' ? 'active' : ''}`}
-                        onClick={() => { setActiveTab('admissions'); setSidebarOpen(false); }}
-                    >
-                        <FaGraduationCap /> Admissions ({admissions.length})
-                    </button>
-                    <button
-                        className={`admin-tab-btn ${activeTab === 'enquiries' ? 'active' : ''}`}
-                        onClick={() => { setActiveTab('enquiries'); setSidebarOpen(false); }}
-                    >
-                        <FaEnvelope /> General Enquiries ({enquiries.length})
-                    </button>
                 </div>
             </div>
 
@@ -539,8 +527,6 @@ const AdminDashboard = () => {
                         {activeTab === 'pending' && 'Pending User Approvals'}
                         {activeTab === 'users' && 'User Account Directory'}
                         {activeTab === 'departments' && 'Department Data Manager'}
-                        {activeTab === 'admissions' && 'Admissions Management'}
-                        {activeTab === 'enquiries' && 'General Enquiries'}
                     </h2>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                         <span className="user-info" style={{ color: '#333', background: '#eef2f6' }}>{user?.username}</span>
@@ -833,142 +819,6 @@ const AdminDashboard = () => {
                         <div className="tab-content">
                             <h2>Department Data Manager</h2>
                             <DepartmentManager />
-                        </div>
-                    ) : activeTab === 'admissions' ? (
-                        <div className="tab-content">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-                                <h2>Admissions Applications</h2>
-                                <button
-                                    onClick={handleExportAdmissions}
-                                    className="btn btn-primary"
-                                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                                >
-                                    <FaUpload style={{ transform: 'rotate(180deg)' }} /> Export CSV
-                                </button>
-                            </div>
-
-                            {admissions.length === 0 ? (
-                                <p className="no-data">No admissions applications found</p>
-                            ) : (
-                                <div className="users-table">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Phone</th>
-                                                <th>Course</th>
-                                                <th>Community</th>
-                                                <th>District</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {admissions.map(ad => (
-                                                <tr key={ad._id}>
-                                                    <td style={{ fontWeight: 'bold' }}>{ad.name}</td>
-                                                    <td>{ad.email}</td>
-                                                    <td>{ad.phone}</td>
-                                                    <td><span className="course-badge">{ad.course}</span></td>
-                                                    <td>{ad.community || '-'}</td>
-                                                    <td>{ad.district || '-'}</td>
-                                                    <td>
-                                                        <select
-                                                            value={ad.status || 'Pending'}
-                                                            onChange={(e) => handleUpdateAdmissionStatus(ad._id, e.target.value)}
-                                                            style={{
-                                                                padding: '6px 12px',
-                                                                borderRadius: '6px',
-                                                                border: '1px solid #ddd',
-                                                                fontSize: '13px',
-                                                                background: ad.status === 'Approved' ? '#e8f5e9' : ad.status === 'Rejected' ? '#ffebee' : '#fff3e0',
-                                                                color: ad.status === 'Approved' ? '#2e7d32' : ad.status === 'Rejected' ? '#c62828' : '#ef6c00',
-                                                                fontWeight: '600'
-                                                            }}
-                                                        >
-                                                            <option value="Pending">Pending</option>
-                                                            <option value="Approved">Approved</option>
-                                                            <option value="Rejected">Rejected</option>
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <button
-                                                            className="btn btn-danger btn-small"
-                                                            onClick={() => handleDeleteAdmission(ad._id)}
-                                                        >
-                                                            <FaTrash />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-                    ) : activeTab === 'enquiries' ? (
-                        <div className="tab-content">
-                            <h2>General Enquiries</h2>
-                            {enquiries.length === 0 ? (
-                                <p className="no-data">No enquiries found</p>
-                            ) : (
-                                <div className="users-table">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Phone</th>
-                                                <th>Message</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {enquiries.map(enq => (
-                                                <tr key={enq._id}>
-                                                    <td style={{ whiteSpace: 'nowrap', fontSize: '13px' }}>
-                                                        {enq.submittedAt ? new Date(enq.submittedAt).toLocaleDateString() : '-'}
-                                                    </td>
-                                                    <td style={{ fontWeight: 'bold' }}>{enq.name}</td>
-                                                    <td>{enq.email}</td>
-                                                    <td>{enq.phone}</td>
-                                                    <td style={{ maxWidth: '300px', wordBreak: 'break-word' }}>{enq.message}</td>
-                                                    <td>
-                                                        <select
-                                                            value={enq.status || 'New'}
-                                                            onChange={(e) => handleUpdateEnquiryStatus(enq._id, e.target.value)}
-                                                            style={{
-                                                                padding: '6px 12px',
-                                                                borderRadius: '6px',
-                                                                border: '1px solid #ddd',
-                                                                fontSize: '13px',
-                                                                background: enq.status === 'Resolved' ? '#e8f5e9' : enq.status === 'Contacted' ? '#e3f2fd' : '#ffebee',
-                                                                color: enq.status === 'Resolved' ? '#2e7d32' : enq.status === 'Contacted' ? '#1565c0' : '#c2185b',
-                                                                fontWeight: '600'
-                                                            }}
-                                                        >
-                                                            <option value="New">New</option>
-                                                            <option value="Contacted">Contacted</option>
-                                                            <option value="Resolved">Resolved</option>
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <button
-                                                            className="btn btn-danger btn-small"
-                                                            onClick={() => handleDeleteEnquiry(enq._id)}
-                                                        >
-                                                            <FaTrash />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
                         </div>
                     ) : null}
                 </div>
