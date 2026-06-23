@@ -169,7 +169,7 @@ const renderCreditDistributionTable = (subjects) => {
             </h4>
             <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', border: '1px solid var(--glass-border)', background: 'var(--bg-section)' }}>
-                    <thead>
+                    <thead style={{ background: 'transparent' }}>
                         <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>S.No</th>
                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '35%' }}>SUBJECT AREA</th>
