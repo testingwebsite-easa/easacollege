@@ -420,7 +420,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
     });
 
     const svgPieChartHTML = grandTotal > 0 ? `
-        <div style="margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 40px; font-family: 'Times New Roman', Times, serif;">
+        <div style="margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 40px; font-family: Arial, sans-serif;">
             <svg width="150" height="150" viewBox="0 0 100 100" style="display: block;">
                 <circle cx="50" cy="50" r="36" fill="#fff" stroke="#000" stroke-width="0.5" />
                 ${slices.map(slice => `<path d="${slice.d}" fill="${slice.color}" stroke="#fff" stroke-width="0.5" />`).join('')}
@@ -553,7 +553,7 @@ const getDefaultOutcomes = (code, title) => {
     ];
 };
 
-const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, acMeetingDate, poList, psoList) => {
+const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, acMeetingDate, poList, psoList, degreePrefix) => {
     if (!subjects || subjects.length === 0) return '';
 
     return subjects.map(subj => {
@@ -666,16 +666,16 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
         return `
         <!-- PAGE A: Syllabus Part 1 -->
-        <div class="page" style="page-break-before: always; font-family: 'Times New Roman', Times, serif; font-size: 9.5pt; line-height: 1.35; padding-top: 25px; padding-bottom: 25px;">
+        <div class="page" style="page-break-before: always; font-family: Arial, sans-serif; font-size: 9.5pt; line-height: 1.35; padding-top: 25px; padding-bottom: 25px;">
             <div class="pdf-header" style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.5px solid #000; padding-bottom: 5px; margin-bottom: 15px; font-size: 9.5pt; font-weight: bold; font-family: Arial, sans-serif; font-style: italic;">
                 <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">B.E/B.Tech Programmes (${regYear})</div>
+                <div class="right-col">${degreePrefix ? degreePrefix.toUpperCase() : 'B.E.'} PROGRAMMES (${regYear})</div>
             </div>
 
             <table style="width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 10px; font-size: 9.5pt; border: 1.5px solid #000;">
                 <tr>
                     <td rowspan="2" style="width: 18%; border: 1.5px solid #000; padding: 6px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 10pt;">
-                        ${subj.code || ''}
+                        ${(subj.code || '').toUpperCase()}
                     </td>
                     <td rowspan="2" style="width: 58%; border: 1.5px solid #000; padding: 6px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 10pt; text-transform: uppercase;">
                         ${subj.title || ''}
@@ -751,7 +751,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
                                     <span>${unitPeriods} Periods</span>
                                 </div>
-                                <span style="font-family: 'Times New Roman', Times, serif;">${topicsStr}</span>
+                                <span style="font-family: Arial, sans-serif;">${topicsStr}</span>
                             </div>
                         ` : '';
                     }).join('')
@@ -766,10 +766,10 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         </div>
 
         <!-- PAGE B: Syllabus Part 2 -->
-        <div class="page" style="page-break-before: always; font-family: 'Times New Roman', Times, serif; font-size: 9.5pt; line-height: 1.35; padding-top: 25px; padding-bottom: 25px;">
+        <div class="page" style="page-break-before: always; font-family: Arial, sans-serif; font-size: 9.5pt; line-height: 1.35; padding-top: 25px; padding-bottom: 25px;">
             <div class="pdf-header" style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.5px solid #000; padding-bottom: 5px; margin-bottom: 15px; font-size: 9.5pt; font-weight: bold; font-family: Arial, sans-serif; font-style: italic;">
                 <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">B.E/B.Tech Programmes (${regYear})</div>
+                <div class="right-col">${degreePrefix ? degreePrefix.toUpperCase() : 'B.E.'} PROGRAMMES (${regYear})</div>
             </div>
 
             <div style="margin-top: 10px; margin-bottom: 12px;">
@@ -787,7 +787,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
                                     <span>${unitPeriods} Periods</span>
                                 </div>
-                                <span style="font-family: 'Times New Roman', Times, serif;">${topicsStr}</span>
+                                <span style="font-family: Arial, sans-serif;">${topicsStr}</span>
                             </div>
                         ` : '';
                     }).join('')
@@ -999,7 +999,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     const getHeaderHTML = () => `
         <div class="pdf-header">
             <div class="left-col">EASA College of Engineering and Technology</div>
-            <div class="right-col">${degreePrefix} ${deptName} (${regYear})</div>
+            <div class="right-col">${degreePrefix} ${deptName.toUpperCase()} (${regYear})</div>
         </div>
     `;
 
@@ -1058,7 +1058,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             </tr>
                             ${theoryCourses.map(s => `
                                 <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${s.code}</td>
+                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                     <td>${s.title}</td>
                                     <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'HS'}</td>
                                     <td class="center">${s.l}</td>
@@ -1079,7 +1079,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             </tr>
                             ${theoryCumPracticalCourses.map(s => `
                                 <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${s.code}</td>
+                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                     <td>${s.title}</td>
                                     <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'PC'}</td>
                                     <td class="center">${s.l}</td>
@@ -1100,7 +1100,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             </tr>
                             ${practicalCourses.map(s => `
                                 <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${s.code}</td>
+                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                     <td>${s.title}</td>
                                     <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'EEC'}</td>
                                     <td class="center">${s.l}</td>
@@ -1121,7 +1121,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             </tr>
                             ${otherCourses.map(s => `
                                 <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${s.code}</td>
+                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                     <td>${s.title}</td>
                                     <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'EEC'}</td>
                                     <td class="center">${s.l}</td>
@@ -1149,14 +1149,14 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         <style>
             /* Default typography */
             body {
-                font-family: 'Times New Roman', Times, serif;
+                font-family: Arial, sans-serif;
                 font-size: 10pt;
             }
             
             /* Apply consistent font size and family to all elements on content pages (page 2 onwards) except headers and footers */
             .print-table .page *:not(.pdf-header):not(.pdf-header *):not(.pdf-footer):not(.pdf-footer *),
             .page:not(:first-of-type) *:not(.pdf-header):not(.pdf-header *):not(.pdf-footer):not(.pdf-footer *) {
-                font-family: 'Times New Roman', Times, serif !important;
+                font-family: Arial, sans-serif !important;
                 font-size: 10pt !important;
             }
             
@@ -1181,7 +1181,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 margin: 15mm 15mm 20mm 15mm;
             }
             body {
-                font-family: 'Times New Roman', Times, serif;
+                font-family: Arial, sans-serif;
                 color: #000;
                 background: #fff;
                 margin: 0;
@@ -1556,24 +1556,24 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
                 <!-- 2. DEGREE & DEPARTMENT -->
                 <div style="margin: 40px 0; text-align: center;">
-                    <h2 style="font-family: 'Times New Roman', Times, serif; font-size: 16pt; font-weight: bold; line-height: 1.5; text-transform: uppercase; margin: 0; padding: 0 10px;">
+                    <h2 style="font-family: Arial, sans-serif; font-size: 30pt; font-weight: bold; line-height: 1.5; text-transform: uppercase; margin: 0; padding: 0 10px;">
                         ${degreePrefix} ${deptName.toUpperCase()}
                     </h2>
                 </div>
 
                 <!-- 3. TITLE block -->
                 <div style="margin: 40px 0; text-align: center;">
-                    <h1 style="font-family: 'Times New Roman', Times, serif; font-size: 20pt; font-weight: bold; line-height: 1.3; text-transform: uppercase; margin: 0 0 10px 0;">
+                    <h1 style="font-family: Arial, sans-serif; font-size: 24pt; font-weight: bold; line-height: 1.3; text-transform: uppercase; margin: 0 0 10px 0;">
                         CURRICULUM AND SYLLABUS
                     </h1>
-                    <h3 style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; font-weight: bold; text-transform: uppercase; margin: 0;">
+                    <h3 style="font-family: Arial, sans-serif; font-size:20pt; font-weight: bold; text-transform: uppercase; margin: 0;">
                         (CHOICE BASED CREDIT SYSTEM)
                     </h3>
                 </div>
 
                 <!-- 4. REGULATION YEAR -->
                 <div style="margin: 45px 0; text-align: center;">
-                    <h2 style="font-family: 'Times New Roman', Times, serif; font-size: 16pt; font-weight: bold; text-transform: uppercase; margin: 0;">
+                    <h2 style="font-family: Arial, sans-serif; font-size: 16pt; font-weight: bold; text-transform: uppercase; margin: 0;">
                         REGULATIONS ${regYear.replace('R-', '')}
                     </h2>
                 </div>
@@ -1591,7 +1591,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <td style="border: none; padding: 0;">
                         <div class="pdf-header">
                             <div class="left-col">EASA College of Engineering and Technology</div>
-                            <div class="right-col">${degreePrefix} ${deptName} (${regYear})</div>
+                            <div class="right-col">${degreePrefix} ${deptName.toUpperCase()} (${regYear})</div>
                         </div>
                     </td>
                 </tr>
@@ -1646,7 +1646,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             ${getHeaderHTML()}
             
             <div class="title-block" style="margin-top: 20px; margin-bottom: 20px;">
-                <h1 style="font-size: 16pt;">Department of ${deptName}</h1>
+                <h1 style="font-size: 16pt; text-transform: uppercase;">Department of ${deptName.toUpperCase()}</h1>
             </div>
             
             <div class="section-container" style="margin-bottom: 25px;">
@@ -1727,7 +1727,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     ${getHeaderHTML()}
                     ${index === 0 ? `
                     <div class="title-block">
-                        <h1 style="font-size: 15pt; font-family: Arial, sans-serif;">${degreePrefix.replace('.', '')} ${deptName.toUpperCase()}</h1>
+                        <h1 style="font-size: 15pt; font-family: Arial, sans-serif;">${degreePrefix.toUpperCase()} ${deptName.toUpperCase()}</h1>
                         <h2 style="font-size: 11pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.5; margin-top: 10px;">
                             REGULATION – ${regYear.replace('R-', '')}<br>
                             CHOICE BASED CREDIT SYSTEM<br>
@@ -1794,7 +1794,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                         return `
                                             <tr>
                                                 <td class="center">${globalIndex}</td>
-                                                <td class="center" style="font-family: monospace; font-weight: bold;">${s.code}</td>
+                                                <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                                 <td>${s.title}</td>
                                                 <td class="center">${s.l}</td>
                                                 <td class="center">${s.t}</td>
@@ -1871,7 +1871,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                         return `
                                             <tr>
                                                 <td class="center">${oecGlobalIndex}</td>
-                                                <td class="center" style="font-family: monospace; font-weight: bold;">${s.code}</td>
+                                                <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                                 <td>${s.title}</td>
                                                 <td class="center">${s.l}</td>
                                                 <td class="center">${s.t}</td>
@@ -1895,7 +1895,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         </div>
         ` : ''}
         ${subjects && subjects.length > 0 ? getCreditDistributionHTML(subjects, pageTracker, bosMeetingDate, acMeetingDate) : ''}
-        ${subjects && subjects.length > 0 ? getDetailedSyllabiHTML(subjects, regYear, pageTracker, bosMeetingDate, acMeetingDate, deptData.po, deptData.pso) : ''}
+        ${subjects && subjects.length > 0 ? getDetailedSyllabiHTML(subjects, regYear, pageTracker, bosMeetingDate, acMeetingDate, deptData.po, deptData.pso, degreePrefix) : ''}
         
                     </td>
                 </tr>
