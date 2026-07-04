@@ -331,8 +331,8 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
     // --- Dynamic Styles ---
     const colors = {
         bg: isDark ? '#0f172a' : '#fff',
-        text: isDark ? '#e2e8f0' : '#334155',
-        muted: isDark ? '#94a3b8' : '#64748b',
+        text: isDark ? '#ffffff' : '#000000',
+        muted: isDark ? '#cbd5e1' : '#4b5563',
         border: isDark ? '#334155' : '#e2e8f0',
         sectionBg: isDark ? '#1e293b' : '#fff',
         inputBg: isDark ? '#0f172a' : '#fff',
@@ -345,7 +345,7 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
     const sectionUploadHeaderStyle = {
         fontSize: '1.25rem',
         fontWeight: '700',
-        color: isDark ? '#fff' : '#334155',
+        color: isDark ? '#ffffff' : '#000000',
         marginBottom: '1.5rem',
         borderBottom: `2px solid ${colors.border}`,
         paddingBottom: '0.5rem'
@@ -355,7 +355,7 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
         display: 'block',
         fontSize: '0.9rem',
         fontWeight: '600',
-        color: isDark ? '#cbd5e1' : '#475569',
+        color: isDark ? '#ffffff' : '#000000',
         marginBottom: '0.4rem'
     };
 
@@ -468,15 +468,15 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
                                         <div className="form-group">
                                             <label style={labelStyle}>Post Applied For (Category)</label>
                                             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="postAppliedFor" value="Teaching" checked={formData.postAppliedFor === 'Teaching'} onChange={handleChange} /> Teaching</label>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="postAppliedFor" value="Non-Teaching" checked={formData.postAppliedFor === 'Non-Teaching'} onChange={handleChange} /> Non-Teaching</label>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: colors.text, cursor: 'pointer' }}><input type="radio" name="postAppliedFor" value="Teaching" checked={formData.postAppliedFor === 'Teaching'} onChange={handleChange} style={{ cursor: 'pointer', accentColor: '#667eea' }} /> Teaching</label>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: colors.text, cursor: 'pointer' }}><input type="radio" name="postAppliedFor" value="Non-Teaching" checked={formData.postAppliedFor === 'Non-Teaching'} onChange={handleChange} style={{ cursor: 'pointer', accentColor: '#667eea' }} /> Non-Teaching</label>
                                             </div>
                                         </div>
                                         <div className="form-group">
                                             <label style={labelStyle}>Employment Type</label>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '0.5rem' }}>
                                                 {['Regular', 'Contract', 'Visiting', 'Temporary', 'Others'].map(type => (
-                                                    <label key={type} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="checkbox" name="employmentType" value={type} checked={formData.employmentType.includes(type)} onChange={handleChange} /> {type}</label>
+                                                    <label key={type} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: colors.text, cursor: 'pointer' }}><input type="checkbox" name="employmentType" value={type} checked={formData.employmentType.includes(type)} onChange={handleChange} style={{ cursor: 'pointer', accentColor: '#667eea' }} /> {type}</label>
                                                 ))}
                                             </div>
                                             {formData.employmentType.includes('Others') && (
@@ -525,8 +525,8 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
                                         <div>
                                             <label style={labelStyle}>Marital Status</label>
                                             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="maritalStatus" value="Single" checked={formData.maritalStatus === 'Single'} onChange={handleChange} /> Single</label>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="maritalStatus" value="Married" checked={formData.maritalStatus === 'Married'} onChange={handleChange} /> Married</label>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: colors.text, cursor: 'pointer' }}><input type="radio" name="maritalStatus" value="Single" checked={formData.maritalStatus === 'Single'} onChange={handleChange} style={{ cursor: 'pointer', accentColor: '#667eea' }} /> Single</label>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: colors.text, cursor: 'pointer' }}><input type="radio" name="maritalStatus" value="Married" checked={formData.maritalStatus === 'Married'} onChange={handleChange} style={{ cursor: 'pointer', accentColor: '#667eea' }} /> Married</label>
                                             </div>
                                         </div>
                                         <div>
@@ -586,8 +586,8 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
                                         <div style={{ gridColumn: '1 / -1' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                                                 <label style={labelStyle}>Permanent Address</label>
-                                                <label style={{ fontSize: '0.9rem', color: colors.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <input type="checkbox" name="sameAsPresent" checked={formData.sameAsPresent} onChange={handleChange} /> Same as Present
+                                                <label style={{ fontSize: '0.9rem', color: colors.text, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <input type="checkbox" name="sameAsPresent" checked={formData.sameAsPresent} onChange={handleChange} style={{ cursor: 'pointer', accentColor: '#667eea' }} /> Same as Present
                                                 </label>
                                             </div>
                                             <textarea name="permanentAddress" value={formData.permanentAddress} onChange={handleChange} style={textareaStyle} rows="3" disabled={formData.sameAsPresent} />
@@ -629,8 +629,8 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
                                         <label style={labelStyle}>Additional Qualifications</label>
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '0.5rem', padding: '1rem', background: colors.checkboxBg, borderRadius: '8px' }}>
                                             {['NET', 'SET', 'GATE', 'SLET', 'PhD Guideship', 'AICTE-QIP', 'Others'].map(q => (
-                                                <label key={q} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <input type="checkbox" name="additionalQualifications" value={q} checked={formData.additionalQualifications.includes(q)} onChange={handleChange} />
+                                                <label key={q} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: colors.text, cursor: 'pointer' }}>
+                                                    <input type="checkbox" name="additionalQualifications" value={q} checked={formData.additionalQualifications.includes(q)} onChange={handleChange} style={{ cursor: 'pointer', accentColor: '#667eea' }} />
                                                     {q}
                                                 </label>
                                             ))}
@@ -652,12 +652,13 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
                                 <div className="form-section" style={{ marginBottom: '2rem', background: colors.sectionBg, padding: '1.5rem', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: `1px solid ${colors.border}` }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                         <h3 style={{ ...sectionUploadHeaderStyle, marginBottom: 0, borderBottom: 'none' }}>4. Experience Details</h3>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: colors.checkboxBg, padding: '0.5rem 1rem', borderRadius: '8px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: colors.checkboxBg, padding: '0.5rem 1rem', borderRadius: '8px', color: colors.text }}>
                                             <input
                                                 type="checkbox"
                                                 name="isFresher"
                                                 checked={formData.isFresher}
                                                 onChange={handleChange}
+                                                style={{ cursor: 'pointer', accentColor: '#667eea' }}
                                             />
                                             <span style={{ fontWeight: 600 }}>I am a Fresher</span>
                                         </label>
@@ -764,7 +765,7 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
                                     <h4 style={labelStyle}>Software / Tools Known</h4>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
                                         {['MS Office', 'ERP', 'LMS', 'AI Tools', 'Others'].map(tool => (
-                                            <label key={tool} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="checkbox" name="softwareSkills" value={tool} checked={formData.softwareSkills.includes(tool)} onChange={handleChange} /> {tool}</label>
+                                            <label key={tool} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: colors.text, cursor: 'pointer' }}><input type="checkbox" name="softwareSkills" value={tool} checked={formData.softwareSkills.includes(tool)} onChange={handleChange} style={{ cursor: 'pointer', accentColor: '#667eea' }} /> {tool}</label>
                                         ))}
                                     </div>
                                     {formData.softwareSkills.includes('Others') && (
@@ -839,13 +840,13 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
 
                                 {/* DECLARATION & SUBMIT */}
                                 <div style={{ marginBottom: '2rem', background: colors.sectionBg, padding: '1.5rem', borderRadius: '12px', border: `1px solid ${colors.border}` }}>
-                                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer', color: colors.text }}>
                                         <input
                                             type="checkbox"
                                             name="declaration"
                                             checked={formData.declaration}
                                             onChange={handleChange}
-                                            style={{ marginTop: '0.2rem' }}
+                                            style={{ marginTop: '0.2rem', cursor: 'pointer', accentColor: '#667eea' }}
                                         />
                                         <span style={{ fontSize: '0.95rem', color: colors.text, lineHeight: '1.5' }}>
                                             I hereby declare that the information provided above is true to the best of my knowledge and belief. I understand that any misrepresentation of facts will lead to immediate cancellation of my application/appointment.
@@ -878,6 +879,13 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
                     </motion.div>
                 </div>
             )}
+            <style>{`
+                /* Dropdown visibility fix */
+                select option {
+                    background-color: ${isDark ? '#1e293b' : '#ffffff'};
+                    color: ${isDark ? '#ffffff' : '#000000'};
+                }
+            `}</style>
         </AnimatePresence>
     );
 };

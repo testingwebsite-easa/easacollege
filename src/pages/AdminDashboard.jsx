@@ -1261,16 +1261,17 @@ const AdminDashboard = () => {
                                             <option value="warning">Warning (Yellow)</option>
                                             <option value="danger">Urgent (Red)</option>
                                         </select>
-                                    </div>
 
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={tickerForm.isActive}
-                                            onChange={e => setTickerForm({ ...tickerForm, isActive: e.target.checked })}
-                                            style={{ width: '20px', height: '20px' }}
-                                        />
-                                        <label>Active</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                            <input
+                                                type="checkbox"
+                                                id="isActiveTicker"
+                                                checked={tickerForm.isActive}
+                                                onChange={e => setTickerForm({ ...tickerForm, isActive: e.target.checked })}
+                                                style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#667eea' }}
+                                            />
+                                            <label htmlFor="isActiveTicker" style={{ color: 'var(--text-main)', cursor: 'pointer' }}>Active</label>
+                                        </div>
                                     </div>
 
                                     <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update' : 'Add'}</button>
