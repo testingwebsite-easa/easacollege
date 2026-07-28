@@ -115,9 +115,13 @@ export const HeroCarousel = ({ onApplyClick }) => {
                     padding: 0 1rem;
                 }
                 .hero-btn-group {
+                    position: absolute;
+                    bottom: 90px;
+                    // right: 100px;
+                    z-index: 30;
                     display: flex;
                     gap: 1.2rem;
-                    justify-content: center;
+                    justify-content: flex-end;
                     flex-wrap: wrap;
                 }
                 .hero-btn {
@@ -181,14 +185,14 @@ export const HeroCarousel = ({ onApplyClick }) => {
                         max-width: 100%;
                     }
                     .hero-btn-group {
+                        bottom: 70px;
+                        right: 20px;
                         gap: 0.8rem;
-                        flex-direction: column;
-                        align-items: center;
                     }
                     .hero-btn {
-                        padding: 0.8rem 2rem !important;
+                        padding: 0.8rem 1.8rem !important;
                         font-size: 0.95rem !important;
-                        width: 100%;
+                        width: auto;
                         max-width: 250px;
                     }
                     .custom-slick-arrow {
@@ -298,32 +302,37 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                     >
                                         {slide.subtitle}
                                     </motion.p>
-
-                                    <motion.div
-                                        variants={itemVariants}
-                                        className="hero-btn-group"
-                                    >
-                                        <button
-                                            className="btn btn-primary hero-btn"
-                                            onClick={onApplyClick}
-                                        >
-                                            Admissions Open
-                                        </button>
-                                        <button
-                                            className="btn hero-btn"
-                                            style={{
-                                                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                                backdropFilter: 'blur(10px)',
-                                                WebkitBackdropFilter: 'blur(10px)',
-                                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                color: 'white'
-                                            }}
-                                        >
-                                            Virtual Tour
-                                        </button>
-                                    </motion.div>
                                 </motion.div>
                             </div>
+
+                            {/* Action Button at Bottom Right */}
+                            <motion.div
+                                variants={itemVariants}
+                                initial="hidden"
+                                animate={index === currentSlide ? "visible" : "hidden"}
+                                className="hero-btn-group"
+                            >
+                                <button
+                                    className="btn btn-primary hero-btn"
+                                    onClick={onApplyClick}
+                                >
+                                    Admissions Open
+                                </button>
+                                {/* 
+                                <button
+                                    className="btn hero-btn"
+                                    style={{
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                        backdropFilter: 'blur(10px)',
+                                        WebkitBackdropFilter: 'blur(10px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        color: 'white'
+                                    }}
+                                >
+                                    Virtual Tour
+                                </button> 
+                                */}
+                            </motion.div>
                         </div>
                     </div>
                 ))}
