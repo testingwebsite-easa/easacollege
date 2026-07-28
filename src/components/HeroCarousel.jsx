@@ -24,20 +24,32 @@ const NextArrow = ({ onClick }) => (
 );
 
 export const HeroCarousel = ({ onApplyClick }) => {
-    const navigate = useNavigate();
     const [heroSlides, setHeroSlides] = useState([]);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [loading, setLoading] = useState(true);
+
+    const defaultSlides = [
+        {
+            title: "EASA College of Engineering and Technology",
+            subtitle: "Empowering Minds, Engineering the Future",
+            image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1920&q=80"
+        }
+    ];
 
     React.useEffect(() => {
         fetch(`${API_BASE_URL}/api/hero-slides`)
             .then(res => res.json())
             .then(data => {
-                setHeroSlides(data);
+                if (Array.isArray(data) && data.length > 0) {
+                    setHeroSlides(data);
+                } else {
+                    setHeroSlides(defaultSlides);
+                }
                 setLoading(false);
             })
             .catch(err => {
                 console.error("Error fetching hero slides:", err);
+                setHeroSlides(defaultSlides);
                 setLoading(false);
             });
     }, []);
@@ -107,17 +119,21 @@ export const HeroCarousel = ({ onApplyClick }) => {
         <div className="hero-carousel" style={{ width: '100%', position: 'relative', overflow: 'hidden' }}>
             <style>{`
                 .hero-content-container {
-                    position: relative;
-                    z-index: 10;
-                    text-align: center;
+                    position: absolute;
+                    bottom: 70px;
+                    left: 80px;
+                    z-index: 20;
+                    text-align: left;
                     color: white;
-                    max-width: 900px;
-                    padding: 0 1rem;
+                    width: calc(100% - 320px);
+                    max-width: 650px;
+                    padding: 0;
                 }
                 .hero-btn-group {
                     position: absolute;
-                    bottom: 90px;
-                    // right: 100px;
+                    bottom: 100px;
+                    right: 520px;
+                    margin: 0 !important;
                     z-index: 30;
                     display: flex;
                     gap: 1.2rem;
@@ -125,8 +141,8 @@ export const HeroCarousel = ({ onApplyClick }) => {
                     flex-wrap: wrap;
                 }
                 .hero-btn {
-                    padding: 1rem 2.5rem;
-                    font-size: 1.1rem;
+                    padding: 0.8rem 2rem;
+                    font-size: 1rem;
                 }
                 
                 /* Custom Arrows */
@@ -161,7 +177,7 @@ export const HeroCarousel = ({ onApplyClick }) => {
 
                 /* Custom Dots Override */
                 .hero-carousel .slick-dots {
-                    bottom: 30px !important;
+                    bottom: 25px !important;
                     z-index: 25;
                 }
                 .hero-carousel .slick-dots li {
@@ -181,17 +197,19 @@ export const HeroCarousel = ({ onApplyClick }) => {
                 /* Mobile Adjustments */
                 @media (max-width: 768px) {
                     .hero-content-container {
-                        width: 90%;
+                        left: 20px;
+                        bottom: 120px;
+                        width: calc(100% - 40px);
                         max-width: 100%;
+                        padding: 0;
                     }
                     .hero-btn-group {
-                        bottom: 70px;
+                        bottom: 60px;
                         right: 20px;
-                        gap: 0.8rem;
                     }
                     .hero-btn {
-                        padding: 0.8rem 1.8rem !important;
-                        font-size: 0.95rem !important;
+                        padding: 0.7rem 1.5rem !important;
+                        font-size: 0.9rem !important;
                         width: auto;
                         max-width: 250px;
                     }
@@ -255,7 +273,6 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                 alt={slide.title}
                                 className="hero-bg-image"
                                 style={{
-                                    filter: 'brightness(0.35)', // Slightly darker for text pop
                                     transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)', // Subtle zoom effect on active
                                     transition: 'transform 6s ease' // Long zoom over time
                                 }}
@@ -266,7 +283,8 @@ export const HeroCarousel = ({ onApplyClick }) => {
                             />
 
                             {/* Content Overlay */}
-                            <div className="container hero-content-container">
+                            <div className="hero-content-container">
+                                {/* Smaller Left-Aligned Title & Subtitle */}
                                 <motion.div
                                     variants={containerVariants}
                                     initial="hidden"
@@ -276,12 +294,12 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                         variants={itemVariants}
                                         className="hero-title"
                                         style={{
-                                            fontSize: 'clamp(2rem, 5vw, 4.5rem)', // Adjusted min size
-                                            fontWeight: '800',
-                                            marginBottom: '1rem',
-                                            textShadow: '0 4px 10px rgba(0,0,0,0.5)',
-                                            lineHeight: 1.1,
-                                            letterSpacing: '-1px'
+                                            fontSize: 'clamp(1.2rem, 2.5vw, 2.2rem)',
+                                            fontWeight: '700',
+                                            marginBottom: '0.5rem',
+                                            textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.6)',
+                                            lineHeight: 1.2,
+                                            letterSpacing: '-0.5px'
                                         }}
                                     >
                                         {slide.title}
@@ -291,13 +309,14 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                         variants={itemVariants}
                                         className="hero-subtitle"
                                         style={{
-                                            fontSize: 'clamp(1rem, 2vw, 1.35rem)',
-                                            marginBottom: '2.5rem',
-                                            opacity: 0.9,
-                                            maxWidth: '700px',
-                                            marginLeft: 'auto',
+                                            fontSize: 'clamp(0.85rem, 1.2vw, 1.05rem)',
+                                            marginBottom: '0',
+                                            opacity: 1,
+                                            maxWidth: '650px',
+                                            marginLeft: '0',
                                             marginRight: 'auto',
-                                            fontWeight: 300
+                                            fontWeight: 400,
+                                            textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5)'
                                         }}
                                     >
                                         {slide.subtitle}
@@ -305,7 +324,7 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                 </motion.div>
                             </div>
 
-                            {/* Action Button at Bottom Right */}
+                            {/* Admissions Button at Right 200px */}
                             <motion.div
                                 variants={itemVariants}
                                 initial="hidden"
@@ -318,20 +337,6 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                 >
                                     Admissions Open
                                 </button>
-                                {/* 
-                                <button
-                                    className="btn hero-btn"
-                                    style={{
-                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                        backdropFilter: 'blur(10px)',
-                                        WebkitBackdropFilter: 'blur(10px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        color: 'white'
-                                    }}
-                                >
-                                    Virtual Tour
-                                </button> 
-                                */}
                             </motion.div>
                         </div>
                     </div>
