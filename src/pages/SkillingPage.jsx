@@ -5,8 +5,8 @@ import {
     FaChartPie, FaIdBadge, FaCogs, FaQuoteLeft, FaImages, FaDownload,
     FaPhone, FaEnvelope, FaMapMarkerAlt, FaUserTie,
     FaCheckCircle, FaStar, FaGlobe, FaRocket, FaFileAlt, FaCalendarCheck,
-    FaChevronRight,
-    FaCertificate, FaLaptopCode, FaTools, FaLightbulb
+    FaChevronRight, FaCertificate, FaLaptopCode, FaTools, FaLightbulb,
+    FaMicrochip, FaCode, FaCloud, FaRobot, FaBrain, FaBuilding, FaCheckDouble
 } from 'react-icons/fa';
 import * as FaIcons from 'react-icons/fa';
 import Navbar from '../components/Navbar';
@@ -19,52 +19,106 @@ import API_BASE_URL from '../api';
 const skillingData = {
     name: "Center for Skilling & Development",
     heroImage: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=2070&ixlib=rb-4.0.3",
-    vision: "To empower students with cutting-edge industry skills and vocational training, bridging the gap between academic knowledge and industrial application.",
+    vision: "To empower students with cutting-edge industry skills, vocational training, and global certifications, bridging the gap between academic knowledge and industrial application.",
     mission: [
-        "To provide hands-on training in emerging technologies and industrial tools.",
-        "To offer value-added courses and certifications from global leaders.",
-        "To enhance employability through soft skills and personality development.",
-        "To foster a culture of lifelong learning and professional excellence."
+        "To provide hands-on training in emerging technologies, coding, and industrial automation tools.",
+        "To offer value-added courses and internationally recognized certifications from global leaders.",
+        "To enhance employability through communication skills, aptitude, and professional etiquette.",
+        "To foster a culture of innovation, lifelong learning, and professional excellence."
     ],
-    overview: `The Center for Skilling & Development at EASA College is a dedicated hub for nurturing the professional capabilities of our students. We go beyond the curriculum to offer a wide range of value-added courses, vocational training, and industry-recognized certifications. Our programs are designed in collaboration with industry partners to ensure relevance and practicality. From technical skills like coding, robotics, and automation to essential soft skills, we ensure our students are future-ready and capable of adapting to the dynamic demands of the global workforce.`,
+    overviewParagraphs: [
+        "The Center for Skilling & Development at EASA College of Engineering and Technology is a dedicated hub for nurturing the technical and professional capabilities of our students. We go beyond the conventional university curriculum to offer a comprehensive range of value-added courses, vocational training, and industry-recognized certifications.",
+        "Our programmes are developed in active collaboration with leading industrial partners to ensure direct relevance to current technological trends. From core technical skills like Full Stack Development, Data Science, AI, Robotics, and IoT to essential soft skills and aptitude training, we prepare our students to become confident, industry-ready professionals.",
+        "Through practical hands-on laboratories, real-world mini projects, expert guest lectures, and continuous mentoring, the Skilling Center equips students to adapt seamlessly to the dynamic demands of the global corporate landscape."
+    ],
     stats: [
-        { label: "Students Trained", value: "2000+", icon: <FaUserTie /> },
-        { label: "Courses Offered", value: "30+", icon: <FaChalkboardTeacher /> },
-        { label: "Certifications Issued", value: "1500+", icon: <FaCertificate /> },
-        { label: "Training Partners", value: "25+", icon: <FaHandshake /> },
-        { label: "Placement Support", value: "100%", icon: <FaCheckCircle /> }
+        { label: "Students Trained", value: "2500+", icon: <FaUserTie /> },
+        { label: "Skill Courses Offered", value: "35+", icon: <FaChalkboardTeacher /> },
+        { label: "Certifications Issued", value: "1800+", icon: <FaCertificate /> },
+        { label: "Training Partners & MoUs", value: "30+", icon: <FaHandshake /> },
+        { label: "Practical Exposure", value: "100%", icon: <FaCheckCircle /> }
     ],
     partners: [
-        "AWS", "Google Cloud", "Microsoft", "Cisco", "Oracle", "Red Hat", "Salesforce", "IBM",
-        "Siemens", "Bosch", "Texas Instruments", "National Instruments", "Autodesk", "Unity"
+        { name: "AWS Academy", category: "Cloud Computing" },
+        { name: "Google Cloud", category: "Cloud & Data" },
+        { name: "Microsoft", category: "Software & Cloud" },
+        { name: "Cisco Networking Academy", category: "Networking & Security" },
+        { name: "Oracle Academy", category: "Database & Java" },
+        { name: "Red Hat", category: "Linux & DevOps" },
+        { name: "Salesforce", category: "CRM & Cloud" },
+        { name: "IBM SkillsBuild", category: "AI & Emerging Tech" },
+        { name: "Siemens", category: "Industrial Automation" },
+        { name: "Bosch", category: "Automotive & Electronics" },
+        { name: "Texas Instruments", category: "Embedded Systems" },
+        { name: "National Instruments", category: "LabVIEW & Testing" },
+        { name: "Autodesk", category: "CAD / CAM Design" },
+        { name: "Unity", category: "AR/VR & Game Dev" },
+        { name: "Festo", category: "Pneumatics & Automation" }
     ],
     trainingPrograms: [
-        { title: "Full Stack Development", desc: "Comprehensive training in MERN stack, covering frontend and backend technologies.", icon: "FaLaptopCode" },
-        { title: "Data Science & AI", desc: "Practical sessions on Python, Machine Learning algorithms, and Data Analytics.", icon: "FaBrain" },
-        { title: "IoT & Robotics", desc: "Hands-on workshops on Arduino, Raspberry Pi, and industrial automation systems.", icon: "FaRobot" },
-        { title: "CAD/CAM/CAE", desc: "Advanced training in design and analysis software like AutoCAD, SolidWorks, and ANSYS.", icon: "FaTools" },
-        { title: "Communication Skills", desc: "Intensive training to enhance verbal and written communication for the corporate world.", icon: "FaComments" },
-        { title: "Cloud Computing", desc: "Certification courses on AWS, Azure, and Google Cloud platforms.", icon: "FaCloud" }
+        {
+            title: "Full Stack Development & Web Tech",
+            subtitle: "Frontend, Backend & Database Architecture",
+            desc: "Comprehensive hands-on training in modern MERN stack (MongoDB, Express, React, Node.js), HTML5, CSS3, JavaScript (ES6+), and Version Control (Git/GitHub).",
+            icon: <FaLaptopCode />,
+            skills: ["React.js", "Node.js & Express", "MongoDB & SQL", "RESTful APIs", "Git & GitHub"]
+        },
+        {
+            title: "Data Science, AI & Machine Learning",
+            subtitle: "Data Analytics, Python & Predictive Modeling",
+            desc: "Practical modules covering Python programming, Pandas, NumPy, Scikit-Learn, data visualization, machine learning models, and introductory Deep Learning.",
+            icon: <FaBrain />,
+            skills: ["Python Programming", "Data Visualization", "Supervised/Unsupervised ML", "Neural Networks", "Data Wrangling"]
+        },
+        {
+            title: "Embedded Systems & IoT Training",
+            subtitle: "Smart Hardware, Sensors & Microcontrollers",
+            desc: "Specialized training in Embedded C programming, Microcontrollers (8051, PIC, ARM), Arduino, Raspberry Pi, sensor integration, and cloud-based IoT solutions.",
+            icon: <FaMicrochip />,
+            skills: ["Embedded C", "Arduino & Raspberry Pi", "Sensor Interfacing", "Wireless Protocols (MQTT/BLE)", "IoT Cloud Integration"]
+        },
+        {
+            title: "CAD / CAM / CAE Design & Modeling",
+            subtitle: "Computer-Aided Engineering & 3D Modeling",
+            desc: "Advanced mechanical design and simulation training using AutoCAD, SolidWorks, ANSYS, and Creo for product design, stress analysis, and manufacturing workflows.",
+            icon: <FaTools />,
+            skills: ["2D Drafting (AutoCAD)", "3D Parametric Modeling", "FEA Analysis (ANSYS)", "SolidWorks", "Product Lifecycle Management"]
+        },
+        {
+            title: "Communication & Soft Skills Training",
+            subtitle: "Professional Etiquette & Corporate Readiness",
+            desc: "Intensive modules focused on verbal and written communication, public speaking, group discussions, business correspondence, interview preparation, and teamwork.",
+            icon: <FaUserTie />,
+            skills: ["Verbal & Written English", "Presentation Skills", "Group Discussion Techniques", "HR Mock Interviews", "Workplace Ethics"]
+        },
+        {
+            title: "Cloud Computing & Cyber Security",
+            subtitle: "AWS, Azure & Network Security Fundamentals",
+            desc: "Fundamentals of cloud architecture, virtualization, AWS services (EC2, S3, IAM), network security protocols, ethical hacking concepts, and threat analysis.",
+            icon: <FaCloud />,
+            skills: ["AWS Cloud Architecture", "Virtualization & Containers", "Network Security Protocols", "Identity Management", "Cyber Hygiene"]
+        }
     ],
     certifications: [
-        { title: "CCNA Networking", provider: "Cisco", duration: "3 Months", level: "Intermediate" },
-        { title: "AWS Certified Practitioner", provider: "AWS", duration: "2 Months", level: "Beginner" },
-        { title: "Java SE 8 Programmer", provider: "Oracle", duration: "4 Months", level: "Advanced" },
-        { title: "AutoCAD Certified User", provider: "Autodesk", duration: "2 Months", level: "Beginner" },
-        { title: "Google Data Analytics", provider: "Google", duration: "6 Months", level: "Beginner" }
+        { title: "AWS Certified Solutions Architect / Practitioner", provider: "AWS Academy", duration: "2–3 Months", level: "Beginner – Intermediate" },
+        { title: "CCNA Network Associate", provider: "Cisco Networking Academy", duration: "3 Months", level: "Intermediate" },
+        { title: "Java SE & Database Certified Specialist", provider: "Oracle Academy", duration: "3 Months", level: "Intermediate – Advanced" },
+        { title: "AutoCAD & SolidWorks Certified Professional", provider: "Autodesk / Dassault Systems", duration: "2 Months", level: "Beginner – Intermediate" },
+        { title: "Google Data Analytics Professional", provider: "Google", duration: "4 Months", level: "Beginner – Intermediate" },
+        { title: "Embedded Systems & IoT Specialist", provider: "Texas Instruments / EASA Center", duration: "3 Months", level: "Intermediate" }
     ],
     process: [
-        { step: 1, title: "Needs Analysis", desc: "Identifying skill gaps and industry requirements." },
-        { step: 2, title: "Course Selection", desc: "Students choose relevant value-added courses." },
-        { step: 3, title: "Training Delivery", desc: "Expert-led sessions with practical exposure." },
-        { step: 4, title: "Assessment", desc: "Evaluate learning through projects and tests." },
-        { step: 5, title: "Certification", desc: "Awarding certificates upon successful completion." },
-        { step: 6, title: "Career Support", desc: "Connecting skilled students with opportunities." }
+        { step: 1, title: "Skill Needs Analysis & Registration", desc: "Diagnostic evaluation to identify individual skill gaps and career aspirational paths." },
+        { step: 2, title: "Course Selection & Enrollment", desc: "Students select relevant value-added courses aligned with industry demands." },
+        { step: 3, title: "Hands-on Training & Project Labs", desc: "Expert-led practical sessions, lab workshops, and mini project building." },
+        { step: 4, title: "Assessment & Capstone Project", desc: "Evaluating learning outcomes through practical coding tests, quizzes, and live capstones." },
+        { step: 5, title: "Certification & Badge Awarding", desc: "Earning globally recognized certifications and verified digital badges upon completion." },
+        { step: 6, title: "Placement & Internship Integration", desc: "Connecting certified students directly with campus recruitment drives and internship slots." }
     ],
     testimonials: [
-        { name: "Sneha R.", branch: "CSE", course: "Full Stack Dev", text: "The full stack course gave me the confidence to build my own projects. The hands-on approach was excellent." },
-        { name: "Karthik M.", branch: "Mech", course: "AutoCAD", text: "Learning AutoCAD through the skilling center helped me secure a design internship. Highly recommended!" },
-        { name: "Anjali P.", branch: "ECE", course: "IoT", text: "The IoT workshop was an eye-opener. We worked with real sensors and built a smart home prototype." }
+        { name: "Sneha R.", branch: "CSE", course: "Full Stack Development", text: "The Full Stack Web Development course at EASA Skilling Center gave me complete confidence to build real projects. The hands-on coding approach directly helped me crack my campus interview." },
+        { name: "Karthik M.", branch: "Mechanical", course: "AutoCAD & SolidWorks", text: "Learning parametric 3D modeling and ANSYS at the skilling center enabled me to secure a core design internship. The trainers were extremely supportive." },
+        { name: "Anjali P.", branch: "ECE", course: "IoT & Embedded Systems", text: "The IoT workshop was a fantastic experience. Working with microcontrollers, sensors, and cloud dashboards prepared me thoroughly for core electronics roles." }
     ],
     gallery: [
         "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1000",
@@ -73,15 +127,16 @@ const skillingData = {
         "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1000"
     ],
     downloads: [
-        { title: "Skill Development Brochure", size: "3.5 MB", type: "PDF" },
-        { title: "Course Catalog 2025", size: "2.1 MB", type: "PDF" },
-        { title: "Certification Guidelines", size: "1.2 MB", type: "PDF" }
+        { title: "Skill Development Brochure 2025-26", size: "3.5 MB", fileType: "PDF" },
+        { title: "Value-Added Course Catalog", size: "2.1 MB", fileType: "PDF" },
+        { title: "Certification Guidelines & Policies", size: "1.2 MB", fileType: "PDF" },
+        { title: "Student Skill Registration Form", size: "650 KB", fileType: "DOCX" }
     ],
     contact: {
-        name: "Dr. Skill Coordinator",
-        designation: "Head - Skilling & Development",
+        name: "Head - Skilling & Development",
+        designation: "Center for Skilling & Professional Development",
         email: "skilling@easacollege.com",
-        phone: "+91 98765 43211",
+        phone: "+91 93426 28013",
         address: "Skill Center, Tech Block, EASA College of Engineering & Technology, Coimbatore."
     }
 };
@@ -93,22 +148,19 @@ const SkillingPage = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        // Optional: Fetch data from API if needed in future
-        // const fetchData = async () => { ... };
-        // fetchData();
     }, []);
 
     const sections = [
         { id: 'overview', label: 'Overview', icon: <FaBriefcase /> },
         { id: 'statistics', label: 'Key Metrics', icon: <FaChartLine /> },
-        { id: 'partners', label: 'Skill Partners', icon: <FaHandshake /> },
         { id: 'programs', label: 'Training Programs', icon: <FaChalkboardTeacher /> },
+        { id: 'partners', label: 'Skill Partners', icon: <FaHandshake /> },
         { id: 'certifications', label: 'Certifications', icon: <FaCertificate /> },
         { id: 'process', label: 'Process Flow', icon: <FaCogs /> },
         { id: 'testimonials', label: 'Student Stories', icon: <FaQuoteLeft /> },
         { id: 'gallery', label: 'Gallery', icon: <FaImages /> },
         { id: 'downloads', label: 'Downloads', icon: <FaDownload /> },
-        { id: 'contact', label: 'Contact', icon: <FaPhone /> }
+        { id: 'contact', label: 'Contact Us', icon: <FaPhone /> }
     ];
 
     const renderContent = () => {
@@ -121,11 +173,18 @@ const SkillingPage = () => {
                     exit={{ opacity: 0, scale: 0.98 }}
                     transition={{ duration: 0.3 }}
                 >
+                    {/* 1. Overview */}
                     {activeSection === 'overview' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                             <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Overview</h2>
                             <div className="overview-hero">
-                                <p style={{ fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--text-muted)', marginBottom: '3rem' }}>{data.overview}</p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '3rem' }}>
+                                    {data.overviewParagraphs.map((para, idx) => (
+                                        <p key={idx} style={{ fontSize: '1.15rem', lineHeight: '1.8', color: 'var(--text-muted)' }}>
+                                            {para}
+                                        </p>
+                                    ))}
+                                </div>
 
                                 <div className="vision-mission-grid">
                                     <div className="card-box" style={{ textAlign: 'center' }}>
@@ -150,9 +209,10 @@ const SkillingPage = () => {
                         </div>
                     )}
 
+                    {/* 2. Key Metrics */}
                     {activeSection === 'statistics' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Key Metrics</h2>
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Key Metrics & Highlights</h2>
                             <div className="stats-grid">
                                 {data.stats.map((stat, idx) => (
                                     <div key={idx} className="stat-card">
@@ -167,18 +227,84 @@ const SkillingPage = () => {
                         </div>
                     )}
 
+                    {/* 3. Training Programs */}
+                    {activeSection === 'programs' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                            <div>
+                                <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '0.8rem' }}>Training Programs & Skill Courses</h2>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                                    Comprehensive hands-on training modules designed by industry experts to equip students with practical competencies.
+                                </p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                {data.trainingPrograms.map((prog, idx) => (
+                                    <div key={idx} className="card-box" style={{ background: 'var(--bg-card)', padding: '2.5rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1.2rem' }}>
+                                            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--glass-highlight)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)', fontSize: '1.8rem', flexShrink: 0 }}>
+                                                {prog.icon}
+                                            </div>
+                                            <div>
+                                                <h3 style={{ color: 'var(--text-main)', fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.2rem' }}>{prog.title}</h3>
+                                                <div style={{ color: 'var(--secondary)', fontSize: '0.92rem', fontWeight: '700' }}>{prog.subtitle}</div>
+                                            </div>
+                                        </div>
+
+                                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.7', fontSize: '1.05rem', marginBottom: '1.5rem' }}>
+                                            {prog.desc}
+                                        </p>
+
+                                        {prog.skills && (
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem' }}>
+                                                {prog.skills.map((skill, sIdx) => (
+                                                    <span key={sIdx} style={{ background: 'var(--bg-section)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', padding: '0.4rem 1rem', borderRadius: '50px', fontSize: '0.88rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <FaCheckCircle style={{ color: 'var(--secondary)' }} />
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 4. Skill Partners */}
                     {activeSection === 'partners' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Our Skill Partners</h2>
+                            <div>
+                                <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '0.8rem' }}>Our Industry Skill Partners</h2>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                                    Collaborating with leading global corporations and academies to deliver certified, industry-aligned training.
+                                </p>
+                            </div>
+
                             <div className="overview-hero">
-                                <div className="partners-grid">
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem' }}>
                                     {data.partners.map((partner, idx) => (
                                         <motion.div
                                             key={idx}
-                                            whileHover={{ scale: 1.05 }}
-                                            style={{ background: 'var(--bg-section)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', padding: '15px', border: '1px solid var(--glass-border)' }}
+                                            whileHover={{ y: -4, scale: 1.02 }}
+                                            style={{
+                                                background: 'var(--bg-section)',
+                                                borderRadius: '20px',
+                                                padding: '1.5rem',
+                                                border: '1px solid var(--glass-border)',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                textAlign: 'center',
+                                                minHeight: '120px'
+                                            }}
                                         >
-                                            <span style={{ color: 'var(--text-main)', fontWeight: '800', textAlign: 'center' }}>{partner}</span>
+                                            <span style={{ color: 'var(--text-main)', fontWeight: '800', fontSize: '1.1rem', marginBottom: '0.4rem' }}>
+                                                {partner.name}
+                                            </span>
+                                            <span style={{ color: 'var(--secondary)', fontSize: '0.82rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                                {partner.category}
+                                            </span>
                                         </motion.div>
                                     ))}
                                 </div>
@@ -186,34 +312,22 @@ const SkillingPage = () => {
                         </div>
                     )}
 
-                    {activeSection === 'programs' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Training Programs</h2>
-                            <div className="training-grid">
-                                {data.trainingPrograms.map((prog, idx) => (
-                                    <div key={idx} className="card-box" style={{ background: 'var(--bg-card)', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-                                        <div style={{ minWidth: '64px', height: '64px', background: 'var(--glass-highlight)', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)', fontSize: '1.8rem', border: '1px solid var(--glass-border)' }}>
-                                            <FaChalkboardTeacher />
-                                        </div>
-                                        <div>
-                                            <h3 style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: '800', marginBottom: '0.8rem' }}>{prog.title}</h3>
-                                            <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>{prog.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
+                    {/* 5. Certifications */}
                     {activeSection === 'certifications' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Certifications</h2>
+                            <div>
+                                <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '0.8rem' }}>Global & Industry Certifications</h2>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                                    Earn internationally recognized credentials to validate technical expertise and stand out during campus recruitment.
+                                </p>
+                            </div>
+
                             <div className="training-grid">
                                 {data.certifications.map((cert, idx) => (
                                     <div key={idx} className="card-box" style={{ background: 'var(--bg-card)', borderLeft: '6px solid var(--secondary)' }}>
                                         <h3 style={{ fontSize: '1.4rem', color: 'var(--text-main)', fontWeight: '800', marginBottom: '0.5rem' }}>{cert.title}</h3>
                                         <div style={{ color: 'var(--secondary)', fontWeight: '800', fontSize: '1.1rem', marginBottom: '1.5rem' }}>{cert.provider}</div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '600', flexWrap: 'wrap', gap: '10px' }}>
                                             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FaCheckCircle /> {cert.level}</span>
                                             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><FaCalendarCheck /> {cert.duration}</span>
                                         </div>
@@ -223,9 +337,10 @@ const SkillingPage = () => {
                         </div>
                     )}
 
+                    {/* 6. Process Flow */}
                     {activeSection === 'process' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Skilling Process</h2>
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Skilling & Development Process</h2>
                             <div className="overview-hero">
                                 <div style={{ position: 'relative', paddingLeft: '3rem' }}>
                                     <div style={{ position: 'absolute', left: '11px', top: '10px', bottom: '10px', width: '2px', background: 'var(--glass-border)' }}></div>
@@ -244,9 +359,10 @@ const SkillingPage = () => {
                         </div>
                     )}
 
+                    {/* 7. Student Testimonials */}
                     {activeSection === 'testimonials' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Student Stories</h2>
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Student Stories & Impact</h2>
                             <div className="training-grid">
                                 {data.testimonials.map((testim, idx) => (
                                     <div key={idx} className="card-box" style={{ background: 'var(--bg-card)', position: 'relative' }}>
@@ -265,9 +381,10 @@ const SkillingPage = () => {
                         </div>
                     )}
 
+                    {/* 8. Gallery */}
                     {activeSection === 'gallery' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Gallery</h2>
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Skilling & Workshop Gallery</h2>
                             <div className="training-grid">
                                 {data.gallery.map((img, idx) => (
                                     <div key={idx} style={{ background: 'var(--bg-card)', padding: '0.8rem', borderRadius: '24px', border: '1px solid var(--glass-border)', overflow: 'hidden' }}>
@@ -278,9 +395,10 @@ const SkillingPage = () => {
                         </div>
                     )}
 
+                    {/* 9. Downloads */}
                     {activeSection === 'downloads' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Downloads</h2>
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Resources & Downloads</h2>
                             <div className="downloads-grid">
                                 {data.downloads.map((file, idx) => (
                                     <div key={idx} style={{ background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '24px', padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -288,7 +406,7 @@ const SkillingPage = () => {
                                             <div style={{ fontSize: '2.5rem', color: 'var(--secondary)' }}><FaFileAlt /></div>
                                             <div>
                                                 <h4 style={{ color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '800', marginBottom: '0.3rem' }}>{file.title}</h4>
-                                                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600' }}>{file.type} • {file.size}</div>
+                                                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600' }}>{file.fileType || 'PDF'} • {file.size}</div>
                                             </div>
                                         </div>
                                         <a
@@ -305,16 +423,17 @@ const SkillingPage = () => {
                         </div>
                     )}
 
+                    {/* 10. Contact */}
                     {activeSection === 'contact' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Contact Us</h2>
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)' }}>Contact Skilling Center</h2>
                             <div className="overview-hero contact-grid">
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ width: '220px', height: '220px', borderRadius: '50%', background: 'var(--glass-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '6px solid var(--glass-border)', margin: '0 auto', overflow: 'hidden' }}>
                                         <FaUserTie style={{ fontSize: '6rem', color: 'var(--secondary)' }} />
                                     </div>
-                                    <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-main)', marginTop: '2rem' }}>{data.contact.name}</h3>
-                                    <div style={{ fontSize: '1.1rem', color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '0.5rem' }}>{data.contact.designation}</div>
+                                    <h3 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text-main)', marginTop: '2rem' }}>{data.contact.name}</h3>
+                                    <div style={{ fontSize: '1rem', color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '0.5rem' }}>{data.contact.designation}</div>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
@@ -349,34 +468,34 @@ const SkillingPage = () => {
 
     return (
         <div style={{ background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)', position: 'relative' }}>
-            <SEO title="Skilling & Development | EASA College" description="Center for Skilling & Development at EASA College - Empowering students with industry-ready skills." />
+            <SEO title="Skilling & Development | EASA College" description="Center for Skilling & Development at EASA College - Empowering students with industry-ready skills, certifications, and hands-on technical training." />
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
 
             <GlobalHero
                 pageKey="skilling"
                 defaultTitle={data.name}
-                defaultSubtitle="Empowering Minds with Industry-Ready Skills"
+                defaultSubtitle="Empowering Minds with Industry-Ready Skills & Certifications"
                 defaultImage={data.heroImage}
             />
 
             <div className="skilling-container">
                 <aside style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
                     <div style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--glass-border)', padding: '1.5rem', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1.5rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)' }}>Menu Navigation</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1.5rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)' }}>Skilling Navigation</div>
                         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                             {sections.map((section) => (
                                 <button
                                     key={section.id}
                                     onClick={() => setActiveSection(section.id)}
                                     style={{
-                                        textAlign: 'left', padding: '1rem 1.2rem', borderRadius: '12px',
+                                        textAlign: 'left', padding: '0.9rem 1.1rem', borderRadius: '12px',
                                         background: activeSection === section.id ? 'var(--secondary)' : 'transparent',
                                         border: 'none', color: activeSection === section.id ? 'var(--bg-dark)' : 'var(--text-muted)',
-                                        cursor: 'pointer', fontSize: '0.95rem', fontWeight: '700', transition: 'all 0.3s ease',
+                                        cursor: 'pointer', fontSize: '0.92rem', fontWeight: '700', transition: 'all 0.3s ease',
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                     }}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
                                         {section.icon}
                                         <span>{section.label}</span>
                                     </div>
@@ -424,9 +543,9 @@ const SkillingPage = () => {
                         border-radius: 0 !important; 
                         margin: 0 !important;
                         width: 100vw !important;
-                        margin-left: -1.5rem !important; /* Counteract container padding */
+                        margin-left: -1.5rem !important;
                         padding: 0.8rem 1rem !important;
-                        background: rgba(15, 23, 42, 0.95) !important; /* Darker, more solid background */
+                        background: rgba(15, 23, 42, 0.95) !important;
                         backdrop-filter: blur(16px);
                         border-bottom: 1px solid var(--glass-border);
                         border-top: 1px solid var(--glass-border);
@@ -450,7 +569,7 @@ const SkillingPage = () => {
                     nav::-webkit-scrollbar { display: none; }
                     button { 
                         white-space: nowrap !important; 
-                        background: transparent !important; /* Clean look */
+                        background: transparent !important;
                         border: 1px solid var(--glass-border) !important;
                         color: var(--text-muted) !important; 
                         padding: 0.5rem 1rem !important; 
@@ -459,49 +578,35 @@ const SkillingPage = () => {
                         flex-shrink: 0;
                         transition: all 0.2s ease;
                     }
-                    button[style*="var(--secondary)"] { /* Active State Override */
+                    button[style*="var(--secondary)"] {
                          background: var(--secondary) !important;
                          color: var(--bg-dark) !important;
                          border-color: var(--secondary) !important;
                          font-weight: 700 !important;
                     }
                     
-                    /* Hide non-essential elements in mobile nav to save space */
-                    aside > div > div:first-child { display: none; } /* Hide "Menu Navigation" title */
-                    aside > div > div:last-child { display: none; } /* Hide social icons */
+                    aside > div > div:first-child { display: none; }
 
                     main { width: 100%; box-sizing: border-box; }
-                    /* Collapse grids */
                     .vision-mission-grid, .training-grid, .downloads-grid { grid-template-columns: 1fr; }
                     .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
-                    .partners-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 1rem; }
                     .overview-hero { padding: 2rem; }
                 }
 
                 @media (max-width: 480px) {
                     .skilling-container { padding: 0.5rem 0; width: 100vw; max-width: 100vw; }
-                     aside > div { 
-                        margin-left: -0.5rem !important; /* Adjusted for smaller padding */
-                     }
-                    .overview-hero { padding: 0.7rem; border-radius: 12px; }
+                    aside > div { 
+                        margin-left: -0.5rem !important;
+                    }
+                    .overview-hero { padding: 1.2rem; border-radius: 16px; }
                     .card-box, .stat-card { padding: 1.5rem; }
                     h2 { font-size: 2rem !important; }
-                    /* Adjust contact circle size */
                     .contact-grid > div:first-child > div:first-child { width: 160px !important; height: 160px !important; }
                     .contact-grid > div:first-child > div:first-child svg { font-size: 4rem !important; }
                 }
 
-                /* Make images responsive */
                 img { max-width: 100%; height: auto; display: block; }
-
-                /* Prevent card overflow */
                 .card-box, .stat-card { min-width: 0; word-break: break-word; }
-
-                /* Horizontal scroll for stats on very small screens */
-                @media (max-width: 600px) {
-                    .stats-grid { flex-wrap: nowrap; overflow-x: auto; gap: 1rem; }
-                    .stat-card { min-width: 220px; max-width: 260px; flex: 0 0 220px; }
-                }
 
                 .card-box {
                     padding: 2.5rem;
@@ -521,18 +626,14 @@ const SkillingPage = () => {
                 }
 
                 .stats-grid {
-                    display: flex;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
                     gap: 2rem;
-                    flex-wrap: wrap;
-                    justify-content: center;
                     width: 100%;
                     box-sizing: border-box;
-                    overflow-x: auto;
                 }
 
                 .stat-card {
-                    flex: 1 1 300px;
-                    max-width: 350px;
                     background: var(--bg-card);
                     border: 1px solid var(--glass-border);
                     border-radius: 24px;
@@ -541,13 +642,6 @@ const SkillingPage = () => {
                     transition: all 0.3s ease;
                     min-width: 0;
                     box-sizing: border-box;
-                }
-
-                .partners-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-                    gap: 1.5rem;
-                    width: 100%;
                 }
 
                 .training-grid {
