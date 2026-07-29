@@ -10,9 +10,10 @@ const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
     const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
     return (
-        <div style={{
+        <div className="page-hero" style={{
             position: 'relative',
-            height: '100vh', // Full screen height
+            minHeight: 'calc(100vh - 160px)',
+            height: 'calc(100vh - 160px)',
             width: '100%',
             display: 'flex',
             alignItems: 'center',
@@ -27,7 +28,7 @@ const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
                 left: 0,
                 width: '100%',
                 height: '100%',
-                backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7)), url(${backgroundImage})`,
+                backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.75)), url(${backgroundImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundAttachment: 'fixed',
@@ -55,9 +56,13 @@ const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
                     position: 'relative', 
                     zIndex: 1, 
                     textAlign: 'center', 
-                    padding: '180px 2rem 5rem 2rem', 
+                    padding: '2rem 1.5rem', 
                     width: '100%', 
-                    maxWidth: '1200px', 
+                    maxWidth: '1200px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     y: y1, 
                     opacity 
                 }}
@@ -66,16 +71,16 @@ const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8 }}
-                    style={{ marginBottom: '1.5rem' }}
+                    style={{ marginBottom: '0.8rem' }}
                 >
                     <span style={{
-                        padding: '0.6rem 0',
-                        color: '#F8D53D', // Yellow color as seen in screenshot
-                        fontSize: '1rem',
+                        padding: '0.4rem 0',
+                        color: '#F8D53D',
+                        fontSize: '0.95rem',
                         fontWeight: '800',
                         letterSpacing: '2px',
                         textTransform: 'uppercase',
-                        display: 'block' // Ensure it behaves like a block to allow potential wrapping if needed, but centering comes from parent
+                        display: 'block'
                     }}>
                         EASA College of Engineering And Technology
                     </span>
@@ -87,11 +92,11 @@ const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
                     style={{
-                        fontSize: 'clamp(3rem, 5vw, 4.5rem)',
+                        fontSize: 'clamp(2.5rem, 4.5vw, 4rem)',
                         fontWeight: '900',
-                        lineHeight: '1.1',
-                        marginBottom: '1.5rem',
-                        letterSpacing: '-2px',
+                        lineHeight: '1.15',
+                        marginBottom: '1rem',
+                        letterSpacing: '-1.5px',
                         textShadow: '0 4px 10px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.5)'
                     }}
                 >
@@ -105,8 +110,8 @@ const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
                         transition={{ duration: 0.8, delay: 0.4 }}
                         style={{
                             color: 'var(--text-muted)',
-                            fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
-                            maxWidth: '700px',
+                            fontSize: 'clamp(1rem, 1.4vw, 1.25rem)',
+                            maxWidth: '750px',
                             margin: '0 auto',
                             fontWeight: '300',
                             lineHeight: '1.6'
