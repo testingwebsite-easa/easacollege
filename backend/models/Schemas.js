@@ -18,7 +18,11 @@ NewsEventSchema.index({ category: 1 });
 const HeroSlideSchema = new mongoose.Schema({
     image: String,
     title: String,
-    subtitle: String
+    subtitle: String,
+    titleColor: { type: String, default: '#ffffff' },
+    subtitleColor: { type: String, default: '#ffffff' },
+    buttonBgColor: { type: String, default: '#1B2A6B' },
+    buttonTextColor: { type: String, default: '#ffffff' }
 });
 
 const GalleryEventSchema = new mongoose.Schema({

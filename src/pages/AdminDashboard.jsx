@@ -269,7 +269,7 @@ const AdminDashboard = () => {
 
     // Forms State
     const [sessionForm, setSessionForm] = useState({ title: '', startDate: '', endDate: '', status: 'Upcoming', description: '' });
-    const [heroForm, setHeroForm] = useState({ image: '', title: '', subtitle: '' });
+    const [heroForm, setHeroForm] = useState({ image: '', title: '', subtitle: '', titleColor: '#ffffff', subtitleColor: '#ffffff', buttonBgColor: '#1B2A6B', buttonTextColor: '#ffffff' });
     const [programForm, setProgramForm] = useState({ title: '', subtitle: '', description: '', image: '', color: '' });
     const [newsForm, setNewsForm] = useState({ image: '', title: '', date: '', category: '', desc: '', pdf_url: '' });
     const [placementForm, setPlacementForm] = useState({ name: '', logo: '', row: 1 });
@@ -671,20 +671,45 @@ const AdminDashboard = () => {
     const renderInput = (label, name, value, onChange, type = "text", required = true) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{label}</label>
-            <input
-                type={type}
-                value={value}
-                onChange={onChange}
-                required={required}
-                style={{
-                    padding: '0.8rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--glass-border)',
-                    background: 'var(--bg-section)',
-                    color: 'var(--text-main)',
-                    outline: 'none'
-                }}
-            />
+            {type === 'color' ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <input
+                        type="color"
+                        value={value || '#ffffff'}
+                        onChange={onChange}
+                        style={{ width: '45px', height: '40px', border: 'none', borderRadius: '6px', cursor: 'pointer', background: 'transparent' }}
+                    />
+                    <input
+                        type="text"
+                        value={value || '#ffffff'}
+                        onChange={onChange}
+                        style={{
+                            flex: 1,
+                            padding: '0.8rem',
+                            borderRadius: '8px',
+                            border: '1px solid var(--glass-border)',
+                            background: 'var(--bg-section)',
+                            color: 'var(--text-main)',
+                            outline: 'none'
+                        }}
+                    />
+                </div>
+            ) : (
+                <input
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    required={required}
+                    style={{
+                        padding: '0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--glass-border)',
+                        background: 'var(--bg-section)',
+                        color: 'var(--text-main)',
+                        outline: 'none'
+                    }}
+                />
+            )}
         </div>
     );
 
@@ -1231,13 +1256,23 @@ const AdminDashboard = () => {
                             </div>
 
                             {activeTab === 'hero' && (
-                                <form onSubmit={(e) => handleGenericSubmit(e, heroForm, setHeroForm, '/api/hero-slides', setHeroSlides, { image: '', title: '', subtitle: '' })} style={{ display: 'grid', gap: '1rem' }}>
+                                <form onSubmit={(e) => handleGenericSubmit(e, heroForm, setHeroForm, '/api/hero-slides', setHeroSlides, { image: '', title: '', subtitle: '', titleColor: '#ffffff', subtitleColor: '#ffffff', buttonBgColor: '#1B2A6B', buttonTextColor: '#ffffff' })} style={{ display: 'grid', gap: '1rem' }}>
                                     <div>
                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Background Image</label>
                                         <ImageUpload value={heroForm.image} onUpload={(url) => setHeroForm({ ...heroForm, image: url })} />
                                     </div>
                                     {renderInput('Title', 'title', heroForm.title, e => setHeroForm({ ...heroForm, title: e.target.value }))}
                                     {renderInput('Subtitle', 'subtitle', heroForm.subtitle, e => setHeroForm({ ...heroForm, subtitle: e.target.value }))}
+                                    
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        {renderInput('Title Text Color', 'titleColor', heroForm.titleColor || '#ffffff', e => setHeroForm({ ...heroForm, titleColor: e.target.value }), 'color')}
+                                        {renderInput('Subtitle Text Color', 'subtitleColor', heroForm.subtitleColor || '#ffffff', e => setHeroForm({ ...heroForm, subtitleColor: e.target.value }), 'color')}
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        {renderInput('Button Background Color', 'buttonBgColor', heroForm.buttonBgColor || '#1B2A6B', e => setHeroForm({ ...heroForm, buttonBgColor: e.target.value }), 'color')}
+                                        {renderInput('Button Text Color', 'buttonTextColor', heroForm.buttonTextColor || '#ffffff', e => setHeroForm({ ...heroForm, buttonTextColor: e.target.value }), 'color')}
+                                    </div>
+
                                     <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update' : 'Add'}</button>
                                 </form>
                             )}

@@ -23,8 +23,8 @@
   --text-highlight: #FCCA26;
   /* Indigo from gradient */
   --bg-main: var(--bg-dark);
-  --nav-bg: rgba(255, 255, 255, 0.01);
-  --nav-text: var(--text-muted);
+  --nav-bg: #1B2A6B;
+  --nav-text: #ffffff;
 }
 
 .line-clamp-1 {
@@ -65,10 +65,9 @@
   --text-muted: #86868b;
   --glass: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(0, 0, 0, 0.1);
-  --glass-border: rgba(0, 0, 0, 0.1);
   --glass-highlight: rgba(0, 0, 0, 0.02);
-  --nav-bg: rgba(255, 255, 255, 0.95);
-  --nav-text: var(--primary);
+  --nav-bg: #1B2A6B;
+  --nav-text: #ffffff;
 }
 
 * {
@@ -1334,7 +1333,7 @@ a {
   }
 }
 
-/* Page Hero styles for subpages with fixed header */
+/* Page Hero styles for subpages with sticky header */
 .page-hero {
   position: relative;
   width: 100%;
@@ -1343,24 +1342,23 @@ a {
   justify-content: center;
   overflow: hidden;
   background: var(--bg-section);
-  /* Responsive paddingTop to clear the fixed navbar */
-  padding-top: 260px; /* Default for desktop with large logo header */
+  padding-top: 3rem;
   padding-bottom: 4rem;
-  min-height: 420px;
+  min-height: 380px;
 }
 
 @media (max-width: 1100px) {
   .page-hero {
-    padding-top: 180px; /* Tablet view / smaller navbar */
-    min-height: 350px;
+    padding-top: 2rem;
+    min-height: 320px;
   }
 }
 
 @media (max-width: 768px) {
   .page-hero {
-    padding-top: 140px; /* Mobile view / compact navbar */
-    padding-bottom: 3rem;
-    min-height: 300px;
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    min-height: 280px;
   }
 }
 

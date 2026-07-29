@@ -131,18 +131,36 @@ export const HeroCarousel = ({ onApplyClick }) => {
                 }
                 .hero-btn-group {
                     position: absolute;
-                    bottom: 100px;
-                    right: 520px;
+                    bottom: 91px;
+                    left: 40%;
+                    transform: translateX(-50%);
+                    right: auto !important;
                     margin: 0 !important;
                     z-index: 30;
                     display: flex;
                     gap: 1.2rem;
-                    justify-content: flex-end;
+                    justify-content: center;
+                    align-items: center;
                     flex-wrap: wrap;
                 }
                 .hero-btn {
-                    padding: 0.8rem 2rem;
+                    padding: 0.8rem 2.2rem;
                     font-size: 1rem;
+                    font-weight: 600;
+                    background-color: #1B2A6B !important;
+                    background: linear-gradient(135deg, #1B2A6B 0%, #2D2C7A 100%) !important;
+                    color: #ffffff !important;
+                    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 15px rgba(27, 42, 107, 0.4);
+                    transition: all 0.3s ease;
+                }
+                .hero-btn:hover {
+                    background: linear-gradient(135deg, #2D2C7A 0%, #1B2A6B 100%) !important;
+                    color: #FCCA26 !important;
+                    border-color: #FCCA26 !important;
+                    box-shadow: 0 6px 20px rgba(252, 202, 38, 0.4);
+                    transform: translateY(-2px);
                 }
                 
                 /* Custom Arrows */
@@ -205,7 +223,9 @@ export const HeroCarousel = ({ onApplyClick }) => {
                     }
                     .hero-btn-group {
                         bottom: 60px;
-                        right: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        right: auto !important;
                     }
                     .hero-btn {
                         padding: 0.7rem 1.5rem !important;
@@ -225,13 +245,19 @@ export const HeroCarousel = ({ onApplyClick }) => {
                     }
                 }
                 
-                /* Force Full Screen Height */
+                /* Hero Carousel Positioned Flush Below Sticky Navbar */
+                .hero-carousel {
+                    margin-top: 0 !important;
+                }
+
                 .hero-carousel,
                 .hero-carousel .slick-slider,
                 .hero-carousel .slick-list,
-                .hero-carousel .slick-track {
-                    height: 100vh;
-                    height: 100dvh;
+                .hero-carousel .slick-track,
+                .hero-slide-item {
+                    height: calc(100vh - 160px);
+                    height: calc(100dvh - 160px);
+                    min-height: 480px;
                 }
                 
                 .hero-carousel .slick-slide {
@@ -239,8 +265,41 @@ export const HeroCarousel = ({ onApplyClick }) => {
                 }
                 
                 .hero-carousel .slick-slide > div {
-                    height: 100vh;
-                    height: 100dvh;
+                    height: calc(100vh - 160px);
+                    height: calc(100dvh - 160px);
+                    min-height: 480px;
+                }
+
+                @media (max-width: 1100px) {
+                    .hero-carousel {
+                        margin-top: 0 !important;
+                    }
+                    .hero-carousel,
+                    .hero-carousel .slick-slider,
+                    .hero-carousel .slick-list,
+                    .hero-carousel .slick-track,
+                    .hero-carousel .slick-slide > div,
+                    .hero-slide-item {
+                        height: calc(100vh - 90px);
+                        height: calc(100dvh - 90px);
+                        min-height: 400px;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .hero-carousel {
+                        margin-top: 0 !important;
+                    }
+                    .hero-carousel,
+                    .hero-carousel .slick-slider,
+                    .hero-carousel .slick-list,
+                    .hero-carousel .slick-track,
+                    .hero-carousel .slick-slide > div,
+                    .hero-slide-item {
+                        height: calc(100vh - 60px);
+                        height: calc(100dvh - 60px);
+                        min-height: 350px;
+                    }
                 }
 
                 /* Hero Image Override */
@@ -258,10 +317,8 @@ export const HeroCarousel = ({ onApplyClick }) => {
             <Slider {...settings}>
                 {heroSlides.map((slide, index) => (
                     <div key={index}>
-                        <div style={{
+                        <div className="hero-slide-item" style={{
                             position: 'relative',
-                            height: '100vh',
-                            minHeight: '100dvh', // Ensure mobile adaptation
                             width: '100%',
                             display: 'flex',
                             alignItems: 'center',
@@ -299,7 +356,8 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                             marginBottom: '0.5rem',
                                             textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.6)',
                                             lineHeight: 1.2,
-                                            letterSpacing: '-0.5px'
+                                            letterSpacing: '-0.5px',
+                                            color: slide.titleColor || '#ffffff'
                                         }}
                                     >
                                         {slide.title}
@@ -316,7 +374,8 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                             marginLeft: '0',
                                             marginRight: 'auto',
                                             fontWeight: 400,
-                                            textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5)'
+                                            textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5)',
+                                            color: slide.subtitleColor || '#ffffff'
                                         }}
                                     >
                                         {slide.subtitle}
@@ -324,7 +383,7 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                 </motion.div>
                             </div>
 
-                            {/* Admissions Button at Right 200px */}
+                            {/* Admissions Button Centered at Bottom */}
                             <motion.div
                                 variants={itemVariants}
                                 initial="hidden"
@@ -334,6 +393,10 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                 <button
                                     className="btn btn-primary hero-btn"
                                     onClick={onApplyClick}
+                                    style={{
+                                        ...(slide.buttonBgColor ? { backgroundColor: slide.buttonBgColor, background: slide.buttonBgColor } : {}),
+                                        ...(slide.buttonTextColor ? { color: slide.buttonTextColor } : {})
+                                    }}
                                 >
                                     Admissions Open
                                 </button>

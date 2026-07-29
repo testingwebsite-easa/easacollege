@@ -344,8 +344,8 @@ const Navbar = ({ onApplyClick }) => {
         return items;
     }, [departments]);
 
-    const logoToDisplay = theme === 'light' ? headerLogoLight : headerLogoDark;
-    const accreditationsToDisplay = theme === 'light' ? accreditationsLight : accreditationsDark;
+    const logoToDisplay = headerLogoDark;
+    const accreditationsToDisplay = accreditationsDark;
 
     const toggleMobileItem = (title) => {
         setMobileExpanded(prev => ({
@@ -369,15 +369,15 @@ const Navbar = ({ onApplyClick }) => {
 
     return (
         <header style={{
-            position: 'fixed',
+            position: 'sticky',
             top: 0,
             width: '100%',
             zIndex: 1000,
-            backgroundColor: 'var(--nav-bg)',
+            backgroundColor: 'var(--nav-bg, #1B2A6B)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
-            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-            borderBottom: '1px solid var(--glass-border)',
+            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
             display: 'flex',
             flexDirection: 'column',
             transition: 'all 0.3s ease'
@@ -385,11 +385,11 @@ const Navbar = ({ onApplyClick }) => {
             <NewsTicker />
             {/* Top Bar: Notices & Quick Contact - Sleek & Minimal - Hidden on Mobile */}
             <div className="nav-tablet-hide-mobile" style={{
-                background: 'linear-gradient(90deg, var(--bg-card) 0%, var(--glass) 100%)',
+                background: 'rgba(15, 23, 42, 0.35)',
                 padding: '0.3rem 0',
                 fontSize: '0.75rem',
-                borderBottom: '1px solid var(--glass-border)',
-                color: 'var(--nav-text)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
                 zIndex: 2000,
                 position: 'relative'
             }}>
@@ -397,7 +397,7 @@ const Navbar = ({ onApplyClick }) => {
                     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', flexShrink: 0 }}>
                         {/* 1. College Code */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.85rem', color: theme === 'dark' ? '#F8D53D' : '#3E3E7E' }}>Counselling Code: TN-UG/PG 2749</span>
+                            <span style={{ fontSize: '0.85rem', color: '#F8D53D', fontWeight: '600' }}>Counselling Code: TN-UG/PG 2749</span>
                         </div>
                         <div style={{ width: '1px', height: '14px', background: 'var(--glass-border)' }}></div>
 
@@ -616,15 +616,15 @@ const Navbar = ({ onApplyClick }) => {
 
                 {/* Left: College Logo (Desktop & Mobile) */}
                 <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => navigate('/')}>
-                    <img src={logoToDisplay} alt="EASA College Logo" style={{ height: '310px', objectFit: 'contain' }} />
+                    <img src={logoToDisplay} alt="EASA College Logo" style={{ height: '65px', maxHeight: '65px', width: 'auto', objectFit: 'contain' }} />
                 </div>
 
                 <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <img src={accreditationsToDisplay} alt="Accreditations" style={{ height: '350px', objectFit: 'contain' }} />
+                    <img src={accreditationsToDisplay} alt="Accreditations" style={{ height: '55px', maxHeight: '55px', width: 'auto', objectFit: 'contain' }} />
                 </div>
 
                 <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src={yearsOfExcellence} alt="18+ Years of Excellence" style={{ height: '225px', objectFit: 'contain' }} />
+                    <img src={yearsOfExcellence} alt="18+ Years of Excellence" style={{ height: '50px', maxHeight: '50px', width: 'auto', objectFit: 'contain' }} />
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -980,6 +980,14 @@ const Navbar = ({ onApplyClick }) => {
                     transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
                     z-index: 1050;
                     padding: 0.5rem;
+                }
+
+                .nav-link {
+                    color: #ffffff !important;
+                    transition: color 0.2s ease !important;
+                }
+                .nav-link:hover {
+                    color: #FCCA26 !important;
                 }
 
                 .nav-item-dropdown:hover .dropdown-menu {
