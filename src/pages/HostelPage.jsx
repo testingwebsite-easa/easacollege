@@ -127,7 +127,7 @@ const HostelPage = () => {
                             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '32px', padding: '3.5rem', boxShadow: '0 20px 50px rgba(0,0,0,0.05)' }}>
                                 {(displayData.aboutImage || displayData.heroImage) && activeSection !== 'overview' && (
                                     <div style={{ width: '100%', height: '400px', borderRadius: '24px', overflow: 'hidden', marginBottom: '2.5rem', border: '1px solid var(--glass-border)' }}>
-                                        <img src={displayData.aboutImage || displayData.heroImage} alt={displayData.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img loading="lazy" decoding="async" src={displayData.aboutImage || displayData.heroImage} alt={displayData.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                 )}
                                 <div style={{ fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--text-muted)' }}>

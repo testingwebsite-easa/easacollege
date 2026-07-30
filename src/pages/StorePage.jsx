@@ -96,11 +96,9 @@ function StorePage() {
                             boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
                             border: '1px solid var(--glass-border)'
                         }}>
-                            <img
-                                src="https://images.unsplash.com/photo-1556740649-175911c7284a?q=80&w=2070&auto=format&fit=crop"
+                            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556740649-175911c7284a?q=80&w=2070&auto=format&fit=crop"
                                 alt="Campus Store"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', padding: '2rem', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <FaBook size={30} style={{ color: 'var(--secondary)' }} />

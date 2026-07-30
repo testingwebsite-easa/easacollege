@@ -46,7 +46,7 @@ function InfrastructurePage() {
                                         <div key={idx} style={{ padding: '2.5rem', textAlign: 'center', background: 'var(--bg-section)', borderRadius: '32px', border: '1px solid var(--glass-border)', transition: 'all 0.3s ease' }}>
                                             {fac.image && (
                                                 <div style={{ width: '100%', height: '220px', marginBottom: '1.5rem', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                    <img src={fac.image} alt={fac.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <img loading="lazy" decoding="async" src={fac.image} alt={fac.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 </div>
                                             )}
                                             <h3 style={{ fontSize: '1.6rem', fontWeight: '800', marginBottom: '1rem', color: 'var(--text-main)' }}>{fac.title}</h3>

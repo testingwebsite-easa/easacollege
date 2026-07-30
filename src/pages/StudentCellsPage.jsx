@@ -158,7 +158,7 @@ const StudentCellsPage = () => {
                                     <>
                                         {activeTabData?.image && (
                                             <div style={{ width: '100%', height: '450px', borderRadius: '24px', overflow: 'hidden', marginBottom: '2.5rem', border: '1px solid var(--glass-border)' }}>
-                                                <img src={activeTabData.image} alt={activeTabData.heading} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <img loading="lazy" decoding="async" src={activeTabData.image} alt={activeTabData.heading} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </div>
                                         )}
                                         <div style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>

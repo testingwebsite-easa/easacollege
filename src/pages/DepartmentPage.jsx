@@ -235,7 +235,7 @@ const DepartmentPage = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                     <div style={{ position: 'relative', marginBottom: '2rem' }}>
                         <div className="hod-image-container" style={{ width: '250px', height: '250px', borderRadius: '50%', overflow: 'hidden', border: '6px solid var(--glass-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-                            <img src={department.hod.image} alt={department.hod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img loading="lazy" decoding="async" src={department.hod.image} alt={department.hod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         <div style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'var(--secondary)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-dark)', fontSize: '1.5rem', border: '4px solid var(--bg-card)' }}>
                             <FaChalkboardTeacher />
@@ -352,7 +352,7 @@ const DepartmentPage = () => {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                         {event.photos.map((photo, pIdx) => (
                             <div key={pIdx} style={{ borderRadius: '12px', overflow: 'hidden', height: '150px' }}>
-                                <img src={photo.src} alt={photo.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <img loading="lazy" decoding="async" src={photo.src} alt={photo.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
                         ))}
                     </div>
@@ -364,7 +364,7 @@ const DepartmentPage = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
                     {galleryData.images.map((img, idx) => (
                         <div key={idx} style={{ borderRadius: '16px', overflow: 'hidden', height: '200px', border: '1px solid var(--glass-border)' }}>
-                            <img src={img.src} alt={img.caption || 'Gallery'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img loading="lazy" decoding="async" src={img.src} alt={img.caption || 'Gallery'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                     ))}
                 </div>
@@ -469,7 +469,7 @@ const DepartmentPage = () => {
                 <div key={idx} style={{ background: 'var(--bg-card)', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
                     <div style={{ height: '220px', background: 'var(--glass-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)' }}>
                         {lab.image ? (
-                            <img src={lab.image} alt={lab.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img loading="lazy" decoding="async" src={lab.image} alt={lab.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                             <FaFlask size={50} />
                         )}

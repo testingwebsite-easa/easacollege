@@ -64,7 +64,7 @@ function MediaPressPage() {
                             >
                                 <div style={{ height: '240px', position: 'relative', overflow: 'hidden', background: 'var(--bg-section)' }}>
                                     {item.image ? (
-                                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} className="news-image" />
+                                        <img loading="lazy" decoding="async" src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} className="news-image" />
                                     ) : (
                                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <FaImage size={60} style={{ opacity: 0.1, color: 'var(--text-muted)' }} />

@@ -307,7 +307,7 @@ const DynamicPage = () => {
                                 ) : (
                                     <>
                                         {activeTabData?.image && (
-                                            <img src={activeTabData.image} alt={activeTabData.heading} className="section-image" />
+                                            <img loading="lazy" decoding="async" src={activeTabData.image} alt={activeTabData.heading} className="section-image" />
                                         )}
                                         <div className="content-text">
                                             {activeTabData?.body}

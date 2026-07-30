@@ -325,8 +325,7 @@ export const HeroCarousel = ({ onApplyClick }) => {
                             justifyContent: 'center'
                         }}>
                             {/* Background Image */}
-                            <img
-                                src={slide.image}
+                            <img loading="lazy" decoding="async" src={slide.image}
                                 alt={slide.title}
                                 className="hero-bg-image"
                                 style={{

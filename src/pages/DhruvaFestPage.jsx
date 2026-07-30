@@ -70,7 +70,7 @@ const EventGallery = ({ event }) => {
                             <div key={index} className="gallery-main-slide">
                                 <div className="gallery-clickable" data-src={item.image} data-sub-html={`<h4>${item.title}</h4><p>${item.desc}</p>`} style={{ cursor: 'pointer', display: 'block' }}>
                                     <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '16px', overflow: 'hidden' }}>
-                                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img loading="lazy" decoding="async" src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
 
                                         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)', padding: '3rem 2rem 1.5rem', color: 'white', textAlign: 'left' }}>
                                             <h3 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.5rem', color: '#ffeb3b', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{item.title}</h3>
@@ -89,7 +89,7 @@ const EventGallery = ({ event }) => {
                     {items.map((item, index) => (
                         <div key={index} style={{ padding: '0 8px' }}>
                             <div className="thumb-item" style={{ height: '80px', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer' }}>
-                                <img src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <img loading="lazy" decoding="async" src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
                         </div>
                     ))}

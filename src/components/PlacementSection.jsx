@@ -163,11 +163,9 @@ const PlacementSection = () => {
                             boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
                             border: '1px solid var(--glass-border)'
                         }}>
-                            <img
-                                src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1000"
+                            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1000"
                                 alt="Placement Training"
-                                style={{ width: '100%', height: '500px', objectFit: 'cover' }}
-                            />
+                                style={{ width: '100%', height: '500px', objectFit: 'cover' }} />
                             <div style={{
                                 position: 'absolute',
                                 inset: 0,
@@ -345,15 +343,13 @@ const PlacementSection = () => {
                     <div className="scroll-track animate-left">
                         {row1.length > 0 && [...row1, ...row1].map((company, index) => (
                             <div key={`left-${index}`} className="partner-card">
-                                <img
-                                    src={company.logo}
+                                <img loading="lazy" decoding="async" src={company.logo}
                                     alt={company.name}
                                     style={{
                                         width: '100%',
                                         height: '100%',
                                         objectFit: 'contain'
-                                    }}
-                                />
+                                    }} />
                             </div>
                         ))}
                     </div>
@@ -362,15 +358,13 @@ const PlacementSection = () => {
                     <div className="scroll-track animate-right">
                         {row2.length > 0 && [...row2, ...row2].map((company, index) => (
                             <div key={`right-${index}`} className="partner-card">
-                                <img
-                                    src={company.logo}
+                                <img loading="lazy" decoding="async" src={company.logo}
                                     alt={company.name}
                                     style={{
                                         width: '100%',
                                         height: '100%',
                                         objectFit: 'contain'
-                                    }}
-                                />
+                                    }} />
                             </div>
                         ))}
                     </div>

@@ -92,11 +92,9 @@ function GymPage() {
                             boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
                             border: '1px solid var(--glass-border)'
                         }}>
-                            <img
-                                src="https://easa-college.s3.eu-north-1.amazonaws.com/images/DSC08490.JPG"
+                            <img loading="lazy" decoding="async" src="https://easa-college.s3.eu-north-1.amazonaws.com/images/DSC08490.JPG"
                                 alt="Students in Gym"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', padding: '2rem', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <FaDumbbell size={30} style={{ color: 'var(--secondary)' }} />

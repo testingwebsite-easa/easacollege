@@ -161,11 +161,9 @@ const AlumniSocial = () => {
                                                 overflow: 'hidden',
                                                 flexShrink: 0
                                             }}>
-                                                <img 
-                                                    src={person.photoUrl || "https://res.cloudinary.com/dzt6vksue/image/upload/v1/assets/profile-placeholder"} 
+                                                <img loading="lazy" decoding="async" src={person.photoUrl || "https://res.cloudinary.com/dzt6vksue/image/upload/v1/assets/profile-placeholder"} 
                                                     alt={person.name}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                />
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </div>
                                             <div>
                                                 <h3 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#fff', marginBottom: '0.2rem' }}>{person.name}</h3>

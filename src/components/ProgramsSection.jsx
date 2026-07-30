@@ -76,8 +76,7 @@ const ProgramsSection = () => {
                                 </motion.div>
                             </div>
                             <div className="program-image" style={{ order: index % 2 === 0 ? 2 : 1 }}>
-                                <img
-                                    src={program.image}
+                                <img loading="lazy" decoding="async" src={program.image}
                                     alt={program.title}
                                     className="p-img"
                                     onError={(e) => e.target.style.display = 'none'}

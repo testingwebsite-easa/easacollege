@@ -290,7 +290,7 @@ const CampusClubsPage = () => {
                                             {clubEvents.map(event => (
                                                 <div key={event.id} className="glass-card p-4" style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>
                                                     <div className="aspect-video w-full mb-4 rounded-lg overflow-hidden bg-black/50">
-                                                        <img src={event.image} alt={event.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                                                        <img loading="lazy" decoding="async" src={event.image} alt={event.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                                                     </div>
                                                     <div className="text-left">
                                                         <span className="text-sm text-[#FCCA26]" style={{ color: 'var(--accent-yellow)', fontSize: '0.875rem' }}>{event.date}</span>
@@ -320,11 +320,9 @@ const CampusClubsPage = () => {
                                             transition={{ delay: 0.1 }}
                                             className="club-logo-container"
                                         >
-                                            <img
-                                                src={clubLogo}
+                                            <img loading="lazy" decoding="async" src={clubLogo}
                                                 alt={`${activeClub.name} Logo`}
-                                                className="club-logo-img"
-                                            />
+                                                className="club-logo-img" />
                                         </motion.div>
 
                                         {/* Club Title & Description */}
