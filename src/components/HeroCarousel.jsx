@@ -24,10 +24,6 @@ const NextArrow = ({ onClick }) => (
 );
 
 export const HeroCarousel = ({ onApplyClick }) => {
-    const [heroSlides, setHeroSlides] = useState([]);
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const [loading, setLoading] = useState(true);
-
     const defaultSlides = [
         {
             title: "EASA College of Engineering and Technology",
@@ -35,6 +31,10 @@ export const HeroCarousel = ({ onApplyClick }) => {
             image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1920&q=80"
         }
     ];
+
+    const [heroSlides, setHeroSlides] = useState(defaultSlides);
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [loading, setLoading] = useState(false);
 
     React.useEffect(() => {
         fetch(`${API_BASE_URL}/api/hero-slides`)
@@ -329,6 +329,9 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                 src={slide.image}
                                 alt={slide.title}
                                 className="hero-bg-image"
+                                fetchPriority={index === 0 ? "high" : "low"}
+                                loading={index === 0 ? "eager" : "lazy"}
+                                decoding="async"
                                 style={{
                                     transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)', // Subtle zoom effect on active
                                     transition: 'transform 6s ease' // Long zoom over time

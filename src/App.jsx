@@ -1,93 +1,94 @@
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
-import MissionPage from './pages/MissionPage';
-import CoreBeliefsPage from './pages/CoreBeliefsPage';
-import InstitutionPage from './pages/InstitutionPage';
-import LoginPage from './pages/LoginPage';
-import AdminDashboard from './pages/AdminDashboard';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import SyllabusDashboard from './pages/SyllabusDashboard';
+const MissionPage = lazy(() => import('./pages/MissionPage'));
+const CoreBeliefsPage = lazy(() => import('./pages/CoreBeliefsPage'));
+const InstitutionPage = lazy(() => import('./pages/InstitutionPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const SyllabusDashboard = lazy(() => import('./pages/SyllabusDashboard'));
 import ProtectedRoute from './components/ProtectedRoute';
 
 
-import ManagementPage from './pages/ManagementPage';
-import MediaPressPage from './pages/MediaPressPage';
-import MilestonesPage from './pages/MilestonesPage';
-import LeadershipPage from './pages/LeadershipPage';
-import GovernancePage from './pages/GovernancePage';
-import AdministrationPage from './pages/AdministrationPage';
-import PrincipalPage from './pages/PrincipalPage';
-import SustainabilityPage from './pages/SustainabilityPage';
-import CommunityOutreachPage from './pages/CommunityOutreachPage';
+const ManagementPage = lazy(() => import('./pages/ManagementPage'));
+const MediaPressPage = lazy(() => import('./pages/MediaPressPage'));
+const MilestonesPage = lazy(() => import('./pages/MilestonesPage'));
+const LeadershipPage = lazy(() => import('./pages/LeadershipPage'));
+const GovernancePage = lazy(() => import('./pages/GovernancePage'));
+const AdministrationPage = lazy(() => import('./pages/AdministrationPage'));
+const PrincipalPage = lazy(() => import('./pages/PrincipalPage'));
+const SustainabilityPage = lazy(() => import('./pages/SustainabilityPage'));
+const CommunityOutreachPage = lazy(() => import('./pages/CommunityOutreachPage'));
 // 
-import DepartmentPage from './pages/DepartmentPage';
+const DepartmentPage = lazy(() => import('./pages/DepartmentPage'));
 // 
-import ResearchPage from './pages/ResearchPage';
-import ResourcePage from './pages/ResourcePage';
+const ResearchPage = lazy(() => import('./pages/ResearchPage'));
+const ResourcePage = lazy(() => import('./pages/ResourcePage'));
 // import DigitalLibraryPage from './pages/resources/DigitalLibraryPage';
-import RegulationsPage from './pages/resources/RegulationsPage';
-import StatutoryBodiesPage from './pages/resources/StatutoryBodiesPage';
-import FormsPage from './pages/resources/FormsPage';
-import AcademicCalendarPage from './pages/resources/AcademicCalendarPage';
-import FacultyHandbookPage from './pages/resources/FacultyHandbookPage';
-import StudentHandbookPage from './pages/resources/StudentHandbookPage';
-import SyllabusPage from './pages/resources/SyllabusPage';
+const RegulationsPage = lazy(() => import('./pages/resources/RegulationsPage'));
+const StatutoryBodiesPage = lazy(() => import('./pages/resources/StatutoryBodiesPage'));
+const FormsPage = lazy(() => import('./pages/resources/FormsPage'));
+const AcademicCalendarPage = lazy(() => import('./pages/resources/AcademicCalendarPage'));
+const FacultyHandbookPage = lazy(() => import('./pages/resources/FacultyHandbookPage'));
+const StudentHandbookPage = lazy(() => import('./pages/resources/StudentHandbookPage'));
+const SyllabusPage = lazy(() => import('./pages/resources/SyllabusPage'));
 
 import ScrollToTop from './components/ScrollToTop';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import LoadingBar from './components/LoadingBar';
-import DynamicPage from './pages/DynamicPage';
-import ResearchListingPage from './pages/ResearchListingPage';
-import CareerPage from './pages/CareerPage';
-import JobApplicationsView from './pages/JobApplicationsView';
-import AlumniRegistration from './pages/AlumniRegistration';
-import LibraryPage from './pages/LibraryPage';
-import ScholarshipPage from './pages/ScholarshipPage';
-import PlacementPage from './pages/PlacementPage';
-import SkillingPage from './pages/SkillingPage';
-import AdmissionsPage from './pages/AdmissionsPage';
-import AlumniSocial from './pages/AlumniSocial';
+const DynamicPage = lazy(() => import('./pages/DynamicPage'));
+const ResearchListingPage = lazy(() => import('./pages/ResearchListingPage'));
+const CareerPage = lazy(() => import('./pages/CareerPage'));
+const JobApplicationsView = lazy(() => import('./pages/JobApplicationsView'));
+const AlumniRegistration = lazy(() => import('./pages/AlumniRegistration'));
+const LibraryPage = lazy(() => import('./pages/LibraryPage'));
+const ScholarshipPage = lazy(() => import('./pages/ScholarshipPage'));
+const PlacementPage = lazy(() => import('./pages/PlacementPage'));
+const SkillingPage = lazy(() => import('./pages/SkillingPage'));
+const AdmissionsPage = lazy(() => import('./pages/AdmissionsPage'));
+const AlumniSocial = lazy(() => import('./pages/AlumniSocial'));
 import './index.css';
-import NotFoundPage from './pages/NotFoundPage';
-import GalleryPage from './pages/GalleryPage';
-import VideoGalleryPage from './pages/VideoGalleryPage';
-import VirtualTourPage from './pages/VirtualTourPage';
-import GrievancePage from './pages/GrievancePage';
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const GalleryPage = lazy(() => import('./pages/GalleryPage'));
+const VideoGalleryPage = lazy(() => import('./pages/VideoGalleryPage'));
+const VirtualTourPage = lazy(() => import('./pages/VirtualTourPage'));
+const GrievancePage = lazy(() => import('./pages/GrievancePage'));
 // Dynamic Static Pages
-import HostelPage from './pages/HostelPage';
-import SportsPage from './pages/SportsPage';
-import AmenitiesPage from './pages/AmenitiesPage';
-import DhruvaFestPage from './pages/DhruvaFestPage';
-import StudentCellsPage from './pages/StudentCellsPage';
-import AssociationsPage from './pages/AssociationsPage';
-import CampusClubsPage from './pages/CampusClubsPage';
-import GymPage from './pages/GymPage';
-import YogaPage from './pages/YogaPage';
-import FoodCourtPage from './pages/FoodCourtPage';
-import CafeteriaPage from './pages/CafeteriaPage';
-import IqacAboutPage from './pages/IqacAboutPage';
-import IqacCommitteePage from './pages/IqacCommitteePage';
+const HostelPage = lazy(() => import('./pages/HostelPage'));
+const SportsPage = lazy(() => import('./pages/SportsPage'));
+const AmenitiesPage = lazy(() => import('./pages/AmenitiesPage'));
+const DhruvaFestPage = lazy(() => import('./pages/DhruvaFestPage'));
+const StudentCellsPage = lazy(() => import('./pages/StudentCellsPage'));
+const AssociationsPage = lazy(() => import('./pages/AssociationsPage'));
+const CampusClubsPage = lazy(() => import('./pages/CampusClubsPage'));
+const GymPage = lazy(() => import('./pages/GymPage'));
+const YogaPage = lazy(() => import('./pages/YogaPage'));
+const FoodCourtPage = lazy(() => import('./pages/FoodCourtPage'));
+const CafeteriaPage = lazy(() => import('./pages/CafeteriaPage'));
+const IqacAboutPage = lazy(() => import('./pages/IqacAboutPage'));
+const IqacCommitteePage = lazy(() => import('./pages/IqacCommitteePage'));
 import PopupAlert from './components/PopupAlert';
 import { ThemeProvider } from './context/ThemeContext';
-import ProfessionalChaptersPage from './pages/ProfessionalChaptersPage';
-import StorePage from './pages/StorePage';
-import TransportPage from './pages/TransportPage';
-import MedicalPage from './pages/MedicalPage';
-import Naac from './pages/Naac';
-import NaacDvv from './pages/NaacDvv';
-import NaacDistinction from './pages/NaacDistinction';
-import NaacBestPractices from './pages/NaacBestPractices';
-import NaacRti from './pages/NaacRti';
-import NaacFeedback from './pages/NaacFeedback';
-import NaacExtendedProfile from './pages/NaacExtendedProfile';
-import NaacCommittee from './pages/NaacCommittee';
-import AictePage from './pages/AictePage';
-import AicteEoaPage from './pages/AicteEoaPage';
-import SdgsPage from './pages/SdgsPage';
-import ObePage from './pages/ObePage';
-import NirfPage from './pages/NirfPage';
-import Login from './pages/Login';
+const ProfessionalChaptersPage = lazy(() => import('./pages/ProfessionalChaptersPage'));
+const StorePage = lazy(() => import('./pages/StorePage'));
+const TransportPage = lazy(() => import('./pages/TransportPage'));
+const MedicalPage = lazy(() => import('./pages/MedicalPage'));
+const Naac = lazy(() => import('./pages/Naac'));
+const NaacDvv = lazy(() => import('./pages/NaacDvv'));
+const NaacDistinction = lazy(() => import('./pages/NaacDistinction'));
+const NaacBestPractices = lazy(() => import('./pages/NaacBestPractices'));
+const NaacRti = lazy(() => import('./pages/NaacRti'));
+const NaacFeedback = lazy(() => import('./pages/NaacFeedback'));
+const NaacExtendedProfile = lazy(() => import('./pages/NaacExtendedProfile'));
+const NaacCommittee = lazy(() => import('./pages/NaacCommittee'));
+const AictePage = lazy(() => import('./pages/AictePage'));
+const AicteEoaPage = lazy(() => import('./pages/AicteEoaPage'));
+const SdgsPage = lazy(() => import('./pages/SdgsPage'));
+const ObePage = lazy(() => import('./pages/ObePage'));
+const NirfPage = lazy(() => import('./pages/NirfPage'));
+const Login = lazy(() => import('./pages/Login'));
 
 
 
@@ -99,6 +100,7 @@ function App() {
         <Router>
           <PopupAlert />
           <ScrollToTop />
+          <Suspense fallback={<div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}><div className="loading-spinner" /></div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/professional-chapters" element={<ProfessionalChaptersPage />} />
@@ -213,6 +215,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
 
           </Routes>
+        </Suspense>
           <ScrollToTopButton />
 
         </Router>
