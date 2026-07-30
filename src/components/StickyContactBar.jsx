@@ -51,7 +51,7 @@ const StickyContactBar = () => {
                     </div>
 
                     {/* WhatsApp */}
-                    <a href="https://wa.me/918220008082" target="_blank" rel="noreferrer" className="sidebar-link">
+                    <a href="https://wa.me/918220008082" target="_blank" rel="noreferrer" className="sidebar-link" aria-label="Contact via WhatsApp">
                         <span className="sidebar-label">WhatsApp</span>
                         <div className="sidebar-icon" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
                             <FaWhatsapp />
@@ -59,7 +59,7 @@ const StickyContactBar = () => {
                     </a>
 
                     {/* Email */}
-                    <a href="mailto:info@easacollege.ac.in" className="sidebar-link">
+                    <a href="mailto:info@easacollege.ac.in" className="sidebar-link" aria-label="Send Email">
                         <span className="sidebar-label">Send Email</span>
                         <div className="sidebar-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
                             <FaEnvelope />
@@ -72,6 +72,7 @@ const StickyContactBar = () => {
                     <button
                         onClick={() => setShowAdmissionForm(true)}
                         className="vertical-tab admission-tab"
+                        aria-label="Apply Online"
                         style={{ cursor: 'pointer', border: 'none', textAlign: 'center' }}
                     >
                         Apply Online
@@ -79,6 +80,7 @@ const StickyContactBar = () => {
                     <button
                         onClick={() => setShowEnquiryForm(true)}
                         className="vertical-tab enquiry-tab"
+                        aria-label="Enquire Now"
                         style={{ cursor: 'pointer', border: 'none', textAlign: 'center' }}
                     >
                         Enquire Now

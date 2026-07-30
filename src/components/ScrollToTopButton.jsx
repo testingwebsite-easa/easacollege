@@ -52,6 +52,7 @@ const ScrollToTopButton = () => {
                         exit={{ opacity: 0, scale: 0.5, y: 20 }}
                         onClick={scrollToTop}
                         title="Scroll to top"
+                        aria-label="Scroll to top"
                         className="scroll-to-top-btn"
                         whileHover={{
                             scale: 1.1,
@@ -72,6 +73,7 @@ const ScrollToTopButton = () => {
                     href="https://wa.me/918220008082"
                     target="_blank"
                     rel="noreferrer"
+                    aria-label="Contact us on WhatsApp"
                     initial={{ opacity: 0, scale: 0.5, x: 20 }}
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     style={{

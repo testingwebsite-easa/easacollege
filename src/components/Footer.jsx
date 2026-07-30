@@ -228,13 +228,13 @@ const Footer = ({ onOpenAdmission }) => {
                         {/* Social Links */}
                         <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem' }}>
                             {[
-                                { icon: <FaFacebookF />, href: 'https://www.facebook.com/easacollegecbe/' },
-                                { icon: <FaTwitter />, href: 'https://x.com/EasacollegeC' },
-                                { icon: <FaInstagram />, href: 'https://www.instagram.com/easacollege/' },
-                                { icon: <FaLinkedinIn />, href: 'https://www.linkedin.com/company/easa-cet/' },
-                                { icon: <FaYoutube />, href: 'https://www.youtube.com/@EASACollegeOfficial' }
+                                { name: 'Facebook', icon: <FaFacebookF />, href: 'https://www.facebook.com/easacollegecbe/' },
+                                { name: 'Twitter', icon: <FaTwitter />, href: 'https://x.com/EasacollegeC' },
+                                { name: 'Instagram', icon: <FaInstagram />, href: 'https://www.instagram.com/easacollege/' },
+                                { name: 'LinkedIn', icon: <FaLinkedinIn />, href: 'https://www.linkedin.com/company/easa-cet/' },
+                                { name: 'YouTube', icon: <FaYoutube />, href: 'https://www.youtube.com/@EASACollegeOfficial' }
                             ].map((social, index) => (
-                                <a key={index} href={social.href} style={{
+                                <a key={index} href={social.href} aria-label={social.name} target="_blank" rel="noopener noreferrer" style={{
                                     width: '38px',
                                     height: '38px',
                                     borderRadius: '50%',
@@ -265,10 +265,11 @@ const Footer = ({ onOpenAdmission }) => {
                                     type="email"
                                     name="email"
                                     placeholder="Your Email"
+                                    aria-label="Email address for newsletter"
                                     required
                                     style={{ ...inputStyle, marginBottom: 0, padding: '0.7rem', width: 'auto', flex: 1 }}
                                 />
-                                <button type="submit" style={{ ...buttonStyle, width: 'auto', padding: '0 1rem' }}>
+                                <button type="submit" aria-label="Subscribe to Newsletter" style={{ ...buttonStyle, width: 'auto', padding: '0 1rem' }}>
                                     <FaPaperPlane />
                                 </button>
                             </form>

@@ -629,24 +629,28 @@ const Navbar = ({ onApplyClick }) => {
 
                 {/* Mobile Menu Toggle */}
                 <div className="mobile-menu-btn nav-tablet-show-mobile" style={{ alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
-                    <div onClick={toggleMenu} style={{
-                        fontSize: '1.4rem',
-                        cursor: 'pointer',
-                        color: isMenuOpen ? '#fff' : 'var(--text-main)', // Adaptive color
-                        background: isMenuOpen ? 'var(--primary)' : 'var(--glass)', // Glass effect
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
-                        padding: '0.6rem',
-                        borderRadius: '12px',
-                        border: '1px solid var(--glass-border)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.3s ease',
-                        boxShadow: isMenuOpen ? '0 4px 12px var(--primary-glow)' : 'none'
-                    }}>
+                    <button
+                        onClick={toggleMenu}
+                        aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                        style={{
+                            fontSize: '1.4rem',
+                            cursor: 'pointer',
+                            color: isMenuOpen ? '#fff' : 'var(--text-main)', // Adaptive color
+                            background: isMenuOpen ? 'var(--primary)' : 'var(--glass)', // Glass effect
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            padding: '0.6rem',
+                            borderRadius: '12px',
+                            border: '1px solid var(--glass-border)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.3s ease',
+                            boxShadow: isMenuOpen ? '0 4px 12px var(--primary-glow)' : 'none'
+                        }}
+                    >
                         {isMenuOpen ? <FaTimes /> : <FaBars />}
-                    </div>
+                    </button>
                 </div>
             </div>
 
