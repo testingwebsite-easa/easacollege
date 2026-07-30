@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
-import missionBg from '../assets/mission-bg.png';
-import sdgHero from '../assets/sdg-hero.png';
+import missionBg from '../assets/mission-bg.webp';
+import sdgHero from '../assets/sdg-hero.webp';
 import AdmissionForm from '../components/AdmissionForm';
 import AdmissionCTA from '../components/AdmissionCTA';
 

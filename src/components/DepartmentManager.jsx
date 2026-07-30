@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaFilePdf, FaBook } from 'react-icons/fa';
 import { departments as staticDepartments } from '../data/departmentsData';
 import { getDetailedSyllabusForSubject } from '../data/syllabusData';
-import collegeLogo from '../assets/EASA College Logo.jpg';
+import collegeLogo from '../assets/EASA College Logo.webp';
 import API_BASE_URL from '../api';
 
 const getRomanNumeral = (num) => {

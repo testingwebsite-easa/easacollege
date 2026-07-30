@@ -4,11 +4,11 @@ import { FaAward, FaMedal, FaTrophy, FaCertificate, FaBars, FaTimes, FaPhone, Fa
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from '../context/ThemeContext';
 import API_BASE_URL from '../api';
-import headerLogoDark from '../assets/College Logo with White Letter.png';
-import headerLogoLight from '../assets/College Logo with Blue Letter.png';
-import accreditationsLight from '../assets/6 Logos with blue Letter.png';
-import accreditationsDark from '../assets/6 Logos with white Letter.png';
-import yearsOfExcellence from '../assets/years-of-excellence.png';
+import headerLogoDark from '../assets/College Logo with White Letter.webp';
+import headerLogoLight from '../assets/College Logo with Blue Letter.webp';
+import accreditationsLight from '../assets/6 Logos with blue Letter.webp';
+import accreditationsDark from '../assets/6 Logos with white Letter.webp';
+import yearsOfExcellence from '../assets/years-of-excellence.webp';
 import languages from '../data/languages.json';
 import NewsTicker from './NewsTicker';
 import { departments as staticDepartments } from '../data/departmentsData';

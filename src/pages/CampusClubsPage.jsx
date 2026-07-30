@@ -4,8 +4,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
-import clubLogo from '../assets/club_logo_gen.png';
-import clubsHeroImg from '../assets/clubs_hero_unique.png';
+import clubLogo from '../assets/club_logo_gen.webp';
+import clubsHeroImg from '../assets/clubs_hero_unique.webp';
 import useScrollAnimation from '../hooks/useScrollAnimation';
 import './CampusClubsPage.css';
 

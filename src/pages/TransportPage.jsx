@@ -9,7 +9,7 @@ import useScrollAnimation from '../hooks/useScrollAnimation';
 import SEO from '../components/SEO';
 import { motion } from 'framer-motion';
 import { FaBus, FaMapMarkedAlt, FaClock, FaUserCheck, FaShieldAlt } from 'react-icons/fa';
-import busImage from '../assets/BUS.jpeg';
+import busImage from '../assets/BUS.webp';
 
 function TransportPage() {
     useScrollAnimation();

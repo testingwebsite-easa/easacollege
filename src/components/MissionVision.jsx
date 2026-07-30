@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaEye, FaBullseye, FaCheckCircle } from 'react-icons/fa';
 import API_BASE_URL from '../api';
-import visionImg from '../assets/vision.png';
-import missionImg from '../assets/mission.png';
+import visionImg from '../assets/vision.webp';
+import missionImg from '../assets/mission.webp';
 
 const MissionVision = () => {
     const [data, setData] = useState({ vision: "", mission: [] });

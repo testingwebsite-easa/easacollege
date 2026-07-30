@@ -7,7 +7,7 @@ import AdmissionCTA from '../components/AdmissionCTA';
 import { motion } from 'framer-motion';
 import useScrollAnimation from '../hooks/useScrollAnimation';
 import API_BASE_URL from '../api';
-import missionBg from '../assets/mission-bg.png'; // Fallback
+import missionBg from '../assets/mission-bg.webp'; // Fallback
 import GlobalHero from '../components/GlobalHero';
 
 const ResearchPage = () => {

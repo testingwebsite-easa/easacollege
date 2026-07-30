@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import missionBg from '../assets/mission-bg.png'; // Fallback or default
+import missionBg from '../assets/mission-bg.webp'; // Fallback or default
 
 const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
     const { scrollY } = useScroll();

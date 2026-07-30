@@ -6,7 +6,7 @@ import AdmissionForm from '../components/AdmissionForm';
 import AdmissionCTA from '../components/AdmissionCTA';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import API_BASE_URL from '../api';
-import missionBg from '../assets/mission-bg.png';
+import missionBg from '../assets/mission-bg.webp';
 
 import GlobalHero from '../components/GlobalHero';
 

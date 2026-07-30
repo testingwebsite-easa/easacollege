@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import missionBg from '../../assets/mission-bg.png';
+import missionBg from '../../assets/mission-bg.webp';
 import AdmissionForm from '../../components/AdmissionForm';
 import AdmissionCTA from '../../components/AdmissionCTA';
 import API_BASE_URL from '../../api';
 import { departments as staticDepartments } from '../../data/departmentsData';
 import { FaFilePdf, FaEye, FaDownload, FaBookOpen, FaGraduationCap, FaChevronDown, FaChevronUp, FaSearch, FaLightbulb, FaMusic, FaFlask, FaFileAlt, FaTimes, FaGlobe } from 'react-icons/fa';
-import collegeLogo from '../../assets/Logo - Blue.png';
+import collegeLogo from '../../assets/Logo - Blue.webp';
 
 import { SYLLABUS_DATA, GENERIC_FIRST_YEAR, getDetailedSyllabusForSubject } from '../../data/syllabusData';
 

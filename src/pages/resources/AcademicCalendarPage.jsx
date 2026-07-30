@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { motion } from 'framer-motion';
-import missionBg from '../../assets/mission-bg.png';
+import missionBg from '../../assets/mission-bg.webp';
 import AdmissionForm from '../../components/AdmissionForm';
 import AdmissionCTA from '../../components/AdmissionCTA';
 import { FaEye, FaDownload, FaFilePdf } from 'react-icons/fa';

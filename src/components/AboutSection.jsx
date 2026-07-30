@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaArrowRight, FaGraduationCap, FaUniversity } from 'react-icons/fa';
-import aboutMain from '../assets/about-main.JPG';
+import aboutMain from '../assets/about-main.webp';
 
 const AboutSection = () => {
     return (

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import missionBg from '../assets/mission-bg.png';
+import missionBg from '../assets/mission-bg.webp';
 import AdmissionForm from '../components/AdmissionForm';
 import AdmissionCTA from '../components/AdmissionCTA';
 import API_BASE_URL from '../api';
