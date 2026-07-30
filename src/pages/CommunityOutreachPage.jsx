@@ -45,7 +45,7 @@ function CommunityOutreachPage() {
                                         <div key={idx} className="glass-card" style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
                                             {project.image && (
                                                 <div style={{ width: '100%', height: '180px', marginBottom: '1.5rem', borderRadius: '12px', overflow: 'hidden' }}>
-                                                    <img loading="lazy" decoding="async" src={project.image} alt={project.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <img src={project.image} alt={project.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 </div>
                                             )}
                                             <h3 style={{ fontSize: '1.3rem', marginBottom: '0.8rem', color: 'var(--primary)' }}>{project.title}</h3>

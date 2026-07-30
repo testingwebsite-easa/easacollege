@@ -87,7 +87,8 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
                                 }}
                             >
                                 <div style={{ width: '100%', height: 'clamp(280px, 40vw, 380px)', overflow: 'hidden' }}>
-                                    <img loading="lazy" decoding="async" src={member.image_url}
+                                    <img
+                                        src={member.image_url}
                                         alt={member.name}
                                         style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                                         onError={(e) => {
@@ -124,7 +125,8 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
                                     }}
                                 >
                                     <div style={{ width: '100%', aspectRatio: '3/4', overflow: 'hidden' }}>
-                                        <img loading="lazy" decoding="async" src={member.image_url}
+                                        <img
+                                            src={member.image_url}
                                             alt={member.name}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                                             onError={(e) => {

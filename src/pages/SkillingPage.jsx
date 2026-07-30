@@ -388,7 +388,7 @@ const SkillingPage = () => {
                             <div className="training-grid">
                                 {data.gallery.map((img, idx) => (
                                     <div key={idx} style={{ background: 'var(--bg-card)', padding: '0.8rem', borderRadius: '24px', border: '1px solid var(--glass-border)', overflow: 'hidden' }}>
-                                        <img loading="lazy" decoding="async" src={img} alt="Skilling" style={{ width: '100%', height: '250px', objectFit: 'cover', borderRadius: '18px' }} />
+                                        <img src={img} alt="Skilling" style={{ width: '100%', height: '250px', objectFit: 'cover', borderRadius: '18px' }} />
                                     </div>
                                 ))}
                             </div>

@@ -27,7 +27,8 @@ const HierarchyNode = ({ member, delay = 0 }) => {
             }}
         >
             <div style={{ width: '100px', height: '100px', margin: '0 auto 1rem', borderRadius: '50%', overflow: 'hidden', border: '3px solid var(--secondary)' }}>
-                <img loading="lazy" decoding="async" src={member.image_url}
+                <img
+                    src={member.image_url}
                     alt={member.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     onError={(e) => {

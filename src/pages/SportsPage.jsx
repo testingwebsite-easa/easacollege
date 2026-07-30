@@ -110,9 +110,11 @@ const SportsPage = () => {
                     <div style={{ marginTop: '2rem', background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--glass-border)', padding: '2rem', textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
                         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '80px', background: 'var(--secondary)', opacity: 0.1 }} />
                         <div style={{ width: '100px', height: '100px', margin: '0 auto 1rem', borderRadius: '50%', overflow: 'hidden', border: '3px solid var(--bg-card)', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', position: 'relative', zIndex: 1 }}>
-                            <img loading="lazy" decoding="async" src="https://ui-avatars.com/api/?name=Physical+Director&background=Random"
+                            <img
+                                src="https://ui-avatars.com/api/?name=Physical+Director&background=Random"
                                 alt="Physical Director"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                         </div>
                         <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.2rem' }}>Dr. Varatharajan .R</h3>
                         <p style={{ fontSize: '0.85rem', color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '1.5rem' }}>Physical Director</p>
@@ -167,7 +169,8 @@ const SportsPage = () => {
                                             }}
                                         >
                                             <div style={{ height: '220px', overflow: 'hidden', position: 'relative' }}>
-                                                <img loading="lazy" decoding="async" src={sport.image}
+                                                <img
+                                                    src={sport.image}
                                                     alt={sport.name}
                                                     style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
                                                     onMouseOver={e => e.target.style.transform = 'scale(1.1)'}
@@ -229,13 +232,13 @@ const SportsPage = () => {
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
                                     {[selectedSport.image, ...selectedSport.gallery].filter(Boolean).map((img, idx) => (
                                         <div key={idx} style={{ borderRadius: '8px', overflow: 'hidden', height: '250px' }}>
-                                            <img loading="lazy" decoding="async" src={img} alt={`Gallery ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src={img} alt={`Gallery ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                     ))}
                                 </div>
                             ) : (
                                 <div style={{ textAlign: 'center', color: '#666' }}>
-                                    <img loading="lazy" decoding="async" src={selectedSport.image} alt={selectedSport.name} style={{ maxWidth: '100%', maxHeight: '600px', borderRadius: '12px' }} />
+                                    <img src={selectedSport.image} alt={selectedSport.name} style={{ maxWidth: '100%', maxHeight: '600px', borderRadius: '12px' }} />
                                     <p style={{ marginTop: '1rem' }}>No additional photos available.</p>
                                 </div>
                             )}

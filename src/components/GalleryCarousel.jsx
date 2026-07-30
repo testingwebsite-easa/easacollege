@@ -110,9 +110,11 @@ const GalleryCarousel = () => {
                                     className="gallery-card"
                                     onClick={() => window.location.href = '/gallery'}
                                 >
-                                    <img loading="lazy" decoding="async" src={item.src}
+                                    <img
+                                        src={item.src}
                                         alt={item.caption}
-                                        className="g-img" />
+                                        className="g-img"
+                                    />
                                     <div className="gallery-overlay" />
                                     <div className="gallery-content">
                                         <div>

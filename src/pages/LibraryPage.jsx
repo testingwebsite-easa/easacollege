@@ -190,7 +190,7 @@ const LibraryPage = () => {
                                             <div key={r.name} className="resource-card-hover" style={{ padding: '2.5rem', borderRadius: '24px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', cursor: 'pointer', transition: 'all 0.3s ease' }} onClick={() => window.open(r.link, '_blank')}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                                                     {r.logo ? (
-                                                        <img loading="lazy" decoding="async" src={r.logo} alt={r.name} style={{ height: '60px', objectFit: 'contain', maxWidth: '180px' }} />
+                                                        <img src={r.logo} alt={r.name} style={{ height: '60px', objectFit: 'contain', maxWidth: '180px' }} />
                                                     ) : (
                                                         <h3 style={{ fontSize: '1.8rem', fontWeight: '800', margin: 0 }}>{r.name}</h3>
                                                     )}
@@ -213,7 +213,7 @@ const LibraryPage = () => {
                                             <a key={l.name} href={l.url} target="_blank" rel="noopener noreferrer" className="resource-card-hover" style={{ padding: '3rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', textDecoration: 'none', borderRadius: '24px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', transition: 'all 0.3s ease' }}>
                                                 <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginBottom: '0.5rem' }}>
                                                     {l.logo ? (
-                                                        <img loading="lazy" decoding="async" src={l.logo} alt={l.name} style={{ maxHeight: '100%', maxWidth: '90%', objectFit: 'contain' }} />
+                                                        <img src={l.logo} alt={l.name} style={{ maxHeight: '100%', maxWidth: '90%', objectFit: 'contain' }} />
                                                     ) : (
                                                         <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--primary-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                             <FaLink color="var(--primary)" size={32} />
@@ -260,7 +260,7 @@ const LibraryPage = () => {
                                             <div key={m.name} style={{ padding: '3rem 2rem', textAlign: 'center', borderRadius: '32px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
                                                 <div style={{ width: '130px', height: '130px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--secondary), var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', overflow: 'hidden', border: '5px solid var(--glass-highlight)' }}>
                                                     {m.image ? (
-                                                        <img loading="lazy" decoding="async" src={m.image} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        <img src={m.image} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     ) : (
                                                         <FaUserTie size={50} color="white" />
                                                     )}
@@ -291,7 +291,7 @@ const LibraryPage = () => {
                                                 whileHover={{ y: -10 }}
                                                 style={{ height: '240px', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--glass-border)', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
                                             >
-                                                <img loading="lazy" decoding="async" src={img} alt={`Library ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <img src={img} alt={`Library ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </motion.div>
                                         ))}
                                     </div>

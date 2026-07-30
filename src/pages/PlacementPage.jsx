@@ -375,7 +375,8 @@ const PlacementPage = () => {
                                     >
                                         {recruiter.logo ? (
                                             <div style={{ height: '80px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <img loading="lazy" decoding="async" src={recruiter.logo}
+                                                <img
+                                                    src={recruiter.logo}
                                                     alt={recruiter.name}
                                                     style={{
                                                         maxWidth: '85%',

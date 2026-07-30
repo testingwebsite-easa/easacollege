@@ -213,7 +213,7 @@ const AlumniRegistration = () => {
                                             />
                                             {photoPreview ? (
                                                 <div style={{ position: 'relative', width: '100px', height: '100px', margin: '0 auto' }}>
-                                                    <img loading="lazy" decoding="async" src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', border: '3px solid #F8D53D' }} />
+                                                    <img src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', border: '3px solid #F8D53D' }} />
                                                     <div style={{ position: 'absolute', bottom: 0, right: 0, background: '#F8D53D', color: '#000', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}><FaCamera /></div>
                                                 </div>
                                             ) : (
@@ -360,10 +360,12 @@ const AlumniRegistration = () => {
                                             boxShadow: '0 12px 25px rgba(0,0,0,0.4)',
                                             position: 'relative'
                                         }}>
-                                            <img loading="lazy" decoding="async" src={photoPreview || alumniData?.photoUrl || "https://res.cloudinary.com/dzt6vksue/image/upload/v1/assets/profile-placeholder"}
+                                            <img
+                                                src={photoPreview || alumniData?.photoUrl || "https://res.cloudinary.com/dzt6vksue/image/upload/v1/assets/profile-placeholder"}
                                                 alt="Profile"
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                crossOrigin="anonymous" />
+                                                crossOrigin="anonymous"
+                                            />
                                         </div>
 
                                         {/* Details Column */}

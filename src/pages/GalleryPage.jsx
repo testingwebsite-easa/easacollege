@@ -87,10 +87,12 @@ const GalleryPage = () => {
                             >
                                 <div style={{ height: '350px', overflow: 'hidden', position: 'relative' }}>
                                     {event.photos && event.photos.length > 0 ? (
-                                        <img loading="lazy" decoding="async" src={event.photos[0].src}
+                                        <img
+                                            src={event.photos[0].src}
                                             alt={event.eventName}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }}
-                                            className="album-cover" />
+                                            className="album-cover"
+                                        />
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', background: 'var(--bg-section)' }}>
                                             <FaImages size={60} style={{ opacity: 0.2 }} />
@@ -178,9 +180,11 @@ const GalleryPage = () => {
                             }}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <img loading="lazy" decoding="async" src={selectedImage.src}
+                            <img
+                                src={selectedImage.src}
                                 alt={selectedImage.caption}
-                                style={{ maxWidth: '100%', maxHeight: '90vh', display: 'block' }} />
+                                style={{ maxWidth: '100%', maxHeight: '90vh', display: 'block' }}
+                            />
                             <div style={{ padding: '3rem', background: 'linear-gradient(to top, rgba(0,0,0,0.95), transparent)', position: 'absolute', bottom: 0, width: '100%', color: 'white' }}>
                                 <h3 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900' }}>{selectedImage.caption || selectedEvent?.eventName}</h3>
                             </div>

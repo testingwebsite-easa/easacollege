@@ -139,9 +139,11 @@ const NewsEventsSection = () => {
                                     {/* Image Container */}
                                     <div className="image-container">
                                         <div className="image-overlay" />
-                                        <img loading="lazy" decoding="async" src={item.image || 'https://via.placeholder.com/400x300'}
+                                        <img
+                                            src={item.image || 'https://via.placeholder.com/400x300'}
                                             alt={item.title}
-                                            className="news-image" />
+                                            className="news-image"
+                                        />
 
                                         {/* Date Badge */}
                                         {item.date && (

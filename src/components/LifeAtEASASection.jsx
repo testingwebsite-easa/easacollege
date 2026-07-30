@@ -73,9 +73,11 @@ const LifeAtEASASection = () => {
                             whileHover={{ y: -10 }}
                             className="life-card"
                         >
-                            <img loading="lazy" decoding="async" src={item.imageUrl}
+                            <img
+                                src={item.imageUrl}
                                 alt={item.title}
-                                className="life-img" />
+                                className="life-img"
+                            />
                             <div className="life-overlay" />
                             <div className="life-content">
                                 <span className="life-category">

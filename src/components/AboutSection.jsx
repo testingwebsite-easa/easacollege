@@ -68,10 +68,12 @@ const AboutSection = () => {
                         <div className="about-image-corner top-left" style={{ position: 'absolute', top: '-20px', left: '-20px', width: '120px', height: '120px', borderTop: '4px solid var(--secondary)', borderLeft: '4px solid var(--secondary)', borderRadius: '20px' }}></div>
                         <div className="about-image-corner bottom-right" style={{ position: 'absolute', bottom: '-20px', right: '-20px', width: '120px', height: '120px', borderBottom: '4px solid var(--secondary)', borderRight: '4px solid var(--secondary)', borderRadius: '20px' }}></div>
                         <div className="about-image-container" style={{ borderRadius: '30px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.2)' }}>
-                            <img loading="lazy" decoding="async" src={aboutMain}
+                            <img
+                                src={aboutMain}
                                 alt="EASA College Campus"
                                 className="about-image"
-                                style={{ width: '110%', height: '550px', objectFit: 'cover' }} />
+                                style={{ width: '110%', height: '550px', objectFit: 'cover' }}
+                            />
                         </div>
                     </div>
                 </div>

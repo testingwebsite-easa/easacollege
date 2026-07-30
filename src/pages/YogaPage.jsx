@@ -54,9 +54,11 @@ function YogaPage() {
                             boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
                             border: '1px solid var(--glass-border)'
                         }}>
-                            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                            <img
+                                src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
                                 alt="Yoga Session"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                         </div>
                         <div style={{
                             position: 'absolute',
