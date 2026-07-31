@@ -28,7 +28,8 @@ export const HeroCarousel = ({ onApplyClick }) => {
         {
             title: "EASA College of Engineering and Technology",
             subtitle: "Empowering Minds, Engineering the Future",
-            image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1920&q=80"
+            image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1920&q=80",
+            mobileImage: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80"
         }
     ];
 
@@ -302,16 +303,42 @@ export const HeroCarousel = ({ onApplyClick }) => {
                     }
                 }
 
-                /* Hero Image Override */
+                /* Hero Image Override & Mobile Picture Container */
+                .hero-bg-picture {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    overflow: hidden;
+                    display: block;
+                }
+
                 .hero-bg-image {
                     height: 100% !important;
                     width: 100% !important;
                     max-width: none !important;
                     object-fit: cover !important;
+                    object-position: center !important;
                     position: absolute;
                     top: 0;
                     left: 0;
                     z-index: 0;
+                }
+
+                .hero-bg-image.fit-contain {
+                    object-fit: contain !important;
+                    background-color: #0b0f19;
+                }
+
+                @media (max-width: 768px) {
+                    .hero-bg-image {
+                        object-fit: cover !important;
+                        object-position: center center !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                    }
                 }
             `}</style>
             <Slider {...settings}>
@@ -324,23 +351,35 @@ export const HeroCarousel = ({ onApplyClick }) => {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            {/* Background Image */}
-                            <img
-                                src={slide.image}
-                                alt={slide.title}
-                                className="hero-bg-image"
-                                fetchPriority={index === 0 ? "high" : "low"}
-                                loading={index === 0 ? "eager" : "lazy"}
-                                decoding="async"
-                                style={{
-                                    transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)', // Subtle zoom effect on active
-                                    transition: 'transform 6s ease' // Long zoom over time
-                                }}
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
-                                }}
-                            />
+                            {/* Background Image with HTML5 Picture tag for Desktop / Mobile resolution separation */}
+                            <picture className="hero-bg-picture">
+                                {(slide.mobileImage || slide.mobile_image || slide.imageMobile || slide.mobileUrl || slide.mobile_url) && (
+                                    <source
+                                        media="(max-width: 768px)"
+                                        srcSet={slide.mobileImage || slide.mobile_image || slide.imageMobile || slide.mobileUrl || slide.mobile_url}
+                                    />
+                                )}
+                                <source
+                                    media="(min-width: 769px)"
+                                    srcSet={slide.image || slide.desktopImage || slide.desktop_image}
+                                />
+                                <img
+                                    src={slide.image || slide.desktopImage || slide.desktop_image}
+                                    alt={slide.title || "Hero Slide"}
+                                    className={`hero-bg-image ${slide.fit === 'contain' || slide.mobileFit === 'contain' ? 'fit-contain' : ''}`}
+                                    fetchPriority={index === 0 ? "high" : "low"}
+                                    loading={index === 0 ? "eager" : "lazy"}
+                                    decoding="async"
+                                    style={{
+                                        transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)', // Subtle zoom effect on active
+                                        transition: 'transform 6s ease' // Long zoom over time
+                                    }}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+                                    }}
+                                />
+                            </picture>
 
                             {/* Content Overlay */}
                             <div className="hero-content-container">

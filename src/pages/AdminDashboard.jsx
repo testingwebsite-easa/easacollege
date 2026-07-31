@@ -269,7 +269,7 @@ const AdminDashboard = () => {
 
     // Forms State
     const [sessionForm, setSessionForm] = useState({ title: '', startDate: '', endDate: '', status: 'Upcoming', description: '' });
-    const [heroForm, setHeroForm] = useState({ image: '', title: '', subtitle: '', titleColor: '#ffffff', subtitleColor: '#ffffff', buttonBgColor: '#1B2A6B', buttonTextColor: '#ffffff' });
+    const [heroForm, setHeroForm] = useState({ image: '', mobileImage: '', title: '', subtitle: '', titleColor: '#ffffff', subtitleColor: '#ffffff', buttonBgColor: '#1B2A6B', buttonTextColor: '#ffffff' });
     const [programForm, setProgramForm] = useState({ title: '', subtitle: '', description: '', image: '', color: '' });
     const [newsForm, setNewsForm] = useState({ image: '', title: '', date: '', category: '', desc: '', pdf_url: '' });
     const [placementForm, setPlacementForm] = useState({ name: '', logo: '', row: 1 });
@@ -1256,10 +1256,14 @@ const AdminDashboard = () => {
                             </div>
 
                             {activeTab === 'hero' && (
-                                <form onSubmit={(e) => handleGenericSubmit(e, heroForm, setHeroForm, '/api/hero-slides', setHeroSlides, { image: '', title: '', subtitle: '', titleColor: '#ffffff', subtitleColor: '#ffffff', buttonBgColor: '#1B2A6B', buttonTextColor: '#ffffff' })} style={{ display: 'grid', gap: '1rem' }}>
+                                <form onSubmit={(e) => handleGenericSubmit(e, heroForm, setHeroForm, '/api/hero-slides', setHeroSlides, { image: '', mobileImage: '', title: '', subtitle: '', titleColor: '#ffffff', subtitleColor: '#ffffff', buttonBgColor: '#1B2A6B', buttonTextColor: '#ffffff' })} style={{ display: 'grid', gap: '1rem' }}>
                                     <div>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Background Image</label>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Desktop Background Image</label>
                                         <ImageUpload value={heroForm.image} onUpload={(url) => setHeroForm({ ...heroForm, image: url })} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Mobile Background Image (Optional)</label>
+                                        <ImageUpload value={heroForm.mobileImage || ''} onUpload={(url) => setHeroForm({ ...heroForm, mobileImage: url })} />
                                     </div>
                                     {renderInput('Title', 'title', heroForm.title, e => setHeroForm({ ...heroForm, title: e.target.value }))}
                                     {renderInput('Subtitle', 'subtitle', heroForm.subtitle, e => setHeroForm({ ...heroForm, subtitle: e.target.value }))}

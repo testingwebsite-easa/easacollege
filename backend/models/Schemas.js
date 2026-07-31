@@ -17,6 +17,8 @@ NewsEventSchema.index({ category: 1 });
 
 const HeroSlideSchema = new mongoose.Schema({
     image: String,
+    mobileImage: String,
+    fit: { type: String, default: 'cover' },
     title: String,
     subtitle: String,
     titleColor: { type: String, default: '#ffffff' },
