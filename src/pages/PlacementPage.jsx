@@ -8,7 +8,6 @@ import {
     FaChevronRight, FaGraduationCap, FaCode, FaMicrochip, FaBuilding,
     FaMoneyBillWave, FaLightbulb, FaHandsHelping, FaLaptopCode, FaCheckDouble
 } from 'react-icons/fa';
-import * as FaIcons from 'react-icons/fa';
 import { useTheme } from '../context/ThemeContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';

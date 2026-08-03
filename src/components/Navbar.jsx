@@ -9,8 +9,8 @@ import headerLogoLight from '../assets/College Logo with Blue Letter.webp';
 import accreditationsLight from '../assets/6 Logos with blue Letter.webp';
 import accreditationsDark from '../assets/6 Logos with white Letter.webp';
 import yearsOfExcellence from '../assets/years-of-excellence.webp';
-import languages from '../data/languages.json';
 import NewsTicker from './NewsTicker';
+import languages from '../data/languages.json';
 import { departments as staticDepartments } from '../data/departmentsData';
 
 const NAV_ITEMS = [
@@ -129,18 +129,13 @@ const NAV_ITEMS = [
                 title: 'IQAC',
                 children: [
                     { title: 'About', href: '/iqac-about' },
-                    { title: 'Committee', href: '/iqac-committee' },
-                    { title: 'AQAR', href: '/iqac-aqar' },
-                    { title: 'Meeting Minutes', href: '/iqac-minutes' }
+                    { title: 'Committee', href: '/iqac-committee' }
                 ]
             },
             // { title: 'SDGS @EASA', href: '/sdgs' },
             { title: 'Centre of Excellence', href: '/coe' },
             { title: "Professional Chapters", href: "/professional-chapters" },
-            { title: 'Spark Innovation Lab', href: '/spark-lab' },
-            { title: 'Evolve Makerspace Lab', href: '/evolve-makerspace' },
-            { title: 'Evoke Project Lab', href: '/evoke-project' },
-            { title: 'Leap Incubation Lab', href: '/leap-incubation' },
+            { title: 'Idea Lab', href: '/idea-lab' },
             { title: 'ASCEND (Career Advancement Centre)', href: '/ascend-center' }
         ]
     },

@@ -105,7 +105,7 @@ const ResearchListingPage = () => {
                                         alt={item.title}
                                         style={{
                                             width: '100%',
-                                            height: '180px',
+                                            height: '190px',
                                             objectFit: 'cover',
                                             borderRadius: '0.75rem',
                                             marginBottom: '1rem',
@@ -113,10 +113,43 @@ const ResearchListingPage = () => {
                                         }}
                                     />
                                 )}
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>{item.title}</h2>
-                                <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', flex: 1 }}>
+
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                    {item.type && (
+                                        <span style={{ padding: '0.25rem 0.65rem', background: 'var(--primary-glow, rgba(27,42,107,0.1))', color: 'var(--primary, #1B2A6B)', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '700' }}>
+                                            {item.type}
+                                        </span>
+                                    )}
+                                    {item.status && (
+                                        <span style={{ padding: '0.25rem 0.65rem', background: item.status === 'Completed' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: item.status === 'Completed' ? '#059669' : '#d97706', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '700' }}>
+                                            {item.status}
+                                        </span>
+                                    )}
+                                    {item.year && (
+                                        <span style={{ padding: '0.25rem 0.65rem', background: 'var(--glass-highlight, #f3f4f6)', color: 'var(--text-main, #333)', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '600' }}>
+                                            {item.year}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-main)' }}>{item.title}</h2>
+
+                                {item.author && (
+                                    <p style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--primary)', marginBottom: '0.4rem' }}>
+                                        👤 {item.author}
+                                    </p>
+                                )}
+
+                                {item.department && (
+                                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                                        🏛️ {item.department}
+                                    </p>
+                                )}
+
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '1.25rem', flex: 1 }}>
                                     {item.description}
                                 </p>
+
                                 {item.link && (
                                     <a
                                         href={item.link}
@@ -125,11 +158,15 @@ const ResearchListingPage = () => {
                                         style={{
                                             color: 'var(--primary)',
                                             fontWeight: 600,
-                                            textDecoration: 'underline',
-                                            marginTop: 'auto'
+                                            textDecoration: 'none',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.4rem',
+                                            marginTop: 'auto',
+                                            fontSize: '0.9rem'
                                         }}
                                     >
-                                        Learn more
+                                        Read More / View Details →
                                     </a>
                                 )}
                             </div>

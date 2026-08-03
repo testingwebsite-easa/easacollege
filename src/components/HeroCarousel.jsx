@@ -28,8 +28,8 @@ export const HeroCarousel = ({ onApplyClick }) => {
         {
             title: "EASA College of Engineering and Technology",
             subtitle: "Empowering Minds, Engineering the Future",
-            image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1920&q=80",
-            mobileImage: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80"
+            image: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlufknq3G5LFb-mAJV4AWzIqN0InRpsLOujTCmaHqUcJ55AAz4CYKfO0AAeJ6eNmTRrYimN2o-rBL_w7KkaROavE3zl0xUX9DSAqN8N4XmbfTalti_PeoBUJ35oq3bXawP8KsE=s680-w680-h510-rw",
+            mobileImage: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWmqJDBQfqeJLgjWVjtIUVBVC-6cYjmEvQl-Txmi8h7psEy7l8BH2xpkw8Ik-eE5mYf2wuLmhywGJjahQ-2_MWQZntPc86DUJWI5zzSGBxlh4yUeWxNZ6mvcr1_zEO_9cWQQ6NJN=s680-w680-h510-rw"
         }
     ];
 
@@ -162,7 +162,7 @@ export const HeroCarousel = ({ onApplyClick }) => {
                     border-color: #FCCA26 !important;
                     box-shadow: 0 6px 20px rgba(252, 202, 38, 0.4);
                     transform: translateY(-2px);
-                }
+                                        }
                 
                 /* Custom Arrows */
                 .custom-slick-arrow {

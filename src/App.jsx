@@ -89,6 +89,7 @@ const SdgsPage = lazy(() => import('./pages/SdgsPage'));
 const ObePage = lazy(() => import('./pages/ObePage'));
 const NirfPage = lazy(() => import('./pages/NirfPage'));
 const Login = lazy(() => import('./pages/Login'));
+const IdeaLabPage = lazy(() => import('./pages/IdeaLabPage'));
 
 
 
@@ -133,6 +134,8 @@ function App() {
             <Route path="/community-outreach" element={<CommunityOutreachPage />} />
             <Route path="/admin/applications" element={<JobApplicationsView />} />
             <Route path="/research" element={<ResearchPage />} />
+            <Route path="/rd" element={<ResearchPage />} />
+            <Route path="/rd-cell" element={<ResearchPage />} />
             <Route path="/department/:id" element={<DepartmentPage />} />
             {/* Research Listing Routes */}
             <Route path="/department-research" element={<ResearchListingPage />} />
@@ -203,12 +206,9 @@ function App() {
             <Route path="/sdgs" element={<SdgsPage />} />
             <Route path="/obe" element={<ObePage />} />
             <Route path="/nirf" element={<NirfPage />} />
-
-
+            <Route path="/idea-lab" element={<IdeaLabPage />} />
             <Route path="/page/cafeteria" element={<CafeteriaPage />} />
-
             <Route path="/page/food-court" element={<FoodCourtPage />} />
-
             <Route path="/page/:slug" element={<DynamicPage />} />
 
             {/* 404 Catch-all */}

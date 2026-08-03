@@ -676,7 +676,128 @@ const sportsData = [
     { name: 'Chess', type: 'Indoor', count: '50 Boards', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?q=80&w=2158&auto=format&fit=crop', description: 'Dedicated chess room.' },
     { name: 'Carrom', type: 'Indoor', count: '20 Boards', image: 'https://images.unsplash.com/photo-1634804658555-212dc345e2cd?q=80&w=2070&auto=format&fit=crop', description: 'Standard carrom boards.' }
 ];
-const researchItemsData = [];
+const researchItemsData = [
+    {
+        title: "International Research Webinar on Deep Learning & Medical Imaging",
+        category: "department-research",
+        type: "Research Seminar",
+        author: "Dr. A. R. Ramanathan (Resource Person, IIT Madras)",
+        department: "Computer Science and Engineering",
+        year: "2026",
+        status: "Completed",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop",
+        description: "Special researcher session on applying convolutional neural networks and transformer models for early diagnostic cancer detection in medical radiology datasets.",
+        link: "https://easacollege.ac.in/research/medical-imaging-session"
+    },
+    {
+        title: "Research Colloquium on Renewable Energy Micro-Grids",
+        category: "department-research",
+        type: "Colloquium",
+        author: "Dr. K. Meenakshi & Research Team",
+        department: "Electrical & Electronics Engineering",
+        year: "2026",
+        status: "Completed",
+        image: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=1200&auto=format&fit=crop",
+        description: "Deliberation on smart grid communication protocols, peak load forecasting algorithms, and solar PV integration into rural power distribution grids.",
+        link: "https://easacollege.ac.in/research/microgrid-colloquium"
+    },
+    {
+        title: "Faculty Development Programme (FDP) on High-Impact Research Paper Writing",
+        category: "faculty-research",
+        type: "FDP / Workshop",
+        author: "Dr. S. K. Sundaram (NIT Trichy)",
+        department: "R&D Cell & Faculty Research Wing",
+        year: "2026",
+        status: "Completed",
+        image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=1200&auto=format&fit=crop",
+        description: "Comprehensive 5-day research methodology workshop focusing on Scopus/WoS journal indexing standards, latex formatting, citation analytics, and handling peer reviewer comments.",
+        link: "https://easacollege.ac.in/research/fdp-paper-writing"
+    },
+    {
+        title: "Grant Proposal & Funded Project Formulation Session",
+        category: "faculty-research",
+        type: "Expert Lecture",
+        author: "Dr. V. Rajeshwari (DST Representative)",
+        department: "R&D Cell",
+        year: "2025",
+        status: "Completed",
+        image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&auto=format&fit=crop",
+        description: "Guidance session for faculty members on securing research funding from DST, SERB, AICTE, and CSIR for institutional innovation projects.",
+        link: "https://easacollege.ac.in/research/grant-formulation"
+    },
+    {
+        title: "Annual Student Research Symposium (ASRS 2026) - Smart IoT Solutions",
+        category: "student-research",
+        type: "Symposium",
+        author: "CSE & ECE Student Researchers",
+        department: "Computer Science & Engineering",
+        year: "2026",
+        status: "Completed",
+        image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1200&auto=format&fit=crop",
+        description: "Exhibition and presentation of student-led research papers and working prototypes in industrial automation, agricultural IoT, and environmental monitoring.",
+        link: "https://easacollege.ac.in/research/asrs-2026"
+    },
+    {
+        title: "Paper Presentation Session on Autonomous Robotics & Drones",
+        category: "student-research",
+        type: "Paper Presentation",
+        author: "Mechanical & Mechatronics Student Forum",
+        department: "Mechanical Engineering",
+        year: "2025",
+        status: "Completed",
+        image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1200&auto=format&fit=crop",
+        description: "Student research presentations discussing drone path planning algorithms, payload balancing, and lightweight composite drone frame design.",
+        link: "https://easacollege.ac.in/research/drones-paper-presentation"
+    },
+    {
+        title: "Joint Industrial Research Workshop on Cyber Security & Digital Forensics",
+        category: "industrial-research",
+        type: "Industry-Academia Workshop",
+        author: "Maxbite Technologies & Cyber Defense Experts",
+        department: "Cyber Security & IT",
+        year: "2026",
+        status: "Completed",
+        image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop",
+        description: "Collaborative research session with industry engineers addressing threat hunting, zero-day vulnerability analysis, and ethical hacking protocols.",
+        link: "https://easacollege.ac.in/research/industrial-cybersecurity"
+    },
+    {
+        title: "Interactive Awareness Session on Intellectual Property Rights & Patent Drafting",
+        category: "ipr-cell",
+        type: "IPR Workshop",
+        author: "Adv. M. Vignesh (Registered Patent Agent)",
+        department: "IPR Cell",
+        year: "2026",
+        status: "Completed",
+        image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=1200&auto=format&fit=crop",
+        description: "Step-by-step guidance on novelty searching using Indian Patent Office databases, filing provisional specifications, and commercializing academic patents.",
+        link: "https://easacollege.ac.in/research/ipr-patent-workshop"
+    },
+    {
+        title: "AI-Powered Smart Agricultural Crop Disease Detection System",
+        category: "rd-projects",
+        type: "Funded Project",
+        author: "Dr. P. Chandran & R&D Team",
+        department: "AI & Data Science",
+        year: "2025-2026",
+        status: "Ongoing",
+        image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1200&auto=format&fit=crop",
+        description: "Ongoing sponsored research project aimed at developing low-cost edge AI devices for real-time leaf spot detection and yield prediction for local farmers.",
+        link: "https://easacollege.ac.in/research/crop-disease-ai"
+    },
+    {
+        title: "Patent Granted: Smart Automated Biomedical Waste Disposal & Sterilization Device",
+        category: "patents",
+        type: "Patent",
+        author: "Dept. of Biomedical Engineering & IPR Cell",
+        department: "Biomedical Engineering",
+        year: "2025",
+        status: "Granted",
+        image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1200&auto=format&fit=crop",
+        description: "Official Indian Patent granted for compact eco-friendly hospital waste treatment system using automated UV-C sterilization and automated shredding.",
+        link: "https://easacollege.ac.in/research/patents/biomedical-disposal"
+    }
+];
 const careersData = [];
 const placementPageData = {
     name: "Training & Placement Cell",

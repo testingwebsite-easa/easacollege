@@ -8,7 +8,6 @@ import {
     FaChevronRight, FaCertificate, FaLaptopCode, FaTools, FaLightbulb,
     FaMicrochip, FaCode, FaCloud, FaRobot, FaBrain, FaBuilding, FaCheckDouble
 } from 'react-icons/fa';
-import * as FaIcons from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
