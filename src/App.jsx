@@ -37,6 +37,7 @@ const SyllabusPage = lazy(() => import('./pages/resources/SyllabusPage'));
 
 import ScrollToTop from './components/ScrollToTop';
 import ScrollToTopButton from './components/ScrollToTopButton';
+import StickyContactBar from './components/StickyContactBar';
 import LoadingBar from './components/LoadingBar';
 const DynamicPage = lazy(() => import('./pages/DynamicPage'));
 const ResearchListingPage = lazy(() => import('./pages/ResearchListingPage'));
@@ -217,6 +218,7 @@ function App() {
           </Routes>
         </Suspense>
           <ScrollToTopButton />
+          <StickyContactBar />
 
         </Router>
       </ThemeProvider>

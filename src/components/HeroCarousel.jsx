@@ -424,25 +424,6 @@ export const HeroCarousel = ({ onApplyClick }) => {
                                     </motion.p>
                                 </motion.div>
                             </div>
-
-                            {/* Admissions Button Centered at Bottom */}
-                            <motion.div
-                                variants={itemVariants}
-                                initial="hidden"
-                                animate={index === currentSlide ? "visible" : "hidden"}
-                                className="hero-btn-group"
-                            >
-                                <button
-                                    className="btn btn-primary hero-btn"
-                                    onClick={onApplyClick}
-                                    style={{
-                                        ...(slide.buttonBgColor ? { backgroundColor: slide.buttonBgColor, background: slide.buttonBgColor } : {}),
-                                        ...(slide.buttonTextColor ? { color: slide.buttonTextColor } : {})
-                                    }}
-                                >
-                                    Admissions Open
-                                </button>
-                            </motion.div>
                         </div>
                     </div>
                 ))}

@@ -9,6 +9,9 @@ import API_BASE_URL from '../api';
 import missionBg from '../assets/mission-bg.webp';
 
 import GlobalHero from '../components/GlobalHero';
+import FacultyResearchShowcase from '../components/FacultyResearchShowcase';
+import DepartmentResearchShowcase from '../components/DepartmentResearchShowcase';
+import StudentResearchShowcase from '../components/StudentResearchShowcase';
 
 const ResearchListingPage = () => {
     const { category } = useParams();
@@ -34,7 +37,6 @@ const ResearchListingPage = () => {
 
     useEffect(() => {
         setLoading(true);
-        // Simulate API delay for smooth transition or actual fetch
         const endpoint = activeCategory === 'research'
             ? `${API_BASE_URL}/api/research-items`
             : `${API_BASE_URL}/api/research-items?category=${activeCategory}`;
@@ -51,6 +53,10 @@ const ResearchListingPage = () => {
             });
     }, [activeCategory]);
 
+    const isFacultyResearch = activeCategory === 'faculty-research' || activeCategory === 'faculty';
+    const isDeptResearch = activeCategory === 'department-research' || activeCategory === 'department';
+    const isStudentResearch = activeCategory === 'student-research' || activeCategory === 'student';
+
     return (
         <div className="research-page" style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh', background: 'var(--bg-main)' }}>
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
@@ -62,10 +68,15 @@ const ResearchListingPage = () => {
                 defaultImage={missionBg}
             />
 
-
-            {/* MAIN CONTENT - IMPRESSIVE GRID */}
-            <main style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem', minHeight: '40vh' }}>
-                {loading ? (
+            {/* MAIN CONTENT */}
+            <main style={{ width: '100%', maxWidth: '1250px', margin: '0 auto', padding: '2rem 1.5rem', minHeight: '40vh' }}>
+                {isFacultyResearch ? (
+                    <FacultyResearchShowcase />
+                ) : isDeptResearch ? (
+                    <DepartmentResearchShowcase />
+                ) : isStudentResearch ? (
+                    <StudentResearchShowcase />
+                ) : loading ? (
                     <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
                         <span className="loader" style={{ display: 'inline-block', marginRight: '1rem' }} />
                         Loading research items...

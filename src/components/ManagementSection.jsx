@@ -13,13 +13,16 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
         fetch(url)
             .then(res => res.json())
             .then(data => {
-                const limitedData = (!category || isStatic) ? data.slice(0, 5) : data;
+                const filteredData = Array.isArray(data)
+                    ? data.filter(m => m.category !== 'principal' && !m.designation?.toLowerCase().includes('principal'))
+                    : [];
+                const limitedData = (!category || isStatic) ? filteredData.slice(0, 5) : filteredData;
                 setManagementTeam(limitedData);
             })
             .catch(err => console.error("Error fetching management team:", err));
     }, [category, isStatic]);
 
-    const isScrolling = !isStatic && !!category;
+    const isScrolling = false;
 
     return (
         <section style={{ padding: 'clamp(2rem, 5vw, 4rem) 0', background: 'var(--bg-main)', position: 'relative', overflow: 'hidden' }}>
@@ -70,74 +73,74 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
 
             <div style={{ width: '100%', padding: '0 2rem' }}>
                 {isScrolling ? (
-                    <div className="infinite-scroll-track" style={{ display: 'flex', gap: '2.5rem', animation: 'management-scroll 40s linear infinite' }}>
+                    <div className="infinite-scroll-track" style={{ display: 'flex', gap: '1.5rem', animation: 'management-scroll 40s linear infinite' }}>
                         {[...managementTeam, ...managementTeam].map((member, index) => (
                             <motion.div
                                 key={index}
-                                whileHover={{ y: -12 }}
+                                whileHover={{ y: -8 }}
                                 style={{
-                                    width: '320px',
+                                    width: '230px',
                                     flexShrink: 0,
-                                    borderRadius: '24px',
+                                    borderRadius: '16px',
                                     background: 'var(--bg-card)',
                                     border: '1px solid var(--glass-border)',
                                     overflow: 'hidden',
-                                    boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
+                                    boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
                                     transition: 'all 0.3s ease'
                                 }}
                             >
-                                <div style={{ width: '100%', height: 'clamp(280px, 40vw, 380px)', overflow: 'hidden' }}>
+                                <div style={{ width: '100%', height: '210px', overflow: 'hidden' }}>
                                     <img
                                         src={member.image_url}
                                         alt={member.name}
                                         style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                                         onError={(e) => {
                                             e.target.onerror = null;
-                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=3E3E7E&color=fff&size=400`;
+                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=3E3E7E&color=fff&size=300`;
                                         }}
                                     />
                                 </div>
-                                <div style={{ padding: '1.5rem 1rem', textAlign: 'center', minHeight: '120px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                    <h3 style={{ fontSize: 'clamp(1.1rem, 2vw, 1.4rem)', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-main)', lineHeight: '1.2' }}>{member.name}</h3>
-                                    <p style={{ color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.75rem' }}>{member.designation}</p>
+                                <div style={{ padding: '1rem 0.8rem', textAlign: 'center', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    <h3 style={{ fontSize: '1.05rem', fontWeight: '800', marginBottom: '0.2rem', color: 'var(--text-main)', lineHeight: '1.2' }}>{member.name}</h3>
+                                    <p style={{ color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', fontSize: '0.7rem' }}>{member.designation}</p>
                                 </div>
                             </motion.div>
                         ))}
                     </div>
                 ) : (
-                    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+                    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div className="management-static-grid">
                             {managementTeam.map((member, index) => (
                                 <motion.div
                                     key={index}
-                                    initial={{ opacity: 0, y: 30 }}
+                                    initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1, duration: 0.6 }}
+                                    transition={{ delay: index * 0.08, duration: 0.5 }}
                                     viewport={{ once: true }}
-                                    whileHover={{ y: -10 }}
+                                    whileHover={{ y: -6 }}
                                     style={{
                                         background: 'var(--bg-card)',
-                                        borderRadius: '24px',
+                                        borderRadius: '16px',
                                         border: '1px solid var(--glass-border)',
                                         overflow: 'hidden',
-                                        boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
+                                        boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
                                         transition: 'all 0.3s ease'
                                     }}
                                 >
-                                    <div style={{ width: '100%', aspectRatio: '3/4', overflow: 'hidden' }}>
+                                    <div style={{ width: '100%', height: '210px', overflow: 'hidden' }}>
                                         <img
                                             src={member.image_url}
                                             alt={member.name}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                                             onError={(e) => {
                                                 e.target.onerror = null;
-                                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=3E3E7E&color=fff&size=400`;
+                                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=3E3E7E&color=fff&size=300`;
                                             }}
                                         />
                                     </div>
-                                    <div style={{ padding: '1.5rem 1rem', textAlign: 'center', minHeight: '100px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                        <h3 style={{ fontSize: 'clamp(1rem, 1.5vw, 1.2rem)', fontWeight: '800', marginBottom: '0.3rem', color: 'var(--text-main)', lineHeight: '1.2' }}>{member.name}</h3>
-                                        <p style={{ color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.7rem' }}>{member.designation}</p>
+                                    <div style={{ padding: '1rem 0.8rem', textAlign: 'center', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                        <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '0.2rem', color: 'var(--text-main)', lineHeight: '1.2' }}>{member.name}</h3>
+                                        <p style={{ color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', fontSize: '0.7rem' }}>{member.designation}</p>
                                     </div>
                                 </motion.div>
                             ))}
@@ -156,23 +159,16 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
                 }
                 .management-static-grid {
                     display: grid;
-                    grid-template-columns: repeat(5, 1fr);
-                    gap: 1.5rem;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 1.25rem;
                     width: 100%;
-                }
-                @media (max-width: 1200px) {
-                    .management-static-grid { grid-template-columns: repeat(4, 1fr); }
-                }
-                @media (max-width: 992px) {
-                    .management-static-grid { grid-template-columns: repeat(3, 1fr); }
                 }
                 @media (max-width: 768px) {
                     .management-static-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
                 }
-                @media (max-width: 550px) {
-                    .management-static-grid { grid-template-columns: 1fr; gap: 1rem; }
+                @media (max-width: 480px) {
+                    .management-static-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
                 }
-
             `}</style>
         </section>
     );

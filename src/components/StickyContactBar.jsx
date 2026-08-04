@@ -12,10 +12,9 @@ const StickyContactBar = () => {
 
     useEffect(() => {
         const checkVisibility = () => {
-            const isMobile = window.innerWidth <= 768;
             const isAdmin = location.pathname.startsWith('/admin') || location.pathname === '/login';
 
-            if (isMobile || isAdmin) {
+            if (isAdmin) {
                 setIsVisible(false);
             } else {
                 setIsVisible(true);
@@ -67,23 +66,23 @@ const StickyContactBar = () => {
                     </a>
                 </div>
 
-                {/* Vertical Tabs Section */}
+                {/* Right Side Vertical Buttons Section */}
                 <div className="vertical-tabs-container">
                     <button
                         onClick={() => setShowAdmissionForm(true)}
-                        className="vertical-tab admission-tab"
-                        aria-label="Apply Online"
-                        style={{ cursor: 'pointer', border: 'none', textAlign: 'center' }}
+                        className="side-tab-btn admission-tab"
+                        aria-label="Admission"
                     >
-                        Apply Online
+                        <span className="tab-yellow-accent"></span>
+                        <span className="tab-text">Admission</span>
                     </button>
                     <button
                         onClick={() => setShowEnquiryForm(true)}
-                        className="vertical-tab enquiry-tab"
+                        className="side-tab-btn enquiry-tab"
                         aria-label="Enquire Now"
-                        style={{ cursor: 'pointer', border: 'none', textAlign: 'center' }}
                     >
-                        Enquire Now
+                        <span className="tab-yellow-accent"></span>
+                        <span className="tab-text">Enquire Now</span>
                     </button>
                 </div>
             </div>
@@ -99,17 +98,17 @@ const StickyContactBar = () => {
                     transform: translateY(-50%);
                     display: flex;
                     flex-direction: column;
-                    align-items: flex-end; /* Align contents to the right */
-                    gap: 1.5rem; /* Gap between icons block and tabs block */
+                    align-items: flex-end;
+                    gap: 1.2rem;
                     z-index: 99999;
-                    pointer-events: none; /* Let clicks pass through empty areas */
+                    pointer-events: none;
                 }
 
                 .sidebar-contact-container {
                     display: flex;
                     flex-direction: column;
                     gap: 1rem;
-                    padding-right: 20px; /* Floating effect for icons */
+                    padding-right: 15px;
                     pointer-events: auto;
                 }
                 .sidebar-link {
@@ -120,14 +119,14 @@ const StickyContactBar = () => {
                     position: relative;
                 }
                 .sidebar-icon {
-                    width: 50px;
-                    height: 50px;
+                    width: 46px;
+                    height: 46px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     border-radius: 50%;
                     color: white;
-                    font-size: 1.2rem;
+                    font-size: 1.1rem;
                     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
                     transition: transform 0.3s ease, box-shadow 0.3s ease;
                     backdrop-filter: blur(10px);
@@ -140,12 +139,12 @@ const StickyContactBar = () => {
                 }
                 .sidebar-label {
                     position: absolute;
-                    right: 60px; /* Position to the left of the icon */
+                    right: 56px;
                     background: rgba(15, 23, 42, 0.9);
                     color: white;
                     padding: 0.5rem 1rem;
                     border-radius: 8px;
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     font-weight: 500;
                     white-space: nowrap;
                     opacity: 0;
@@ -176,7 +175,7 @@ const StickyContactBar = () => {
                 /* Numbers Popup for Call */
                 .sidebar-numbers {
                     position: absolute;
-                    right: 60px;
+                    right: 56px;
                     background: rgba(15, 23, 42, 0.95);
                     padding: 0.5rem;
                     border-radius: 12px;
@@ -201,7 +200,7 @@ const StickyContactBar = () => {
                 .number-link {
                     color: white;
                     text-decoration: none;
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     padding: 0.5rem 1rem;
                     border-radius: 6px;
                     transition: background 0.2s;
@@ -215,60 +214,95 @@ const StickyContactBar = () => {
                     color: #fff;
                 }
 
+                /* Side Tab Buttons matching image style (Compact size) */
                 .vertical-tabs-container {
                     display: flex;
                     flex-direction: column;
-                    gap: 0;
+                    gap: 6px;
                     pointer-events: auto;
                 }
 
-                .vertical-tab {
-                    writing-mode: vertical-rl;
-                    text-orientation: mixed;
-                    transform: rotate(180deg);
-                    padding: 1.5rem 0.6rem;
-                    color: white;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    font-size: 0.9rem;
-                    text-decoration: none;
-                    transition: all 0.3s ease;
-                    box-shadow: -4px 4px 15px rgba(0,0,0,0.2);
-                    border-radius: 0 4px 4px 0;
-                    border: 1px solid rgba(255,255,255,0.1);
-                    font-family: inherit;
+                .side-tab-btn {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    color: #ffffff;
+                    border: none;
+                    border-radius: 6px 0 0 6px;
+                    padding: 0;
+                    cursor: pointer;
+                    overflow: hidden;
+                    box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.4);
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    margin-right: 0;
                 }
 
                 .admission-tab {
-                    background: #3b0764;
-                    background: linear-gradient(to top, #3b0764, #581c87);
+                    background: linear-gradient(180deg, #1e1b4b 0%, #030712 100%) !important;
+                }
+
+                .admission-tab:hover {
+                    transform: translateX(-5px);
+                    background: linear-gradient(180deg, #2e1065 0%, #1e1b4b 100%) !important;
+                    box-shadow: -6px 6px 20px rgba(0, 0, 0, 0.5);
                 }
 
                 .enquiry-tab {
-                    background: #c2410c;
-                    background: linear-gradient(to top, #ea580c, #c2410c);
+                    background: linear-gradient(180deg, #c2410c 0%, #7c2d12 100%) !important;
                 }
 
-                .fees-tab {
-                    background: #1e3a8a;
-                    background: linear-gradient(to top, #1e3a8a, #1d4ed8);
+                .enquiry-tab:hover {
+                    transform: translateX(-5px);
+                    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%) !important;
+                    box-shadow: -6px 6px 20px rgba(0, 0, 0, 0.5);
                 }
 
-                .vertical-tab:hover {
-                    padding-bottom: 2rem;
-                    padding-top: 2rem;
-                    width: 45px;
+                .tab-yellow-accent {
+                    width: 4px;
+                    align-self: stretch;
+                    background: #FCCA26;
+                    box-shadow: 0 0 8px rgba(252, 202, 38, 0.7);
+                    flex-shrink: 0;
+                }
+
+                .side-tab-btn:hover .tab-yellow-accent {
+                    background: #FFE066;
+                    box-shadow: 0 0 12px rgba(252, 202, 38, 1);
+                }
+
+                .tab-text {
+                    writing-mode: vertical-rl;
+                    transform: rotate(180deg);
+                    padding: 0.8rem 0.38rem;
+                    color: #ffffff;
+                    font-weight: 800;
+                    font-size: 0.75rem;
+                    letter-spacing: 0.8px;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                    font-family: inherit;
+                    user-select: none;
                 }
 
                 @media (max-width: 768px) {
+                    .sidebar-contact-container {
+                        display: none;
+                    }
                     .right-side-bar {
-                        display: none !important;
+                        top: 55%;
+                    }
+                    .tab-text {
+                        padding: 0.6rem 0.3rem;
+                        font-size: 0.65rem;
+                        letter-spacing: 0.5px;
+                    }
+                    .tab-yellow-accent {
+                        width: 3px;
                     }
                 }
             `}</style>
         </>
     );
-};
-
+}
 export default StickyContactBar;

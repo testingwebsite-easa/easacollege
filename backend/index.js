@@ -3780,4 +3780,59 @@ app.patch('/api/popup-alert', async (req, res) => {
     }
 });
 
+// ==================== FACULTY RESEARCH ROUTES ====================
+app.get('/api/faculty-research', async (req, res) => {
+    try {
+        const { facultyResearchData } = require('./data');
+        res.json(facultyResearchData || []);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch faculty research data" });
+    }
+});
+
+app.get('/api/faculty-publications', async (req, res) => {
+    try {
+        const { facultyPublicationsData } = require('./data');
+        res.json(facultyPublicationsData || []);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch faculty publications data" });
+    }
+});
+
+app.get('/api/faculty-phd', async (req, res) => {
+    try {
+        const { facultyPhdData } = require('./data');
+        res.json(facultyPhdData || []);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch faculty PhD research program data" });
+    }
+});
+
+app.get('/api/faculty-patents', async (req, res) => {
+    try {
+        const { facultyPatentsData } = require('./data');
+        res.json(facultyPatentsData || []);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch faculty patents data" });
+    }
+});
+
+app.get('/api/department-research-overview', async (req, res) => {
+    try {
+        const { departmentResearchData } = require('./data');
+        res.json(departmentResearchData || []);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch department research overview data" });
+    }
+});
+
+app.get('/api/student-research-items', async (req, res) => {
+    try {
+        const { studentResearchData } = require('./data');
+        res.json(studentResearchData || []);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch student research items data" });
+    }
+});
+
 module.exports = app;

@@ -5,21 +5,49 @@ import API_BASE_URL from '../api';
 import visionImg from '../assets/vision.webp';
 import missionImg from '../assets/mission.webp';
 
-const MissionVision = () => {
-    const [data, setData] = useState({ vision: "", mission: [] });
-    const [loading, setLoading] = useState(true);
+const defaultVision = "To be a world-class centre for engineering, technology and management, empowering individuals ethically to lead, innovate and thrive in an ever-evolving global landscape and create socially responsible citizens.";
 
+const defaultMission = [
+    "To foster a culture of academic excellence, intellectual and personal growth and practical training that includes hands-on experience in the fields of engineering, technology, and management.",
+    "To advance knowledge and drive innovation through cutting-edge research and development in engineering, technology and management.",
+    "To bridge the gap between academia and industry by offering industry aligned programs, practical experience and hands-on training in engineering, technology and management that prepare students to lead, innovate and thrive in an ever-evolving global landscape.",
+    "To prioritise health, safety, diversity, equity and inclusion to create a welcoming and inclusive environment that produces socially responsible citizens.",
+    "To prepare students for successful careers and fulfilling lives by equipping them with the knowledge, skills and ethical principles needed to lead, innovate and thrive in their chosen fields, while emphasising hands-on training as a vital component of their education."
+];
+
+const getMissionPoints = (missionData) => {
+    if (Array.isArray(missionData) && missionData.length > 0) {
+        return missionData;
+    }
+    if (typeof missionData === 'string' && missionData.trim().length > 0) {
+        const points = missionData
+            .split(/(?=\d+\.\s*)/)
+            .map(p => p.replace(/^\d+\.\s*/, '').trim())
+            .filter(p => p.length > 0);
+        if (points.length > 0) return points;
+    }
+    return defaultMission;
+};
+
+const MissionVision = () => {
+    const [data, setData] = useState({ vision: defaultVision, mission: defaultMission });
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/mission-vision`);
-                const result = await response.json();
-                setData(result);
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result && (result.vision || (Array.isArray(result.mission) && result.mission.length > 0))) {
+                        setData({
+                            vision: result.vision || defaultVision,
+                            mission: (Array.isArray(result.mission) && result.mission.length > 0) ? result.mission : defaultMission
+                        });
+                    }
+                }
             } catch (error) {
                 console.error("Error fetching mission data:", error);
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -244,54 +272,70 @@ const MissionVision = () => {
                         whileInView={{ width: '80px' }}
                         style={{ height: '4px', background: 'var(--secondary)', marginBottom: '1.5rem', borderRadius: '2px' }} />
 
-                    <motion.ul
+                    <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                         style={{
-                            listStyle: 'none',
-                            padding: 0,
-                            margin: 0
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1rem'
                         }}
                     >
-                        {data.mission && data.mission.map((item, index) => (
-                            <motion.li
+                        {getMissionPoints(data.mission).map((item, index) => (
+                            <motion.div
                                 key={index}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
+                                variants={itemVariants}
+                                className="mission-point-card"
                                 style={{
-                                    marginBottom: '1rem',
                                     display: 'flex',
                                     alignItems: 'flex-start',
-                                    padding: '0.6rem',
-                                    borderRadius: '8px',
-                                    transition: 'background-color 0.3s'
+                                    gap: '1.2rem',
+                                    padding: '1rem 1.2rem',
+                                    borderRadius: '14px',
+                                    background: 'rgba(255, 255, 255, 0.04)',
+                                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)',
+                                    transition: 'all 0.3s ease'
                                 }}
                             >
                                 <span style={{
-                                    marginRight: '12px',
-                                    color: 'var(--secondary)',
-                                    marginTop: '4px',
-                                    flexShrink: 0
+                                    minWidth: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, var(--secondary, #ec4899), #be185d)',
+                                    color: '#ffffff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: '800',
+                                    fontSize: '0.85rem',
+                                    flexShrink: 0,
+                                    boxShadow: '0 4px 10px rgba(236, 72, 153, 0.3)'
                                 }}>
-                                    <FaCheckCircle size={16} />
+                                    {String(index + 1).padStart(2, '0')}
                                 </span>
                                 <span style={{
                                     color: 'var(--text-muted)',
                                     fontSize: '1.05rem',
-                                    lineHeight: '1.5'
+                                    lineHeight: '1.65',
+                                    fontWeight: '400'
                                 }}>
                                     {item}
                                 </span>
-                            </motion.li>
+                            </motion.div>
                         ))}
-                    </motion.ul>
+                    </motion.div>
                 </div>
             </motion.div>
 
             <style>{`
+                .mission-point-card:hover {
+                    transform: translateX(4px);
+                    border-color: rgba(236, 72, 153, 0.3) !important;
+                    background: rgba(255, 255, 255, 0.07) !important;
+                }
                 @media (max-width: 968px) {
                     .glass-card {
                         grid-template-columns: 1fr !important;

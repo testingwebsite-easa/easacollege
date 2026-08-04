@@ -101,7 +101,18 @@ function InstitutionPage() {
                             style={{ background: 'var(--bg-card)', borderRadius: '32px', padding: '3.5rem', border: '1px solid var(--glass-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.05)' }}
                         >
                             <h2 style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '1.5rem', borderBottom: '4px solid var(--secondary)', width: 'fit-content' }}>Our Mission</h2>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', lineHeight: '1.8' }}>{visionMission.mission}</p>
+                            {Array.isArray(visionMission.mission) ? (
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    {visionMission.mission.map((item, idx) => (
+                                        <li key={idx} style={{ display: 'flex', gap: '0.8rem', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.6' }}>
+                                            <span style={{ fontWeight: '800', color: 'var(--secondary)', flexShrink: 0 }}>{String(idx + 1).padStart(2, '0')}.</span>
+                                            <span>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', lineHeight: '1.8' }}>{visionMission.mission}</p>
+                            )}
                         </motion.div>
                     </div>
                 </div>
