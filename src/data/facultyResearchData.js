@@ -1077,6 +1077,22 @@ export const facultyPublicationsData = [
         pageNo: "-",
         doiIsbn: "-",
         indexing: "Textbook"
+    },
+    {
+        sNo: 47,
+        faculty: "Dr. S. Prem Anand",
+        department: "CSE (Cyber Security)",
+        publicationCategory: "Book",
+        title: "Cyber Security Concepts with Standards and Governance Frameworks",
+        authors: "Mr. S. Balaji, Dr. S. Prem Anand, Mrs. P. Jothi, Mrs. D. Francilin Doli",
+        journalConferenceBook: "Cyber Security Concepts with Standards and Governance Frameworks",
+        publisher: "Yatiraja Scholarly Press",
+        year: "2026",
+        volume: "-",
+        issue: "-",
+        pageNo: "-",
+        doiIsbn: "-",
+        indexing: "Book"
     }
 ];
 
