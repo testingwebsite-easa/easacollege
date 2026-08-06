@@ -2664,7 +2664,7 @@ const facultyPublicationsData = [
     {
         sNo: 47,
         faculty: "Dr. S. Prem Anand",
-        department: "CSE (Cyber Security)",
+        department: "CSE",
         publicationCategory: "Book",
         title: "Cyber Security Concepts with Standards and Governance Frameworks",
         authors: "Mr. S. Balaji, Dr. S. Prem Anand, Mrs. P. Jothi, Mrs. D. Francilin Doli",

@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FaUser, FaGraduationCap, FaBriefcase, FaEnvelope, FaPhone, FaIdCard, FaDownload, FaCamera, FaSpinner } from 'react-icons/fa';
+import { FaUser, FaGraduationCap, FaBriefcase, FaEnvelope, FaPhone, FaIdCard, FaDownload, FaCamera, FaSpinner, FaCheckCircle, FaShieldAlt, FaQrcode } from 'react-icons/fa';
+import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import API_BASE_URL from '../api';
+import collegeLogo from '../assets/College Logo with White Letter.webp';
 
 import GlobalHero from '../components/GlobalHero';
 
@@ -33,7 +35,16 @@ const AlumniRegistration = () => {
             try {
                 const res = await fetch(`${API_BASE_URL}/api/departments`);
                 const data = await res.json();
-                setDepartments(data);
+                if (Array.isArray(data)) {
+                    const sortedData = [...data].sort((a, b) => {
+                        const nameA = (a.name || a.departmentName || a || '').toString().trim();
+                        const nameB = (b.name || b.departmentName || b || '').toString().trim();
+                        return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+                    });
+                    setDepartments(sortedData);
+                } else {
+                    setDepartments([]);
+                }
             } catch (err) {
                 console.error("Error fetching departments:", err);
             }
@@ -90,11 +101,13 @@ const AlumniRegistration = () => {
         try {
             const canvas = await html2canvas(idCardRef.current, {
                 backgroundColor: null,
-                scale: 2 // Higher resolution
+                scale: 3, // Crisp ultra-high resolution export
+                useCORS: true,
+                allowTaint: true
             });
 
             const link = document.createElement('a');
-            link.download = `EASA_Alumni_ID_${formData.name.replace(/\s+/g, '_')}.png`;
+            link.download = `EASA_Alumni_ID_${(formData.name || 'Card').replace(/\s+/g, '_')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         } catch (err) {
@@ -102,6 +115,28 @@ const AlumniRegistration = () => {
             alert("Could not generate ID card. Please try again.");
         }
     };
+
+    const getAlumniPhoto = (url, name = 'Alumni') => {
+        if (!url || typeof url !== 'string' || url.trim() === '' || url.includes('profile-placeholder')) {
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Alumni')}&background=0F172A&color=F8D53D&bold=true&size=200`;
+        }
+        return url;
+    };
+
+    const displayPhone = formData.phone || alumniData?.phone || alumniData?.mobile || alumniData?.phoneNumber || '';
+    const cardUniqueNumber = alumniData?.alumniId || 
+        (alumniData?._id ? `ECET-${alumniData._id.slice(-8).toUpperCase()}` : 
+        `ECET-${(formData.batch ? formData.batch.slice(-4) : new Date().getFullYear())}-${Math.floor(100000 + Math.random() * 900000)}`);
+
+    const qrPayload = `EASA COLLEGE ALUMNI DIGITAL ID
+Name: ${formData.name || alumniData?.name || 'Alumni Member'}
+Card No: ${cardUniqueNumber}
+Department: ${formData.department || alumniData?.department || 'N/A'}
+Batch: ${formData.batch || alumniData?.batch || 'N/A'}
+Job Title: ${formData.currentJob || alumniData?.currentJob || 'N/A'}
+Mobile: ${displayPhone || 'N/A'}
+Email: ${formData.email || alumniData?.email || 'N/A'}
+Status: Verified Lifetime Alumni`;
 
     return (
         <div style={{ background: 'var(--bg-dark)', minHeight: '100vh', color: 'var(--text-main)' }}>
@@ -279,142 +314,218 @@ const AlumniRegistration = () => {
                             </div>
 
                             {/* ID CARD VISUAL */}
-                            <div ref={idCardRef} style={{
-                                width: '512px',
-                                height: '325px',
-                                background: '#0F172A',
-                                borderRadius: '24px',
-                                boxShadow: '0 40px 100px rgba(0,0,0,0.6)',
-                                position: 'relative',
-                                overflow: 'hidden',
-                                color: 'white',
-                                display: 'flex',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                userSelect: 'none'
-                            }}>
-                                {/* Yellow Accent Strip */}
-                                <div style={{ width: '18px', height: '100%', background: '#F8D53D', flexShrink: 0 }}></div>
-
-                                {/* Decorative Circles Section */}
-                                <div style={{ position: 'absolute', width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}>
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '-40px',
-                                        right: '-40px',
-                                        width: '200px',
-                                        height: '200px',
-                                        background: 'rgba(255, 255, 255, 0.02)',
-                                        borderRadius: '50%'
-                                    }}></div>
-                                    <div style={{
-                                        position: 'absolute',
-                                        bottom: '-30px',
-                                        right: '10%',
-                                        width: '120px',
-                                        height: '120px',
-                                        background: 'rgba(248, 213, 61, 0.03)',
-                                        borderRadius: '50%'
-                                    }}></div>
+                            <div 
+                                ref={idCardRef} 
+                                style={{
+                                    width: '560px',
+                                    minHeight: '345px',
+                                    background: 'linear-gradient(135deg, #070B14 0%, #111827 50%, #0A0F1D 100%)',
+                                    borderRadius: '24px',
+                                    boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(248, 213, 61, 0.15)',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    color: 'white',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    border: '2px solid rgba(248, 213, 61, 0.4)',
+                                    boxSizing: 'border-box',
+                                    padding: '1.6rem 1.8rem',
+                                    fontFamily: "'Inter', 'Outfit', sans-serif",
+                                    userSelect: 'none'
+                                }}
+                            >
+                                {/* Decorative Shimmer & Glow Accents */}
+                                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', zIndex: 1 }}>
+                                    <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '220px', height: '220px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(248, 213, 61, 0.15) 0%, rgba(0,0,0,0) 70%)' }} />
+                                    <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '180px', height: '180px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(0,0,0,0) 70%)' }} />
+                                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #F8D53D 0%, #EAB308 50%, #3B82F6 100%)' }} />
                                 </div>
 
-                                <div style={{ flex: 1, padding: '2rem 2.2rem', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 2 }}>
-                                    {/* Header Section */}
-                                    <div style={{ marginBottom: '1.2rem' }}>
-                                        <h2 style={{
-                                            fontSize: '1.4rem',
-                                            fontWeight: '800',
-                                            margin: 0,
-                                            letterSpacing: '0.4px',
-                                            lineHeight: '1.2',
-                                            color: '#FFFFFF',
-                                            fontFamily: "'Outfit', sans-serif"
-                                        }}>
-                                            EASA COLLEGE OF ENGINEERING AND TECHNOLOGY
-                                        </h2>
-                                        <div style={{
-                                            fontSize: '1rem',
-                                            fontWeight: '700',
-                                            color: '#F8D53D',
-                                            marginTop: '0.3rem',
-                                            letterSpacing: '1.2px',
-                                            textTransform: 'uppercase'
-                                        }}>
-                                            ALUMNI ASSOCIATION
-                                        </div>
+                                {/* Top Header: Official College Logo + Digital Badge */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', position: 'relative', zIndex: 2 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <img 
+                                            src={collegeLogo} 
+                                            alt="EASA College Logo" 
+                                            style={{ height: '40px', maxWidth: '240px', objectFit: 'contain' }}
+                                        />
                                     </div>
 
-                                    {/* Divider */}
-                                    <div style={{ width: '100%', height: '1px', background: 'rgba(255, 255, 255, 0.08)', marginBottom: '1.8rem' }}></div>
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '6px',
+                                        background: 'linear-gradient(135deg, rgba(248, 213, 61, 0.2) 0%, rgba(248, 213, 61, 0.05) 100%)',
+                                        border: '1px solid rgba(248, 213, 61, 0.5)',
+                                        padding: '4px 10px',
+                                        borderRadius: '20px'
+                                    }}>
+                                        <FaShieldAlt style={{ color: '#F8D53D', fontSize: '0.75rem' }} />
+                                        <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#F8D53D', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                            ALUMNI DIGITAL ID
+                                        </span>
+                                    </div>
+                                </div>
 
-                                    {/* Profile & Info Section */}
-                                    <div style={{ display: 'flex', gap: '2.2rem', alignItems: 'center', flex: 1 }}>
-                                        {/* Profile Photo Wrapper */}
+                                {/* Metallic Gold Line */}
+                                <div style={{ width: '100%', height: '1px', background: 'linear-gradient(90deg, rgba(248, 213, 61, 0.6) 0%, rgba(248, 213, 61, 0.1) 100%)', marginBottom: '1.2rem', position: 'relative', zIndex: 2 }} />
+
+                                {/* Middle Section: Photo & Info */}
+                                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flex: 1, position: 'relative', zIndex: 2 }}>
+                                    {/* Photo & Verified Status */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                                         <div style={{
-                                            width: '115px',
-                                            height: '115px',
-                                            borderRadius: '50%',
-                                            border: '5px solid #F8D53D',
-                                            background: '#FFFFFF',
+                                            width: '110px',
+                                            height: '120px',
+                                            borderRadius: '16px',
+                                            border: '2px solid #F8D53D',
+                                            background: '#0F172A',
                                             overflow: 'hidden',
-                                            flexShrink: 0,
-                                            boxShadow: '0 12px 25px rgba(0,0,0,0.4)',
+                                            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.5)',
                                             position: 'relative'
                                         }}>
                                             <img
-                                                src={photoPreview || alumniData?.photoUrl || "https://res.cloudinary.com/dzt6vksue/image/upload/v1/assets/profile-placeholder"}
-                                                alt="Profile"
+                                                src={photoPreview || getAlumniPhoto(alumniData?.photoUrl, formData.name)}
+                                                alt={formData.name || "Alumni Profile"}
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                crossOrigin="anonymous"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || 'Alumni')}&background=0F172A&color=F8D53D&bold=true&size=200`;
+                                                }}
                                             />
                                         </div>
-
-                                        {/* Details Column */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', justifyContent: 'center' }}>
-                                            <h3 style={{
-                                                fontSize: '1.75rem',
-                                                fontWeight: '900',
-                                                color: '#F8D53D',
-                                                margin: '0 0 0.1rem 0',
-                                                lineHeight: '1.1',
-                                                textTransform: 'uppercase',
-                                                fontFamily: "'Outfit', sans-serif"
-                                            }}>
-                                                {formData.name}
-                                            </h3>
-
-                                            <div style={{ fontSize: '1rem', fontWeight: '600', color: 'rgba(255, 255, 255, 0.95)', maxWidth: '300px' }}>
-                                                {formData.department}
-                                            </div>
-                                            <div style={{ fontSize: '1rem', fontWeight: '700', color: '#F8D53D' }}>
-                                                Batch {formData.batch}
-                                            </div>
-
-                                            <div style={{ marginTop: '0.8rem', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                                                <div style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <FaEnvelope size={11} style={{ opacity: 0.6 }} /> {formData.email}
-                                                </div>
-                                                <div style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <FaPhone size={11} style={{ opacity: 0.6 }} /> {formData.phone}
-                                                </div>
-                                                <div style={{ fontSize: '1.05rem', color: '#F8D53D', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', marginTop: '6px' }}>
-                                                    ID: {alumniData?.alumniId || (alumniData?._id ? `EASA-AL-${alumniData._id.slice(-6).toUpperCase()}` : 'PENDING')}
-                                                </div>
-                                            </div>
+                                        
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            gap: '4px',
+                                            fontSize: '0.65rem',
+                                            fontWeight: '700',
+                                            color: '#4ADE80',
+                                            background: 'rgba(74, 222, 128, 0.1)',
+                                            padding: '2px 8px',
+                                            borderRadius: '10px',
+                                            border: '1px solid rgba(74, 222, 128, 0.2)'
+                                        }}>
+                                            <FaCheckCircle style={{ fontSize: '0.65rem' }} /> VERIFIED
                                         </div>
                                     </div>
 
-                                    {/* Bottom Right Subtle Label */}
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '2.5rem',
-                                        right: '2.2rem',
-                                        fontSize: '0.6rem',
-                                        color: 'rgba(255,255,255,0.2)',
-                                        letterSpacing: '2px',
-                                        textTransform: 'uppercase',
-                                        fontWeight: '700'
-                                    }}>
-                                        Electronic Issued Card
+                                    {/* Alumni Details */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
+                                        <h3 style={{
+                                            fontSize: '1.35rem',
+                                            fontWeight: '900',
+                                            color: '#FFFFFF',
+                                            margin: 0,
+                                            lineHeight: '1.2',
+                                            letterSpacing: '0.5px',
+                                            textTransform: 'uppercase',
+                                            fontFamily: "'Outfit', sans-serif"
+                                        }}>
+                                            {formData.name || 'ALUMNI NAME'}
+                                        </h3>
+
+                                        <div style={{ fontSize: '0.88rem', fontWeight: '700', color: '#F8D53D', lineHeight: '1.2' }}>
+                                            {formData.department || 'Department of Engineering'}
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginTop: '2px' }}>
+                                            <span style={{ 
+                                                fontSize: '0.75rem', 
+                                                fontWeight: '800', 
+                                                color: '#000', 
+                                                background: '#F8D53D',
+                                                padding: '2px 8px', 
+                                                borderRadius: '6px' 
+                                            }}>
+                                                Batch {formData.batch || 'N/A'}
+                                            </span>
+                                            
+                                            {formData.currentJob && (
+                                                <span style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.8)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <FaBriefcase style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }} /> {formData.currentJob}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Mobile Number & Email Contact Box */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', background: 'rgba(255, 255, 255, 0.05)', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#FFFFFF' }}>
+                                                <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(248, 213, 61, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F8D53D', fontSize: '0.7rem', flexShrink: 0 }}>
+                                                    <FaPhone />
+                                                </div>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: '800', color: '#FFFFFF', letterSpacing: '0.5px' }}>
+                                                    {displayPhone || 'Not Provided'}
+                                                </span>
+                                            </div>
+
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)' }}>
+                                                <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(248, 213, 61, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F8D53D', fontSize: '0.7rem', flexShrink: 0 }}>
+                                                    <FaEnvelope />
+                                                </div>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'rgba(255, 255, 255, 0.9)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '240px' }}>
+                                                    {formData.email || 'alumni@easa.ac.in'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bottom Unique Card Number Badge & Barcode */}
+                                <div style={{ 
+                                    marginTop: '0.8rem', 
+                                    paddingTop: '0.7rem', 
+                                    borderTop: '1px dashed rgba(255, 255, 255, 0.15)', 
+                                    display: 'flex', 
+                                    justify: 'space-between', 
+                                    alignItems: 'center',
+                                    position: 'relative',
+                                    zIndex: 2
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '0.65rem', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                            UNIQUE CARD NO:
+                                        </span>
+                                        <div style={{
+                                            background: 'linear-gradient(135deg, rgba(248, 213, 61, 0.25) 0%, rgba(248, 213, 61, 0.1) 100%)',
+                                            border: '1px solid rgba(248, 213, 61, 0.6)',
+                                            padding: '4px 12px',
+                                            borderRadius: '8px',
+                                            color: '#F8D53D',
+                                            fontWeight: '900',
+                                            fontSize: '0.9rem',
+                                            letterSpacing: '1.5px',
+                                            fontFamily: "'Courier New', monospace",
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                                        }}>
+                                            {cardUniqueNumber}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div style={{
+                                            padding: '4px',
+                                            background: '#FFFFFF',
+                                            borderRadius: '8px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justify: 'center',
+                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                                            flexShrink: 0
+                                        }}>
+                                            <QRCodeSVG 
+                                                value={qrPayload} 
+                                                size={54} 
+                                                bgColor="#FFFFFF"
+                                                fgColor="#070B14"
+                                                level="M"
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>SCAN TO VERIFY</span>
+                                            <span style={{ fontSize: '0.65rem', color: '#F8D53D', fontWeight: '800' }}>VALID LIFETIME</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
