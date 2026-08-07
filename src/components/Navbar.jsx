@@ -140,6 +140,14 @@ const NAV_ITEMS = [
         ]
     },
     {
+        title: 'ALUMNI CONNECT',
+        children: [
+            { title: 'Alumni Connect Hub', href: '/alumni' },
+            { title: 'Alumni Registration & Digital ID', href: '/alumni-registration' },
+            { title: 'Alumni Social Hub', href: '/alumni-social' }
+        ]
+    },
+    {
         title: 'GALLERY',
         children: [
             { title: 'Photo Gallery', href: '/gallery' },
@@ -561,13 +569,14 @@ const Navbar = ({ onApplyClick }) => {
                             onClick={(e) => { e.stopPropagation(); setMobileExpanded(prev => ({ ...prev, 'ALUMNI_UTILITY': !prev['ALUMNI_UTILITY'] })) }}>
                             <span style={{ fontSize: '0.85rem' }}>ALUMNI</span> <FaChevronDown size={10} />
                             <div className="dropdown-menu" style={{
-                                minWidth: '160px', left: 'auto', right: 0, top: '100%',
+                                minWidth: '190px', left: 'auto', right: 0, top: '100%',
                                 background: theme === 'dark' ? '#000' : '#fff',
                                 color: theme === 'dark' ? '#fff' : '#000',
                                 display: mobileExpanded['ALUMNI_UTILITY'] ? 'block' : 'none'
                             }}>
-                                <a href="/alumni-registration" className="dropdown-item">Registration</a>
-                                <a href="/alumni-social" className="dropdown-item">Alumni Social</a>
+                                <a href="/alumni" className="dropdown-item">Alumni Connect Hub</a>
+                                <a href="/alumni-registration" className="dropdown-item">Alumni Registration</a>
+                                <a href="/alumni-social" className="dropdown-item">Alumni Social Hub</a>
                             </div>
                         </div>
                         
@@ -895,12 +904,18 @@ const Navbar = ({ onApplyClick }) => {
 
             <style>{`
                 @media (max-width: 1400px) {
-                    .desktop-nav { gap: 0.6rem !important; }
-                    .nav-link { font-size: 0.65rem !important; }
-                    .header-row img { height: 45px !important; }
+                    .desktop-nav { gap: 0.5rem !important; }
+                    .nav-link { font-size: 0.65rem !important; padding: 0.3rem 0.35rem !important; }
+                    .header-row img { height: 42px !important; }
                 }
 
-                @media (max-width: 1100px) {
+                @media (max-width: 1200px) {
+                    .desktop-nav { gap: 0.35rem !important; }
+                    .nav-link { font-size: 0.6rem !important; padding: 0.25rem 0.3rem !important; }
+                    .header-row img { height: 38px !important; }
+                }
+
+                @media (max-width: 975px) {
                     .nav-tablet-hide-mobile { display: none !important; }
                     
                     .header-row.container {

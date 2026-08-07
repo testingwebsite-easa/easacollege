@@ -267,24 +267,44 @@ const ManagementPage = () => {
 
             <style>{`
                 .management-grid {
-                    display: grid;
-                    grid-template-columns: repeat(4, 1fr);
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: center;
                     gap: 1.5rem;
                     width: 100%;
                 }
                 .management-card-item {
-                    width: 100%;
+                    flex: 1 1 250px;
+                    max-width: 270px;
+                    min-width: 210px;
                 }
                 @media (max-width: 992px) {
                     .management-grid {
-                        grid-template-columns: repeat(2, 1fr);
                         gap: 1.2rem;
                     }
+                    .management-card-item {
+                        flex: 1 1 calc(50% - 1.2rem);
+                        max-width: calc(50% - 0.6rem);
+                        min-width: 170px;
+                        padding: 1.5rem 1rem !important;
+                    }
                 }
-                @media (max-width: 480px) {
+                @media (max-width: 576px) {
                     .management-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 0.8rem;
+                        gap: 0.9rem;
+                    }
+                    .management-card-item {
+                        flex: 1 1 calc(50% - 0.9rem);
+                        max-width: calc(50% - 0.45rem);
+                        min-width: 140px;
+                        padding: 1.2rem 0.75rem !important;
+                        border-radius: 16px !important;
+                    }
+                }
+                @media (max-width: 360px) {
+                    .management-card-item {
+                        flex: 1 1 100%;
+                        max-width: 100%;
                     }
                 }
             `}</style>

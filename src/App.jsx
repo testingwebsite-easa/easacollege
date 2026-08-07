@@ -44,6 +44,7 @@ const ResearchListingPage = lazy(() => import('./pages/ResearchListingPage'));
 const CareerPage = lazy(() => import('./pages/CareerPage'));
 const JobApplicationsView = lazy(() => import('./pages/JobApplicationsView'));
 const AlumniRegistration = lazy(() => import('./pages/AlumniRegistration'));
+const AlumniConnectPage = lazy(() => import('./pages/AlumniConnectPage'));
 const LibraryPage = lazy(() => import('./pages/LibraryPage'));
 const ScholarshipPage = lazy(() => import('./pages/ScholarshipPage'));
 const PlacementPage = lazy(() => import('./pages/PlacementPage'));
@@ -155,11 +156,13 @@ function App() {
             <Route path="/resources/syllabus-curriculum" element={<SyllabusPage />} />
             <Route path="/resources/handbook/faculty" element={<FacultyHandbookPage />} />
             <Route path="/resources/handbook/student" element={<StudentHandbookPage />} />
-            {/* Career Page Route */}
+            {/* Career & Alumni Routes */}
             <Route path="/careers" element={<CareerPage />} />
             <Route path="/scholarships" element={<ScholarshipPage />} />
             <Route path="/admissions" element={<AdmissionsPage />} />
             <Route path="/admission" element={<AdmissionsPage />} />
+            <Route path="/alumni" element={<AlumniConnectPage />} />
+            <Route path="/alumni-connect" element={<AlumniConnectPage />} />
             <Route path="/alumni-registration" element={<AlumniRegistration />} />
             <Route path="/alumni-social" element={<AlumniSocial />} />
 

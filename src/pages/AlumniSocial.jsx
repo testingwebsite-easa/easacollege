@@ -638,25 +638,20 @@ Status: Verified Lifetime Alumni`;
                             {/* Download Button */}
                             <button
                                 onClick={() => downloadIDCard(selectedAlumni.name)}
+                                className="btn-gold-impressive"
                                 style={{
-                                    background: 'linear-gradient(135deg, #F8D53D 0%, #D4A017 100%)',
-                                    color: '#000',
-                                    padding: '0.9rem 3rem',
+                                    padding: '1rem 3rem',
                                     borderRadius: '50px',
-                                    fontWeight: '900',
                                     fontSize: '1rem',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '10px',
-                                    border: 'none',
-                                    boxShadow: '0 12px 30px rgba(248, 213, 61, 0.4)',
                                     cursor: 'pointer',
-                                    transition: 'all 0.3s ease',
                                     marginTop: '0.5rem',
                                     flexShrink: 0
                                 }}
                             >
-                                <FaDownload /> DOWNLOAD DIGITAL CARD
+                                <FaDownload size={16} /> DOWNLOAD DIGITAL CARD
                             </button>
                         </motion.div>
                     </motion.div>
@@ -666,6 +661,22 @@ Status: Verified Lifetime Alumni`;
             <Footer />
 
             <style>{`
+                .btn-gold-impressive {
+                    background: linear-gradient(135deg, #FFE770 0%, #F8D53D 50%, #D4A017 100%) !important;
+                    color: #070B14 !important;
+                    font-weight: 900 !important;
+                    letter-spacing: 0.5px !important;
+                    border: 1px solid #FFE566 !important;
+                    box-shadow: 0 12px 35px rgba(248, 213, 61, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+                    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .btn-gold-impressive:hover {
+                    transform: translateY(-4px) scale(1.03) !important;
+                    box-shadow: 0 20px 50px rgba(248, 213, 61, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+                    background: linear-gradient(135deg, #FFFFFF 0%, #F8D53D 60%, #EAB308 100%) !important;
+                }
                 .spin { animation: spin 1s linear infinite; }
                 @keyframes spin { 100% { transform: rotate(360deg); } }
             `}</style>

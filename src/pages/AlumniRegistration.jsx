@@ -264,17 +264,16 @@ Status: Verified Lifetime Alumni`;
                             </div>
 
                             <div style={{ marginTop: '4rem', textAlign: 'center' }}>
-                                <button type="submit" disabled={loading} className="btn" style={{
-                                    padding: '1.2rem 4rem',
-                                    fontSize: '1.1rem',
+                                <button type="submit" disabled={loading} className="btn-gold-impressive" style={{
+                                    width: '100%',
+                                    padding: '1.2rem',
                                     borderRadius: '50px',
-                                    background: 'linear-gradient(135deg, #F8D53D 0%, #D4A017 100%)',
-                                    color: '#000',
-                                    fontWeight: '900',
-                                    boxShadow: '0 15px 30px rgba(248, 213, 61, 0.2)',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    transition: '0.3s'
+                                    fontSize: '1.1rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    cursor: 'pointer'
                                 }}>
                                     {loading ? <><FaSpinner className="spin" /> VERIFYING...</> : 'GENERATE ALUMNI ID CARD'}
                                 </button>
@@ -532,9 +531,7 @@ Status: Verified Lifetime Alumni`;
 
 
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', width: '100%' }}>
-                                <button onClick={downloadIDCard} className="btn" style={{
-                                    background: 'linear-gradient(135deg, #F8D53D 0%, #D4A017 100%)',
-                                    color: '#000',
+                                <button onClick={downloadIDCard} className="btn-gold-impressive" style={{
                                     padding: '1.2rem 3.5rem',
                                     borderRadius: '50px',
                                     fontWeight: '900',
@@ -542,12 +539,9 @@ Status: Verified Lifetime Alumni`;
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '12px',
-                                    border: 'none',
-                                    boxShadow: '0 15px 35px rgba(248, 213, 61, 0.3)',
-                                    transition: 'all 0.3s ease',
                                     cursor: 'pointer'
                                 }}>
-                                    <FaDownload /> DOWNLOAD DIGITAL CARD
+                                    <FaDownload size={18} /> DOWNLOAD DIGITAL CARD
                                 </button>
 
                                 <button
@@ -565,6 +559,22 @@ Status: Verified Lifetime Alumni`;
 
             <Footer />
             <style>{`
+                .btn-gold-impressive {
+                    background: linear-gradient(135deg, #FFE770 0%, #F8D53D 50%, #D4A017 100%) !important;
+                    color: #070B14 !important;
+                    font-weight: 900 !important;
+                    letter-spacing: 0.5px !important;
+                    border: 1px solid #FFE566 !important;
+                    box-shadow: 0 12px 35px rgba(248, 213, 61, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+                    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .btn-gold-impressive:hover {
+                    transform: translateY(-4px) scale(1.03) !important;
+                    box-shadow: 0 20px 50px rgba(248, 213, 61, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+                    background: linear-gradient(135deg, #FFFFFF 0%, #F8D53D 60%, #EAB308 100%) !important;
+                }
                 .custom-input {
                     width: 100%;
                     padding: 1rem 1.2rem;

@@ -1,0 +1,2105 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- =========================================
+         1. META
+    ========================================== -->
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>EASA Alumni Connect</title>
+
+
+    <!-- =========================================
+         2. BOOTSTRAP & FONTS
+    ========================================== -->
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <!-- =========================================
+         3. FONT AWESOME
+    ========================================== -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+
+    <!-- =========================================
+         4. ALL YOUR CSS GOES HERE
+    ========================================== -->
+
+    <style>
+
+        /* ===============================
+           DESIGN SYSTEM & VARIABLES
+        =============================== */
+        :root {
+            --primary-navy: #0F172A;
+            --primary-blue: #1E3A8A;
+            --accent-gold: #F59E0B;
+            --accent-yellow: #FDB913;
+            --gradient-gold: linear-gradient(135deg, #FDB913 0%, #D97706 100%);
+            --gradient-navy: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
+            --gradient-card: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --bg-light: #F8FAFC;
+            --shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
+            --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 20px 35px -10px rgba(15, 23, 42, 0.12), 0 10px 15px -5px rgba(15, 23, 42, 0.06);
+            --shadow-glow: 0 15px 30px -5px rgba(245, 158, 11, 0.35);
+        }
+
+        /* ===============================
+           BASIC CSS & TYPOGRAPHY
+        =============================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+            background-color: #FFFFFF;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===============================
+           PREMIUM REGISTER & OUTLINE BUTTONS
+        =============================== */
+        .btn-register,
+        .btn-nav-register {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #FDB913 0%, #F59E0B 50%, #D97706 100%);
+            color: #0F172A !important;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            padding: 13px 32px;
+            border-radius: 50px;
+            text-decoration: none !important;
+            box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-register::before,
+        .btn-nav-register::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+            z-index: 2;
+        }
+
+        .btn-register:hover::before,
+        .btn-nav-register:hover::before {
+            left: 100%;
+        }
+
+        .btn-register:hover,
+        .btn-nav-register:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 18px 35px -5px rgba(245, 158, 11, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            color: #0F172A !important;
+        }
+
+        .btn-register:active,
+        .btn-nav-register:active {
+            transform: translateY(-1px) scale(0.99);
+            box-shadow: 0 8px 20px -5px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-nav-register {
+            padding: 10px 26px;
+            font-size: 14px;
+            margin-left: 12px;
+        }
+
+        .btn-outline-custom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary-navy);
+            color: var(--primary-navy) !important;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none !important;
+            margin-left: 12px;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .btn-outline-custom:hover {
+            background: var(--primary-navy);
+            color: #FFFFFF !important;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ===============================
+           HERO SECTION
+        =============================== */
+        .hero {
+            position: relative;
+            padding: 90px 0 110px;
+            background: linear-gradient(180deg, #F1F5F9 0%, #FFFFFF 100%);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            right: -100px;
+            top: -100px;
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(30, 58, 138, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+            left: -100px;
+            bottom: -50px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero .badge {
+            background: rgba(245, 158, 11, 0.15) !important;
+            color: #B45309 !important;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            padding: 8px 20px !important;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--primary-navy);
+            margin-top: 15px;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 580px;
+        }
+
+        .hero-image {
+            max-width: 440px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-16px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* ===============================
+           STATISTICS SECTION
+        =============================== */
+        .stats {
+            padding: 60px 0;
+            background: var(--gradient-navy);
+            position: relative;
+            z-index: 10;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 35px 25px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.4s ease;
+            height: 100%;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(245, 158, 11, 0.5);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .counter {
+            font-size: 46px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FDB913, #F59E0B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+            letter-spacing: -1px;
+        }
+
+        .stat-box p {
+            color: #94A3B8;
+            font-size: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        /* ===============================
+           SECTION TITLES & HEADINGS
+        =============================== */
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title.text-start {
+            text-align: left !important;
+        }
+
+        .section-title h2 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--primary-navy);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 14px;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title h2::after {
+            content: "";
+            width: 70px;
+            height: 4px;
+            background: var(--gradient-gold);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0;
+            border-radius: 4px;
+        }
+
+        .section-title.text-start h2::after {
+            left: 0;
+            transform: none;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        /* ===============================
+           ABOUT SECTION
+        =============================== */
+        #about {
+            padding: 100px 0;
+            background: #FFFFFF;
+        }
+
+        #about img {
+            border-radius: 24px;
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        #about img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 25px 50px rgba(15, 23, 42, 0.18);
+        }
+
+        #about p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        /* ===============================
+           VISION & MISSION
+        =============================== */
+        .vision-mission {
+            padding: 100px 0;
+            background: var(--bg-light);
+        }
+
+        .vm-card {
+            background: #FFFFFF;
+            padding: 45px 35px;
+            border-radius: 24px;
+            border: 1px solid #E2E8F0;
+            box-shadow: var(--shadow-md);
+            height: 100%;
+            transition: all 0.4s ease;
+        }
+
+        .vm-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .vm-icon {
+            width: 75px;
+            height: 75px;
+            background: var(--gradient-gold);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .vm-icon i {
+            font-size: 32px;
+            color: #0F172A;
+        }
+
+        .vm-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-navy);
+            margin-bottom: 15px;
+        }
+
+        .vm-card ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        .vm-card ul li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .vm-card ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #D97706;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        /* ===============================
+           WHY STAY CONNECTED
+        =============================== */
+        .why-join {
+            padding: 100px 0;
+            background: #FFFFFF;
+        }
+
+        .feature-box {
+            background: var(--bg-light);
+            padding: 35px 25px;
+            border-radius: 20px;
+            border: 1px solid #E2E8F0;
+            text-align: center;
+            height: 100%;
+            transition: all 0.4s ease;
+        }
+
+        .feature-box:hover {
+            background: var(--gradient-navy);
+            color: #FFFFFF;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+            border-color: transparent;
+        }
+
+        .feature-box i {
+            font-size: 42px;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-box:hover i {
+            color: var(--accent-yellow);
+            transform: scale(1.1);
+        }
+
+        .feature-box h4 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feature-box p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* ===============================
+           REGISTRATION BANNER
+        =============================== */
+        .registration {
+            background: var(--gradient-navy);
+            color: #FFFFFF;
+            padding: 90px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .registration::before {
+            content: "";
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, rgba(0,0,0,0) 70%);
+            right: -100px;
+            top: -100px;
+            pointer-events: none;
+        }
+
+        .registration h2 {
+            color: #FFFFFF;
+            font-size: 2.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .registration p {
+            font-size: 1.1rem;
+            color: #94A3B8;
+            margin-top: 15px;
+        }
+
+        /* ===============================
+           GET INVOLVED & ALUMNI
+        =============================== */
+        .involve-card {
+            background: #FFFFFF;
+            padding: 35px 25px;
+            border-radius: 20px;
+            border: 1px solid #E2E8F0;
+            text-align: center;
+            transition: all 0.4s ease;
+            box-shadow: var(--shadow-sm);
+            height: 100%;
+        }
+
+        .involve-card:hover {
+            background: var(--gradient-navy);
+            color: #FFFFFF;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+            border-color: transparent;
+        }
+
+        .involve-card i {
+            font-size: 42px;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .involve-card:hover i {
+            color: var(--accent-yellow);
+            transform: scale(1.1);
+        }
+
+        .Alumni-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s ease;
+        }
+
+        .Alumni-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .Alumni-card img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+        }
+
+        .Alumni-card h4 {
+            margin-top: 20px;
+            color: var(--primary-navy);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .Alumni-card p {
+            padding-bottom: 20px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ===============================
+           INDUSTRY CONNECT & RESEARCH
+        =============================== */
+        #industry .col-md-4 h4 {
+            background: #FFFFFF;
+            padding: 24px 20px;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-navy);
+            margin-bottom: 20px;
+        }
+
+        #industry .col-md-4 h4:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            color: #D97706;
+        }
+
+
+        /* ===============================
+           NAVBAR CSS
+        =============================== */
+        .navbar-custom {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-weight: 800;
+            color: #FFFFFF;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            text-decoration: none;
+            line-height: 1.1;
+        }
+
+        .navbar-custom .brand-logo {
+            height: 46px;
+            width: auto;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-custom .brand-logo:hover {
+            transform: scale(1.04);
+        }
+
+        .navbar-custom .navbar-brand span {
+            color: var(--accent-gold);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .navbar-custom .nav-link {
+            color: #CBD5E1 !important;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 8px 16px !important;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-link.active {
+            color: var(--accent-yellow) !important;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .navbar-custom .btn-nav-register {
+            background: var(--gradient-gold);
+            color: #0F172A !important;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 50px;
+            text-decoration: none !important;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            transition: all 0.3s ease;
+            margin-left: 12px;
+        }
+
+        .navbar-custom .btn-nav-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+        }
+
+        .navbar-toggler {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+        }
+
+        .navbar-toggler-icon {
+            filter: invert(1);
+        }
+
+        /* ===============================
+           FOOTER CSS
+        =============================== */
+        footer {
+            background: #0B132B;
+            color: #94A3B8;
+            padding: 80px 0 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer h5 {
+            color: #FFFFFF;
+            font-weight: 800;
+            font-size: 1.25rem;
+            margin-bottom: 24px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        footer h5::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent-gold);
+            border-radius: 2px;
+        }
+
+        footer p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        footer ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        footer ul li {
+            margin-bottom: 12px;
+        }
+
+        footer ul li a {
+            color: #94A3B8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        footer ul li a:hover {
+            color: var(--accent-yellow);
+            transform: translateX(4px);
+        }
+
+        .footer-social-links {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .footer-social-links a {
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-social-links a:hover {
+            background: var(--gradient-gold);
+            color: #0F172A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .footer-contact-item {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 16px;
+            align-items: flex-start;
+        }
+
+        .footer-contact-item i {
+            color: var(--accent-gold);
+            font-size: 18px;
+            margin-top: 4px;
+        }
+
+        .footer-bottom {
+            background: #070D1E;
+            padding: 25px 0;
+            margin-top: 60px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            font-size: 0.9rem;
+            color: #64748B;
+        }
+
+        .footer-bottom strong {
+            color: var(--accent-gold);
+        }
+
+        #backToTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-gold);
+            color: #0F172A;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        #backToTop:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(245, 158, 11, 0.6);
+        }
+
+        /* ===============================
+           MOBILE RESPONSIVE HEADER & NAVBAR
+        =============================== */
+        @media (max-width: 991.98px) {
+            .navbar-custom {
+                padding: 12px 0;
+            }
+
+            .navbar-custom .container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .navbar-custom .brand-logo {
+                height: 36px;
+            }
+
+            .navbar-custom .navbar-brand span {
+                font-size: 11px;
+                letter-spacing: 1px;
+            }
+
+            .navbar-toggler {
+                margin-left: auto !important;
+            }
+
+            .navbar-custom .navbar-collapse {
+                background: rgba(15, 23, 42, 0.98);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-radius: 16px;
+                padding: 20px;
+                margin-top: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            }
+
+            .navbar-custom .nav-item {
+                margin-bottom: 6px;
+            }
+
+            .navbar-custom .nav-link {
+                padding: 10px 16px !important;
+                font-size: 16px;
+                border-radius: 10px;
+            }
+
+            .navbar-custom .btn-nav-register {
+                margin-left: 0;
+                margin-top: 14px;
+                width: 100%;
+                justify-content: center;
+                display: flex;
+                padding: 12px 20px;
+            }
+        }
+
+        /* ===============================
+           MOBILE GENERAL RESPONSIVE
+        =============================== */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .counter {
+                font-size: 36px;
+            }
+
+            .btn-outline-custom {
+                margin-left: 0;
+                margin-top: 12px;
+                display: flex;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==========================================
+     1. NAVBAR
+=========================================== -->
+
+<nav class="navbar navbar-expand-lg navbar-custom">
+
+<div class="container d-flex align-items-center justify-content-between">
+
+<a class="navbar-brand d-inline-flex flex-column align-items-start" href="#">
+
+<img src="src/assets/College Logo with White Letter.webp" alt="EASA College Logo" class="brand-logo mb-1">
+
+<span>Alumni Connect</span>
+
+</a>
+
+<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+
+<span class="navbar-toggler-icon"></span>
+
+</button>
+
+<div class="collapse navbar-collapse" id="navbarContent">
+
+<ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+
+<li class="nav-item">
+
+<a class="nav-link active" href="#">Home</a>
+
+</li>
+
+<li class="nav-item">
+
+<a class="nav-link" href="#about">About Us</a>
+
+</li>
+
+<li class="nav-item">
+
+<a class="nav-link" href="#get-involved">Get Involved</a>
+
+</li>
+
+<li class="nav-item">
+
+<a class="nav-link" href="#distinguished-Alumni">Alumni</a>
+
+</li>
+
+<li class="nav-item">
+
+<a class="nav-link" href="#mentorship">Mentorship</a>
+
+</li>
+
+<li class="nav-item">
+
+<a class="nav-link" href="#industry">Industry</a>
+
+</li>
+
+<li class="nav-item">
+
+<a class="nav-link" href="#research">Research</a>
+
+</li>
+
+<li class="nav-item ms-lg-2">
+
+<a href="https://forms.gle/Fs6PKHpD8fvhdir2A" target="_blank" class="btn-nav-register">
+Register Now <i class="fas fa-arrow-right fs-6"></i>
+</a>
+
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</nav>
+
+
+
+<!-- ==========================================
+     2. HERO
+=========================================== -->
+
+<section class="hero">
+
+<div class="container">
+
+<div class="row align-items-center">
+
+<div class="col-lg-7">
+
+<span class="badge bg-warning text-dark px-3 py-2 mb-3">
+EASA Alumni Network
+</span>
+
+<h1>
+Connecting Alumni.<br>
+Building Futures.<br>
+Creating Global Impact.
+</h1>
+
+<p>
+
+Welcome to the official Alumni Network of
+<strong>EASA College of Engineering and Technology.</strong>
+Reconnect with classmates, mentor future engineers,
+share career opportunities and stay connected with
+your alma mater.
+
+</p>
+
+<div class="mt-4">
+
+<a href="https://forms.gle/Fs6PKHpD8fvhdir2A"
+target="_blank"
+class="btn-register">
+
+Register Now <i class="fas fa-paper-plane fs-6"></i>
+
+</a>
+
+<a href="#about"
+class="btn-outline-custom">
+
+Learn More
+
+</a>
+
+</div>
+
+</div>
+
+<div class="col-lg-5 text-center">
+
+<img src="alunimi.png"
+class="img-fluid hero-image"
+alt="EASA Alumni">
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ==========================================
+     3. STATISTICS
+=========================================== -->
+
+<section class="stats">
+
+<div class="container">
+
+<div class="row g-4">
+
+<div class="col-lg-3 col-md-6">
+
+<div class="stat-box">
+
+<h2 class="counter">15 K + </h2>
+
+<p>Alumni Network</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="stat-box">
+
+<h2 class="counter">15 +</h2>
+
+<p>Departments</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="stat-box">
+
+<h2 class="counter">25 + </h2>
+
+<p>Countries</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="stat-box">
+
+<h2 class="counter">100 + </h2>
+
+<p>Industry Partners</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     4. ABOUT
+=========================================== -->
+
+<section id="about">
+
+<div class="container">
+
+<div class="row align-items-center">
+
+<div class="col-lg-6">
+
+<img src="about-main.webp"
+class="img-fluid rounded-4 shadow-lg"
+alt="EASA Campus">
+
+</div>
+
+<div class="col-lg-6">
+
+<div class="section-title text-start">
+
+<h2>
+
+Welcome to
+EASA Alumni Connect
+
+</h2>
+
+</div>
+
+<p>
+
+Welcome to the EASA Alumni Connect community.
+
+At EASA College of Engineering and Technology,
+we believe that our relationship with our students
+continues long after graduation.
+
+Our Alumni serve as ambassadors of the Institution
+across Engineering, Entrepreneurship,
+Research, Healthcare, Education,
+Innovation and Public Service.
+
+</p>
+
+<p>
+
+The Alumni Connect initiative builds a lifelong
+relationship between Alumni and the Institution
+through Networking, Mentorship,
+Career development and Collaboration.
+
+</p>
+
+<div class="row mt-4">
+
+<div class="col-6">
+
+<h5>
+
+<i class="fas fa-user-graduate text-warning"></i>
+
+15,000+
+
+</h5>
+
+<p>Growing Alumni</p>
+
+</div>
+
+<div class="col-6">
+
+<h5>
+
+<i class="fas fa-globe text-warning"></i>
+
+25+
+
+</h5>
+
+<p>Countries</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     5. VISION & MISSION
+=========================================== -->
+
+<section class="py-5 vision-mission">
+
+<div class="container">
+
+<div class="section-title">
+
+<h2>Our Vision & Mission</h2>
+
+<p>Building lifelong relationships that create global impact.</p>
+
+</div>
+
+<div class="row g-4">
+
+<div class="col-lg-6">
+
+<div class="vm-card">
+
+<div class="vm-icon">
+
+<i class="fas fa-eye"></i>
+
+</div>
+
+<h3>Our Vision</h3>
+
+<p>
+
+To foster a vibrant and globally connected Alumni Community that contributes
+to academic excellence, professional growth, innovation and sustainable
+development of EASA College of Engineering and Technology.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-6">
+
+<div class="vm-card">
+
+<div class="vm-icon">
+
+<i class="fas fa-bullseye"></i>
+
+</div>
+
+<h3>Our Mission</h3>
+
+<ul>
+
+<li>Build and maintain a comprehensive Alumni network.</li>
+
+<li>Strengthen lifelong relationships.</li>
+
+<li>Promote networking and collaboration.</li>
+
+<li>Encourage mentoring and leadership.</li>
+
+<li>Recognize Alumni achievements.</li>
+
+<li>Create opportunities for knowledge sharing.</li>
+
+<li>Strengthen Industry collaboration.</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     6. WHY STAY CONNECTED
+=========================================== -->
+
+<section class="why-join">
+
+<div class="container">
+
+<div class="section-title">
+
+<h2>Why Stay Connected?</h2>
+
+<p>Become an active member of the EASA Alumni Community.</p>
+
+</div>
+
+<div class="row g-4">
+
+<div class="col-lg-3 col-md-6">
+
+<div class="feature-box">
+
+<i class="fas fa-bell"></i>
+
+<h4>Stay Updated</h4>
+
+<p>Receive Institutional news and Alumni updates.</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="feature-box">
+
+<i class="fas fa-users"></i>
+
+<h4>Networking</h4>
+
+<p>Connect with Alumni around the world.</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="feature-box">
+
+<i class="fas fa-user-graduate"></i>
+
+<h4>Mentorship</h4>
+
+<p>Guide students through mentoring programmes.</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="feature-box">
+
+<i class="fas fa-briefcase"></i>
+
+<h4>Career Growth</h4>
+
+<p>Share internships and placement opportunities.</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="feature-box">
+
+<i class="fas fa-lightbulb"></i>
+
+<h4>Innovation</h4>
+
+<p>Collaborate on research and entrepreneurship.</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="feature-box">
+
+<i class="fas fa-award"></i>
+
+<h4>Recognition</h4>
+
+<p>Celebrate Alumni achievements globally.</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="feature-box">
+
+<i class="fas fa-handshake"></i>
+
+<h4>Industry Connect</h4>
+
+<p>Build strong academia-industry partnerships.</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="feature-box">
+
+<i class="fas fa-globe"></i>
+
+<h4>Global Community</h4>
+
+<p>Stay connected wherever you are.</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     7. ALUMNI REGISTRATION
+=========================================== -->
+
+<section class="registration">
+
+<div class="container">
+
+<div class="row align-items-center">
+
+<div class="col-lg-8">
+
+<h2>Become a Member of the EASA Alumni Network</h2>
+
+<p>
+
+Register today and stay connected with your alma mater.
+
+Receive Alumni news, networking opportunities,
+events, mentorship programmes and much more.
+
+</p>
+
+</div>
+
+<div class="col-lg-4 text-center">
+
+<a href="https://forms.gle/Fs6PKHpD8fvhdir2A"
+
+target="_blank"
+
+class="btn-register">
+
+Register Now
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     8. GET INVOLVED
+=========================================== -->
+
+<section id="get-involved" class="py-5">
+
+<div class="container">
+
+<div class="section-title">
+
+<h2>Get Involved</h2>
+
+<p>Your experience can inspire the next generation.</p>
+
+</div>
+
+<div class="row g-4">
+
+<div class="col-lg-3 col-md-6">
+<div class="involve-card">
+<i class="fas fa-chalkboard-teacher"></i>
+<h4>Student Mentoring</h4>
+<p>Guide future engineers with your knowledge.</p>
+</div>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<div class="involve-card">
+<i class="fas fa-microphone"></i>
+<h4>Guest Lectures</h4>
+<p>Share your professional expertise.</p>
+</div>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<div class="involve-card">
+<i class="fas fa-briefcase"></i>
+<h4>Career Guidance</h4>
+<p>Support students with career advice.</p>
+</div>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<div class="involve-card">
+<i class="fas fa-building"></i>
+<h4>Industry Collaboration</h4>
+<p>Strengthen industry-academia partnerships.</p>
+</div>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<div class="involve-card">
+<i class="fas fa-laptop-code"></i>
+<h4>Research</h4>
+<p>Collaborate in research & innovation.</p>
+</div>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<div class="involve-card">
+<i class="fas fa-user-tie"></i>
+<h4>Placement Support</h4>
+<p>Help students find career opportunities.</p>
+</div>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<div class="involve-card">
+<i class="fas fa-lightbulb"></i>
+<h4>Startup Mentoring</h4>
+<p>Guide young entrepreneurs.</p>
+</div>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<div class="involve-card">
+<i class="fas fa-globe"></i>
+<h4>International Network</h4>
+<p>Connect EASA Alumni across the world.</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     9. DISTINGUISHED ALUMNI
+=========================================== -->
+
+<section id="distinguished-Alumni" class="bg-light py-5">
+
+<div class="container">
+
+<div class="section-title">
+
+<h2>Distinguished Alumni</h2>
+
+<p>Professional Leaders Across Industries</p>
+
+</div>
+
+<div class="row g-4">
+
+<div class="col-lg-3 col-md-6">
+
+<div class="Alumni-card">
+
+<img src="https://mvjce.edu.in/wp-content/uploads/2023/02/Why-is-Innovation-Important-in-Engineering-Education.webp" class="img-fluid">
+
+<h4>Coming Soon</h4>
+
+<p>Engineering</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="Alumni-card">
+
+<img src="https://images.unsplash.com/photo-1586936893354-362ad6ae47ba?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDN8fHxlbnwwfHx8fHw%3D" class="img-fluid">
+
+<h4>Coming Soon</h4>
+
+<p>Research</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="Alumni-card">
+
+<img src="https://srikrishinternationalschool.com/wp-content/uploads/2025/04/sd-768x440.png" class="img-fluid">
+
+<h4>Coming Soon</h4>
+
+<p>Entrepreneurship</p>
+
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<div class="Alumni-card">
+
+<img src="https://sertifier.com/blog/wp-content/uploads/2023/12/Introduction-to-Corporate-Leadership.jpg" class="img-fluid">
+
+<h4>Coming Soon</h4>
+
+<p>Corporate Leadership</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     10. ALUMNI ACHIEVEMENTS
+=========================================== -->
+
+<section id="achievements">
+
+</section>
+
+
+
+<!-- ==========================================
+     11. CAREER & MENTORSHIP
+=========================================== -->
+
+<section id="mentorship" class="registration">
+
+<div class="container text-center">
+
+<h2>Career & Mentorship</h2>
+
+<p>
+
+Become a mentor and guide current EASA students.
+
+</p>
+
+<a href="https://forms.gle/Fs6PKHpD8fvhdir2A"
+
+target="_blank"
+
+class="btn-register">
+
+Become a Mentor
+
+</a>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     12. INDUSTRY CONNECT
+=========================================== -->
+
+<section id="industry" class="py-5">
+
+<div class="container">
+
+<div class="section-title">
+
+<h2>Industry Connect</h2>
+
+</div>
+
+<div class="row text-center">
+
+<div class="col-md-4">
+
+<h4>Internships</h4>
+
+</div>
+
+<div class="col-md-4">
+
+<h4>Placements</h4>
+
+</div>
+
+<div class="col-md-4">
+
+<h4>Industrial Visits</h4>
+
+</div>
+
+<div class="col-md-4">
+
+<h4>Sponsored Projects</h4>
+
+</div>
+
+<div class="col-md-4">
+
+<h4>Consultancy</h4>
+
+</div>
+
+<div class="col-md-4">
+
+<h4>Innovation Partnerships</h4>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     13. RESEARCH & INNOVATION
+=========================================== -->
+
+<section id="research" class="bg-light py-5">
+
+<div class="container">
+
+<div class="section-title">
+
+<h2>Research & Innovation</h2>
+
+</div>
+
+<div class="row g-4">
+
+<div class="col-md-3">
+
+<div class="feature-box">
+
+<i class="fas fa-flask"></i>
+
+<h4>Research Projects</h4>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="feature-box">
+
+<i class="fas fa-certificate"></i>
+
+<h4>Patents</h4>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="feature-box">
+
+<i class="fas fa-book"></i>
+
+<h4>Publications</h4>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="feature-box">
+
+<i class="fas fa-rocket"></i>
+
+<h4>Startups</h4>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ==========================================
+     14. INTERNATIONAL ALUMNI
+=========================================== -->
+
+<section id="international">
+
+</section>
+
+
+
+<!-- ==========================================
+     15. NEWS & EVENTS
+=========================================== -->
+
+<section id="events">
+
+</section>
+
+
+
+<!-- ==========================================
+     16. PHOTO GALLERY
+=========================================== -->
+
+<section id="gallery">
+
+</section>
+
+
+
+<!-- ==========================================
+     17. TESTIMONIALS
+=========================================== -->
+
+<section id="testimonials">
+
+</section>
+
+
+
+<!-- ==========================================
+     18. CONTACT
+=========================================== -->
+
+<section id="contact">
+
+</section>
+
+
+
+<!-- ==========================================
+     19. GOOGLE MAP
+=========================================== -->
+
+<section id="map">
+
+</section>
+
+
+
+<!-- ==========================================
+     20. FOOTER
+=========================================== -->
+
+<footer>
+
+<div class="container">
+
+<div class="row g-4">
+
+<div class="col-lg-4 col-md-6">
+
+<img src="College Logo with White Letter-Djwx9rrr.webp" alt="EASA College Logo" style="height: 46px; margin-bottom: 20px;" class="img-fluid">
+
+<h5>EASA Alumni Connect</h5>
+
+<p>
+
+Connecting Alumni across the globe, nurturing mentorship, promoting innovation, and building lifelong relationships with EASA College of Engineering and Technology.
+
+</p>
+
+<div class="footer-social-links">
+
+<a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+
+<a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+
+<a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+
+<a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+
+<a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+
+</div>
+
+</div>
+
+<div class="col-lg-2 col-md-6">
+
+<h5>Quick Links</h5>
+
+<ul>
+
+<li><a href="#"><i class="fas fa-chevron-right fs-6"></i> Home</a></li>
+
+<li><a href="#about"><i class="fas fa-chevron-right fs-6"></i> About Us</a></li>
+
+<li><a href="#get-involved"><i class="fas fa-chevron-right fs-6"></i> Get Involved</a></li>
+
+<li><a href="#mentorship"><i class="fas fa-chevron-right fs-6"></i> Mentorship</a></li>
+
+<li><a href="https://forms.gle/Fs6PKHpD8fvhdir2A" target="_blank"><i class="fas fa-chevron-right fs-6"></i> Register</a></li>
+
+</ul>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<h5>Alumni Network</h5>
+
+<ul>
+
+<li><a href="#distinguished-Alumni"><i class="fas fa-chevron-right fs-6"></i> Distinguished Alumni</a></li>
+
+<li><a href="#industry"><i class="fas fa-chevron-right fs-6"></i> Industry Connect</a></li>
+
+<li><a href="#research"><i class="fas fa-chevron-right fs-6"></i> Research & Innovation</a></li>
+
+<li><a href="#achievements"><i class="fas fa-chevron-right fs-6"></i> Achievements</a></li>
+
+</ul>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<h5>Contact Us</h5>
+
+<div class="footer-contact-item">
+
+<i class="fas fa-map-marker-alt"></i>
+
+<div>
+
+<strong>EASA College of Engineering</strong><br>
+
+NH-47, Palakkad Main Road, Navakkarai, Coimbatore - 641105
+
+</div>
+
+</div>
+
+<div class="footer-contact-item">
+
+<i class="fas fa-envelope"></i>
+
+<div>
+
+Alumni@easacollege.com
+
+</div>
+
+</div>
+
+<div class="footer-contact-item">
+
+<i class="fas fa-phone-alt"></i>
+
+<div>
+
++91 91769 99999 / +91 94432 02626
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer-bottom">
+
+<div class="container">
+
+<p class="mb-0">
+
+&copy; 2026 <strong>EASA College of Engineering and Technology</strong>. All Rights Reserved. Built with pride for EASA Alumni.
+
+</p>
+
+</div>
+
+</div>
+
+</footer>
+
+
+
+<!-- ==========================================
+     21. BACK TO TOP
+=========================================== -->
+
+<button id="backToTop">
+    ↑
+</button>
+
+
+
+<!-- ==========================================
+     22. BOOTSTRAP JS
+=========================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+<!-- ==========================================
+     23. ALL INTERNAL JAVASCRIPT
+=========================================== -->
+
+<script>
+
+    /* ===========================
+       BACK TO TOP & NAVBAR SCRIPT
+    =========================== */
+    const backToTopBtn = document.getElementById('backToTop');
+    if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.style.display = 'flex';
+            } else {
+                backToTopBtn.style.display = 'none';
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+</script>
+
+
+</body>
+</html>
