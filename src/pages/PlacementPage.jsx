@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as FaIcons from 'react-icons/fa';
 import {
     FaBriefcase, FaChartLine, FaHandshake, FaChalkboardTeacher,
     FaChartPie, FaIdBadge, FaCogs, FaQuoteLeft, FaImages, FaDownload,
@@ -322,7 +323,9 @@ const PlacementPage = () => {
                                 {data.stats.map((stat, idx) => (
                                     <div key={idx} className="stat-card">
                                         <div style={{ fontSize: '2.5rem', color: 'var(--secondary)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-                                            {typeof stat.icon === 'string' && FaIcons[stat.icon] ? React.createElement(FaIcons[stat.icon]) : stat.icon}
+                                            {typeof stat.icon === 'string'
+                                                ? (FaIcons[stat.icon] ? React.createElement(FaIcons[stat.icon]) : <FaChartLine />)
+                                                : (stat.icon || <FaChartLine />)}
                                         </div>
                                         <div style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '0.5rem' }}>{stat.value}</div>
                                         <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: '700' }}>{stat.label}</div>
