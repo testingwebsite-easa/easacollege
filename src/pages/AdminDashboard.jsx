@@ -1319,7 +1319,7 @@ const AdminDashboard = () => {
 
                             {activeTab === 'about' && (
                                 <form onSubmit={(e) => handleGenericSubmit(e, facultyStatForm, setFacultyStatForm, '/api/faculty-stats', setFacultyStats, { value: '', label: '' })} style={{ display: 'grid', gap: '1rem' }}>
-                                    {renderInput('Value (e.g., 25:1)', 'value', facultyStatForm.value, e => setFacultyStatForm({ ...facultyStatForm, value: e.target.value }))}
+                                    {renderInput('Value (e.g., 20:1)', 'value', facultyStatForm.value, e => setFacultyStatForm({ ...facultyStatForm, value: e.target.value }))}
                                     {renderInput('Label (e.g., Student Ratio)', 'label', facultyStatForm.label, e => setFacultyStatForm({ ...facultyStatForm, label: e.target.value }))}
                                     <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update' : 'Add'}</button>
                                 </form>
