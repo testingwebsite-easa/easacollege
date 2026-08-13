@@ -2596,6 +2596,11 @@ const DepartmentManager = () => {
                                         <option value="semester">Semester Course</option>
                                         <option value="professional_elective">Professional Elective (Vertical)</option>
                                         <option value="open_elective">Open Elective Course</option>
+                                        <option value="employability">EMPLOYABILITY ENHANCEMENT COURSE</option>
+                                        <option value="mandatory">MANDATORY COURSES</option>
+                                        <option value="language_i">Language Elective – I</option>
+                                        <option value="language_ii">Language Elective - II</option>
+                                        <option value="honors_elective">Electives for Honors Degree</option>
                                     </select>
                                 </div>
                                 {courseType === 'semester' && (

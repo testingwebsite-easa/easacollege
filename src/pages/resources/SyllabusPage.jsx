@@ -1039,7 +1039,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">C</th>
+                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credits</th>
                             <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
                         </tr>
                         <tr>
