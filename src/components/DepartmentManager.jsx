@@ -903,7 +903,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">C</th>
+                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
                             <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
                         </tr>
                         <tr>
@@ -1627,7 +1627,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             <th rowSpan="2" style="width: 38%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 7%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits</th>
+                            <th rowSpan="2" style="width: 7%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
                             <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
                         </tr>
                         <tr>
@@ -1700,7 +1700,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             <th rowSpan="2" style="width: 49%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
                             <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits</th>
+                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
                             <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
                         </tr>
                         <tr>
@@ -2596,11 +2596,6 @@ const DepartmentManager = () => {
                                         <option value="semester">Semester Course</option>
                                         <option value="professional_elective">Professional Elective (Vertical)</option>
                                         <option value="open_elective">Open Elective Course</option>
-                                        <option value="employability">EMPLOYABILITY ENHANCEMENT COURSE</option>
-                                        <option value="mandatory">MANDATORY COURSES</option>
-                                        <option value="language_i">Language Elective – I</option>
-                                        <option value="language_ii">Language Elective - II</option>
-                                        <option value="honors_elective">Electives for Honors Degree</option>
                                     </select>
                                 </div>
                                 {courseType === 'semester' && (
@@ -2633,6 +2628,11 @@ const DepartmentManager = () => {
                                                 <option value="THEORY">THEORY</option>
                                                 <option value="PRACTICAL">PRACTICAL</option>
                                                 <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
+                                                <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
+                                                <option value="MANDATORY COURSES">MANDATORY COURSES</option>
+                                                <option value="Language Elective – I">Language Elective – I</option>
+                                                <option value="Language Elective - II">Language Elective - II</option>
+                                                <option value="Electives for Honors Degree">Electives for Honors Degree</option>
                                             </select>
                                         </div>
                                         <div>
@@ -2800,7 +2800,7 @@ const DepartmentManager = () => {
                                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Category</th>
                                                                         <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>Periods per Week</th>
                                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Total Contact Periods</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>C</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Credit</th>
                                                                         <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>Marks</th>
                                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Action</th>
                                                                     </tr>
@@ -2874,7 +2874,7 @@ const DepartmentManager = () => {
                                                                     <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '30%' }}>Course Title</th>
                                                                     <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center', width: '12%' }}>Periods per Week</th>
                                                                     <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Credits</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Credit</th>
                                                                     <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
                                                                     <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>Action</th>
                                                                 </tr>
@@ -2958,7 +2958,7 @@ const DepartmentManager = () => {
                                                                     <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '44%' }}>Course Title</th>
                                                                     <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center', width: '12%' }}>Periods per Week</th>
                                                                     <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Total Contact Periods</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credits</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
                                                                     <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
                                                                     <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>Action</th>
                                                                 </tr>
@@ -3105,6 +3105,11 @@ const DepartmentManager = () => {
                                     <option value="THEORY">THEORY</option>
                                     <option value="PRACTICAL">PRACTICAL</option>
                                     <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
+                                    <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
+                                    <option value="MANDATORY COURSES">MANDATORY COURSES</option>
+                                    <option value="Language Elective – I">Language Elective – I</option>
+                                    <option value="Language Elective - II">Language Elective - II</option>
+                                    <option value="Electives for Honors Degree">Electives for Honors Degree</option>
                                 </select>
                             </div>
                             <div>

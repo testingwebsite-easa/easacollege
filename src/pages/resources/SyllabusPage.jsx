@@ -1039,7 +1039,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credits</th>
+                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
                             <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
                         </tr>
                         <tr>
@@ -1763,7 +1763,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             <th rowSpan="2" style="width: 38%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 7%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits</th>
+                            <th rowSpan="2" style="width: 7%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
                             <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
                         </tr>
                         <tr>
@@ -1836,7 +1836,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             <th rowSpan="2" style="width: 49%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
                             <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits</th>
+                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
                             <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
                         </tr>
                         <tr>
@@ -2374,7 +2374,7 @@ const SyllabusPage = () => {
                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Category</th>
                                                         <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center' }}>Periods per Week</th>
                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Total<br />Contact<br />Periods</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Credits</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Credit</th>
                                                         <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center' }}>Marks</th>
                                                     </tr>
                                                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
@@ -2452,7 +2452,7 @@ const SyllabusPage = () => {
                                                                 <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '30%' }}>Course Title</th>
                                                                 <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center', width: '12%' }}>Periods per Week</th>
                                                                 <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Credits</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Credit</th>
                                                                 <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center', width: '13%' }}>Marks</th>
                                                             </tr>
                                                             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
@@ -2520,7 +2520,7 @@ const SyllabusPage = () => {
                                                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '44%' }}>Course Title</th>
                                                             <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center', width: '12%' }}>Periods per Week</th>
                                                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Total Contact Periods</th>
-                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credits</th>
+                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
                                                             <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center', width: '13%' }}>Marks</th>
                                                         </tr>
                                                         <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
