@@ -13,7 +13,7 @@ const getRomanNumeral = (num) => {
 
 const renderPieChart = (categories, rowTotals, grandTotal) => {
     const colors = {
-        'HSMC': '#6366f1', // Indigo
+        'HUM': '#6366f1', // Indigo
         'BSC': '#3b82f6',  // Blue
         'ESC': '#10b981',  // Emerald
         'PCC': '#f59e0b',  // Amber
@@ -89,9 +89,9 @@ const renderPieChart = (categories, rowTotals, grandTotal) => {
 const renderCreditDistributionTable = (subjects) => {
     if (!subjects || subjects.length === 0) return null;
 
-    const categories = ['HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
+    const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
     const categoryLabels = {
-        'HSMC': 'Humanities and Social Sciences including Management Courses (HSMC)',
+        'HUM': 'Humanities and Social Sciences including Management Courses (HUM)',
         'BSC': 'Basic Science Courses (BSC)',
         'ESC': 'Engineering Science Courses (ESC)',
         'PCC': 'Professional Core Courses (PCC)',
@@ -114,7 +114,7 @@ const renderCreditDistributionTable = (subjects) => {
             cat = 'PEC';
         } else {
             const rawCat = (subj.categoryType || '').toUpperCase().trim();
-            if (rawCat === 'HS' || rawCat === 'HSMC') cat = 'HSMC';
+            if (rawCat === 'HS' || rawCat === 'HUM') cat = 'HUM';
             else if (rawCat === 'BS' || rawCat === 'BSC') cat = 'BSC';
             else if (rawCat === 'ES' || rawCat === 'ESC') cat = 'ESC';
             else if (rawCat === 'PC' || rawCat === 'PCC') cat = 'PCC';
@@ -227,9 +227,9 @@ const renderCreditDistributionTable = (subjects) => {
 
 const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeetingDate) => {
     const pageNum = ++pageTracker.current;
-    const categories = ['HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
+    const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
     const categoryLabels = {
-        'HSMC': 'Humanities and Social Sciences including Management Courses (HSMC)',
+        'HUM': 'Humanities and Social Sciences including Management Courses (HUM)',
         'BSC': 'Basic Science Courses (BSC)',
         'ESC': 'Engineering Science Courses (ESC)',
         'PCC': 'Professional Core Courses (PCC)',
@@ -252,7 +252,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
             cat = 'PEC';
         } else {
             const rawCat = (subj.categoryType || '').toUpperCase().trim();
-            if (rawCat === 'HS' || rawCat === 'HSMC') cat = 'HSMC';
+            if (rawCat === 'HS' || rawCat === 'HUM') cat = 'HUM';
             else if (rawCat === 'BS' || rawCat === 'BSC') cat = 'BSC';
             else if (rawCat === 'ES' || rawCat === 'ESC') cat = 'ESC';
             else if (rawCat === 'PC' || rawCat === 'PCC') cat = 'PCC';
@@ -301,7 +301,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
     }
 
     const colors = {
-        'HSMC': '#4f46e5',
+        'HUM': '#4f46e5',
         'BSC': '#2563eb',
         'ESC': '#059669',
         'PCC': '#d97706',
@@ -385,10 +385,10 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
                 </thead>
                 <tbody>
                     ${categories.map((cat, idx) => {
-                        const isMC = cat === 'MC';
-                        const total = rowTotals[cat];
-                        const percentage = (grandTotal > 0 && !isMC) ? Math.round((total / grandTotal) * 100) : '-';
-                        return `
+        const isMC = cat === 'MC';
+        const total = rowTotals[cat];
+        const percentage = (grandTotal > 0 && !isMC) ? Math.round((total / grandTotal) * 100) : '-';
+        return `
                             <tr>
                                 <td class="center" style="font-family: Arial, sans-serif;">${idx + 1}</td>
                                 <td style="font-weight: bold; font-family: Arial, sans-serif;">${categoryLabels[cat]}</td>
@@ -397,7 +397,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
                                 <td class="center" style="font-family: Arial, sans-serif;">${isMC ? '-' : `${percentage}%`}</td>
                             </tr>
                         `;
-                    }).join('')}
+    }).join('')}
                     <tr style="font-weight: bold; background-color: rgba(0, 0, 0, 0.02);">
                         <td></td>
                         <td style="font-family: Arial, sans-serif;">Total</td>
@@ -425,15 +425,15 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         const categoryName = subj.categoryName || getDefaultCategoryName(subj.categoryType);
         const prerequisites = subj.prerequisites || 'Basic knowledge of the subject.';
         const subtitleStr = subj.subtitle ? `<div style="font-size: 9.5pt; font-weight: normal; margin-top: 3px;">(${subj.subtitle})</div>` : '';
-        
+
         const objectives = (subj.objectives && subj.objectives.length > 0)
             ? subj.objectives
             : getDefaultObjectives(subj.code, subj.title);
-            
+
         const outcomes = (subj.outcomes && subj.outcomes.length > 0)
             ? subj.outcomes
             : getDefaultOutcomes(subj.code, subj.title);
-            
+
         const units = (subj.units && subj.units.length > 0)
             ? subj.units
             : getDetailedSyllabusForSubject(subj.code, subj.title).map(u => ({
@@ -602,14 +602,14 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             </table>
 
             <div style="margin-top: 15px; margin-bottom: 12px;">
-                ${isPurePractical 
-                    ? renderExperimentsTableHTML(firstHalfExperiments, "List of Exercises (Part I)")
-                    : units.slice(0, 3).map((unit, uIdx) => {
-                        const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][uIdx] || (uIdx + 1)}`;
-                        const unitTitle = unit.title ? unit.title.toUpperCase() : '';
-                        const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
-                        
-                        return topicsStr ? `
+                ${isPurePractical
+                ? renderExperimentsTableHTML(firstHalfExperiments, "List of Exercises (Part I)")
+                : units.slice(0, 3).map((unit, uIdx) => {
+                    const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][uIdx] || (uIdx + 1)}`;
+                    const unitTitle = unit.title ? unit.title.toUpperCase() : '';
+                    const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
+
+                    return topicsStr ? `
                             <div style="margin-bottom: 8px; text-align: justify; font-size: 9.5pt; line-height: 1.35;">
                                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
@@ -618,8 +618,8 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                                 <span style="font-family: Arial, sans-serif;">${topicsStr}</span>
                             </div>
                         ` : '';
-                    }).join('')
-                }
+                }).join('')
+            }
             </div>
 
             <div class="pdf-footer" style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 9pt; font-family: Arial, sans-serif; font-style: italic; color: #000;">
@@ -637,15 +637,15 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             </div>
 
             <div style="margin-top: 10px; margin-bottom: 12px;">
-                ${isPurePractical 
-                    ? renderExperimentsTableHTML(secondHalfExperiments, "List of Exercises (Part II)")
-                    : units.slice(3).map((unit, uIdx) => {
-                        const actualIdx = uIdx + 3;
-                        const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][actualIdx] || (actualIdx + 1)}`;
-                        const unitTitle = unit.title ? unit.title.toUpperCase() : '';
-                        const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
-                        
-                        return topicsStr ? `
+                ${isPurePractical
+                ? renderExperimentsTableHTML(secondHalfExperiments, "List of Exercises (Part II)")
+                : units.slice(3).map((unit, uIdx) => {
+                    const actualIdx = uIdx + 3;
+                    const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][actualIdx] || (actualIdx + 1)}`;
+                    const unitTitle = unit.title ? unit.title.toUpperCase() : '';
+                    const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
+
+                    return topicsStr ? `
                             <div style="margin-bottom: 8px; text-align: justify; font-size: 9.5pt; line-height: 1.35;">
                             
                                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
@@ -655,8 +655,8 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                                 <span style="font-family: Arial, sans-serif;">${topicsStr}</span>
                             </div>
                         ` : '';
-                    }).join('')
-                }
+                }).join('')
+            }
                 ${!isPurePractical ? `
                 <div style="display: flex; justify-content: flex-end; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-top: 10px; margin-bottom: 10px; border-top: 1px dashed #ddd; padding-top: 5px;">
                     <span>TOTAL: ${totalPeriods} PERIODS</span>
@@ -713,35 +713,35 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                     </thead>
                     <tbody>
                         ${coPoMapping.map(row => {
-                            return `
+                return `
                             <tr>
                                 <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">${row.coNo}</td>
                                 ${Array.from({ length: poCount }).map((_, i) => {
-                                    const val = row[`po${i + 1}`] || '-';
-                                    return `<td style="border: 1.5px solid #000; padding: 4px;">${val}</td>`;
-                                }).join('')}
+                    const val = row[`po${i + 1}`] || '-';
+                    return `<td style="border: 1.5px solid #000; padding: 4px;">${val}</td>`;
+                }).join('')}
                                 ${Array.from({ length: psoCount }).map((_, i) => {
-                                    const val = row[`pso${i + 1}`] || '-';
-                                    return `<td style="border: 1.5px solid #000; padding: 4px;">${val}</td>`;
-                                }).join('')}
+                    const val = row[`pso${i + 1}`] || '-';
+                    return `<td style="border: 1.5px solid #000; padding: 4px;">${val}</td>`;
+                }).join('')}
                             </tr>
                             `;
-                        }).join('')}
+            }).join('')}
                         <!-- Average row -->
                         <tr style="font-weight: bold; background-color: #f9f9f9;">
                             <td style="border: 1.5px solid #000; padding: 4px;">Average</td>
                             ${Array.from({ length: poCount }).map((_, i) => {
-                                const key = `po${i + 1}`;
-                                const values = coPoMapping.map(row => row[key]).filter(v => v && v !== '-').map(Number);
-                                const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
-                                return `<td style="border: 1.5px solid #000; padding: 4px;">${avg}</td>`;
-                            }).join('')}
+                const key = `po${i + 1}`;
+                const values = coPoMapping.map(row => row[key]).filter(v => v && v !== '-').map(Number);
+                const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
+                return `<td style="border: 1.5px solid #000; padding: 4px;">${avg}</td>`;
+            }).join('')}
                             ${Array.from({ length: psoCount }).map((_, i) => {
-                                const key = `pso${i + 1}`;
-                                const values = coPoMapping.map(row => row[key]).filter(v => v && v !== '-').map(Number);
-                                const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
-                                return `<td style="border: 1.5px solid #000; padding: 4px;">${avg}</td>`;
-                            }).join('')}
+                const key = `pso${i + 1}`;
+                const values = coPoMapping.map(row => row[key]).filter(v => v && v !== '-').map(Number);
+                const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
+                return `<td style="border: 1.5px solid #000; padding: 4px;">${avg}</td>`;
+            }).join('')}
                         </tr>
                     </tbody>
                 </table>
@@ -1641,21 +1641,21 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     </thead>
                     <tbody>
                         ${(() => {
-                            let globalIndex = 0;
-                            return sortedVerticals.map(vertNum => {
-                                const subjectsForVert = verticalsGrouped[vertNum];
-                                const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
-                                const romanNum = getRomanNumeral(vertNum);
+                let globalIndex = 0;
+                return sortedVerticals.map(vertNum => {
+                    const subjectsForVert = verticalsGrouped[vertNum];
+                    const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
+                    const romanNum = getRomanNumeral(vertNum);
 
-                                return `
+                    return `
                                     <tr class="category-row" style="background-color: rgba(0, 0, 0, 0.05);">
                                         <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 9pt; font-weight: bold; text-align: center; padding: 6px;">
                                             Vertical ${romanNum}: ${verticalName}
                                         </td>
                                     </tr>
                                     ${subjectsForVert.map(s => {
-                                        globalIndex++;
-                                        return `
+                        globalIndex++;
+                        return `
                                             <tr>
                                                 <td class="center">${globalIndex}</td>
                                                 <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
@@ -1670,10 +1670,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                                 <td class="center">${s.total}</td>
                                             </tr>
                                         `;
-                                    }).join('')}
+                    }).join('')}
                                 `;
-                            }).join('');
-                        })()}
+                }).join('');
+            })()}
                     </tbody>
                 </table>
             </div>
@@ -1714,25 +1714,25 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     </thead>
                     <tbody>
                         ${(() => {
-                            const oecsGrouped = subjects.filter(s => s.isOpenElective).reduce((acc, subj) => {
-                                const dept = subj.offeringDept || 'Other Departments';
-                                if (!acc[dept]) acc[dept] = [];
-                                acc[dept].push(subj);
-                                return acc;
-                            }, {});
-                            const sortedOecDepts = Object.keys(oecsGrouped).sort();
-                            let oecGlobalIndex = 0;
-                            return sortedOecDepts.map(deptName => {
-                                const deptSubjects = oecsGrouped[deptName];
-                                return `
+                const oecsGrouped = subjects.filter(s => s.isOpenElective).reduce((acc, subj) => {
+                    const dept = subj.offeringDept || 'Other Departments';
+                    if (!acc[dept]) acc[dept] = [];
+                    acc[dept].push(subj);
+                    return acc;
+                }, {});
+                const sortedOecDepts = Object.keys(oecsGrouped).sort();
+                let oecGlobalIndex = 0;
+                return sortedOecDepts.map(deptName => {
+                    const deptSubjects = oecsGrouped[deptName];
+                    return `
                                     <tr style="background: #f9f9f9;">
                                         <td colspan="11" style="font-weight: bold; text-align: center; font-size: 9.5pt; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 1px solid #000; padding: 6px;">
                                             ${deptName}
                                         </td>
                                     </tr>
                                     ${deptSubjects.map(s => {
-                                        oecGlobalIndex++;
-                                        return `
+                        oecGlobalIndex++;
+                        return `
                                             <tr>
                                                 <td class="center">${oecGlobalIndex}</td>
                                                 <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
@@ -1747,10 +1747,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                                 <td class="center">${s.total}</td>
                                             </tr>
                                         `;
-                                    }).join('')}
+                    }).join('')}
                                 `;
-                            }).join('');
-                        })()}
+                }).join('');
+            })()}
                     </tbody>
                 </table>
             </div>
@@ -1778,7 +1778,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
 const getDefaultCategoryName = (catType) => {
     const map = {
-        'HSMC': 'Humanities, Social Sciences and Management Course (HSMC)',
+        'HUM': 'Humanities, Social Sciences and Management Course (HUM)',
         'BSC': 'Basic Science Course (BSC)',
         'ESC': 'Engineering Science Course (ESC)',
         'PCC': 'Professional Core Course (PCC)',
@@ -1838,9 +1838,9 @@ const DepartmentManager = () => {
     const getDeptSlug = (userDeptName) => {
         if (!userDeptName) return '';
         const lower = userDeptName.toLowerCase().trim();
-        let found = staticDepartments.find(d => 
-            d.slug.toLowerCase() === lower || 
-            d.id.toLowerCase() === lower || 
+        let found = staticDepartments.find(d =>
+            d.slug.toLowerCase() === lower ||
+            d.id.toLowerCase() === lower ||
             d.name.toLowerCase() === lower
         );
         if (found) return found.slug;
@@ -1855,8 +1855,8 @@ const DepartmentManager = () => {
         if (lower === 'agri') return 'agriculture-engineering';
         if (lower === 'mba') return 'master-of-business-administration';
 
-        found = staticDepartments.find(d => 
-            d.name.toLowerCase().includes(lower) || 
+        found = staticDepartments.find(d =>
+            d.name.toLowerCase().includes(lower) ||
             lower.includes(d.name.toLowerCase())
         );
         if (found) return found.slug;
@@ -1930,7 +1930,7 @@ const DepartmentManager = () => {
         category: 'THEORY',
         code: '',
         title: '',
-        categoryType: 'HSMC',
+        categoryType: 'HUM',
         l: 0,
         t: 0,
         p: 0,
@@ -2016,7 +2016,7 @@ const DepartmentManager = () => {
     const handleStartManageSyllabus = (originalIndex) => {
         const subj = data.subjects[originalIndex];
         setSelectedSyllabusSubjectIndex(originalIndex);
-        
+
         const prefilledMapping = (subj.coPoMapping && subj.coPoMapping.length === 5)
             ? subj.coPoMapping.map(m => ({ ...m }))
             : [1, 2, 3, 4, 5].map(num => {
@@ -2035,7 +2035,7 @@ const DepartmentManager = () => {
             code: subj.code || '',
             title: subj.title || '',
             category: subj.category || 'THEORY',
-            categoryType: subj.categoryType || 'HSMC',
+            categoryType: subj.categoryType || 'HUM',
             l: subj.l ?? 0,
             t: subj.t ?? 0,
             p: subj.p ?? 0,
@@ -2043,13 +2043,13 @@ const DepartmentManager = () => {
             subtitle: subj.subtitle || '',
             categoryName: subj.categoryName || getDefaultCategoryName(subj.categoryType),
             prerequisites: subj.prerequisites || 'Basic knowledge of the subject.',
-            objectives: (subj.objectives && subj.objectives.length > 0) 
-                ? [...subj.objectives] 
+            objectives: (subj.objectives && subj.objectives.length > 0)
+                ? [...subj.objectives]
                 : getDefaultObjectives(subj.code, subj.title),
-            outcomes: (subj.outcomes && subj.outcomes.length > 0) 
+            outcomes: (subj.outcomes && subj.outcomes.length > 0)
                 ? subj.outcomes.map(co => ({ ...co }))
                 : getDefaultOutcomes(subj.code, subj.title),
-            units: (subj.units && subj.units.length > 0) 
+            units: (subj.units && subj.units.length > 0)
                 ? subj.units.map(u => ({ ...u, topics: Array.isArray(u.topics) ? [...u.topics] : [u.topics || ''] }))
                 : getDetailedSyllabusForSubject(subj.code, subj.title).map(u => ({
                     unitNo: u.unit || u.unitNo || '',
@@ -2080,7 +2080,7 @@ const DepartmentManager = () => {
 
         const originalIndex = selectedSyllabusSubjectIndex;
         const currentSubject = data.subjects[originalIndex];
-        
+
         const updatedSubject = {
             ...currentSubject,
             subtitle: syllabusEditValue.subtitle,
@@ -2198,7 +2198,7 @@ const DepartmentManager = () => {
     const updateEditingSubjectField = (field, value) => {
         setEditingSubjectValue(prev => {
             const updated = { ...prev, [field]: value };
-            
+
             // Treat empty string as 0 for calculations
             const lVal = updated.l === '' ? 0 : Number(updated.l || 0);
             const tVal = updated.t === '' ? 0 : Number(updated.t || 0);
@@ -2301,7 +2301,7 @@ const DepartmentManager = () => {
         const success = await updateBackend(updatedData);
         if (success) {
             setNewSubject({
-                semester: 1, vertical: '', verticalName: '', category: 'THEORY', code: '', title: '', categoryType: 'HSMC',
+                semester: 1, vertical: '', verticalName: '', category: 'THEORY', code: '', title: '', categoryType: 'HUM',
                 l: 0, t: 0, p: 0, contactPeriods: 0, credits: 3, cia: 40, ese: 60, total: 100, isOpenElective: false, offeringDept: ''
             });
         }
@@ -2598,12 +2598,12 @@ const DepartmentManager = () => {
                                         <option value="open_elective">Open Elective Course</option>
                                     </select>
                                 </div>
-                                 {courseType === 'semester' && (
-                                     <div>
-                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Semester</label>
-                                         <input type="number" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                     </div>
-                                 )}
+                                {courseType === 'semester' && (
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Semester</label>
+                                        <input type="number" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                    </div>
+                                )}
                                 {courseType === 'professional_elective' && (
                                     <>
                                         <div>
@@ -2633,11 +2633,11 @@ const DepartmentManager = () => {
                                         <div>
                                             <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category Type</label>
                                             <select
-                                                value={newSubject.categoryType || 'HSMC'}
+                                                value={newSubject.categoryType || 'HUM'}
                                                 onChange={e => setNewSubject({ ...newSubject, categoryType: e.target.value })}
                                                 style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
                                             >
-                                                <option value="HSMC">HSMC</option>
+                                                <option value="HUM">HUM</option>
                                                 <option value="BSC">BSC</option>
                                                 <option value="ESC">ESC</option>
                                                 <option value="PCC">PCC</option>
@@ -2833,7 +2833,7 @@ const DepartmentManager = () => {
                                                                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center' }}>
                                                                                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                                                                                             <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontSize: '0.75rem' }} title="Manage Syllabus">
-                                                                                            Syllabus <FaBook />
+                                                                                                Syllabus <FaBook />
                                                                                             </button>
                                                                                             <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
                                                                                                 <FaEdit />
@@ -3104,8 +3104,8 @@ const DepartmentManager = () => {
                             </div>
                             <div>
                                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category Type</label>
-                                <select value={editingSubjectValue.categoryType || 'HSMC'} onChange={e => updateEditingSubjectField('categoryType', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
-                                    <option value="HSMC">HSMC</option>
+                                <select value={editingSubjectValue.categoryType || 'HUM'} onChange={e => updateEditingSubjectField('categoryType', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
+                                    <option value="HUM">HUM</option>
                                     <option value="BSC">BSC</option>
                                     <option value="ESC">ESC</option>
                                     <option value="PCC">PCC</option>
@@ -3226,60 +3226,295 @@ const DepartmentManager = () => {
                                 ))}
                             </div>
 
-                        {/* Tab Contents */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            {activeSyllabusTab === 'objectives-outcomes' && (
-                                <>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Subtitle (e.g. Common to all branches)</label>
-                                            <input type="text" value={syllabusEditValue.subtitle} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, subtitle: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} placeholder="e.g. Common to all B.E/B.Tech Programmes" />
+                            {/* Tab Contents */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                {activeSyllabusTab === 'objectives-outcomes' && (
+                                    <>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Subtitle (e.g. Common to all branches)</label>
+                                                <input type="text" value={syllabusEditValue.subtitle} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, subtitle: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} placeholder="e.g. Common to all B.E/B.Tech Programmes" />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category Full Name</label>
+                                                <input type="text" value={syllabusEditValue.categoryName} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, categoryName: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} placeholder="e.g. Humanities, Social Sciences and Management Course (HUM)" />
+                                            </div>
                                         </div>
+
                                         <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category Full Name</label>
-                                            <input type="text" value={syllabusEditValue.categoryName} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, categoryName: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} placeholder="e.g. Humanities, Social Sciences and Management Course (HSMC)" />
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Pre-requisites</label>
+                                            <textarea value={syllabusEditValue.prerequisites} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, prerequisites: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '60px', resize: 'vertical' }} placeholder="e.g. Basic knowledge of English grammar..." />
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Pre-requisites</label>
-                                        <textarea value={syllabusEditValue.prerequisites} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, prerequisites: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '60px', resize: 'vertical' }} placeholder="e.g. Basic knowledge of English grammar..." />
-                                    </div>
+                                        <div>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Objectives </h4>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                                                    <thead>
+                                                        <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Objective Description</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {syllabusEditValue.objectives.map((obj, idx) => (
+                                                            <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                                                                <td style={{ padding: '0.5rem 0.75rem' }}>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={obj}
+                                                                        onChange={e => {
+                                                                            const newObjs = [...syllabusEditValue.objectives];
+                                                                            newObjs[idx] = e.target.value;
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, objectives: newObjs });
+                                                                        }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                    />
+                                                                </td>
+                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newObjs = syllabusEditValue.objectives.filter((_, i) => i !== idx);
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, objectives: newObjs });
+                                                                        }}
+                                                                        className="btn btn-danger"
+                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    >
+                                                                        <FaTrash />
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        {syllabusEditValue.objectives.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No objectives defined. Add one below.</td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                <input
+                                                    type="text"
+                                                    id="newObjectiveInput"
+                                                    placeholder="Type new course objective description here..."
+                                                    style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        const input = document.getElementById('newObjectiveInput');
+                                                        if (input && input.value.trim()) {
+                                                            setSyllabusEditValue({
+                                                                ...syllabusEditValue,
+                                                                objectives: [...syllabusEditValue.objectives, input.value.trim()]
+                                                            });
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                    className="btn btn-primary"
+                                                    style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                >
+                                                    <FaPlus /> Add Objective
+                                                </button>
+                                            </div>
+                                        </div>
 
-                                    <div>
-                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Objectives </h4>
+                                        <div>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Outcomes (COs) </h4>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                                                    <thead>
+                                                        <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>CO No</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Course Outcome Description</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '22%', color: 'var(--text-main)', fontWeight: 'bold' }}>RBT Level</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {syllabusEditValue.outcomes.map((co, idx) => (
+                                                            <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={co.coNo}
+                                                                        onChange={e => {
+                                                                            const newOutcomes = [...syllabusEditValue.outcomes];
+                                                                            newOutcomes[idx].coNo = e.target.value;
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
+                                                                        }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
+                                                                    />
+                                                                </td>
+                                                                <td style={{ padding: '0.5rem 0.75rem' }}>
+                                                                    <textarea
+                                                                        value={co.outcome}
+                                                                        onChange={e => {
+                                                                            const newOutcomes = [...syllabusEditValue.outcomes];
+                                                                            newOutcomes[idx].outcome = e.target.value;
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
+                                                                        }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '55px', resize: 'vertical' }}
+                                                                    />
+                                                                </td>
+                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                    <select
+                                                                        value={co.rbtLevel}
+                                                                        onChange={e => {
+                                                                            const newOutcomes = [...syllabusEditValue.outcomes];
+                                                                            newOutcomes[idx].rbtLevel = e.target.value;
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
+                                                                        }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                                    >
+                                                                        {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
+                                                                            <option key={lvl} value={lvl}>{lvl}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                </td>
+                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', verticalAlign: 'top' }}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newOutcomes = syllabusEditValue.outcomes.filter((_, i) => i !== idx);
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
+                                                                        }}
+                                                                        className="btn btn-danger"
+                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    >
+                                                                        <FaTrash />
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        {syllabusEditValue.outcomes.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No course outcomes defined. Add one below.</td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '15% 55% 20% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                                <input
+                                                    type="text"
+                                                    id="newCoNoInput"
+                                                    placeholder="CO No"
+                                                    defaultValue={`CO${syllabusEditValue.outcomes.length + 1}`}
+                                                    style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
+                                                />
+                                                <textarea
+                                                    id="newOutcomeInput"
+                                                    placeholder="Type new course outcome description..."
+                                                    style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical' }}
+                                                />
+                                                <select
+                                                    id="newOutcomeRbtSelect"
+                                                    defaultValue="Apply"
+                                                    style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                >
+                                                    {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
+                                                        <option key={lvl} value={lvl}>{lvl}</option>
+                                                    ))}
+                                                </select>
+                                                <button
+                                                    onClick={() => {
+                                                        const coNoInput = document.getElementById('newCoNoInput');
+                                                        const outcomeInput = document.getElementById('newOutcomeInput');
+                                                        const rbtSelect = document.getElementById('newOutcomeRbtSelect');
+                                                        if (coNoInput && outcomeInput && rbtSelect && outcomeInput.value.trim()) {
+                                                            const newCo = {
+                                                                coNo: coNoInput.value.trim() || `CO${syllabusEditValue.outcomes.length + 1}`,
+                                                                outcome: outcomeInput.value.trim(),
+                                                                rbtLevel: rbtSelect.value
+                                                            };
+                                                            setSyllabusEditValue({
+                                                                ...syllabusEditValue,
+                                                                outcomes: [...syllabusEditValue.outcomes, newCo]
+                                                            });
+                                                            outcomeInput.value = '';
+                                                            coNoInput.value = `CO${syllabusEditValue.outcomes.length + 2}`;
+                                                        }
+                                                    }}
+                                                    className="btn btn-primary"
+                                                    style={{ padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                                                >
+                                                    <FaPlus />
+                                                </button>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+                                                <button
+                                                    onClick={() => setActiveSyllabusTab('units')}
+                                                    className="btn btn-primary"
+                                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', fontWeight: 'bold' }}
+                                                >
+                                                    Next: Unit-wise Syllabus →
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {activeSyllabusTab === 'units' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>Unit-wise Syllabus </h4>
                                         <div style={{ overflowX: 'auto' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)' }}>
                                                 <thead>
                                                     <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Objective Description</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit No</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', width: '33%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit Title</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Topics (One topic per line)</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', width: '10%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {syllabusEditValue.objectives.map((obj, idx) => (
+                                                    {syllabusEditValue.units.map((unit, idx) => (
                                                         <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                                                            <td style={{ padding: '0.5rem 0.75rem' }}>
-                                                                <input 
-                                                                    type="text" 
-                                                                    value={obj} 
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={unit.unitNo}
                                                                     onChange={e => {
-                                                                        const newObjs = [...syllabusEditValue.objectives];
-                                                                        newObjs[idx] = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, objectives: newObjs });
-                                                                    }} 
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
+                                                                        const newUnits = [...syllabusEditValue.units];
+                                                                        newUnits[idx].unitNo = e.target.value;
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                    }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
                                                                 />
                                                             </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                                                                <button 
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={unit.title}
+                                                                    onChange={e => {
+                                                                        const newUnits = [...syllabusEditValue.units];
+                                                                        newUnits[idx].title = e.target.value;
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                    }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                />
+                                                            </td>
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                <textarea
+                                                                    value={unit.topics.join('\n')}
+                                                                    onChange={e => {
+                                                                        const newUnits = [...syllabusEditValue.units];
+                                                                        newUnits[idx].topics = e.target.value.split('\n');
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                    }}
+                                                                    placeholder="Enter topics, one per line..."
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '80px', resize: 'vertical', fontSize: '0.85rem' }}
+                                                                />
+                                                            </td>
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top', textAlign: 'center' }}>
+                                                                <button
                                                                     onClick={() => {
-                                                                        const newObjs = syllabusEditValue.objectives.filter((_, i) => i !== idx);
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, objectives: newObjs });
-                                                                    }} 
-                                                                    className="btn btn-danger" 
+                                                                        const newUnits = syllabusEditValue.units.filter((_, i) => i !== idx);
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                    }}
+                                                                    className="btn btn-danger"
                                                                     style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                                                 >
                                                                     <FaTrash />
@@ -3287,86 +3522,132 @@ const DepartmentManager = () => {
                                                             </td>
                                                         </tr>
                                                     ))}
-                                                    {syllabusEditValue.objectives.length === 0 && (
+                                                    {syllabusEditValue.units.length === 0 && (
                                                         <tr>
-                                                            <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No objectives defined. Add one below.</td>
+                                                            <td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No units defined. Add one below.</td>
                                                         </tr>
                                                     )}
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                            <input 
-                                                type="text" 
-                                                id="newObjectiveInput" 
-                                                placeholder="Type new course objective description here..." 
-                                                style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
+                                        <div style={{ display: 'grid', gridTemplateColumns: '15% 35% 40% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                            <input
+                                                type="text"
+                                                id="newUnitNoInput"
+                                                placeholder="Unit No"
+                                                defaultValue={`UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`}
+                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
                                             />
-                                            <button 
+                                            <input
+                                                type="text"
+                                                id="newUnitTitleInput"
+                                                placeholder="Unit Title (e.g. INTRODUCTION)..."
+                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                            />
+                                            <textarea
+                                                id="newUnitTopicsInput"
+                                                placeholder="Enter topics, one per line..."
+                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical', fontSize: '0.85rem' }}
+                                            />
+                                            <button
                                                 onClick={() => {
-                                                    const input = document.getElementById('newObjectiveInput');
-                                                    if (input && input.value.trim()) {
-                                                        setSyllabusEditValue({ 
-                                                            ...syllabusEditValue, 
-                                                            objectives: [...syllabusEditValue.objectives, input.value.trim()] 
+                                                    const unitNoInput = document.getElementById('newUnitNoInput');
+                                                    const titleInput = document.getElementById('newUnitTitleInput');
+                                                    const topicsInput = document.getElementById('newUnitTopicsInput');
+                                                    if (unitNoInput && titleInput && topicsInput && (titleInput.value.trim() || topicsInput.value.trim())) {
+                                                        const newUnit = {
+                                                            unitNo: unitNoInput.value.trim() || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`,
+                                                            title: titleInput.value.trim(),
+                                                            topics: topicsInput.value.trim().split('\n').filter(t => t.trim() !== '')
+                                                        };
+                                                        setSyllabusEditValue({
+                                                            ...syllabusEditValue,
+                                                            units: [...syllabusEditValue.units, newUnit]
                                                         });
-                                                        input.value = '';
+                                                        titleInput.value = '';
+                                                        topicsInput.value = '';
+                                                        unitNoInput.value = `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length + 1] || (syllabusEditValue.units.length + 2)}`;
                                                     }
-                                                }} 
-                                                className="btn btn-primary" 
-                                                style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                }}
+                                                className="btn btn-primary"
+                                                style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
                                             >
-                                                <FaPlus /> Add Objective
+                                                <FaPlus />
+                                            </button>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+                                            <button
+                                                onClick={() => setActiveSyllabusTab(showExercisesTab ? 'experiments' : 'textbooks-references')}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', fontWeight: 'bold' }}
+                                            >
+                                                {showExercisesTab ? 'Next: List of Exercises →' : 'Next: Textbooks & References →'}
                                             </button>
                                         </div>
                                     </div>
+                                )}
 
-                                    <div>
-                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Outcomes (COs) </h4>
+                                {activeSyllabusTab === 'experiments' && showExercisesTab && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>List of Exercises</h4>
                                         <div style={{ overflowX: 'auto' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)' }}>
                                                 <thead>
                                                     <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>CO No</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Course Outcome Description</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '22%', color: 'var(--text-main)', fontWeight: 'bold' }}>RBT Level</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', width: '10%', color: 'var(--text-main)', fontWeight: 'bold', textAlign: 'center' }}>S.No</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', width: '58%', color: 'var(--text-main)', fontWeight: 'bold' }}>Exercise / Experiment Name</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold', textAlign: 'center' }}>CO</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold', textAlign: 'center' }}>RBT Level</th>
+                                                        <th style={{ padding: '0.6rem 0.75rem', width: '8%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {syllabusEditValue.outcomes.map((co, idx) => (
+                                                    {(syllabusEditValue.experiments || []).map((exp, idx) => (
                                                         <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
-                                                                <input 
-                                                                    type="text" 
-                                                                    value={co.coNo} 
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={exp.sNo || ''}
                                                                     onChange={e => {
-                                                                        const newOutcomes = [...syllabusEditValue.outcomes];
-                                                                        newOutcomes[idx].coNo = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
-                                                                    }} 
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }} 
+                                                                        const newExps = [...(syllabusEditValue.experiments || [])];
+                                                                        newExps[idx].sNo = e.target.value;
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
+                                                                    }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }}
                                                                 />
                                                             </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem' }}>
-                                                                <textarea 
-                                                                    value={co.outcome} 
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle' }}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={exp.name || ''}
                                                                     onChange={e => {
-                                                                        const newOutcomes = [...syllabusEditValue.outcomes];
-                                                                        newOutcomes[idx].outcome = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
-                                                                    }} 
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '55px', resize: 'vertical' }} 
+                                                                        const newExps = [...(syllabusEditValue.experiments || [])];
+                                                                        newExps[idx].name = e.target.value;
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
+                                                                    }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
                                                                 />
                                                             </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
-                                                                <select 
-                                                                    value={co.rbtLevel} 
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={exp.co || ''}
                                                                     onChange={e => {
-                                                                        const newOutcomes = [...syllabusEditValue.outcomes];
-                                                                        newOutcomes[idx].rbtLevel = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
-                                                                    }} 
+                                                                        const newExps = [...(syllabusEditValue.experiments || [])];
+                                                                        newExps[idx].co = e.target.value;
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
+                                                                    }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }}
+                                                                />
+                                                            </td>
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                                <select
+                                                                    value={exp.rbtLevel || 'Apply'}
+                                                                    onChange={e => {
+                                                                        const newExps = [...(syllabusEditValue.experiments || [])];
+                                                                        newExps[idx].rbtLevel = e.target.value;
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
+                                                                    }}
                                                                     style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
                                                                 >
                                                                     {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
@@ -3374,13 +3655,13 @@ const DepartmentManager = () => {
                                                                     ))}
                                                                 </select>
                                                             </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', verticalAlign: 'top' }}>
-                                                                <button 
+                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                                <button
                                                                     onClick={() => {
-                                                                        const newOutcomes = syllabusEditValue.outcomes.filter((_, i) => i !== idx);
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
-                                                                    }} 
-                                                                    className="btn btn-danger" 
+                                                                        const newExps = (syllabusEditValue.experiments || []).filter((_, i) => i !== idx);
+                                                                        setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
+                                                                    }}
+                                                                    className="btn btn-danger"
                                                                     style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                                                 >
                                                                     <FaTrash />
@@ -3388,685 +3669,404 @@ const DepartmentManager = () => {
                                                             </td>
                                                         </tr>
                                                     ))}
-                                                    {syllabusEditValue.outcomes.length === 0 && (
+                                                    {(!syllabusEditValue.experiments || syllabusEditValue.experiments.length === 0) && (
                                                         <tr>
-                                                            <td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No course outcomes defined. Add one below.</td>
+                                                            <td colSpan="5" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No exercises defined. Add one below.</td>
                                                         </tr>
                                                     )}
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '15% 55% 20% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                            <input 
-                                                type="text" 
-                                                id="newCoNoInput" 
-                                                placeholder="CO No" 
-                                                defaultValue={`CO${syllabusEditValue.outcomes.length + 1}`}
-                                                style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }} 
+                                        <div style={{ display: 'grid', gridTemplateColumns: '10% 54% 12% 16% 8%', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                            <input
+                                                type="text"
+                                                id="newExpSNoInput"
+                                                placeholder="S.No"
+                                                defaultValue={(syllabusEditValue.experiments || []).length + 1}
+                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold', textAlign: 'center' }}
                                             />
-                                            <textarea 
-                                                id="newOutcomeInput" 
-                                                placeholder="Type new course outcome description..." 
-                                                style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical' }} 
+                                            <input
+                                                type="text"
+                                                id="newExpNameInput"
+                                                placeholder="Experiment Name..."
+                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
                                             />
-                                            <select 
-                                                id="newOutcomeRbtSelect"
+                                            <input
+                                                type="text"
+                                                id="newExpCoInput"
+                                                placeholder="CO"
+                                                defaultValue="CO1"
+                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }}
+                                            />
+                                            <select
+                                                id="newExpRbtSelect"
                                                 defaultValue="Apply"
-                                                style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
                                             >
                                                 {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
                                                     <option key={lvl} value={lvl}>{lvl}</option>
                                                 ))}
                                             </select>
-                                            <button 
+                                            <button
                                                 onClick={() => {
-                                                    const coNoInput = document.getElementById('newCoNoInput');
-                                                    const outcomeInput = document.getElementById('newOutcomeInput');
-                                                    const rbtSelect = document.getElementById('newOutcomeRbtSelect');
-                                                    if (coNoInput && outcomeInput && rbtSelect && outcomeInput.value.trim()) {
-                                                        const newCo = {
-                                                            coNo: coNoInput.value.trim() || `CO${syllabusEditValue.outcomes.length + 1}`,
-                                                            outcome: outcomeInput.value.trim(),
+                                                    const sNoInput = document.getElementById('newExpSNoInput');
+                                                    const nameInput = document.getElementById('newExpNameInput');
+                                                    const coInput = document.getElementById('newExpCoInput');
+                                                    const rbtSelect = document.getElementById('newExpRbtSelect');
+                                                    if (sNoInput && nameInput && coInput && rbtSelect && nameInput.value.trim()) {
+                                                        const newExp = {
+                                                            sNo: sNoInput.value.trim() || String((syllabusEditValue.experiments || []).length + 1),
+                                                            name: nameInput.value.trim(),
+                                                            co: coInput.value.trim() || 'CO1',
                                                             rbtLevel: rbtSelect.value
                                                         };
+                                                        const updatedExps = [...(syllabusEditValue.experiments || []), newExp];
                                                         setSyllabusEditValue({
                                                             ...syllabusEditValue,
-                                                            outcomes: [...syllabusEditValue.outcomes, newCo]
+                                                            experiments: updatedExps
                                                         });
-                                                        outcomeInput.value = '';
-                                                        coNoInput.value = `CO${syllabusEditValue.outcomes.length + 2}`;
+                                                        nameInput.value = '';
+                                                        sNoInput.value = String(updatedExps.length + 1);
                                                     }
-                                                }} 
-                                                className="btn btn-primary" 
-                                                style={{ padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                                                }}
+                                                className="btn btn-primary"
+                                                style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
                                             >
                                                 <FaPlus />
                                             </button>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                            <button 
-                                                onClick={() => setActiveSyllabusTab('units')} 
+                                            <button
+                                                onClick={() => setActiveSyllabusTab('textbooks-references')}
                                                 className="btn btn-primary"
                                                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', fontWeight: 'bold' }}
                                             >
-                                                Next: Unit-wise Syllabus →
+                                                Next: Textbooks & References →
                                             </button>
                                         </div>
                                     </div>
-                                </>
-                            )}
+                                )}
 
-                            {activeSyllabusTab === 'units' && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>Unit-wise Syllabus </h4>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)' }}>
-                                            <thead>
-                                                <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                                    <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit No</th>
-                                                    <th style={{ padding: '0.6rem 0.75rem', width: '33%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit Title</th>
-                                                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Topics (One topic per line)</th>
-                                                    <th style={{ padding: '0.6rem 0.75rem', width: '10%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {syllabusEditValue.units.map((unit, idx) => (
-                                                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
-                                                            <input 
-                                                                type="text" 
-                                                                value={unit.unitNo} 
-                                                                onChange={e => {
-                                                                    const newUnits = [...syllabusEditValue.units];
-                                                                    newUnits[idx].unitNo = e.target.value;
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                }} 
-                                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }} 
-                                                            />
-                                                        </td>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
-                                                            <input 
-                                                                type="text" 
-                                                                value={unit.title} 
-                                                                onChange={e => {
-                                                                    const newUnits = [...syllabusEditValue.units];
-                                                                    newUnits[idx].title = e.target.value;
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                }} 
-                                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                                            />
-                                                        </td>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
-                                                            <textarea 
-                                                                value={unit.topics.join('\n')} 
-                                                                onChange={e => {
-                                                                    const newUnits = [...syllabusEditValue.units];
-                                                                    newUnits[idx].topics = e.target.value.split('\n');
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                }} 
-                                                                placeholder="Enter topics, one per line..."
-                                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '80px', resize: 'vertical', fontSize: '0.85rem' }} 
-                                                            />
-                                                        </td>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top', textAlign: 'center' }}>
-                                                            <button 
-                                                                onClick={() => {
-                                                                    const newUnits = syllabusEditValue.units.filter((_, i) => i !== idx);
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                }} 
-                                                                className="btn btn-danger" 
-                                                                style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                            >
-                                                                    <FaTrash />
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                                {syllabusEditValue.units.length === 0 && (
-                                                    <tr>
-                                                        <td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No units defined. Add one below.</td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '15% 35% 40% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                        <input 
-                                            type="text" 
-                                            id="newUnitNoInput" 
-                                            placeholder="Unit No" 
-                                            defaultValue={`UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`}
-                                            style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }} 
-                                        />
-                                        <input 
-                                            type="text" 
-                                            id="newUnitTitleInput" 
-                                            placeholder="Unit Title (e.g. INTRODUCTION)..." 
-                                            style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                        />
-                                        <textarea 
-                                            id="newUnitTopicsInput" 
-                                            placeholder="Enter topics, one per line..." 
-                                            style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical', fontSize: '0.85rem' }} 
-                                        />
-                                        <button 
-                                            onClick={() => {
-                                                const unitNoInput = document.getElementById('newUnitNoInput');
-                                                const titleInput = document.getElementById('newUnitTitleInput');
-                                                const topicsInput = document.getElementById('newUnitTopicsInput');
-                                                if (unitNoInput && titleInput && topicsInput && (titleInput.value.trim() || topicsInput.value.trim())) {
-                                                    const newUnit = {
-                                                        unitNo: unitNoInput.value.trim() || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`,
-                                                        title: titleInput.value.trim(),
-                                                        topics: topicsInput.value.trim().split('\n').filter(t => t.trim() !== '')
-                                                    };
-                                                    setSyllabusEditValue({
-                                                        ...syllabusEditValue,
-                                                        units: [...syllabusEditValue.units, newUnit]
-                                                    });
-                                                    titleInput.value = '';
-                                                    topicsInput.value = '';
-                                                    unitNoInput.value = `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length + 1] || (syllabusEditValue.units.length + 2)}`;
-                                                }
-                                            }} 
-                                            className="btn btn-primary" 
-                                            style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
-                                        >
-                                            <FaPlus />
-                                        </button>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                        <button 
-                                            onClick={() => setActiveSyllabusTab(showExercisesTab ? 'experiments' : 'textbooks-references')} 
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', fontWeight: 'bold' }}
-                                        >
-                                            {showExercisesTab ? 'Next: List of Exercises →' : 'Next: Textbooks & References →'}
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                                {activeSyllabusTab === 'textbooks-references' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                        <div>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Textbooks </h4>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                                                    <thead>
+                                                        <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Textbook details (title, authors, publisher, year)</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {syllabusEditValue.textbooks.map((tb, idx) => (
+                                                            <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                                                                <td style={{ padding: '0.5rem 0.75rem' }}>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={tb}
+                                                                        onChange={e => {
+                                                                            const newTbs = [...syllabusEditValue.textbooks];
+                                                                            newTbs[idx] = e.target.value;
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, textbooks: newTbs });
+                                                                        }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                    />
+                                                                </td>
+                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newTbs = syllabusEditValue.textbooks.filter((_, i) => i !== idx);
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, textbooks: newTbs });
+                                                                        }}
+                                                                        className="btn btn-danger"
+                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    >
+                                                                        <FaTrash />
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        {syllabusEditValue.textbooks.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No textbooks defined. Add one below.</td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <input
+                                                    type="text"
+                                                    id="newTextbookInput"
+                                                    placeholder="Enter textbook title, authors, publisher, year..."
+                                                    style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        const input = document.getElementById('newTextbookInput');
+                                                        if (input && input.value.trim()) {
+                                                            setSyllabusEditValue({
+                                                                ...syllabusEditValue,
+                                                                textbooks: [...syllabusEditValue.textbooks, input.value.trim()]
+                                                            });
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                    className="btn btn-primary"
+                                                    style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                >
+                                                    <FaPlus /> Add Textbook
+                                                </button>
+                                            </div>
+                                        </div>
 
-                            {activeSyllabusTab === 'experiments' && showExercisesTab && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                    <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>List of Exercises</h4>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)' }}>
-                                            <thead>
-                                                <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                                    <th style={{ padding: '0.6rem 0.75rem', width: '10%', color: 'var(--text-main)', fontWeight: 'bold', textAlign: 'center' }}>S.No</th>
-                                                    <th style={{ padding: '0.6rem 0.75rem', width: '58%', color: 'var(--text-main)', fontWeight: 'bold' }}>Exercise / Experiment Name</th>
-                                                    <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold', textAlign: 'center' }}>CO</th>
-                                                    <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold', textAlign: 'center' }}>RBT Level</th>
-                                                    <th style={{ padding: '0.6rem 0.75rem', width: '8%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {(syllabusEditValue.experiments || []).map((exp, idx) => (
-                                                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                            <input 
-                                                                type="text" 
-                                                                value={exp.sNo || ''} 
-                                                                onChange={e => {
-                                                                    const newExps = [...(syllabusEditValue.experiments || [])];
-                                                                    newExps[idx].sNo = e.target.value;
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
-                                                                }} 
-                                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }} 
-                                                            />
-                                                        </td>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle' }}>
-                                                            <input 
-                                                                type="text" 
-                                                                value={exp.name || ''} 
-                                                                onChange={e => {
-                                                                    const newExps = [...(syllabusEditValue.experiments || [])];
-                                                                    newExps[idx].name = e.target.value;
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
-                                                                }} 
-                                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                                            />
-                                                        </td>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                            <input 
-                                                                type="text" 
-                                                                value={exp.co || ''} 
-                                                                onChange={e => {
-                                                                    const newExps = [...(syllabusEditValue.experiments || [])];
-                                                                    newExps[idx].co = e.target.value;
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
-                                                                }} 
-                                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }} 
-                                                            />
-                                                        </td>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                            <select 
-                                                                value={exp.rbtLevel || 'Apply'} 
-                                                                onChange={e => {
-                                                                    const newExps = [...(syllabusEditValue.experiments || [])];
-                                                                    newExps[idx].rbtLevel = e.target.value;
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
-                                                                }} 
-                                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                                            >
-                                                                {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
-                                                                    <option key={lvl} value={lvl}>{lvl}</option>
-                                                                ))}
-                                                            </select>
-                                                        </td>
-                                                        <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                            <button 
-                                                                onClick={() => {
-                                                                    const newExps = (syllabusEditValue.experiments || []).filter((_, i) => i !== idx);
-                                                                    setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
-                                                                }} 
-                                                                className="btn btn-danger" 
-                                                                style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                            >
-                                                                <FaTrash />
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                                {(!syllabusEditValue.experiments || syllabusEditValue.experiments.length === 0) && (
-                                                    <tr>
-                                                        <td colSpan="5" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No exercises defined. Add one below.</td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '10% 54% 12% 16% 8%', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                        <input 
-                                            type="text" 
-                                            id="newExpSNoInput" 
-                                            placeholder="S.No" 
-                                            defaultValue={(syllabusEditValue.experiments || []).length + 1}
-                                            style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold', textAlign: 'center' }} 
-                                        />
-                                        <input 
-                                            type="text" 
-                                            id="newExpNameInput" 
-                                            placeholder="Experiment Name..." 
-                                            style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                        />
-                                        <input 
-                                            type="text" 
-                                            id="newExpCoInput" 
-                                            placeholder="CO" 
-                                            defaultValue="CO1"
-                                            style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }} 
-                                        />
-                                        <select 
-                                            id="newExpRbtSelect"
-                                            defaultValue="Apply"
-                                            style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                        >
-                                            {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
-                                                <option key={lvl} value={lvl}>{lvl}</option>
-                                            ))}
-                                        </select>
-                                        <button 
-                                            onClick={() => {
-                                                const sNoInput = document.getElementById('newExpSNoInput');
-                                                const nameInput = document.getElementById('newExpNameInput');
-                                                const coInput = document.getElementById('newExpCoInput');
-                                                const rbtSelect = document.getElementById('newExpRbtSelect');
-                                                if (sNoInput && nameInput && coInput && rbtSelect && nameInput.value.trim()) {
-                                                    const newExp = {
-                                                        sNo: sNoInput.value.trim() || String((syllabusEditValue.experiments || []).length + 1),
-                                                        name: nameInput.value.trim(),
-                                                        co: coInput.value.trim() || 'CO1',
-                                                        rbtLevel: rbtSelect.value
-                                                    };
-                                                    const updatedExps = [...(syllabusEditValue.experiments || []), newExp];
-                                                    setSyllabusEditValue({
-                                                        ...syllabusEditValue,
-                                                        experiments: updatedExps
-                                                    });
-                                                    nameInput.value = '';
-                                                    sNoInput.value = String(updatedExps.length + 1);
-                                                }
-                                            }} 
-                                            className="btn btn-primary" 
-                                            style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
-                                        >
-                                            <FaPlus />
-                                        </button>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                        <button 
-                                            onClick={() => setActiveSyllabusTab('textbooks-references')} 
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', fontWeight: 'bold' }}
-                                        >
-                                            Next: Textbooks & References →
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                                        <div>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Reference Books</h4>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                                                    <thead>
+                                                        <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Reference book details (title, authors, publisher, year)</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {syllabusEditValue.references.map((ref, idx) => (
+                                                            <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                                                                <td style={{ padding: '0.5rem 0.75rem' }}>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={ref}
+                                                                        onChange={e => {
+                                                                            const newRefs = [...syllabusEditValue.references];
+                                                                            newRefs[idx] = e.target.value;
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, references: newRefs });
+                                                                        }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                    />
+                                                                </td>
+                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newRefs = syllabusEditValue.references.filter((_, i) => i !== idx);
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, references: newRefs });
+                                                                        }}
+                                                                        className="btn btn-danger"
+                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    >
+                                                                        <FaTrash />
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        {syllabusEditValue.references.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No references defined. Add one below.</td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <input
+                                                    type="text"
+                                                    id="newReferenceInput"
+                                                    placeholder="Enter reference book title, authors, publisher, year..."
+                                                    style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        const input = document.getElementById('newReferenceInput');
+                                                        if (input && input.value.trim()) {
+                                                            setSyllabusEditValue({
+                                                                ...syllabusEditValue,
+                                                                references: [...syllabusEditValue.references, input.value.trim()]
+                                                            });
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                    className="btn btn-primary"
+                                                    style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                >
+                                                    <FaPlus /> Add Reference
+                                                </button>
+                                            </div>
+                                        </div>
 
-                            {activeSyllabusTab === 'textbooks-references' && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                    <div>
-                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Textbooks </h4>
+                                        <div>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Additional / Web References</h4>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                                                    <thead>
+                                                        <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Web reference URL</th>
+                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {(syllabusEditValue.webReferences || []).map((web, idx) => (
+                                                            <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                                                                <td style={{ padding: '0.5rem 0.75rem' }}>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={web}
+                                                                        onChange={e => {
+                                                                            const newWebs = [...(syllabusEditValue.webReferences || [])];
+                                                                            newWebs[idx] = e.target.value;
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, webReferences: newWebs });
+                                                                        }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                    />
+                                                                </td>
+                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newWebs = (syllabusEditValue.webReferences || []).filter((_, i) => i !== idx);
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, webReferences: newWebs });
+                                                                        }}
+                                                                        className="btn btn-danger"
+                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    >
+                                                                        <FaTrash />
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        {(!syllabusEditValue.webReferences || syllabusEditValue.webReferences.length === 0) && (
+                                                            <tr>
+                                                                <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No web references defined. Add one below.</td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <input
+                                                    type="text"
+                                                    id="newWebReferenceInput"
+                                                    placeholder="Enter web reference URL (e.g., https://example.com)..."
+                                                    style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        const input = document.getElementById('newWebReferenceInput');
+                                                        if (input && input.value.trim()) {
+                                                            setSyllabusEditValue({
+                                                                ...syllabusEditValue,
+                                                                webReferences: [...(syllabusEditValue.webReferences || []), input.value.trim()]
+                                                            });
+                                                            input.value = '';
+                                                        }
+                                                    }}
+                                                    className="btn btn-primary"
+                                                    style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                >
+                                                    <FaPlus /> Add Web Reference
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeSyllabusTab === 'co-po-mapping' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', fontWeight: 'bold' }}>
+                                            Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
+                                        </h4>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                            Select correlation levels: <strong>3</strong> (High), <strong>2</strong> (Medium), <strong>1</strong> (Low), or <strong>-</strong> (No Correlation).
+                                        </p>
                                         <div style={{ overflowX: 'auto' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
                                                 <thead>
-                                                    <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Textbook details (title, authors, publisher, year)</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                    <tr style={{ background: 'rgba(255, 255, 255, 0.05)', borderBottom: '1px solid var(--glass-border)' }}>
+                                                        <th style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold', minWidth: '80px' }}>COs</th>
+                                                        {Array.from({ length: data.po?.length || 12 }).map((_, i) => (
+                                                            <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PO{i + 1}</th>
+                                                        ))}
+                                                        {Array.from({ length: data.pso?.length || 2 }).map((_, i) => (
+                                                            <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PSO{i + 1}</th>
+                                                        ))}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {syllabusEditValue.textbooks.map((tb, idx) => (
-                                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                                                            <td style={{ padding: '0.5rem 0.75rem' }}>
-                                                                <input 
-                                                                    type="text" 
-                                                                    value={tb} 
-                                                                    onChange={e => {
-                                                                        const newTbs = [...syllabusEditValue.textbooks];
-                                                                        newTbs[idx] = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, textbooks: newTbs });
-                                                                    }} 
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                                                />
-                                                            </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                                                                <button 
-                                                                    onClick={() => {
-                                                                        const newTbs = syllabusEditValue.textbooks.filter((_, i) => i !== idx);
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, textbooks: newTbs });
-                                                                    }} 
-                                                                    className="btn btn-danger" 
-                                                                    style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                >
-                                                                    <FaTrash />
-                                                                </button>
-                                                            </td>
+                                                    {(syllabusEditValue.coPoMapping || []).map((row, rIdx) => (
+                                                        <tr key={rIdx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                            <td style={{ padding: '0.5rem 0.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{row.coNo}</td>
+                                                            {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
+                                                                const key = `po${i + 1}`;
+                                                                return (
+                                                                    <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
+                                                                        <select
+                                                                            value={row[key] || '-'}
+                                                                            onChange={e => {
+                                                                                const newMapping = [...(syllabusEditValue.coPoMapping || [])];
+                                                                                newMapping[rIdx] = { ...row, [key]: e.target.value };
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
+                                                                            }}
+                                                                            style={{ padding: '0.3rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', width: '50px', textAlign: 'center' }}
+                                                                        >
+                                                                            <option value="-">-</option>
+                                                                            <option value="1">1</option>
+                                                                            <option value="2">2</option>
+                                                                            <option value="3">3</option>
+                                                                        </select>
+                                                                    </td>
+                                                                );
+                                                            })}
+                                                            {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
+                                                                const key = `pso${i + 1}`;
+                                                                return (
+                                                                    <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
+                                                                        <select
+                                                                            value={row[key] || '-'}
+                                                                            onChange={e => {
+                                                                                const newMapping = [...(syllabusEditValue.coPoMapping || [])];
+                                                                                newMapping[rIdx] = { ...row, [key]: e.target.value };
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
+                                                                            }}
+                                                                            style={{ padding: '0.3rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', width: '50px', textAlign: 'center' }}
+                                                                        >
+                                                                            <option value="-">-</option>
+                                                                            <option value="1">1</option>
+                                                                            <option value="2">2</option>
+                                                                            <option value="3">3</option>
+                                                                        </select>
+                                                                    </td>
+                                                                );
+                                                            })}
                                                         </tr>
                                                     ))}
-                                                    {syllabusEditValue.textbooks.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No textbooks defined. Add one below.</td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <input 
-                                                type="text" 
-                                                id="newTextbookInput" 
-                                                placeholder="Enter textbook title, authors, publisher, year..." 
-                                                style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                            />
-                                            <button 
-                                                onClick={() => {
-                                                    const input = document.getElementById('newTextbookInput');
-                                                    if (input && input.value.trim()) {
-                                                        setSyllabusEditValue({ 
-                                                            ...syllabusEditValue, 
-                                                            textbooks: [...syllabusEditValue.textbooks, input.value.trim()] 
-                                                        });
-                                                        input.value = '';
-                                                    }
-                                                }} 
-                                                className="btn btn-primary" 
-                                                style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                            >
-                                                <FaPlus /> Add Textbook
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Reference Books</h4>
-                                        <div style={{ overflowX: 'auto' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
-                                                <thead>
-                                                    <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Reference book details (title, authors, publisher, year)</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {syllabusEditValue.references.map((ref, idx) => (
-                                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                                                            <td style={{ padding: '0.5rem 0.75rem' }}>
-                                                                <input 
-                                                                    type="text" 
-                                                                    value={ref} 
-                                                                    onChange={e => {
-                                                                        const newRefs = [...syllabusEditValue.references];
-                                                                        newRefs[idx] = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, references: newRefs });
-                                                                    }} 
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                                                />
-                                                            </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                                                                <button 
-                                                                    onClick={() => {
-                                                                        const newRefs = syllabusEditValue.references.filter((_, i) => i !== idx);
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, references: newRefs });
-                                                                    }} 
-                                                                    className="btn btn-danger" 
-                                                                    style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                >
-                                                                    <FaTrash />
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                    {syllabusEditValue.references.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No references defined. Add one below.</td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <input 
-                                                type="text" 
-                                                id="newReferenceInput" 
-                                                placeholder="Enter reference book title, authors, publisher, year..." 
-                                                style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                            />
-                                            <button 
-                                                onClick={() => {
-                                                    const input = document.getElementById('newReferenceInput');
-                                                    if (input && input.value.trim()) {
-                                                        setSyllabusEditValue({ 
-                                                            ...syllabusEditValue, 
-                                                            references: [...syllabusEditValue.references, input.value.trim()] 
-                                                        });
-                                                        input.value = '';
-                                                    }
-                                                }} 
-                                                className="btn btn-primary" 
-                                                style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }} 
-                                            >
-                                                <FaPlus /> Add Reference
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Additional / Web References</h4>
-                                        <div style={{ overflowX: 'auto' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
-                                                <thead>
-                                                    <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Web reference URL</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {(syllabusEditValue.webReferences || []).map((web, idx) => (
-                                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                                                            <td style={{ padding: '0.5rem 0.75rem' }}>
-                                                                <input 
-                                                                    type="text" 
-                                                                    value={web} 
-                                                                    onChange={e => {
-                                                                        const newWebs = [...(syllabusEditValue.webReferences || [])];
-                                                                        newWebs[idx] = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, webReferences: newWebs });
-                                                                    }} 
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                                                />
-                                                            </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                                                                <button 
-                                                                    onClick={() => {
-                                                                        const newWebs = (syllabusEditValue.webReferences || []).filter((_, i) => i !== idx);
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, webReferences: newWebs });
-                                                                    }} 
-                                                                    className="btn btn-danger" 
-                                                                    style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                >
-                                                                    <FaTrash />
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                    {(!syllabusEditValue.webReferences || syllabusEditValue.webReferences.length === 0) && (
-                                                        <tr>
-                                                            <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No web references defined. Add one below.</td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <input 
-                                                type="text" 
-                                                id="newWebReferenceInput" 
-                                                placeholder="Enter web reference URL (e.g., https://example.com)..." 
-                                                style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} 
-                                            />
-                                            <button 
-                                                onClick={() => {
-                                                    const input = document.getElementById('newWebReferenceInput');
-                                                    if (input && input.value.trim()) {
-                                                        setSyllabusEditValue({ 
-                                                            ...syllabusEditValue, 
-                                                            webReferences: [...(syllabusEditValue.webReferences || []), input.value.trim()] 
-                                                        });
-                                                        input.value = '';
-                                                    }
-                                                }} 
-                                                className="btn btn-primary" 
-                                                style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                            >
-                                                <FaPlus /> Add Web Reference
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeSyllabusTab === 'co-po-mapping' && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    <h4 style={{ fontSize: '1rem', color: 'var(--primary)', fontWeight: 'bold' }}>
-                                        Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
-                                    </h4>
-                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                        Select correlation levels: <strong>3</strong> (High), <strong>2</strong> (Medium), <strong>1</strong> (Low), or <strong>-</strong> (No Correlation).
-                                    </p>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
-                                            <thead>
-                                                <tr style={{ background: 'rgba(255, 255, 255, 0.05)', borderBottom: '1px solid var(--glass-border)' }}>
-                                                    <th style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold', minWidth: '80px' }}>COs</th>
-                                                    {Array.from({ length: data.po?.length || 12 }).map((_, i) => (
-                                                        <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PO{i + 1}</th>
-                                                    ))}
-                                                    {Array.from({ length: data.pso?.length || 2 }).map((_, i) => (
-                                                        <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PSO{i + 1}</th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {(syllabusEditValue.coPoMapping || []).map((row, rIdx) => (
-                                                    <tr key={rIdx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                        <td style={{ padding: '0.5rem 0.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{row.coNo}</td>
+                                                    {/* Calculated Average Row */}
+                                                    <tr style={{ background: 'rgba(255, 255, 255, 0.02)', fontWeight: 'bold', borderTop: '2px solid var(--glass-border)' }}>
+                                                        <td style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>Average</td>
                                                         {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
                                                             const key = `po${i + 1}`;
-                                                            return (
-                                                                <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
-                                                                    <select
-                                                                        value={row[key] || '-'}
-                                                                        onChange={e => {
-                                                                            const newMapping = [...(syllabusEditValue.coPoMapping || [])];
-                                                                            newMapping[rIdx] = { ...row, [key]: e.target.value };
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
-                                                                        }}
-                                                                        style={{ padding: '0.3rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', width: '50px', textAlign: 'center' }}
-                                                                    >
-                                                                        <option value="-">-</option>
-                                                                        <option value="1">1</option>
-                                                                        <option value="2">2</option>
-                                                                        <option value="3">3</option>
-                                                                    </select>
-                                                                </td>
-                                                            );
+                                                            const values = (syllabusEditValue.coPoMapping || []).map(row => row[key]).filter(v => v && v !== '-').map(Number);
+                                                            const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
+                                                            return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
                                                         })}
                                                         {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
                                                             const key = `pso${i + 1}`;
-                                                            return (
-                                                                <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
-                                                                    <select
-                                                                        value={row[key] || '-'}
-                                                                        onChange={e => {
-                                                                            const newMapping = [...(syllabusEditValue.coPoMapping || [])];
-                                                                            newMapping[rIdx] = { ...row, [key]: e.target.value };
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
-                                                                        }}
-                                                                        style={{ padding: '0.3rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', width: '50px', textAlign: 'center' }}
-                                                                    >
-                                                                        <option value="-">-</option>
-                                                                        <option value="1">1</option>
-                                                                        <option value="2">2</option>
-                                                                        <option value="3">3</option>
-                                                                    </select>
-                                                                </td>
-                                                            );
+                                                            const values = (syllabusEditValue.coPoMapping || []).map(row => row[key]).filter(v => v && v !== '-').map(Number);
+                                                            const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
+                                                            return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
                                                         })}
                                                     </tr>
-                                                ))}
-                                                {/* Calculated Average Row */}
-                                                <tr style={{ background: 'rgba(255, 255, 255, 0.02)', fontWeight: 'bold', borderTop: '2px solid var(--glass-border)' }}>
-                                                    <td style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>Average</td>
-                                                    {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
-                                                        const key = `po${i + 1}`;
-                                                        const values = (syllabusEditValue.coPoMapping || []).map(row => row[key]).filter(v => v && v !== '-').map(Number);
-                                                        const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
-                                                        return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
-                                                    })}
-                                                    {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
-                                                        const key = `pso${i + 1}`;
-                                                        const values = (syllabusEditValue.coPoMapping || []).map(row => row[key]).filter(v => v && v !== '-').map(Number);
-                                                        const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
-                                                        return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
-                                                    })}
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
 
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: '0.5rem' }}>
                                 <button onClick={() => { setSelectedSyllabusSubjectIndex(null); setSyllabusEditValue(null); }} className="btn" style={{ padding: '0.6rem 1.2rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}>Cancel</button>

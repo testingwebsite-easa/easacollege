@@ -19,7 +19,7 @@ const getRomanNumeral = (num) => {
 
 const mapStaticCategoryToAbbrev = (category) => {
     const raw = (category || '').toUpperCase().trim();
-    if (raw.includes('HUMANITIES') || raw === 'HS' || raw === 'HSMC') return 'HSMC';
+    if (raw.includes('HUMANITIES') || raw === 'HS' || raw === 'HUM') return 'HUM';
     if (raw.includes('BASIC SCIENCE') || raw === 'BS' || raw === 'BSC') return 'BSC';
     if (raw.includes('ENGINEERING SCIENCE') || raw === 'ES' || raw === 'ESC') return 'ESC';
     if (raw.includes('PROFESSIONAL CORE') || raw === 'PC' || raw === 'PCC') return 'PCC';
@@ -74,7 +74,7 @@ const flattenSemesters = (syllabusBreakdown) => {
 
 const renderPieChart = (categories, rowTotals, grandTotal) => {
     const colors = {
-        'HSMC': '#6366f1', // Indigo
+        'HUM': '#6366f1', // Indigo
         'BSC': '#3b82f6',  // Blue
         'ESC': '#10b981',  // Emerald
         'PCC': '#f59e0b',  // Amber
@@ -150,9 +150,9 @@ const renderPieChart = (categories, rowTotals, grandTotal) => {
 const renderCreditDistributionTable = (subjects) => {
     if (!subjects || subjects.length === 0) return null;
 
-    const categories = ['HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
+    const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
     const categoryLabels = {
-        'HSMC': 'Humanities and Social Sciences including Management Courses (HSMC)',
+        'HUM': 'Humanities and Social Sciences including Management Courses (HUM)',
         'BSC': 'Basic Science Courses (BSC)',
         'ESC': 'Engineering Science Courses (ESC)',
         'PCC': 'Professional Core Courses (PCC)',
@@ -175,7 +175,7 @@ const renderCreditDistributionTable = (subjects) => {
             cat = 'PEC';
         } else {
             const rawCat = (subj.category || subj.categoryType || '').toUpperCase().trim();
-            if (rawCat.includes('HUMANITIES') || rawCat === 'HS' || rawCat === 'HSMC') cat = 'HSMC';
+            if (rawCat.includes('HUMANITIES') || rawCat === 'HS' || rawCat === 'HUM') cat = 'HUM';
             else if (rawCat.includes('BASIC SCIENCE') || rawCat === 'BS' || rawCat === 'BSC') cat = 'BSC';
             else if (rawCat.includes('ENGINEERING SCIENCE') || rawCat === 'ES' || rawCat === 'ESC') cat = 'ESC';
             else if (rawCat.includes('PROFESSIONAL CORE') || rawCat === 'PC' || rawCat === 'PCC') cat = 'PCC';
@@ -297,9 +297,9 @@ const renderCreditDistributionTable = (subjects) => {
 
 const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeetingDate) => {
     const pageNum = ++pageTracker.current;
-    const categories = ['HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
+    const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
     const categoryLabels = {
-        'HSMC': 'Humanities and Social Sciences including Management Courses (HSMC)',
+        'HUM': 'Humanities and Social Sciences including Management Courses (HUM)',
         'BSC': 'Basic Science Courses (BSC)',
         'ESC': 'Engineering Science Courses (ESC)',
         'PCC': 'Professional Core Courses (PCC)',
@@ -322,7 +322,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
             cat = 'PEC';
         } else {
             const rawCat = (subj.category || subj.categoryType || '').toUpperCase().trim();
-            if (rawCat.includes('HUMANITIES') || rawCat === 'HS' || rawCat === 'HSMC') cat = 'HSMC';
+            if (rawCat.includes('HUMANITIES') || rawCat === 'HS' || rawCat === 'HUM') cat = 'HUM';
             else if (rawCat.includes('BASIC SCIENCE') || rawCat === 'BS' || rawCat === 'BSC') cat = 'BSC';
             else if (rawCat.includes('ENGINEERING SCIENCE') || rawCat === 'ES' || rawCat === 'ESC') cat = 'ESC';
             else if (rawCat.includes('PROFESSIONAL CORE') || rawCat === 'PC' || rawCat === 'PCC') cat = 'PCC';
@@ -380,7 +380,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
     }
 
     const colors = {
-        'HSMC': '#4f46e5',
+        'HUM': '#4f46e5',
         'BSC': '#2563eb',
         'ESC': '#059669',
         'PCC': '#d97706',
@@ -464,10 +464,10 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
                 </thead>
                 <tbody>
                     ${categories.map((cat, idx) => {
-                        const isMC = cat === 'MC';
-                        const total = rowTotals[cat];
-                        const percentage = (grandTotal > 0 && !isMC) ? Math.round((total / grandTotal) * 100) : '-';
-                        return `
+        const isMC = cat === 'MC';
+        const total = rowTotals[cat];
+        const percentage = (grandTotal > 0 && !isMC) ? Math.round((total / grandTotal) * 100) : '-';
+        return `
                             <tr>
                                 <td class="center" style="font-family: Arial, sans-serif;">${idx + 1}</td>
                                 <td style="font-weight: bold; font-family: Arial, sans-serif;">${categoryLabels[cat]}</td>
@@ -476,7 +476,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
                                 <td class="center" style="font-family: Arial, sans-serif;">${isMC ? '-' : `${percentage}%`}</td>
                             </tr>
                         `;
-                    }).join('')}
+    }).join('')}
                     <tr style="font-weight: bold; background-color: rgba(0, 0, 0, 0.02);">
                         <td></td>
                         <td style="font-family: Arial, sans-serif;">Total</td>
@@ -499,7 +499,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
 
 const getDefaultCategoryName = (catType) => {
     const map = {
-        'HSMC': 'Humanities, Social Sciences and Management Course (HSMC)',
+        'HUM': 'Humanities, Social Sciences and Management Course (HUM)',
         'BSC': 'Basic Science Course (BSC)',
         'ESC': 'Engineering Science Course (ESC)',
         'PCC': 'Professional Core Course (PCC)',
@@ -560,15 +560,15 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         const categoryName = subj.categoryName || getDefaultCategoryName(subj.categoryType);
         const prerequisites = subj.prerequisites || 'Basic knowledge of the subject.';
         const subtitleStr = subj.subtitle ? `<div style="font-size: 9.5pt; font-weight: normal; margin-top: 3px;">(${subj.subtitle})</div>` : '';
-        
+
         const objectives = (subj.objectives && subj.objectives.length > 0)
             ? subj.objectives
             : getDefaultObjectives(subj.code, subj.title);
-            
+
         const outcomes = (subj.outcomes && subj.outcomes.length > 0)
             ? subj.outcomes
             : getDefaultOutcomes(subj.code, subj.title);
-            
+
         const units = (subj.units && subj.units.length > 0)
             ? subj.units
             : getDetailedSyllabusForSubject(subj.code, subj.title).map(u => ({
@@ -738,14 +738,14 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             </table>
 
             <div style="margin-top: 15px; margin-bottom: 12px;">
-                ${isPurePractical 
-                    ? renderExperimentsTableHTML(firstHalfExperiments, "List of Exercises (Part I)")
-                    : units.slice(0, 3).map((unit, uIdx) => {
-                        const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][uIdx] || (uIdx + 1)}`;
-                        const unitTitle = unit.title ? unit.title.toUpperCase() : '';
-                        const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
-                        
-                        return topicsStr ? `
+                ${isPurePractical
+                ? renderExperimentsTableHTML(firstHalfExperiments, "List of Exercises (Part I)")
+                : units.slice(0, 3).map((unit, uIdx) => {
+                    const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][uIdx] || (uIdx + 1)}`;
+                    const unitTitle = unit.title ? unit.title.toUpperCase() : '';
+                    const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
+
+                    return topicsStr ? `
                             <div style="margin-bottom: 8px; text-align: justify; font-size: 9.5pt; line-height: 1.35;">
                                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
@@ -754,8 +754,8 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                                 <span style="font-family: Arial, sans-serif;">${topicsStr}</span>
                             </div>
                         ` : '';
-                    }).join('')
-                }
+                }).join('')
+            }
             </div>
 
             <div class="pdf-footer" style="position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 9pt; font-family: Arial, sans-serif; font-style: italic; color: #000;">
@@ -773,15 +773,15 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             </div>
 
             <div style="margin-top: 10px; margin-bottom: 12px;">
-                ${isPurePractical 
-                    ? renderExperimentsTableHTML(secondHalfExperiments, "List of Exercises (Part II)")
-                    : units.slice(3).map((unit, uIdx) => {
-                        const actualIdx = uIdx + 3;
-                        const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][actualIdx] || (actualIdx + 1)}`;
-                        const unitTitle = unit.title ? unit.title.toUpperCase() : '';
-                        const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
-                        
-                        return topicsStr ? `
+                ${isPurePractical
+                ? renderExperimentsTableHTML(secondHalfExperiments, "List of Exercises (Part II)")
+                : units.slice(3).map((unit, uIdx) => {
+                    const actualIdx = uIdx + 3;
+                    const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V'][actualIdx] || (actualIdx + 1)}`;
+                    const unitTitle = unit.title ? unit.title.toUpperCase() : '';
+                    const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
+
+                    return topicsStr ? `
                             <div style="margin-bottom: 8px; text-align: justify; font-size: 9.5pt; line-height: 1.35;">
                                 <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
                                     <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
@@ -790,8 +790,8 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                                 <span style="font-family: Arial, sans-serif;">${topicsStr}</span>
                             </div>
                         ` : '';
-                    }).join('')
-                }
+                }).join('')
+            }
                 ${!isPurePractical ? `
                 <div style="display: flex; justify-content: flex-end; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-top: 10px; margin-bottom: 10px; border-top: 1px dashed #ddd; padding-top: 5px;">
                     <span>TOTAL: ${totalPeriods} PERIODS</span>
@@ -848,35 +848,35 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                     </thead>
                     <tbody>
                         ${coPoMapping.map(row => {
-                            return `
+                return `
                             <tr>
                                 <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">${row.coNo}</td>
                                 ${Array.from({ length: poCount }).map((_, i) => {
-                                    const val = row[`po${i + 1}`] || '-';
-                                    return `<td style="border: 1.5px solid #000; padding: 4px;">${val}</td>`;
-                                }).join('')}
+                    const val = row[`po${i + 1}`] || '-';
+                    return `<td style="border: 1.5px solid #000; padding: 4px;">${val}</td>`;
+                }).join('')}
                                 ${Array.from({ length: psoCount }).map((_, i) => {
-                                    const val = row[`pso${i + 1}`] || '-';
-                                    return `<td style="border: 1.5px solid #000; padding: 4px;">${val}</td>`;
-                                }).join('')}
+                    const val = row[`pso${i + 1}`] || '-';
+                    return `<td style="border: 1.5px solid #000; padding: 4px;">${val}</td>`;
+                }).join('')}
                             </tr>
                             `;
-                        }).join('')}
+            }).join('')}
                         <!-- Average row -->
                         <tr style="font-weight: bold; background-color: #f9f9f9;">
                             <td style="border: 1.5px solid #000; padding: 4px;">Average</td>
                             ${Array.from({ length: poCount }).map((_, i) => {
-                                const key = `po${i + 1}`;
-                                const values = coPoMapping.map(row => row[key]).filter(v => v && v !== '-').map(Number);
-                                const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
-                                return `<td style="border: 1.5px solid #000; padding: 4px;">${avg}</td>`;
-                            }).join('')}
+                const key = `po${i + 1}`;
+                const values = coPoMapping.map(row => row[key]).filter(v => v && v !== '-').map(Number);
+                const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
+                return `<td style="border: 1.5px solid #000; padding: 4px;">${avg}</td>`;
+            }).join('')}
                             ${Array.from({ length: psoCount }).map((_, i) => {
-                                const key = `pso${i + 1}`;
-                                const values = coPoMapping.map(row => row[key]).filter(v => v && v !== '-').map(Number);
-                                const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
-                                return `<td style="border: 1.5px solid #000; padding: 4px;">${avg}</td>`;
-                            }).join('')}
+                const key = `pso${i + 1}`;
+                const values = coPoMapping.map(row => row[key]).filter(v => v && v !== '-').map(Number);
+                const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
+                return `<td style="border: 1.5px solid #000; padding: 4px;">${avg}</td>`;
+            }).join('')}
                         </tr>
                     </tbody>
                 </table>
@@ -944,10 +944,10 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
 const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMission) => {
     if (!deptData) return;
-    
+
     const deptName = deptData.name || "Mechanical Engineering";
     const subjects = deptData.subjects || [];
-    
+
     // Determine regulation year
     let regYear = regYearInput || deptData.regulation;
     if (!regYear && subjects.length > 0) {
@@ -958,9 +958,9 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         }
     }
     if (!regYear) regYear = "R-2023";
-    
+
     const pageTracker = { current: 1 };
-    
+
     let degreePrefix = "B.E.";
     if (academicLevel === "PG") {
         degreePrefix = deptData.slug === 'master-of-business-administration' ? 'M.B.A.' : 'M.E.';
@@ -973,7 +973,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         ];
         degreePrefix = techSlugs.includes(deptData.slug || '') ? 'B.Tech.' : 'B.E.';
     }
-    
+
     // Group subjects by semester (excluding vertical and open elective subjects)
     const semestersGrouped = subjects.filter(s => !s.vertical && !s.isOpenElective).reduce((acc, subj) => {
         const sem = subj.semester || 1;
@@ -981,7 +981,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         acc[sem].push(subj);
         return acc;
     }, {});
-    
+
     const sortedSemesters = Object.keys(semestersGrouped).sort((a, b) => Number(a) - Number(b));
 
     // Group subjects by vertical
@@ -1628,14 +1628,14 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             <div class="section-container">
                 <h3 class="section-title">Mission of the Institution</h3>
                 <ul style="list-style-type: none; padding-left: 0;">
-                    ${instVisionMission?.mission && instVisionMission.mission.length > 0 
-                        ? instVisionMission.mission.map((m, i) => `<li style="margin-bottom: 10px; font-size: 10.5pt; line-height: 1.5;"><strong>M${i+1}</strong>: ${m}</li>`).join('')
-                        : `
+                    ${instVisionMission?.mission && instVisionMission.mission.length > 0
+            ? instVisionMission.mission.map((m, i) => `<li style="margin-bottom: 10px; font-size: 10.5pt; line-height: 1.5;"><strong>M${i + 1}</strong>: ${m}</li>`).join('')
+            : `
                             <li style="margin-bottom: 10px; font-size: 10.5pt; line-height: 1.5;"><strong>M1</strong>: To provide quality technical education and soft skills training to groom the students for modern industrial needs.</li>
                             <li style="margin-bottom: 10px; font-size: 10.5pt; line-height: 1.5;"><strong>M2</strong>: To foster an environment conducive for research, development, and entrepreneurship.</li>
                             <li style="margin-bottom: 10px; font-size: 10.5pt; line-height: 1.5;"><strong>M3</strong>: To instill professional ethics, social responsibility, and lifelong learning in young professionals.</li>
                         `
-                    }
+        }
                 </ul>
             </div>
             ${getFooterHTML(++pageTracker.current)}
@@ -1657,10 +1657,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             <div class="section-container" style="margin-bottom: 25px;">
                 <h3 class="section-title">Mission of the Department</h3>
                 <ul style="list-style-type: none; padding-left: 0;">
-                    ${deptData.mission && deptData.mission.length > 0 
-                        ? deptData.mission.map((m, i) => `<li style="margin-bottom: 8px;"><strong>M${i+1}</strong>: ${m}</li>`).join('')
-                        : '<li>To provide quality technical education and skills training.</li>'
-                    }
+                    ${deptData.mission && deptData.mission.length > 0
+            ? deptData.mission.map((m, i) => `<li style="margin-bottom: 8px;"><strong>M${i + 1}</strong>: ${m}</li>`).join('')
+            : '<li>To provide quality technical education and skills training.</li>'
+        }
                 </ul>
             </div>
             
@@ -1668,7 +1668,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             <div class="section-container" style="margin-bottom: 25px;">
                 <h3 class="section-title">Program Educational Objectives (PEOs)</h3>
                 <ol style="list-style-type: none; padding-left: 0;">
-                    ${deptData.peo.map((peo, i) => `<li style="margin-bottom: 8px;"><strong>PEO${i+1}</strong>: ${peo}</li>`).join('')}
+                    ${deptData.peo.map((peo, i) => `<li style="margin-bottom: 8px;"><strong>PEO${i + 1}</strong>: ${peo}</li>`).join('')}
                 </ol>
             </div>
             ` : ''}
@@ -1677,7 +1677,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             <div class="section-container">
                 <h3 class="section-title">Program Specific Outcomes (PSOs)</h3>
                 <ol style="list-style-type: none; padding-left: 0;">
-                    ${deptData.pso.map((pso, i) => `<li style="margin-bottom: 8px;"><strong>PSO${i+1}</strong>: ${pso}</li>`).join('')}
+                    ${deptData.pso.map((pso, i) => `<li style="margin-bottom: 8px;"><strong>PSO${i + 1}</strong>: ${pso}</li>`).join('')}
                 </ol>
             </div>
             ` : ''}
@@ -1693,16 +1693,16 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <h3 class="section-title" style="margin-bottom: 15px;">Program Outcomes (POs)</h3>
                 <div style="font-size: 9.5pt; line-height: 1.45;">
                     ${deptData.po.map((po, i) => {
-                        const parts = po.split(':');
-                        const title = parts.length > 1 ? parts[0].trim() : `PO ${i+1}`;
-                        const desc = parts.length > 1 ? parts.slice(1).join(':').trim() : po.trim();
-                        const cleanTitle = title.replace(/^PO\s*\d+\.?\s*/i, '');
-                        return `
+            const parts = po.split(':');
+            const title = parts.length > 1 ? parts[0].trim() : `PO ${i + 1}`;
+            const desc = parts.length > 1 ? parts.slice(1).join(':').trim() : po.trim();
+            const cleanTitle = title.replace(/^PO\s*\d+\.?\s*/i, '');
+            return `
                             <div style="margin-bottom: 12px; text-align: justify;">
-                                <strong>PO ${i+1}. ${cleanTitle}</strong>: ${desc}
+                                <strong>PO ${i + 1}. ${cleanTitle}</strong>: ${desc}
                             </div>
                         `;
-                    }).join('')}
+        }).join('')}
                 </div>
             </div>
             ${getFooterHTML(++pageTracker.current)}
@@ -1777,21 +1777,21 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     </thead>
                     <tbody>
                         ${(() => {
-                            let globalIndex = 0;
-                            return sortedVerticals.map(vertNum => {
-                                const subjectsForVert = verticalsGrouped[vertNum];
-                                const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
-                                const romanNum = getRomanNumeral(vertNum);
+                let globalIndex = 0;
+                return sortedVerticals.map(vertNum => {
+                    const subjectsForVert = verticalsGrouped[vertNum];
+                    const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
+                    const romanNum = getRomanNumeral(vertNum);
 
-                                return `
+                    return `
                                     <tr class="category-row" style="background-color: rgba(0, 0, 0, 0.05);">
                                         <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 9pt; font-weight: bold; text-align: center; padding: 6px;">
                                             Vertical ${romanNum}: ${verticalName}
                                         </td>
                                     </tr>
                                     ${subjectsForVert.map(s => {
-                                        globalIndex++;
-                                        return `
+                        globalIndex++;
+                        return `
                                             <tr>
                                                 <td class="center">${globalIndex}</td>
                                                 <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
@@ -1806,10 +1806,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                                 <td class="center">${s.total}</td>
                                             </tr>
                                         `;
-                                    }).join('')}
+                    }).join('')}
                                 `;
-                            }).join('');
-                        })()}
+                }).join('');
+            })()}
                     </tbody>
                 </table>
             </div>
@@ -1850,25 +1850,25 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     </thead>
                     <tbody>
                         ${(() => {
-                            const oecsGrouped = subjects.filter(s => s.isOpenElective).reduce((acc, subj) => {
-                                const dept = subj.offeringDept || 'Other Departments';
-                                if (!acc[dept]) acc[dept] = [];
-                                acc[dept].push(subj);
-                                return acc;
-                            }, {});
-                            const sortedOecDepts = Object.keys(oecsGrouped).sort();
-                            let oecGlobalIndex = 0;
-                            return sortedOecDepts.map(deptName => {
-                                const deptSubjects = oecsGrouped[deptName];
-                                return `
+                const oecsGrouped = subjects.filter(s => s.isOpenElective).reduce((acc, subj) => {
+                    const dept = subj.offeringDept || 'Other Departments';
+                    if (!acc[dept]) acc[dept] = [];
+                    acc[dept].push(subj);
+                    return acc;
+                }, {});
+                const sortedOecDepts = Object.keys(oecsGrouped).sort();
+                let oecGlobalIndex = 0;
+                return sortedOecDepts.map(deptName => {
+                    const deptSubjects = oecsGrouped[deptName];
+                    return `
                                     <tr style="background: #f9f9f9;">
                                         <td colspan="11" style="font-weight: bold; text-align: center; font-size: 9.5pt; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 1px solid #000; padding: 6px;">
                                             ${deptName}
                                         </td>
                                     </tr>
                                     ${deptSubjects.map(s => {
-                                        oecGlobalIndex++;
-                                        return `
+                        oecGlobalIndex++;
+                        return `
                                             <tr>
                                                 <td class="center">${oecGlobalIndex}</td>
                                                 <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
@@ -1883,10 +1883,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                                 <td class="center">${s.total}</td>
                                             </tr>
                                         `;
-                                    }).join('')}
+                    }).join('')}
                                 `;
-                            }).join('');
-                        })()}
+                }).join('');
+            })()}
                     </tbody>
                 </table>
             </div>
@@ -1911,7 +1911,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     </body>
     </html>
     `;
-    
+
     const printWindow = window.open('', '_blank');
     printWindow.document.write(htmlContent);
     printWindow.document.close();
@@ -1928,17 +1928,17 @@ const SyllabusPage = () => {
     const [selectedDept, setSelectedDept] = useState("computer-science-and-engineering");
     const [selectedReg, setSelectedReg] = useState("R-2023");
     const [searchQuery, setSearchQuery] = useState("");
-    
+
     // Department Data State
     const [deptData, setDeptData] = useState(null);
-    
+
     // New Subject Explorer States
     const [selectedSemester, setSelectedSemester] = useState("all");
     const [selectedSubjectCode, setSelectedSubjectCode] = useState("all");
 
     // Ref for smooth scrolling to detailed viewer
     const detailedViewerRef = useRef(null);
-    
+
     // Accordion active semester state
     const [activeSemester, setActiveSemester] = useState(1);
 
@@ -2009,16 +2009,16 @@ const SyllabusPage = () => {
 
         // Check if matching department keywords
         const matchesDept = textToSearch.includes(selectedDept) ||
-                            (deptName && textToSearch.includes(deptName)) ||
-                            textToSearch.includes(deptSlugShort) ||
-                            (selectedDept === "computer-science-and-engineering" && textToSearch.includes("cse")) ||
-                            (selectedDept === "information-technology" && textToSearch.includes("it")) ||
-                            (selectedDept === "electronics-and-communication-engineering" && textToSearch.includes("ece")) ||
-                            (selectedDept === "electrical-and-electronics-engineering" && textToSearch.includes("eee")) ||
-                            (selectedDept === "biomedical-engineering" && textToSearch.includes("bme")) ||
-                            (selectedDept === "mechanical-engineering" && textToSearch.includes("mech")) ||
-                            (selectedDept === "agriculture-engineering" && textToSearch.includes("agri")) ||
-                            (selectedDept === "artificial-intelligence-and-data-science" && (textToSearch.includes("ai & ds") || textToSearch.includes("aids") || textToSearch.includes("artificial intelligence")));
+            (deptName && textToSearch.includes(deptName)) ||
+            textToSearch.includes(deptSlugShort) ||
+            (selectedDept === "computer-science-and-engineering" && textToSearch.includes("cse")) ||
+            (selectedDept === "information-technology" && textToSearch.includes("it")) ||
+            (selectedDept === "electronics-and-communication-engineering" && textToSearch.includes("ece")) ||
+            (selectedDept === "electrical-and-electronics-engineering" && textToSearch.includes("eee")) ||
+            (selectedDept === "biomedical-engineering" && textToSearch.includes("bme")) ||
+            (selectedDept === "mechanical-engineering" && textToSearch.includes("mech")) ||
+            (selectedDept === "agriculture-engineering" && textToSearch.includes("agri")) ||
+            (selectedDept === "artificial-intelligence-and-data-science" && (textToSearch.includes("ai & ds") || textToSearch.includes("aids") || textToSearch.includes("artificial intelligence")));
 
         return matchesReg && matchesDept;
     });
@@ -2067,7 +2067,7 @@ const SyllabusPage = () => {
     };
 
     // Get subjects to display in filter
-    const availableSubjects = selectedSemester === "all" 
+    const availableSubjects = selectedSemester === "all"
         ? Array.from(new Map(syllabusBreakdown.flatMap(sem => sem.courses).map(course => [course.code, course])).values())
         : getSubjectsForSemester(selectedSemester);
 
@@ -2087,7 +2087,7 @@ const SyllabusPage = () => {
             <div className="page-hero">
                 <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url(${missionBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed', zIndex: 0 }} />
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)', backgroundSize: '50px 50px', opacity: 0.5, zIndex: 0 }} />
-                
+
                 <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 2rem', width: '100%', maxWidth: '1000px' }}>
                     <h1 className="text-gradient" style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', fontWeight: '900', marginBottom: '1rem', letterSpacing: '-1px', textShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
                         Syllabus & Curriculum
@@ -2100,7 +2100,7 @@ const SyllabusPage = () => {
 
             {/* Filter Section */}
             <section className="container" style={{ marginTop: '3rem', padding: '0 2rem', position: 'relative', zIndex: 20 }}>
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
@@ -2119,7 +2119,7 @@ const SyllabusPage = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Academic Level</label>
                             <div style={{ display: 'flex', background: 'var(--bg-section)', padding: '4px', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                <button 
+                                <button
                                     onClick={() => setAcademicLevel("UG")}
                                     style={{
                                         flex: 1, padding: '0.6rem', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
@@ -2130,7 +2130,7 @@ const SyllabusPage = () => {
                                 >
                                     Undergraduate (UG)
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setAcademicLevel("PG")}
                                     style={{
                                         flex: 1, padding: '0.6rem', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9rem',
@@ -2211,7 +2211,7 @@ const SyllabusPage = () => {
                                     setSelectedSubjectCode(e.target.value);
                                     if (e.target.value !== "all") {
                                         const subCode = e.target.value;
-                                        const foundSem = syllabusBreakdown.find(sem => 
+                                        const foundSem = syllabusBreakdown.find(sem =>
                                             sem.courses.some(c => c.code === subCode)
                                         );
                                         if (foundSem) {
@@ -2246,7 +2246,7 @@ const SyllabusPage = () => {
 
                     {/* Department Overview (Mission, Vision, Outcomes) */}
                     {deptData && (deptData.mission?.length > 0 || deptData.vision?.length > 0 || deptData.peo?.length > 0) && (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="glass-card"
@@ -2264,7 +2264,7 @@ const SyllabusPage = () => {
                                 <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--primary)', margin: 0 }}>
                                     Department Overview & Outcomes
                                 </h2>
-                                <button 
+                                <button
                                     onClick={() => {
                                         const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
                                         exportCurriculumPDF({
@@ -2373,7 +2373,7 @@ const SyllabusPage = () => {
                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Course Title</th>
                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Category</th>
                                                         <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center' }}>Periods per Week</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Total<br/>Contact<br/>Periods</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Total<br />Contact<br />Periods</th>
                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Credits</th>
                                                         <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center' }}>Marks</th>
                                                     </tr>
@@ -2469,7 +2469,7 @@ const SyllabusPage = () => {
                                                                 const subjectsForVert = verticalsGrouped[vertNum];
                                                                 const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
                                                                 const romanNum = getRomanNumeral(vertNum);
- 
+
                                                                 return (
                                                                     <React.Fragment key={`vert-${vertNum}`}>
                                                                         <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
@@ -2583,10 +2583,10 @@ const SyllabusPage = () => {
                             )}
                         </motion.div>
                     )}
-                    
+
                     {/* 1. Dynmically Uploaded Documents Matching Filters */}
                     {matchingDocs.length > 0 && (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="glass-card"
@@ -2604,10 +2604,10 @@ const SyllabusPage = () => {
                                 <FaFilePdf size={24} />
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', margin: 0 }}>Official Syllabus & Curriculum Documents Found</h3>
                             </div>
-                            
+
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
                                 {matchingDocs.map((doc, idx) => (
-                                    <div 
+                                    <div
                                         key={doc._id || idx}
                                         style={{
                                             background: 'var(--bg-card)',
@@ -2644,7 +2644,7 @@ const SyllabusPage = () => {
 
                     {/* 1.5. Interactive Subject Detailed Syllabus Explorer */}
                     {selectedSubject && (
-                        <motion.div 
+                        <motion.div
                             ref={detailedViewerRef}
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -2666,7 +2666,7 @@ const SyllabusPage = () => {
                             }}
                         >
                             {/* Close button */}
-                            <button 
+                            <button
                                 onClick={() => setSelectedSubjectCode("all")}
                                 style={{
                                     position: 'absolute', top: '1.5rem', right: '1.5rem',
@@ -2691,7 +2691,7 @@ const SyllabusPage = () => {
                                 <h2 className="text-gradient" style={{ fontSize: '2.2rem', fontWeight: '800', margin: 0, lineHeight: 1.2 }}>
                                     {selectedSubject.code}: {selectedSubject.title}
                                 </h2>
-                                
+
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '0.5rem' }}>
                                     <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
                                         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Category</span>
@@ -2716,10 +2716,10 @@ const SyllabusPage = () => {
                                     <FaBookOpen style={{ color: 'var(--primary)' }} />
                                     Course Outline & Syllabus Units
                                 </h3>
-                                
+
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     {getDetailedSyllabusForSubject(selectedSubject.code, selectedSubject.title).map((unitObj, uIdx) => (
-                                        <div 
+                                        <div
                                             key={uIdx}
                                             style={{
                                                 background: 'rgba(255,255,255,0.02)',
@@ -2770,10 +2770,10 @@ const SyllabusPage = () => {
                                     Showing semester curriculum for {activeDeptData ? activeDeptData.name : selectedDept} ({selectedReg})
                                 </p>
                             </div>
-                            
+
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                                 {(!deptData || (!deptData.mission?.length && !deptData.vision?.length && !deptData.peo?.length)) && (
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
                                             exportCurriculumPDF({
@@ -2794,8 +2794,8 @@ const SyllabusPage = () => {
                                 {/* Search Subject Input */}
                                 <div style={{ position: 'relative', minWidth: '260px' }}>
                                     <FaSearch style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         placeholder="Search subject code or name..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -2818,7 +2818,7 @@ const SyllabusPage = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {syllabusBreakdown.map((semData) => {
                                 const isExpanded = activeSemester === semData.semester;
-                                
+
                                 // Apply semester dropdown filter
                                 if (selectedSemester !== "all" && semData.semester !== parseInt(selectedSemester)) {
                                     return null;
@@ -2826,8 +2826,8 @@ const SyllabusPage = () => {
 
                                 // Filter courses inside semester based on search query AND selected subject
                                 const filteredCourses = semData.courses.filter(course => {
-                                    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                                          course.code.toLowerCase().includes(searchQuery.toLowerCase());
+                                    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                        course.code.toLowerCase().includes(searchQuery.toLowerCase());
                                     const matchesSubject = selectedSubjectCode === "all" || course.code === selectedSubjectCode;
                                     return matchesSearch && matchesSubject;
                                 });
@@ -2836,19 +2836,19 @@ const SyllabusPage = () => {
                                 if ((searchQuery || selectedSubjectCode !== "all") && filteredCourses.length === 0) return null;
 
                                 return (
-                                    <div 
-                                        key={semData.semester} 
-                                        className="glass-card" 
-                                        style={{ 
-                                            padding: 0, 
-                                            borderRadius: '12px', 
-                                            overflow: 'hidden', 
+                                    <div
+                                        key={semData.semester}
+                                        className="glass-card"
+                                        style={{
+                                            padding: 0,
+                                            borderRadius: '12px',
+                                            overflow: 'hidden',
                                             border: isExpanded ? '1px solid var(--primary)' : '1px solid var(--glass-border)',
                                             transition: 'border 0.3s ease'
                                         }}
                                     >
                                         {/* Accordion Trigger Header */}
-                                        <div 
+                                        <div
                                             onClick={() => setActiveSemester(isExpanded ? null : semData.semester)}
                                             style={{
                                                 padding: '1.25rem 1.5rem',
@@ -2912,8 +2912,8 @@ const SyllabusPage = () => {
                                                                 </thead>
                                                                 <tbody>
                                                                     {filteredCourses.map((course, cIdx) => (
-                                                                        <tr 
-                                                                            key={course.code || cIdx} 
+                                                                        <tr
+                                                                            key={course.code || cIdx}
                                                                             onClick={() => {
                                                                                 setSelectedSemester(semData.semester.toString());
                                                                                 setSelectedSubjectCode(course.code);
@@ -2922,9 +2922,9 @@ const SyllabusPage = () => {
                                                                                     detailedViewerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                                                                 }, 100);
                                                                             }}
-                                                                            style={{ 
-                                                                                borderBottom: '1px solid var(--glass-border)', 
-                                                                                cursor: 'pointer', 
+                                                                            style={{
+                                                                                borderBottom: '1px solid var(--glass-border)',
+                                                                                cursor: 'pointer',
                                                                                 background: selectedSubjectCode === course.code ? 'rgba(99, 102, 241, 0.08)' : 'transparent',
                                                                                 transition: 'background 0.3s'
                                                                             }}
@@ -2981,7 +2981,7 @@ const SyllabusPage = () => {
                             {(!deptData || !deptData.subjects || deptData.subjects.length === 0) && renderCreditDistributionTable(flattenSemesters(syllabusBreakdown))}
                         </div>
                     </div>
-                    
+
                 </div>
             </section>
 
