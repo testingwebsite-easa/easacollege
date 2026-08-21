@@ -241,8 +241,7 @@ const renderCreditDistributionTable = (subjects) => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', border: '1px solid var(--glass-border)', background: 'var(--bg-section)' }}>
                     <thead style={{ background: 'transparent' }}>
                         <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>S.No</th>
-                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '35%' }}>SUBJECT AREA</th>
+                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '38%' }}>SUBJECT AREA</th>
                             <th colSpan="8" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>CREDITS PER SEMESTER</th>
                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>CREDITS TOTAL</th>
                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>%</th>
@@ -260,7 +259,6 @@ const renderCreditDistributionTable = (subjects) => {
                             const percentage = (grandTotal > 0 && !isMC) ? Math.round((total / grandTotal) * 100) : '-';
                             return (
                                 <tr key={cat} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: '500' }}>{categoryLabels[cat]}</td>
                                     {distribution[cat].map((val, semIdx) => (
                                         <td key={semIdx} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: val > 0 ? 'var(--text-main)' : 'var(--text-muted)' }}>
@@ -277,7 +275,6 @@ const renderCreditDistributionTable = (subjects) => {
                             );
                         })}
                         <tr style={{ background: 'rgba(255,255,255,0.02)', fontWeight: 'bold' }}>
-                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem' }}></td>
                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--primary)' }}>Total</td>
                             {semTotals.map((total, semIdx) => (
                                 <td key={semIdx} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--primary)' }}>
@@ -452,10 +449,9 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
             <table class="curriculum-table">
                 <thead>
                     <tr>
-                        <th rowSpan="2" style="width: 6%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">S.No</th>
-                        <th rowSpan="2" style="width: 44%; font-size: 8pt; font-family: Arial, sans-serif; text-align: left; vertical-align: middle;">Subject Area</th>
+                        <th rowSpan="2" style="width: 50%; font-size: 8pt; font-family: Arial, sans-serif; text-align: left; vertical-align: middle;">Subject Area</th>
                         <th colSpan="8" style="font-size: 8pt; font-family: Arial, sans-serif; text-align: center; padding: 3px;">Credits per Semester</th>
-                        <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits Total</th>
+                        <th rowSpan="2" style="width: 14%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits Total</th>
                         <th rowSpan="2" style="width: 8%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">%</th>
                     </tr>
                     <tr>
@@ -469,7 +465,6 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         const percentage = (grandTotal > 0 && !isMC) ? Math.round((total / grandTotal) * 100) : '-';
         return `
                             <tr>
-                                <td class="center" style="font-family: Arial, sans-serif;">${idx + 1}</td>
                                 <td style="font-weight: bold; font-family: Arial, sans-serif;">${categoryLabels[cat]}</td>
                                 ${distribution[cat].map(val => `<td class="center">${val > 0 ? val : '-'}</td>`).join('')}
                                 <td class="center" style="font-weight: bold; font-family: Arial, sans-serif;">${isMC ? 'No Credits' : total}</td>
@@ -478,7 +473,6 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
                         `;
     }).join('')}
                     <tr style="font-weight: bold; background-color: rgba(0, 0, 0, 0.02);">
-                        <td></td>
                         <td style="font-family: Arial, sans-serif;">Total</td>
                         ${semTotals.map(total => `<td class="center">${total}</td>`).join('')}
                         <td class="center" style="font-family: Arial, sans-serif;">${grandTotal}</td>
@@ -1020,10 +1014,44 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         const subjectsForSem = semestersGrouped[semNum] || [];
         if (subjectsForSem.length === 0) return '';
 
-        const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL'));
-        const practicalCourses = subjectsForSem.filter(s => (s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('THEORY')) || s.category?.toUpperCase().includes('LAB'));
+        const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'THEORY' || (s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('LANGUAGE') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
+        const practicalCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'PRACTICAL' || ((s.category?.toUpperCase().includes('PRACTICAL') || s.category?.toUpperCase().includes('LAB')) && !s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
         const theoryCumPracticalCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('THEORY') && s.category?.toUpperCase().includes('PRACTICAL'));
-        const otherCourses = subjectsForSem.filter(s => !theoryCourses.includes(s) && !practicalCourses.includes(s) && !theoryCumPracticalCourses.includes(s));
+        const employabilityCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('EMPLOYABILITY') || s.categoryType === 'EEC');
+        const mandatoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('MANDATORY') || s.categoryType === 'MC');
+        const languageElective1 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE I'));
+        const languageElective2 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE II'));
+
+        const accounted = new Set([
+            ...theoryCourses,
+            ...practicalCourses,
+            ...theoryCumPracticalCourses,
+            ...employabilityCourses,
+            ...mandatoryCourses,
+            ...languageElective1,
+            ...languageElective2
+        ]);
+        const otherCourses = subjectsForSem.filter(s => !accounted.has(s));
+
+        const semTotalCredits = subjectsForSem.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
+
+        const renderCourseRows = (courseList) => {
+            return courseList.map(s => `
+                <tr>
+                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
+                    <td>${s.title}</td>
+                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'PCC'}</td>
+                    <td class="center">${s.l ?? 0}</td>
+                    <td class="center">${s.t ?? 0}</td>
+                    <td class="center">${s.p ?? 0}</td>
+                    <td class="center">${s.contactPeriods || (Number(s.l || 0) + Number(s.t || 0) + Number(s.p || 0))}</td>
+                    <td class="center" style="font-weight: bold;">${s.credits ?? 0}</td>
+                    <td class="center">${s.cia !== undefined ? s.cia : 40}</td>
+                    <td class="center">${s.ese !== undefined ? s.ese : 60}</td>
+                    <td class="center">${s.total !== undefined ? s.total : 100}</td>
+                </tr>
+            `).join('');
+        };
 
         return `
             <div style="page-break-inside: avoid; margin-bottom: 25px;">
@@ -1054,87 +1082,65 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <tbody>
                         ${theoryCourses.length > 0 ? `
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt;">Theory Course(s)</td>
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">THEORY COURSES</td>
                             </tr>
-                            ${theoryCourses.map(s => `
-                                <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                    <td>${s.title}</td>
-                                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'HS'}</td>
-                                    <td class="center">${s.l}</td>
-                                    <td class="center">${s.t}</td>
-                                    <td class="center">${s.p}</td>
-                                    <td class="center">${s.contactPeriods}</td>
-                                    <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                    <td class="center">${s.cia}</td>
-                                    <td class="center">${s.ese}</td>
-                                    <td class="center">${s.total}</td>
-                                </tr>
-                            `).join('')}
+                            ${renderCourseRows(theoryCourses)}
                         ` : ''}
 
                         ${theoryCumPracticalCourses.length > 0 ? `
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt;">Theory cum Practical Course(s)</td>
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">THEORY CUM PRACTICAL COURSES</td>
                             </tr>
-                            ${theoryCumPracticalCourses.map(s => `
-                                <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                    <td>${s.title}</td>
-                                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'PC'}</td>
-                                    <td class="center">${s.l}</td>
-                                    <td class="center">${s.t}</td>
-                                    <td class="center">${s.p}</td>
-                                    <td class="center">${s.contactPeriods}</td>
-                                    <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                    <td class="center">${s.cia}</td>
-                                    <td class="center">${s.ese}</td>
-                                    <td class="center">${s.total}</td>
-                                </tr>
-                            `).join('')}
+                            ${renderCourseRows(theoryCumPracticalCourses)}
                         ` : ''}
                         
                         ${practicalCourses.length > 0 ? `
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt;">Practical Course(s)</td>
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">PRACTICAL COURSES</td>
                             </tr>
-                            ${practicalCourses.map(s => `
-                                <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                    <td>${s.title}</td>
-                                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'EEC'}</td>
-                                    <td class="center">${s.l}</td>
-                                    <td class="center">${s.t}</td>
-                                    <td class="center">${s.p}</td>
-                                    <td class="center">${s.contactPeriods}</td>
-                                    <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                    <td class="center">${s.cia}</td>
-                                    <td class="center">${s.ese}</td>
-                                    <td class="center">${s.total}</td>
-                                </tr>
-                            `).join('')}
+                            ${renderCourseRows(practicalCourses)}
+                        ` : ''}
+
+                        ${employabilityCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
+                            </tr>
+                            ${renderCourseRows(employabilityCourses)}
+                        ` : ''}
+
+                        ${mandatoryCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">MANDATORY COURSES</td>
+                            </tr>
+                            ${renderCourseRows(mandatoryCourses)}
+                        ` : ''}
+
+                        ${languageElective1.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – I</td>
+                            </tr>
+                            ${renderCourseRows(languageElective1)}
+                        ` : ''}
+
+                        ${languageElective2.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – II</td>
+                            </tr>
+                            ${renderCourseRows(languageElective2)}
                         ` : ''}
 
                         ${otherCourses.length > 0 ? `
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt;">Other Course(s)</td>
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Other Courses</td>
                             </tr>
-                            ${otherCourses.map(s => `
-                                <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                    <td>${s.title}</td>
-                                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'EEC'}</td>
-                                    <td class="center">${s.l}</td>
-                                    <td class="center">${s.t}</td>
-                                    <td class="center">${s.p}</td>
-                                    <td class="center">${s.contactPeriods}</td>
-                                    <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                    <td class="center">${s.cia}</td>
-                                    <td class="center">${s.ese}</td>
-                                    <td class="center">${s.total}</td>
-                                </tr>
-                            `).join('')}
+                            ${renderCourseRows(otherCourses)}
                         ` : ''}
+
+                        <tr style="font-weight: bold; background: rgba(0,0,0,0.02); border-top: 1.5px solid #000;">
+                            <td colSpan="7" style="text-align: center; font-weight: bold; font-family: Arial, sans-serif;">TOTAL</td>
+                            <td class="center" style="font-weight: bold;">${semTotalCredits}</td>
+                            <td colSpan="3"></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -1758,9 +1764,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">S.No.</th>
                             <th rowSpan="2" style="width: 15%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
-                            <th rowSpan="2" style="width: 38%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
+                            <th rowSpan="2" style="width: 43%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
                             <th rowSpan="2" style="width: 7%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
@@ -1777,7 +1782,6 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     </thead>
                     <tbody>
                         ${(() => {
-                let globalIndex = 0;
                 return sortedVerticals.map(vertNum => {
                     const subjectsForVert = verticalsGrouped[vertNum];
                     const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
@@ -1785,15 +1789,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
                     return `
                                     <tr class="category-row" style="background-color: rgba(0, 0, 0, 0.05);">
-                                        <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 9pt; font-weight: bold; text-align: center; padding: 6px;">
+                                        <td colSpan="10" style="font-family: Arial, sans-serif; font-size: 9pt; font-weight: bold; text-align: center; padding: 6px;">
                                             Vertical ${romanNum}: ${verticalName}
                                         </td>
                                     </tr>
                                     ${subjectsForVert.map(s => {
-                        globalIndex++;
                         return `
                                             <tr>
-                                                <td class="center">${globalIndex}</td>
                                                 <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                                 <td>${s.title}</td>
                                                 <td class="center">${s.l}</td>
@@ -1831,9 +1833,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">S.No.</th>
-                            <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
-                            <th rowSpan="2" style="width: 49%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
+                            <th rowSpan="2" style="width: 15%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
+                            <th rowSpan="2" style="width: 51%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
                             <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
                             <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
@@ -1851,26 +1852,23 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <tbody>
                         ${(() => {
                 const oecsGrouped = subjects.filter(s => s.isOpenElective).reduce((acc, subj) => {
-                    const dept = subj.offeringDept || 'Other Departments';
+                    const dept = (subj.offeringDept && subj.offeringDept !== 'Other Departments') ? subj.offeringDept : (deptData?.name || selectedDept || 'Biomedical Engineering');
                     if (!acc[dept]) acc[dept] = [];
                     acc[dept].push(subj);
                     return acc;
                 }, {});
                 const sortedOecDepts = Object.keys(oecsGrouped).sort();
-                let oecGlobalIndex = 0;
                 return sortedOecDepts.map(deptName => {
                     const deptSubjects = oecsGrouped[deptName];
                     return `
                                     <tr style="background: #f9f9f9;">
-                                        <td colspan="11" style="font-weight: bold; text-align: center; font-size: 9.5pt; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 1px solid #000; padding: 6px;">
+                                        <td colspan="10" style="font-weight: bold; text-align: center; font-size: 9.5pt; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 1px solid #000; padding: 6px;">
                                             ${deptName}
                                         </td>
                                     </tr>
                                     ${deptSubjects.map(s => {
-                        oecGlobalIndex++;
                         return `
                                             <tr>
-                                                <td class="center">${oecGlobalIndex}</td>
                                                 <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                                 <td>${s.title}</td>
                                                 <td class="center">${s.l}</td>
@@ -2361,33 +2359,31 @@ const SyllabusPage = () => {
                                             return acc;
                                         }, {})
                                     ).sort((a, b) => Number(a[0]) - Number(b[0])).map(([semesterNum, subjectsForSem]) => (
-                                        <div key={`sem-${semesterNum}`} style={{ marginBottom: '3rem', overflowX: 'auto' }}>
+                                        <div key={`sem-${semesterNum}`} style={{ marginBottom: '3rem', width: '100%' }}>
                                             <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold' }}>
                                                 SEMESTER {semesterNum}
                                             </h3>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.9rem' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
                                                 <thead style={{ background: 'transparent' }}>
                                                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>S. No.</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>CourseCode</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Course Title</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Category</th>
-                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center' }}>Periods per Week</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Total<br />Contact<br />Periods</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle' }}>Credit</th>
-                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center' }}>Marks</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '13%' }}>Course Code</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Category</th>
+                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>Credit</th>
+                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '15%' }}>Marks</th>
                                                     </tr>
                                                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>L</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>T</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>P</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>CIA</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>ESE</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>Total</th>
+                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>L</th>
+                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>T</th>
+                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>P</th>
+                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>CIA</th>
+                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>ESE</th>
+                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>Total</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {/* Group by category (THEORY, PRACTICAL, etc) */}
                                                     {Object.entries(
                                                         subjectsForSem.reduce((acc, subj) => {
                                                             const cat = subj.category || 'THEORY';
@@ -2398,24 +2394,23 @@ const SyllabusPage = () => {
                                                     ).map(([categoryName, categorySubjects], catIndex) => (
                                                         <React.Fragment key={catIndex}>
                                                             <tr>
-                                                                <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.02)', color: 'var(--text-main)' }}>
-                                                                    {categoryName === 'THEORY' ? 'Theory Course(s)' : categoryName === 'PRACTICAL' ? 'Practical Course(s)' : categoryName === 'THEORY CUM PRACTICAL' ? 'Theory cum Practical Course(s)' : categoryName}
+                                                                <td colSpan="11" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                                                                    {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName}
                                                                 </td>
                                                             </tr>
                                                             {categorySubjects.map((subj, subjIdx) => (
                                                                 <tr key={subjIdx}>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subjIdx + 1}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.code}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-muted)' }}>{subj.title}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.credits}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
+                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
                                                                 </tr>
                                                             ))}
                                                         </React.Fragment>
@@ -2437,31 +2432,29 @@ const SyllabusPage = () => {
 
                                         if (sortedVerticals.length === 0) return null;
 
-                                        let globalIndex = 0;
                                         return (
-                                            <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', background: 'var(--bg-section)' }}>
+                                            <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
                                                 <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
                                                     Professional Elective Courses
                                                 </h3>
-                                                <div style={{ overflowX: 'auto' }}>
-                                                    <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.9rem' }}>
+                                                <div style={{ width: '100%' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
                                                         <thead style={{ background: 'transparent' }}>
                                                             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>S. No.</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '30%' }}>Course Title</th>
-                                                                <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center', width: '12%' }}>Periods per Week</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Credit</th>
-                                                                <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center', width: '13%' }}>Marks</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '35%' }}>Course Title</th>
+                                                                <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>Credit</th>
+                                                                <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '15%' }}>Marks</th>
                                                             </tr>
                                                             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>L</th>
-                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>T</th>
-                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>P</th>
-                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>CIA</th>
-                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>ESE</th>
-                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>Total</th>
+                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>L</th>
+                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>T</th>
+                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>P</th>
+                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>CIA</th>
+                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>ESE</th>
+                                                                <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>Total</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -2473,25 +2466,23 @@ const SyllabusPage = () => {
                                                                 return (
                                                                     <React.Fragment key={`vert-${vertNum}`}>
                                                                         <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                                                            <td colSpan="11" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
+                                                                            <td colSpan="10" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
                                                                                 Vertical {romanNum}: {verticalName}
                                                                             </td>
                                                                         </tr>
                                                                         {subjectsForVert.map((subj, subjIdx) => {
-                                                                            globalIndex++;
                                                                             return (
                                                                                 <tr key={subjIdx}>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{globalIndex}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: '500', fontFamily: 'monospace' }}>{subj.code}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
                                                                                 </tr>
                                                                             );
                                                                         })}
@@ -2507,65 +2498,61 @@ const SyllabusPage = () => {
 
                                     {/* Open Elective Courses */}
                                     {deptData.subjects.some(s => s.isOpenElective) && (
-                                        <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', background: 'var(--bg-section)' }}>
+                                        <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
                                             <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
                                                 Open Elective Courses
                                             </h3>
-                                            <div style={{ overflowX: 'auto' }}>
-                                                <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.9rem' }}>
+                                            <div style={{ width: '100%' }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
                                                     <thead style={{ background: 'transparent' }}>
                                                         <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>S. No.</th>
-                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '12%' }}>Course Code</th>
-                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '44%' }}>Course Title</th>
-                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center', width: '12%' }}>Periods per Week</th>
-                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Total Contact Periods</th>
-                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
-                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--primary)', textAlign: 'center', width: '13%' }}>Marks</th>
+                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
+                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '45%' }}>Course Title</th>
+                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
+                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
+                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>Credit</th>
+                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '15%' }}>Marks</th>
                                                         </tr>
                                                         <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>L</th>
-                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>T</th>
-                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>P</th>
-                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>CIA</th>
-                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>ESE</th>
-                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>Total</th>
+                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>L</th>
+                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>T</th>
+                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>P</th>
+                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>CIA</th>
+                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>ESE</th>
+                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center' }}>Total</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {(() => {
                                                             const oecsGrouped = deptData.subjects.filter(s => s.isOpenElective).reduce((acc, subj) => {
-                                                                const dept = subj.offeringDept || 'Other Departments';
+                                                                const dept = (subj.offeringDept && subj.offeringDept !== 'Other Departments') ? subj.offeringDept : (deptData?.name || selectedDept || 'Biomedical Engineering');
                                                                 if (!acc[dept]) acc[dept] = [];
                                                                 acc[dept].push(subj);
                                                                 return acc;
                                                             }, {});
                                                             const sortedOecDepts = Object.keys(oecsGrouped).sort();
-                                                            let oecGlobalIndex = 0;
                                                             return sortedOecDepts.map(deptName => {
                                                                 const deptSubjects = oecsGrouped[deptName];
                                                                 return (
                                                                     <React.Fragment key={`oec-dept-${deptName}`}>
                                                                         <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                                                            <td colSpan={11} style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
+                                                                            <td colSpan={10} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
                                                                                 {deptName}
                                                                             </td>
                                                                         </tr>
-                                                                        {deptSubjects.map((subj, subjIdx) => {
-                                                                            oecGlobalIndex++;
+                                                                        {deptSubjects.map((subj, idx) => {
                                                                             return (
-                                                                                <tr key={subjIdx}>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{oecGlobalIndex}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: '500', fontFamily: 'monospace' }}>{subj.code}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                                <tr key={idx}>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
                                                                                 </tr>
                                                                             );
                                                                         })}

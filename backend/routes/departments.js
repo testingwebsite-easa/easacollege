@@ -5,9 +5,53 @@ const mongoose = require('mongoose');
 // Assuming Schemas is imported where DepartmentData is exported
 const { DepartmentData } = require('../models/Schemas');
 const { getDepartmentDetails } = require('../controllers/departmentController');
+const { parseSyllabusWordDoc } = require('../services/syllabusParser');
+const { parseSyllabusExcelDoc } = require('../services/excelSyllabusParser');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
 // Middleware for auth
-const { verifyToken } = require('./auth'); 
+const { verifyToken } = require('./auth');
+
+// POST /api/departments/scan-syllabus-word - Scan and parse Word (.docx) syllabus files
+router.post('/scan-syllabus-word', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).json({ error: 'Please upload a valid Word document (.docx)' });
+        }
+        const fileName = (req.file.originalname || '').toLowerCase();
+        let result;
+        if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv')) {
+            result = await parseSyllabusExcelDoc(req.file.buffer);
+        } else {
+            result = await parseSyllabusWordDoc(req.file.buffer);
+        }
+        if (!result.success) {
+            return res.status(422).json({ error: result.error || 'Failed to parse syllabus document' });
+        }
+        res.json(result);
+    } catch (err) {
+        console.error('Word syllabus scan error:', err);
+        res.status(500).json({ error: 'Server error while processing Word document: ' + err.message });
+    }
+});
+
+// POST /api/departments/scan-syllabus-excel - Scan and parse Excel (.xlsx, .xls, .csv) syllabus files
+router.post('/scan-syllabus-excel', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).json({ error: 'Please upload a valid Excel spreadsheet (.xlsx, .xls, .csv)' });
+        }
+        const result = await parseSyllabusExcelDoc(req.file.buffer);
+        if (!result.success) {
+            return res.status(422).json({ error: result.error || 'Failed to parse Excel spreadsheet' });
+        }
+        res.json(result);
+    } catch (err) {
+        console.error('Excel syllabus scan error:', err);
+        res.status(500).json({ error: 'Server error while processing Excel file: ' + err.message });
+    }
+});
 
 // GET department data by slug
 router.get('/:slug', async (req, res) => {
@@ -25,7 +69,7 @@ router.get('/:slug', async (req, res) => {
 const getDeptSlug = (userDeptName) => {
     if (!userDeptName) return '';
     const lower = userDeptName.toLowerCase().trim();
-    
+
     // Direct matches
     if (lower === 'computer-science-and-engineering' || lower === 'computer science and engineering') return 'computer-science-and-engineering';
     if (lower === 'electronics-and-communication-engineering' || lower === 'electronics and communication engineering') return 'electronics-and-communication-engineering';
@@ -73,11 +117,12 @@ const getDeptSlug = (userDeptName) => {
 router.put('/:slug', verifyToken, async (req, res) => {
     try {
         const { mission, vision, peo, pso, po, subjects, bosMeetingDate, acMeetingDate, regulation } = req.body;
-        
+
         // HOD Authorization Check
         if (req.user.role === 'hod') {
             const { User } = require('../models/Schemas');
-            const dbUser = await User.findById(req.user.userId);
+            const userId = req.user.userId || req.user.id;
+            const dbUser = await User.findById(userId);
             if (!dbUser) {
                 return res.status(401).json({ error: 'User not found' });
             }
@@ -88,15 +133,15 @@ router.put('/:slug', verifyToken, async (req, res) => {
         } else if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Unauthorized to update department curriculum' });
         }
-        
+
         // Find and update, or create if it doesn't exist
         const updatedData = await DepartmentData.findOneAndUpdate(
             { departmentSlug: req.params.slug },
-            { 
-                mission: mission || [], 
-                vision: vision || [], 
-                peo: peo || [], 
-                pso: pso || [], 
+            {
+                mission: mission || [],
+                vision: vision || [],
+                peo: peo || [],
+                pso: pso || [],
                 po: po || [],
                 subjects: subjects || [],
                 bosMeetingDate: bosMeetingDate || "29.10.2024",
@@ -105,10 +150,11 @@ router.put('/:slug', verifyToken, async (req, res) => {
             },
             { new: true, upsert: true }
         );
-        
+
         res.json(updatedData);
     } catch (err) {
-        res.status(500).json({ error: 'Server error while updating' });
+        console.error('Error in PUT /api/departments/:slug:', err);
+        res.status(500).json({ error: 'Server error while updating: ' + err.message });
     }
 });
 

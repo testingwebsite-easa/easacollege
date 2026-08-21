@@ -13,6 +13,8 @@ import {
 
 import GlobalHero from '../components/GlobalHero';
 
+import NotFoundPage from './NotFoundPage';
+
 const DynamicPage = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
@@ -43,17 +45,7 @@ const DynamicPage = () => {
     if (loading) return <LoadingBar />;
 
     if (!pageData) {
-        return (
-            <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col items-center justify-center">
-                <Navbar />
-                <div className="text-center mt-20 p-8">
-                    <h1 className="text-6xl font-black mb-4">404</h1>
-                    <p className="text-xl mb-6">Page Not Found</p>
-                    <button onClick={() => navigate('/')} className="btn btn-primary">Return Home</button>
-                </div>
-                <Footer />
-            </div>
-        );
+        return <NotFoundPage />;
     }
 
     const tabs = [

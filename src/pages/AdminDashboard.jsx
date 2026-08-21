@@ -363,12 +363,24 @@ const AdminDashboard = () => {
             }
 
             if (endpoint && setter) {
-                const res = await fetch(`${API_BASE_URL}${endpoint}`);
+                const token = localStorage.getItem('admin_token') || localStorage.getItem('authToken') || localStorage.getItem('token');
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const res = await fetch(`${API_BASE_URL}${endpoint}`, { headers });
+                
+                // Check for token expiry
+                if (handleTokenExpiry(res.status)) {
+                    return;
+                }
+
                 if (!res.ok) throw new Error(`Failed to fetch ${tab}`);
                 const data = await res.json();
 
                 // Safety check for list-based data to prevent crashes if API returns object/error
-                if (['scholarships', 'instituteMilestones', 'life-of-EASA', 'careers', 'research-items', 'gallery', 'placement', 'news', 'programs', 'management', 'sessions', 'research-courses', 'beliefs', 'departments', 'leadership', 'administration', 'governance', 'chairperson', 'secretary', 'correspondent', 'principal', 'deans', 'founder', 'pages', 'alumni', 'enquiries'].includes(tab) || tab === 'milestones') {
+                if (['scholarships', 'instituteMilestones', 'life-of-EASA', 'careers', 'research-items', 'gallery', 'placement', 'news', 'programs', 'management', 'sessions', 'research-courses', 'beliefs', 'departments', 'leadership', 'administration', 'governance', 'chairperson', 'secretary', 'correspondent', 'principal', 'deans', 'founder', 'pages', 'alumni', 'enquiries', 'users'].includes(tab) || tab === 'milestones') {
                     if (!Array.isArray(data)) {
                         console.error(`Expected array for ${tab} but received:`, data);
                         setter([]);
@@ -390,12 +402,12 @@ const AdminDashboard = () => {
         if (!window.confirm('Are you sure?')) return;
         try {
             // Get the auth token
-            const token = localStorage.getItem('admin_token');
+            const token = localStorage.getItem('admin_token') || localStorage.getItem('authToken') || localStorage.getItem('token');
 
             const headers = {};
 
             // Add Authorization header if token exists
-            if (token && (endpoint.includes('news-events') || endpoint.includes('hero-slides') || endpoint.includes('programs'))) {
+            if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
@@ -431,21 +443,27 @@ const AdminDashboard = () => {
             const method = editingItem ? 'PUT' : 'POST';
 
             // Get the auth token
-            const token = localStorage.getItem('admin_token');
+            const token = localStorage.getItem('admin_token') || localStorage.getItem('authToken') || localStorage.getItem('token');
 
             const headers = {
                 'Content-Type': 'application/json'
             };
 
-            // Add Authorization header if token exists (for endpoints that require authentication)
-            if (token && (endpoint.includes('news-events') || endpoint.includes('hero-slides') || endpoint.includes('programs'))) {
+            // Add Authorization header if token exists
+            if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            // Prepare payload - if user edit and password empty, don't send empty password
+            let payload = { ...form };
+            if (endpoint === '/api/users' && editingItem && (!payload.password || payload.password.trim() === '')) {
+                delete payload.password;
             }
 
             const res = await fetch(url, {
                 method,
                 headers,
-                body: JSON.stringify(form)
+                body: JSON.stringify(payload)
             });
 
             // Check for token expiry (403 Forbidden)
@@ -481,13 +499,13 @@ const AdminDashboard = () => {
 
     const startEdit = (item, setForm) => {
         setEditingItem(item);
-        // Exclude _id and __v from form
-        const { _id, __v, createdAt, updatedAt, ...formData } = item;
+        // Exclude _id, __v, and password from form
+        const { _id, __v, createdAt, updatedAt, password, ...formData } = item;
         // Adjust date fields for inputs if necessary
         if (formData.startDate) formData.startDate = formData.startDate.split('T')[0];
         if (formData.endDate) formData.endDate = formData.endDate.split('T')[0];
 
-        setForm(prev => ({ ...prev, ...formData }));
+        setForm(prev => ({ ...prev, ...formData, password: '' }));
         setShowModal(true);
     };
 
@@ -1902,7 +1920,6 @@ const AdminDashboard = () => {
                                 </>
                             )}
 
-
                             {activeTab === 'careers' && (
                                 <form onSubmit={async (e) => {
                                     e.preventDefault();
@@ -1959,7 +1976,6 @@ const AdminDashboard = () => {
                                             <option value="Internship">Internship</option>
                                         </select>
                                     </div>
-
                                     <div>
                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
                                         <textarea
@@ -1968,7 +1984,6 @@ const AdminDashboard = () => {
                                             style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '100px', marginTop: '0.4rem' }}
                                         />
                                     </div>
-
                                     <div>
                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Requirements (One per line)</label>
                                         <textarea
@@ -1977,7 +1992,6 @@ const AdminDashboard = () => {
                                             style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '100px', marginTop: '0.4rem' }}
                                         />
                                     </div>
-
                                     <div>
                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Responsibilities (One per line)</label>
                                         <textarea
@@ -2031,21 +2045,42 @@ const AdminDashboard = () => {
                             {activeTab === 'users' && (
                                 <form onSubmit={(e) => handleGenericSubmit(e, userForm, setUserForm, '/api/users', setUsers, { username: '', password: '', role: 'admin' })} style={{ display: 'grid', gap: '1rem' }}>
                                     {renderInput('Username', 'username', userForm.username, e => setUserForm({ ...userForm, username: e.target.value }))}
-                                    {renderInput('Password', 'password', userForm.password, e => setUserForm({ ...userForm, password: e.target.value }), 'password')}
+                                    
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                            {editingItem ? 'Password (leave blank to keep current)' : 'Password'}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={userForm.password || ''}
+                                            onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                                            required={!editingItem}
+                                            placeholder={editingItem ? '••••••••' : 'Enter password'}
+                                            style={{
+                                                padding: '0.8rem',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--glass-border)',
+                                                background: 'var(--bg-section)',
+                                                color: 'var(--text-main)',
+                                                outline: 'none'
+                                            }}
+                                        />
+                                    </div>
 
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Role</label>
                                         <select
                                             className="custom-select"
-                                            value={userForm.role}
+                                            value={userForm.role || 'admin'}
                                             onChange={e => setUserForm({ ...userForm, role: e.target.value })}
                                             style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)' }}
                                         >
                                             <option value="admin">Admin</option>
                                             <option value="superadmin">Super Admin</option>
+                                            <option value="staff">Staff</option>
                                         </select>
                                     </div>
-                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update' : 'Add User'}</button>
+                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update User' : 'Add User'}</button>
                                 </form>
                             )}
                         </div>
@@ -3839,33 +3874,50 @@ const AdminDashboard = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {users.map(user => (
-                                                    <tr key={user._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <td style={{ padding: '1rem' }}>{user.username}</td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <span style={{
-                                                                padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem',
-                                                                background: user.role === 'superadmin' ? 'var(--primary)' : 'var(--glass-highlight)',
-                                                                color: 'white'
-                                                            }}>
-                                                                {user.role}
-                                                            </span>
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <button
-                                                                onClick={() => {
-                                                                    if (window.confirm('Are you sure you want to delete this user?')) {
-                                                                        handleGenericDelete(user._id, '/api/users', setUsers);
-                                                                    }
-                                                                }}
-                                                                style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}
-                                                            >
-                                                                Delete
-                                                            </button>
+                                                {users.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                                            No users found.
                                                         </td>
                                                     </tr>
-                                                ))}
+                                                ) : (
+                                                    users.map(user => (
+                                                        <tr key={user._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem' }}>{user.username}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <span style={{
+                                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem',
+                                                                    background: user.role === 'superadmin' ? 'var(--primary)' : 'var(--glass-highlight)',
+                                                                    color: 'white',
+                                                                    textTransform: 'capitalize'
+                                                                }}>
+                                                                    {user.role}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                    <button
+                                                                        onClick={() => startEdit(user, setUserForm)}
+                                                                        style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            if (window.confirm(`Are you sure you want to delete user "${user.username}"?`)) {
+                                                                                handleGenericDelete(user._id, '/api/users', setUsers);
+                                                                            }
+                                                                        }}
+                                                                        style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>

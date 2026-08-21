@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaFilePdf, FaBook } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaFilePdf, FaBook, FaFileWord, FaFileExcel, FaCloudUploadAlt, FaUpload, FaCheckCircle, FaSpinner, FaExclamationTriangle, FaListAlt } from 'react-icons/fa';
 import { departments as staticDepartments } from '../data/departmentsData';
 import { getDetailedSyllabusForSubject } from '../data/syllabusData';
+import { parseWordSyllabusClient } from '../utils/wordSyllabusParser';
+import { parseExcelSyllabusClient } from '../utils/excelSyllabusParser';
 import collegeLogo from '../assets/EASA College Logo.webp';
 import API_BASE_URL from '../api';
 
@@ -171,8 +173,7 @@ const renderCreditDistributionTable = (subjects) => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', border: '1px solid var(--glass-border)', background: 'var(--bg-section)' }}>
                     <thead style={{ background: 'transparent' }}>
                         <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>S.No</th>
-                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '35%' }}>SUBJECT AREA</th>
+                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '38%' }}>SUBJECT AREA</th>
                             <th colSpan="8" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>CREDITS PER SEMESTER</th>
                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>CREDITS TOTAL</th>
                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>%</th>
@@ -190,7 +191,6 @@ const renderCreditDistributionTable = (subjects) => {
                             const percentage = (grandTotal > 0 && !isMC) ? Math.round((total / grandTotal) * 100) : '-';
                             return (
                                 <tr key={cat} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{idx + 1}</td>
                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: '500' }}>{categoryLabels[cat]}</td>
                                     {distribution[cat].map((val, semIdx) => (
                                         <td key={semIdx} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: val > 0 ? 'var(--text-main)' : 'var(--text-muted)' }}>
@@ -207,7 +207,6 @@ const renderCreditDistributionTable = (subjects) => {
                             );
                         })}
                         <tr style={{ background: 'rgba(255,255,255,0.02)', fontWeight: 'bold' }}>
-                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem' }}></td>
                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--primary)' }}>Total</td>
                             {semTotals.map((total, semIdx) => (
                                 <td key={semIdx} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--primary)' }}>
@@ -373,10 +372,9 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
             <table class="curriculum-table">
                 <thead>
                     <tr>
-                        <th rowSpan="2" style="width: 6%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">S.No</th>
-                        <th rowSpan="2" style="width: 44%; font-size: 8pt; font-family: Arial, sans-serif; text-align: left; vertical-align: middle;">Subject Area</th>
+                        <th rowSpan="2" style="width: 50%; font-size: 8pt; font-family: Arial, sans-serif; text-align: left; vertical-align: middle;">Subject Area</th>
                         <th colSpan="8" style="font-size: 8pt; font-family: Arial, sans-serif; text-align: center; padding: 3px;">Credits per Semester</th>
-                        <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits Total</th>
+                        <th rowSpan="2" style="width: 14%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits Total</th>
                         <th rowSpan="2" style="width: 8%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">%</th>
                     </tr>
                     <tr>
@@ -390,7 +388,6 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         const percentage = (grandTotal > 0 && !isMC) ? Math.round((total / grandTotal) * 100) : '-';
         return `
                             <tr>
-                                <td class="center" style="font-family: Arial, sans-serif;">${idx + 1}</td>
                                 <td style="font-weight: bold; font-family: Arial, sans-serif;">${categoryLabels[cat]}</td>
                                 ${distribution[cat].map(val => `<td class="center">${val > 0 ? val : '-'}</td>`).join('')}
                                 <td class="center" style="font-weight: bold; font-family: Arial, sans-serif;">${isMC ? 'No Credits' : total}</td>
@@ -399,7 +396,6 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
                         `;
     }).join('')}
                     <tr style="font-weight: bold; background-color: rgba(0, 0, 0, 0.02);">
-                        <td></td>
                         <td style="font-family: Arial, sans-serif;">Total</td>
                         ${semTotals.map(total => `<td class="center">${total}</td>`).join('')}
                         <td class="center" style="font-family: Arial, sans-serif;">${grandTotal}</td>
@@ -884,10 +880,44 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         const subjectsForSem = semestersGrouped[semNum] || [];
         if (subjectsForSem.length === 0) return '';
 
-        const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL'));
-        const practicalCourses = subjectsForSem.filter(s => (s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('THEORY')) || s.category?.toUpperCase().includes('LAB'));
+        const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'THEORY' || (s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('LANGUAGE') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
+        const practicalCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'PRACTICAL' || ((s.category?.toUpperCase().includes('PRACTICAL') || s.category?.toUpperCase().includes('LAB')) && !s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
         const theoryCumPracticalCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('THEORY') && s.category?.toUpperCase().includes('PRACTICAL'));
-        const otherCourses = subjectsForSem.filter(s => !theoryCourses.includes(s) && !practicalCourses.includes(s) && !theoryCumPracticalCourses.includes(s));
+        const employabilityCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('EMPLOYABILITY') || s.categoryType === 'EEC');
+        const mandatoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('MANDATORY') || s.categoryType === 'MC');
+        const languageElective1 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE I'));
+        const languageElective2 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE II'));
+
+        const accounted = new Set([
+            ...theoryCourses,
+            ...practicalCourses,
+            ...theoryCumPracticalCourses,
+            ...employabilityCourses,
+            ...mandatoryCourses,
+            ...languageElective1,
+            ...languageElective2
+        ]);
+        const otherCourses = subjectsForSem.filter(s => !accounted.has(s));
+
+        const semTotalCredits = subjectsForSem.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
+
+        const renderCourseRows = (courseList) => {
+            return courseList.map(s => `
+                <tr>
+                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
+                    <td>${s.title}</td>
+                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'PCC'}</td>
+                    <td class="center">${s.l ?? 0}</td>
+                    <td class="center">${s.t ?? 0}</td>
+                    <td class="center">${s.p ?? 0}</td>
+                    <td class="center">${s.contactPeriods || (Number(s.l || 0) + Number(s.t || 0) + Number(s.p || 0))}</td>
+                    <td class="center" style="font-weight: bold;">${s.credits ?? 0}</td>
+                    <td class="center">${s.cia !== undefined ? s.cia : 40}</td>
+                    <td class="center">${s.ese !== undefined ? s.ese : 60}</td>
+                    <td class="center">${s.total !== undefined ? s.total : 100}</td>
+                </tr>
+            `).join('');
+        };
 
         return `
             <div style="page-break-inside: avoid; margin-bottom: 25px;">
@@ -918,87 +948,65 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <tbody>
                         ${theoryCourses.length > 0 ? `
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt;">Theory Course(s)</td>
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">THEORY COURSES</td>
                             </tr>
-                            ${theoryCourses.map(s => `
-                                <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                    <td>${s.title}</td>
-                                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'HS'}</td>
-                                    <td class="center">${s.l}</td>
-                                    <td class="center">${s.t}</td>
-                                    <td class="center">${s.p}</td>
-                                    <td class="center">${s.contactPeriods}</td>
-                                    <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                    <td class="center">${s.cia}</td>
-                                    <td class="center">${s.ese}</td>
-                                    <td class="center">${s.total}</td>
-                                </tr>
-                            `).join('')}
+                            ${renderCourseRows(theoryCourses)}
                         ` : ''}
 
                         ${theoryCumPracticalCourses.length > 0 ? `
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt;">Theory cum Practical Course(s)</td>
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">THEORY CUM PRACTICAL COURSES</td>
                             </tr>
-                            ${theoryCumPracticalCourses.map(s => `
-                                <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                    <td>${s.title}</td>
-                                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'PC'}</td>
-                                    <td class="center">${s.l}</td>
-                                    <td class="center">${s.t}</td>
-                                    <td class="center">${s.p}</td>
-                                    <td class="center">${s.contactPeriods}</td>
-                                    <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                    <td class="center">${s.cia}</td>
-                                    <td class="center">${s.ese}</td>
-                                    <td class="center">${s.total}</td>
-                                </tr>
-                            `).join('')}
+                            ${renderCourseRows(theoryCumPracticalCourses)}
                         ` : ''}
                         
                         ${practicalCourses.length > 0 ? `
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt;">Practical Course(s)</td>
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">PRACTICAL COURSES</td>
                             </tr>
-                            ${practicalCourses.map(s => `
-                                <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                    <td>${s.title}</td>
-                                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'EEC'}</td>
-                                    <td class="center">${s.l}</td>
-                                    <td class="center">${s.t}</td>
-                                    <td class="center">${s.p}</td>
-                                    <td class="center">${s.contactPeriods}</td>
-                                    <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                    <td class="center">${s.cia}</td>
-                                    <td class="center">${s.ese}</td>
-                                    <td class="center">${s.total}</td>
-                                </tr>
-                            `).join('')}
+                            ${renderCourseRows(practicalCourses)}
+                        ` : ''}
+
+                        ${employabilityCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
+                            </tr>
+                            ${renderCourseRows(employabilityCourses)}
+                        ` : ''}
+
+                        ${mandatoryCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">MANDATORY COURSES</td>
+                            </tr>
+                            ${renderCourseRows(mandatoryCourses)}
+                        ` : ''}
+
+                        ${languageElective1.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – I</td>
+                            </tr>
+                            ${renderCourseRows(languageElective1)}
+                        ` : ''}
+
+                        ${languageElective2.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – II</td>
+                            </tr>
+                            ${renderCourseRows(languageElective2)}
                         ` : ''}
 
                         ${otherCourses.length > 0 ? `
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt;">Other Course(s)</td>
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Other Courses</td>
                             </tr>
-                            ${otherCourses.map(s => `
-                                <tr>
-                                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                    <td>${s.title}</td>
-                                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'EEC'}</td>
-                                    <td class="center">${s.l}</td>
-                                    <td class="center">${s.t}</td>
-                                    <td class="center">${s.p}</td>
-                                    <td class="center">${s.contactPeriods}</td>
-                                    <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                    <td class="center">${s.cia}</td>
-                                    <td class="center">${s.ese}</td>
-                                    <td class="center">${s.total}</td>
-                                </tr>
-                            `).join('')}
+                            ${renderCourseRows(otherCourses)}
                         ` : ''}
+
+                        <tr style="font-weight: bold; background: rgba(0,0,0,0.02); border-top: 1.5px solid #000;">
+                            <td colSpan="7" style="text-align: center; font-weight: bold; font-family: Arial, sans-serif;">TOTAL</td>
+                            <td class="center" style="font-weight: bold;">${semTotalCredits}</td>
+                            <td colSpan="3"></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -1622,9 +1630,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">S.No.</th>
                             <th rowSpan="2" style="width: 15%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
-                            <th rowSpan="2" style="width: 38%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
+                            <th rowSpan="2" style="width: 43%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
                             <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
                             <th rowSpan="2" style="width: 7%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
@@ -1641,7 +1648,6 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     </thead>
                     <tbody>
                         ${(() => {
-                let globalIndex = 0;
                 return sortedVerticals.map(vertNum => {
                     const subjectsForVert = verticalsGrouped[vertNum];
                     const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
@@ -1649,15 +1655,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
                     return `
                                     <tr class="category-row" style="background-color: rgba(0, 0, 0, 0.05);">
-                                        <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 9pt; font-weight: bold; text-align: center; padding: 6px;">
+                                        <td colSpan="10" style="font-family: Arial, sans-serif; font-size: 9pt; font-weight: bold; text-align: center; padding: 6px;">
                                             Vertical ${romanNum}: ${verticalName}
                                         </td>
                                     </tr>
                                     ${subjectsForVert.map(s => {
-                        globalIndex++;
                         return `
                                             <tr>
-                                                <td class="center">${globalIndex}</td>
                                                 <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                                 <td>${s.title}</td>
                                                 <td class="center">${s.l}</td>
@@ -1695,9 +1699,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">S.No.</th>
-                            <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
-                            <th rowSpan="2" style="width: 49%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
+                            <th rowSpan="2" style="width: 15%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
+                            <th rowSpan="2" style="width: 51%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
                             <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
                             <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
                             <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
@@ -1715,26 +1718,23 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <tbody>
                         ${(() => {
                 const oecsGrouped = subjects.filter(s => s.isOpenElective).reduce((acc, subj) => {
-                    const dept = subj.offeringDept || 'Other Departments';
+                    const dept = (subj.offeringDept && subj.offeringDept !== 'Other Departments') ? subj.offeringDept : (deptData?.name || selectedDeptObj?.name || 'Biomedical Engineering');
                     if (!acc[dept]) acc[dept] = [];
                     acc[dept].push(subj);
                     return acc;
                 }, {});
                 const sortedOecDepts = Object.keys(oecsGrouped).sort();
-                let oecGlobalIndex = 0;
                 return sortedOecDepts.map(deptName => {
                     const deptSubjects = oecsGrouped[deptName];
                     return `
                                     <tr style="background: #f9f9f9;">
-                                        <td colspan="11" style="font-weight: bold; text-align: center; font-size: 9.5pt; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 1px solid #000; padding: 6px;">
+                                        <td colspan="10" style="font-weight: bold; text-align: center; font-size: 9.5pt; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 1px solid #000; padding: 6px;">
                                             ${deptName}
                                         </td>
                                     </tr>
                                     ${deptSubjects.map(s => {
-                        oecGlobalIndex++;
                         return `
                                             <tr>
-                                                <td class="center">${oecGlobalIndex}</td>
                                                 <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                                                 <td>${s.title}</td>
                                                 <td class="center">${s.l}</td>
@@ -2013,6 +2013,143 @@ const DepartmentManager = () => {
     const [syllabusEditValue, setSyllabusEditValue] = useState(null);
     const [activeSyllabusTab, setActiveSyllabusTab] = useState('objectives-outcomes');
 
+    // Word Document Auto-Scanner State
+    const [isWordScanModalOpen, setIsWordScanModalOpen] = useState(false);
+    const [isScanningWord, setIsScanningWord] = useState(false);
+    const [wordScanError, setWordScanError] = useState(null);
+    const [scannedWordData, setScannedWordData] = useState([]);
+    const [isDragOver, setIsDragOver] = useState(false);
+    const [importMode, setImportMode] = useState('append'); // 'append' | 'replace'
+
+    const getAuthToken = () => {
+        return localStorage.getItem('authToken') || localStorage.getItem('admin_token') || localStorage.getItem('token') || (user && user.token);
+    };
+
+    const handleSyllabusFileUpload = async (file) => {
+        if (!file) return;
+        const fileName = (file.name || '').toLowerCase();
+        const isWord = fileName.endsWith('.docx') || fileName.endsWith('.doc');
+        const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv');
+
+        if (!isWord && !isExcel) {
+            setWordScanError('Please upload a Microsoft Word (.docx) or Excel spreadsheet (.xlsx, .xls, .csv).');
+            return;
+        }
+
+        setIsScanningWord(true);
+        setWordScanError(null);
+        setScannedWordData([]);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const token = getAuthToken();
+            const endpoint = isExcel
+                ? `${API_BASE_URL}/api/departments/scan-syllabus-excel`
+                : `${API_BASE_URL}/api/departments/scan-syllabus-word`;
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                body: formData
+            });
+
+            if (res.ok) {
+                const result = await res.json();
+                if (result.subjects && result.subjects.length > 0) {
+                    setScannedWordData(result.subjects);
+                } else {
+                    const clientResult = isExcel
+                        ? await parseExcelSyllabusClient(file)
+                        : await parseWordSyllabusClient(file);
+                    if (clientResult.success && clientResult.subjects.length > 0) {
+                        setScannedWordData(clientResult.subjects);
+                    } else {
+                        setWordScanError(`No syllabus tables or course formats could be detected in this ${isExcel ? 'Excel' : 'Word'} file. Please verify the document format.`);
+                    }
+                }
+            } else {
+                const clientResult = isExcel
+                    ? await parseExcelSyllabusClient(file)
+                    : await parseWordSyllabusClient(file);
+                if (clientResult.success && clientResult.subjects.length > 0) {
+                    setScannedWordData(clientResult.subjects);
+                } else {
+                    setWordScanError(clientResult.error || `Failed to parse ${isExcel ? 'Excel spreadsheet' : 'Word document'}.`);
+                }
+            }
+        } catch (err) {
+            console.error('File scan upload error:', err);
+            try {
+                const clientResult = isExcel
+                    ? await parseExcelSyllabusClient(file)
+                    : await parseWordSyllabusClient(file);
+                if (clientResult.success && clientResult.subjects.length > 0) {
+                    setScannedWordData(clientResult.subjects);
+                } else {
+                    setWordScanError('Could not parse the document: ' + err.message);
+                }
+            } catch (clientErr) {
+                setWordScanError('Failed to parse document: ' + clientErr.message);
+            }
+        } finally {
+            setIsScanningWord(false);
+        }
+    };
+
+    const handleWordFileUpload = handleSyllabusFileUpload;
+
+    const handleApplyScannedSubjects = async () => {
+        if (!scannedWordData || scannedWordData.length === 0) return;
+
+        let nextSubjects = [];
+        if (importMode === 'replace') {
+            nextSubjects = [...scannedWordData];
+        } else {
+            const existingCodes = new Set((data.subjects || []).map(s => (s.code || '').toUpperCase().trim()));
+            const filteredNew = scannedWordData.filter(s => !existingCodes.has((s.code || '').toUpperCase().trim()));
+            nextSubjects = [...(data.subjects || []), ...filteredNew];
+        }
+
+        const updatedData = {
+            ...data,
+            departmentSlug: selectedDept,
+            subjects: nextSubjects
+        };
+
+        const importedCount = importMode === 'replace' ? scannedWordData.length : nextSubjects.length - (data.subjects || []).length;
+
+        try {
+            const token = getAuthToken();
+            const res = await fetch(`${API_BASE_URL}/api/departments/${selectedDept}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify(updatedData)
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `Server responded with error status ${res.status}`);
+            }
+
+            const savedResult = await res.json();
+            setData(savedResult || updatedData);
+            setIsWordScanModalOpen(false);
+            setScannedWordData([]);
+            alert(`✅ Successfully imported and saved ${importedCount} subjects to the database for ${selectedDept.toUpperCase()}!`);
+        } catch (err) {
+            console.error('Save error after scan:', err);
+            setData(updatedData);
+            setIsWordScanModalOpen(false);
+            setScannedWordData([]);
+            alert(`⚠️ Scanned subjects applied to current view, but database save returned: ${err.message}\n\nPlease click "Save All Changes" or ensure you are logged in as Admin / HOD.`);
+        }
+    };
+
     const handleStartManageSyllabus = (originalIndex) => {
         const subj = data.subjects[originalIndex];
         setSelectedSyllabusSubjectIndex(originalIndex);
@@ -2166,21 +2303,25 @@ const DepartmentManager = () => {
 
     const updateBackend = async (updatedData) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = getAuthToken();
             const res = await fetch(`${API_BASE_URL}/api/departments/${selectedDept}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(updatedData)
             });
-            if (!res.ok) throw new Error('Failed to update');
-            setData(updatedData);
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `Failed to update (HTTP ${res.status})`);
+            }
+            const savedData = await res.json();
+            setData(savedData || updatedData);
             return true;
         } catch (error) {
             console.error('Error updating department data:', error);
-            alert('Failed to save changes. Please try again.');
+            alert('Failed to save changes: ' + error.message);
             return false;
         }
     };
@@ -2566,20 +2707,46 @@ const DepartmentManager = () => {
                     <div className="dept-section-card" style={{ gridColumn: '1 / -1', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '1rem' }}>
                             <h3 style={{ fontSize: '1.2rem', color: 'var(--primary)', margin: 0 }}>Syllabus Subjects</h3>
-                            <button
-                                onClick={() => {
-                                    const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
-                                    exportCurriculumPDF({
-                                        ...data,
-                                        name: activeDeptObj ? activeDeptObj.name : 'Engineering Department',
-                                        slug: selectedDept
-                                    }, academicLevel, undefined, instVisionMission);
-                                }}
-                                className="btn btn-primary"
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.85rem' }}
-                            >
-                                <FaFilePdf /> Export Official Curriculum PDF
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                                <button
+                                    onClick={() => {
+                                        setIsWordScanModalOpen(true);
+                                        setScannedWordData([]);
+                                        setWordScanError(null);
+                                    }}
+                                    className="btn"
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        padding: '0.5rem 1rem',
+                                        borderRadius: '6px',
+                                        fontSize: '0.85rem',
+                                        background: 'linear-gradient(135deg, #1e40af, #059669)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.15)',
+                                        boxShadow: '0 4px 12px rgba(5,150,105,0.25)',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <FaFileWord size={15} /> <FaFileExcel size={15} /> Auto-Scan Syllabus (Word / Excel)
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
+                                        exportCurriculumPDF({
+                                            ...data,
+                                            name: activeDeptObj ? activeDeptObj.name : 'Engineering Department',
+                                            slug: selectedDept
+                                        }, academicLevel, undefined, instVisionMission);
+                                    }}
+                                    className="btn btn-primary"
+                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.85rem' }}
+                                >
+                                    <FaFilePdf /> Export Official Curriculum PDF
+                                </button>
+                            </div>
                         </div>
 
                         {/* Add Subject Form */}
@@ -2779,72 +2946,80 @@ const DepartmentManager = () => {
                                             {sortedSemesters.map(semNum => {
                                                 const subjectsForSem = semestersGrouped[semNum];
                                                 const categoriesGrouped = subjectsForSem.reduce((acc, subj) => {
-                                                    const cat = subj.category || 'THEORY';
+                                                    let cat = subj.category || 'THEORY';
+                                                    const cUpper = String(cat).toUpperCase().trim();
+                                                    if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED')) cat = 'THEORY CUM PRACTICAL';
+                                                    else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR') cat = 'PRACTICAL';
+                                                    else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC')) cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
+                                                    else if (cUpper.includes('MANDATORY') || cUpper.includes('MC')) cat = 'MANDATORY COURSES';
+                                                    else if (cUpper.includes('LANGUAGE') && (cUpper.includes('I') || cUpper.includes('1'))) cat = 'Language Elective – I';
+                                                    else if (cUpper.includes('LANGUAGE') && (cUpper.includes('II') || cUpper.includes('2'))) cat = 'Language Elective - II';
+                                                    else if (cUpper.includes('HONOR')) cat = 'Electives for Honors Degree';
+                                                    else cat = 'THEORY';
+
                                                     if (!acc[cat]) acc[cat] = [];
-                                                    acc[cat].push(subj);
+                                                    acc[cat].push({ ...subj, category: cat });
                                                     return acc;
                                                 }, {});
 
                                                 return (
-                                                    <div key={`sem-${semNum}`} style={{ marginBottom: '2rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', background: 'var(--bg-section)' }}>
+                                                    <div key={`sem-${semNum}`} style={{ marginBottom: '2rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
                                                         <h4 style={{ fontSize: '1.2rem', color: 'var(--primary)', marginBottom: '1.2rem', textAlign: 'center', fontWeight: 'bold' }}>
                                                             SEMESTER {semNum}
                                                         </h4>
-                                                        <div style={{ overflowX: 'auto' }}>
-                                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', border: '1px solid var(--glass-border)' }}>
+                                                        <div style={{ width: '100%' }}>
+                                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
                                                                 <thead style={{ background: 'transparent' }}>
                                                                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>S. No.</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Course Code</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Course Title</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Category</th>
-                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>Periods per Week</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Total Contact Periods</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Credit</th>
-                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center' }}>Marks</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle' }}>Action</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '12%' }}>Course Code</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '28%' }}>Course Title</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Category</th>
+                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '9%' }}>Periods / Week</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Contact Periods</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>Credit</th>
+                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '14%' }}>Marks</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '16%' }}>Action</th>
                                                                     </tr>
                                                                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
                                                                     {Object.entries(categoriesGrouped).map(([categoryName, categorySubjects], catIdx) => (
                                                                         <React.Fragment key={catIdx}>
                                                                             <tr>
-                                                                                <td colSpan="13" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.02)', color: 'var(--primary)' }}>
-                                                                                    {categoryName === 'THEORY' ? 'Theory Course(s)' : categoryName === 'PRACTICAL' ? 'Practical Course(s)' : categoryName === 'THEORY CUM PRACTICAL' ? 'Theory cum Practical Course(s)' : categoryName}
+                                                                                <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                                                                                    {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName}
                                                                                 </td>
                                                                             </tr>
                                                                             {categorySubjects.map((subj, subjIdx) => (
                                                                                 <tr key={subjIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subjIdx + 1}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: '500' }}>{subj.code}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center' }}>
-                                                                                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                                                                            <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontSize: '0.75rem' }} title="Manage Syllabus">
-                                                                                                Syllabus <FaBook />
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
+                                                                                        <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
+                                                                                            <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.3rem 0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }} title="Manage Syllabus">
+                                                                                                Syllabus <FaBook size={10} />
                                                                                             </button>
-                                                                                            <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
-                                                                                                <FaEdit />
+                                                                                            <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.3rem 0.45rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
+                                                                                                <FaEdit size={11} />
                                                                                             </button>
-                                                                                            <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
-                                                                                                <FaTrash />
+                                                                                            <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
+                                                                                                <FaTrash size={11} />
                                                                                             </button>
                                                                                         </div>
                                                                                     </td>
@@ -2861,35 +3036,33 @@ const DepartmentManager = () => {
 
                                             {/* Single Professional Electives / Vertical Table */}
                                             {sortedVerticals.length > 0 && (
-                                                <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', background: 'var(--bg-section)' }}>
+                                                <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
                                                     <h4 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
                                                         Professional Elective Courses
                                                     </h4>
-                                                    <div style={{ overflowX: 'auto' }}>
-                                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ width: '100%' }}>
+                                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
                                                             <thead style={{ background: 'transparent' }}>
                                                                 <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>S.No.</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '30%' }}>Course Title</th>
-                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center', width: '12%' }}>Periods per Week</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Credit</th>
-                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>Action</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
+                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Contact Periods</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
+                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Action</th>
                                                                 </tr>
                                                                 <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 {(() => {
-                                                                    let globalIndex = 0;
                                                                     return sortedVerticals.map(vertNum => {
                                                                         const subjectsForVert = verticalsGrouped[vertNum];
                                                                         const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
@@ -2898,35 +3071,33 @@ const DepartmentManager = () => {
                                                                         return (
                                                                             <React.Fragment key={`vert-${vertNum}`}>
                                                                                 <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                                                                    <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.9rem' }}>
+                                                                                    <td colSpan="11" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.9rem' }}>
                                                                                         Vertical {romanNum}: {verticalName}
                                                                                     </td>
                                                                                 </tr>
                                                                                 {subjectsForVert.map((subj, subjIdx) => {
-                                                                                    globalIndex++;
                                                                                     return (
                                                                                         <tr key={subjIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{globalIndex}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: '500', fontFamily: 'monospace' }}>{subj.code}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center' }}>
-                                                                                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                                                                                    <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontSize: '0.75rem' }} title="Manage Syllabus">
-                                                                                                        Next <FaBook />
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
+                                                                                                <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
+                                                                                                    <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.3rem 0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }} title="Manage Syllabus">
+                                                                                                        Syllabus <FaBook size={10} />
                                                                                                     </button>
-                                                                                                    <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
-                                                                                                        <FaEdit />
+                                                                                                    <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.3rem 0.45rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
+                                                                                                        <FaEdit size={11} />
                                                                                                     </button>
-                                                                                                    <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
-                                                                                                        <FaTrash />
+                                                                                                    <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
+                                                                                                        <FaTrash size={11} />
                                                                                                     </button>
                                                                                                 </div>
                                                                                             </td>
@@ -2945,76 +3116,72 @@ const DepartmentManager = () => {
 
                                             {/* Open Elective Courses Table */}
                                             {subjectsWithIndex.some(s => s.isOpenElective) && (
-                                                <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', background: 'var(--bg-section)' }}>
+                                                <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
                                                     <h4 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
                                                         Open Elective Courses
                                                     </h4>
-                                                    <div style={{ overflowX: 'auto' }}>
-                                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ width: '100%' }}>
+                                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
                                                             <thead style={{ background: 'transparent' }}>
                                                                 <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>S.No.</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '12%' }}>Course Code</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '44%' }}>Course Title</th>
-                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center', width: '12%' }}>Periods per Week</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Total Contact Periods</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
-                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>Action</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '45%' }}>Course Title</th>
+                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Contact Periods</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>Credit</th>
+                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '12%' }}>Marks</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Action</th>
                                                                 </tr>
                                                                 <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 {(() => {
                                                                     const oecsGrouped = subjectsWithIndex.filter(s => s.isOpenElective).reduce((acc, subj) => {
-                                                                        const dept = subj.offeringDept || 'Other Departments';
+                                                                        const dept = (subj.offeringDept && subj.offeringDept !== 'Other Departments') ? subj.offeringDept : (deptData?.name || selectedDeptObj?.name || 'Biomedical Engineering');
                                                                         if (!acc[dept]) acc[dept] = [];
                                                                         acc[dept].push(subj);
                                                                         return acc;
                                                                     }, {});
                                                                     const sortedOecDepts = Object.keys(oecsGrouped).sort();
-                                                                    let oecGlobalIndex = 0;
                                                                     return sortedOecDepts.map(deptName => {
                                                                         const deptSubjects = oecsGrouped[deptName];
                                                                         return (
                                                                             <React.Fragment key={`oec-dept-${deptName}`}>
                                                                                 <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                                                                    <td colSpan={12} style={{ border: '1px solid var(--glass-border)', padding: '0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
+                                                                                    <td colSpan={11} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
                                                                                         {deptName}
                                                                                     </td>
                                                                                 </tr>
                                                                                 {deptSubjects.map((subj, idx) => {
-                                                                                    oecGlobalIndex++;
                                                                                     return (
                                                                                         <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{oecGlobalIndex}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: '500', fontFamily: 'monospace' }}>{subj.code}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center' }}>
-                                                                                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                                                                                                    <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontSize: '0.75rem' }} title="Manage Syllabus">
-                                                                                                        Next <FaBook />
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
+                                                                                                <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
+                                                                                                    <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.3rem 0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }} title="Manage Syllabus">
+                                                                                                        Syllabus <FaBook size={10} />
                                                                                                     </button>
-                                                                                                    <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
-                                                                                                        <FaEdit />
+                                                                                                    <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.3rem 0.45rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
+                                                                                                        <FaEdit size={11} />
                                                                                                     </button>
-                                                                                                    <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
-                                                                                                        <FaTrash />
+                                                                                                    <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
+                                                                                                        <FaTrash size={11} />
                                                                                                     </button>
                                                                                                 </div>
                                                                                             </td>
@@ -4086,6 +4253,625 @@ const DepartmentManager = () => {
                     </div>
                 );
             })()}
+
+            {/* Word Document Auto-Scanner Modal */}
+            {isWordScanModalOpen && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(8px)',
+                    zIndex: 10000,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '1.5rem'
+                }}>
+                    <div style={{
+                        background: 'var(--bg-card)',
+                        border: '1px solid var(--glass-border)',
+                        borderRadius: '16px',
+                        width: '100%',
+                        maxWidth: '900px',
+                        maxHeight: '90vh',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    }}>
+                        {/* Modal Header */}
+                        <div style={{
+                            padding: '1.25rem 1.5rem',
+                            borderBottom: '1px solid var(--glass-border)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            background: 'rgba(255,255,255,0.02)'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '8px',
+                                    background: 'linear-gradient(135deg, rgba(37,99,235,0.2), rgba(5,150,105,0.2))',
+                                    color: '#3b82f6',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '4px'
+                                }}>
+                                    <FaFileWord size={16} color="#3b82f6" />
+                                    <FaFileExcel size={16} color="#10b981" />
+                                </div>
+                                <div>
+                                    <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-main)', fontWeight: '700' }}>
+                                        Auto-Scan Syllabus (Word .docx / Excel .xlsx, .csv)
+                                    </h3>
+                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                        Target Department: <strong style={{ color: 'var(--primary)' }}>{selectedDept.toUpperCase()}</strong>
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setIsWordScanModalOpen(false);
+                                    setScannedWordData([]);
+                                    setWordScanError(null);
+                                }}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: 'var(--text-muted)',
+                                    cursor: 'pointer',
+                                    padding: '0.5rem',
+                                    borderRadius: '6px'
+                                }}
+                            >
+                                <FaTimes size={18} />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1 }}>
+                            {/* Drag & Drop Area */}
+                            {scannedWordData.length === 0 && (
+                                <div>
+                                    <div
+                                        onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+                                        onDragLeave={() => setIsDragOver(false)}
+                                        onDrop={e => {
+                                            e.preventDefault();
+                                            setIsDragOver(false);
+                                            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                                                handleSyllabusFileUpload(e.dataTransfer.files[0]);
+                                            }
+                                        }}
+                                        style={{
+                                            border: `2px dashed ${isDragOver ? 'var(--primary)' : 'rgba(255, 255, 255, 0.2)'}`,
+                                            borderRadius: '12px',
+                                            padding: '2.5rem 1.5rem',
+                                            textAlign: 'center',
+                                            background: isDragOver ? 'rgba(37, 99, 235, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                                            transition: 'all 0.2s ease',
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={() => document.getElementById('syllabusFileInput')?.click()}
+                                    >
+                                        <input
+                                            id="syllabusFileInput"
+                                            type="file"
+                                            accept=".docx,.doc,.xlsx,.xls,.csv"
+                                            style={{ display: 'none' }}
+                                            onChange={e => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    handleSyllabusFileUpload(e.target.files[0]);
+                                                }
+                                            }}
+                                        />
+                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                            <FaFileWord size={40} style={{ color: '#3b82f6' }} />
+                                            <FaFileExcel size={40} style={{ color: '#10b981' }} />
+                                        </div>
+                                        <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.1rem' }}>
+                                            Drag & Drop your Syllabus Word or Excel file here
+                                        </h4>
+                                        <p style={{ margin: '0 0 1rem 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                            Supports <strong>.docx, .doc</strong> (Word Syllabi) and <strong>.xlsx, .xls, .csv</strong> (Excel Spreadsheets)
+                                        </p>
+                                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary"
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    document.getElementById('syllabusFileInput')?.click();
+                                                }}
+                                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+                                            >
+                                                <FaUpload /> Choose Word / Excel File
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Feature Highlights */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
+                                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                            <h5 style={{ margin: '0 0 0.25rem 0', color: '#10b981', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                                <FaFileExcel size={14} /> Excel Multi-Sheet & Master Sheets
+                                            </h5>
+                                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Auto-reads sheets by Semester (Sem 1-8), Verticals, or single consolidated table with auto-aligned column mapping.</p>
+                                        </div>
+                                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                            <h5 style={{ margin: '0 0 0.25rem 0', color: '#3b82f6', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                                <FaFileWord size={14} /> Word Document Syllabus
+                                            </h5>
+                                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Auto-extracts Course Codes, Titles, L-T-P-C, CIA (0-100), ESE (0-100), Unit topics, COs, and References.</p>
+                                        </div>
+                                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.85rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                            <h5 style={{ margin: '0 0 0.25rem 0', color: 'var(--secondary)', fontSize: '0.9rem' }}>Instant Live Preview & Edit</h5>
+                                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Review and refine all detected subjects and semesters before syncing to the live database with 1 click.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Scanning Progress */}
+                            {isScanningWord && (
+                                <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+                                    <FaSpinner size={36} className="fa-spin" style={{ color: 'var(--primary)', marginBottom: '1rem' }} />
+                                    <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>Scanning & Structuring Syllabus Data...</h4>
+                                    <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                        Extracting curriculum tables, semester breakdowns, CIA/ESE marks (0-100), unit topics, and outcomes...
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Error Alert */}
+                            {wordScanError && (
+                                <div style={{
+                                    marginTop: '1rem',
+                                    padding: '1rem',
+                                    borderRadius: '8px',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    color: '#f87171',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    fontSize: '0.85rem'
+                                }}>
+                                    <FaExclamationTriangle size={18} />
+                                    <div>{wordScanError}</div>
+                                </div>
+                            )}
+
+                            {/* Scanned Results Preview */}
+                            {scannedWordData.length > 0 && (
+                                <div>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        marginBottom: '1rem',
+                                        flexWrap: 'wrap',
+                                        gap: '0.75rem'
+                                    }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                            <span style={{
+                                                padding: '0.3rem 0.6rem',
+                                                background: 'rgba(16, 185, 129, 0.15)',
+                                                color: '#10b981',
+                                                borderRadius: '4px',
+                                                fontSize: '0.8rem',
+                                                fontWeight: '600',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.35rem'
+                                            }}>
+                                                <FaCheckCircle /> {scannedWordData.length} Subjects Detected
+                                            </span>
+                                            <span style={{
+                                                padding: '0.3rem 0.6rem',
+                                                background: 'rgba(59, 130, 246, 0.15)',
+                                                color: '#60a5fa',
+                                                borderRadius: '4px',
+                                                fontSize: '0.8rem',
+                                                fontWeight: '600'
+                                            }}>
+                                                {new Set(scannedWordData.map(s => s.semester || 1)).size} Semesters
+                                            </span>
+                                        </div>
+
+                                        {/* Import Mode Selector */}
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: 'var(--text-main)' }}>
+                                                <input
+                                                    type="radio"
+                                                    name="importMode"
+                                                    value="append"
+                                                    checked={importMode === 'append'}
+                                                    onChange={() => setImportMode('append')}
+                                                />
+                                                Merge / Append to Existing
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: '#f87171' }}>
+                                                <input
+                                                    type="radio"
+                                                    name="importMode"
+                                                    value="replace"
+                                                    checked={importMode === 'replace'}
+                                                    onChange={() => setImportMode('replace')}
+                                                />
+                                                Replace Entire Curriculum
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Preview Table */}
+                                    <div style={{
+                                        maxHeight: '400px',
+                                        overflowY: 'auto',
+                                        border: '1px solid var(--glass-border)',
+                                        borderRadius: '8px',
+                                        marginBottom: '1rem'
+                                    }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'left' }}>
+                                            <thead>
+                                                <tr style={{ background: 'rgba(255,255,255,0.06)', position: 'sticky', top: 0, zIndex: 2 }}>
+                                                    <th style={{ padding: '0.5rem 0.6rem', borderBottom: '1px solid var(--glass-border)', width: '110px' }}>Session / Sem</th>
+                                                    <th style={{ padding: '0.5rem 0.6rem', borderBottom: '1px solid var(--glass-border)', width: '95px' }}>Code</th>
+                                                    <th style={{ padding: '0.5rem 0.6rem', borderBottom: '1px solid var(--glass-border)' }}>Course Title</th>
+                                                    <th style={{ padding: '0.5rem 0.6rem', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', width: '120px' }}>Course Category</th>
+                                                    <th style={{ padding: '0.5rem 0.6rem', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', width: '70px' }}>Type</th>
+                                                    <th style={{ padding: '0.5rem 0.4rem', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', width: '115px' }}>L - T - P</th>
+                                                    <th style={{ padding: '0.5rem 0.4rem', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', width: '45px' }}>Cred</th>
+                                                    <th style={{ padding: '0.5rem 0.4rem', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', width: '50px' }}>CIA</th>
+                                                    <th style={{ padding: '0.5rem 0.4rem', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', width: '50px' }}>ESE</th>
+                                                    <th style={{ padding: '0.5rem 0.4rem', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', width: '45px' }}>Total</th>
+                                                    <th style={{ padding: '0.5rem 0.4rem', borderBottom: '1px solid var(--glass-border)', textAlign: 'center', width: '35px' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {scannedWordData.map((subj, idx) => (
+                                                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
+                                                        <td style={{ padding: '0.35rem 0.5rem' }}>
+                                                            <select
+                                                                value={subj.vertical ? `V-${subj.vertical}` : subj.isOpenElective ? 'OEC' : `Sem-${subj.semester || 1}`}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    setScannedWordData(prev => {
+                                                                        const updated = [...prev];
+                                                                        if (val === 'OEC') {
+                                                                            updated[idx] = { ...updated[idx], isOpenElective: true, vertical: null, verticalName: '', semester: null, category: 'OPEN ELECTIVE', categoryType: 'OEC' };
+                                                                        } else if (val.startsWith('V-')) {
+                                                                            const vertNum = Number(val.replace('V-', ''));
+                                                                            updated[idx] = { ...updated[idx], vertical: vertNum, verticalName: `Vertical ${vertNum}`, isOpenElective: false, semester: null, category: 'PROFESSIONAL ELECTIVE', categoryType: 'PEC' };
+                                                                        } else if (val.startsWith('Sem-')) {
+                                                                            const semNum = Number(val.replace('Sem-', ''));
+                                                                            updated[idx] = { ...updated[idx], semester: semNum, vertical: null, verticalName: '', isOpenElective: false };
+                                                                        }
+                                                                        return updated;
+                                                                    });
+                                                                }}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    padding: '0.25rem 0.35rem',
+                                                                    borderRadius: '4px',
+                                                                    background: 'var(--bg-main)',
+                                                                    border: '1px solid var(--glass-border)',
+                                                                    color: subj.vertical ? 'var(--secondary)' : subj.isOpenElective ? '#8b5cf6' : '#60a5fa',
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: '600',
+                                                                    cursor: 'pointer',
+                                                                    outline: 'none'
+                                                                }}
+                                                            >
+                                                                {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
+                                                                    <option key={`sem-${s}`} value={`Sem-${s}`}>Semester {s}</option>
+                                                                ))}
+                                                                {[1, 2, 3, 4, 5, 6, 7, 8].map(v => (
+                                                                    <option key={`v-${v}`} value={`V-${v}`}>Vertical {v}</option>
+                                                                ))}
+                                                                <option value="OEC">Open Elective</option>
+                                                            </select>
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                                                            <input
+                                                                type="text"
+                                                                value={subj.code || ''}
+                                                                onChange={e => {
+                                                                    const val = e.target.value.toUpperCase();
+                                                                    setScannedWordData(prev => {
+                                                                        const updated = [...prev];
+                                                                        updated[idx] = { ...updated[idx], code: val };
+                                                                        return updated;
+                                                                    });
+                                                                }}
+                                                                style={{ width: '100%', padding: '0.2rem 0.35rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.78rem' }}
+                                                            />
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.5rem' }}>
+                                                            <input
+                                                                type="text"
+                                                                value={subj.title || ''}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    setScannedWordData(prev => {
+                                                                        const updated = [...prev];
+                                                                        updated[idx] = { ...updated[idx], title: val };
+                                                                        return updated;
+                                                                    });
+                                                                }}
+                                                                style={{ width: '100%', minWidth: '160px', padding: '0.2rem 0.35rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'var(--text-main)', fontSize: '0.78rem' }}
+                                                            />
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.5rem', textAlign: 'center' }}>
+                                                            <select
+                                                                value={subj.category || 'THEORY'}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    setScannedWordData(prev => {
+                                                                        const updated = [...prev];
+                                                                        let cia = updated[idx].cia;
+                                                                        let ese = updated[idx].ese;
+                                                                        if (val === 'PRACTICAL' && (!cia || cia === 40)) {
+                                                                            cia = 60; ese = 40;
+                                                                        } else if (val === 'MANDATORY COURSES') {
+                                                                            cia = 100; ese = 0;
+                                                                        } else if (val === 'EMPLOYABILITY ENHANCEMENT COURSE') {
+                                                                            cia = 50; ese = 50;
+                                                                        } else if (val === 'THEORY' && (!cia || cia === 60)) {
+                                                                            cia = 40; ese = 60;
+                                                                        }
+                                                                        updated[idx] = {
+                                                                            ...updated[idx],
+                                                                            category: val,
+                                                                            cia,
+                                                                            ese,
+                                                                            total: cia + ese
+                                                                        };
+                                                                        return updated;
+                                                                    });
+                                                                }}
+                                                                style={{ width: '100%', padding: '0.2rem 0.3rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', borderRadius: '4px', color: 'var(--text-main)', fontSize: '0.72rem' }}
+                                                            >
+                                                                <option value="THEORY">THEORY</option>
+                                                                <option value="PRACTICAL">PRACTICAL</option>
+                                                                <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
+                                                                <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT</option>
+                                                                <option value="MANDATORY COURSES">MANDATORY COURSE</option>
+                                                                <option value="Language Elective – I">Language Elective – I</option>
+                                                                <option value="Language Elective - II">Language Elective - II</option>
+                                                                <option value="PROFESSIONAL ELECTIVE">PROFESSIONAL ELECTIVE</option>
+                                                                <option value="OPEN ELECTIVE">OPEN ELECTIVE</option>
+                                                            </select>
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.5rem', textAlign: 'center' }}>
+                                                            <select
+                                                                value={subj.categoryType || 'PCC'}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    setScannedWordData(prev => {
+                                                                        const updated = [...prev];
+                                                                        updated[idx] = { ...updated[idx], categoryType: val };
+                                                                        return updated;
+                                                                    });
+                                                                }}
+                                                                style={{ padding: '0.2rem 0.3rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', borderRadius: '4px', color: 'var(--text-main)', fontSize: '0.72rem' }}
+                                                            >
+                                                                <option value="HUM">HUM</option>
+                                                                <option value="BSC">BSC</option>
+                                                                <option value="ESC">ESC</option>
+                                                                <option value="PCC">PCC</option>
+                                                                <option value="PEC">PEC</option>
+                                                                <option value="OEC">OEC</option>
+                                                                <option value="EEC">EEC</option>
+                                                                <option value="MC">MC</option>
+                                                            </select>
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.4rem', textAlign: 'center' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={subj.l ?? 3}
+                                                                    onChange={e => {
+                                                                        const val = Math.max(0, Number(e.target.value));
+                                                                        setScannedWordData(prev => {
+                                                                            const updated = [...prev];
+                                                                            const t = updated[idx].t || 0;
+                                                                            const p = updated[idx].p || 0;
+                                                                            updated[idx] = { ...updated[idx], l: val, contactPeriods: val + t + p };
+                                                                            return updated;
+                                                                        });
+                                                                    }}
+                                                                    style={{ width: '28px', textAlign: 'center', padding: '0.15rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', color: 'var(--text-muted)', fontSize: '0.75rem' }}
+                                                                    title="Lecture (L)"
+                                                                />
+                                                                <span style={{ color: 'var(--text-muted)' }}>-</span>
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={subj.t ?? 0}
+                                                                    onChange={e => {
+                                                                        const val = Math.max(0, Number(e.target.value));
+                                                                        setScannedWordData(prev => {
+                                                                            const updated = [...prev];
+                                                                            const l = updated[idx].l || 0;
+                                                                            const p = updated[idx].p || 0;
+                                                                            updated[idx] = { ...updated[idx], t: val, contactPeriods: l + val + p };
+                                                                            return updated;
+                                                                        });
+                                                                    }}
+                                                                    style={{ width: '28px', textAlign: 'center', padding: '0.15rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', color: 'var(--text-muted)', fontSize: '0.75rem' }}
+                                                                    title="Tutorial (T)"
+                                                                />
+                                                                <span style={{ color: 'var(--text-muted)' }}>-</span>
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={subj.p ?? 0}
+                                                                    onChange={e => {
+                                                                        const val = Math.max(0, Number(e.target.value));
+                                                                        setScannedWordData(prev => {
+                                                                            const updated = [...prev];
+                                                                            const l = updated[idx].l || 0;
+                                                                            const t = updated[idx].t || 0;
+                                                                            updated[idx] = { ...updated[idx], p: val, contactPeriods: l + t + val };
+                                                                            return updated;
+                                                                        });
+                                                                    }}
+                                                                    style={{ width: '28px', textAlign: 'center', padding: '0.15rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', color: 'var(--text-muted)', fontSize: '0.75rem' }}
+                                                                    title="Practical (P)"
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.4rem', textAlign: 'center' }}>
+                                                            <input
+                                                                type="number"
+                                                                value={subj.credits ?? 3}
+                                                                onChange={e => {
+                                                                    const val = Number(e.target.value);
+                                                                    setScannedWordData(prev => {
+                                                                        const updated = [...prev];
+                                                                        updated[idx] = { ...updated[idx], credits: val };
+                                                                        return updated;
+                                                                    });
+                                                                }}
+                                                                style={{ width: '38px', textAlign: 'center', padding: '0.15rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', color: 'white', fontWeight: 'bold', fontSize: '0.75rem' }}
+                                                            />
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.4rem', textAlign: 'center' }}>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                max="100"
+                                                                value={subj.cia ?? 40}
+                                                                onChange={e => {
+                                                                    const val = Math.min(100, Math.max(0, Number(e.target.value)));
+                                                                    setScannedWordData(prev => {
+                                                                        const updated = [...prev];
+                                                                        const ese = updated[idx].ese || 0;
+                                                                        updated[idx] = { ...updated[idx], cia: val, total: val + ese };
+                                                                        return updated;
+                                                                    });
+                                                                }}
+                                                                style={{ width: '42px', textAlign: 'center', padding: '0.15rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', color: 'white', fontSize: '0.75rem' }}
+                                                            />
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.4rem', textAlign: 'center' }}>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                max="100"
+                                                                value={subj.ese ?? 60}
+                                                                onChange={e => {
+                                                                    const val = Math.min(100, Math.max(0, Number(e.target.value)));
+                                                                    setScannedWordData(prev => {
+                                                                        const updated = [...prev];
+                                                                        const cia = updated[idx].cia || 0;
+                                                                        updated[idx] = { ...updated[idx], ese: val, total: cia + val };
+                                                                        return updated;
+                                                                    });
+                                                                }}
+                                                                style={{ width: '42px', textAlign: 'center', padding: '0.15rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', color: 'white', fontSize: '0.75rem' }}
+                                                            />
+                                                        </td>
+                                                        <td style={{ padding: '0.35rem 0.4rem', textAlign: 'center', fontWeight: 'bold' }}>{subj.total}</td>
+                                                        <td style={{ padding: '0.35rem 0.4rem', textAlign: 'center' }}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setScannedWordData(prev => prev.filter((_, i) => i !== idx));
+                                                                }}
+                                                                style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '0.8rem', padding: '0.15rem 0.3rem' }}
+                                                                title="Delete this row"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div style={{
+                            padding: '1rem 1.5rem',
+                            borderTop: '1px solid var(--glass-border)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            background: 'rgba(255,255,255,0.02)'
+                        }}>
+                            {scannedWordData.length > 0 ? (
+                                <button
+                                    onClick={() => {
+                                        setScannedWordData([]);
+                                        setWordScanError(null);
+                                    }}
+                                    className="btn"
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        background: 'var(--bg-main)',
+                                        border: '1px solid var(--glass-border)',
+                                        color: 'var(--text-muted)',
+                                        fontSize: '0.85rem'
+                                    }}
+                                >
+                                    Scan Another File
+                                </button>
+                            ) : (
+                                <div></div>
+                            )}
+
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <button
+                                    onClick={() => {
+                                        setIsWordScanModalOpen(false);
+                                        setScannedWordData([]);
+                                        setWordScanError(null);
+                                    }}
+                                    className="btn"
+                                    style={{
+                                        padding: '0.6rem 1.2rem',
+                                        background: 'var(--bg-main)',
+                                        border: '1px solid var(--glass-border)',
+                                        color: 'var(--text-main)',
+                                        fontSize: '0.85rem'
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                {scannedWordData.length > 0 && (
+                                    <button
+                                        onClick={handleApplyScannedSubjects}
+                                        className="btn btn-primary"
+                                        style={{
+                                            padding: '0.6rem 1.4rem',
+                                            fontSize: '0.85rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                                            borderColor: '#10b981'
+                                        }}
+                                    >
+                                        <FaCheckCircle /> Import {scannedWordData.length} Subjects to Curriculum
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

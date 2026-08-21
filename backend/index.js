@@ -243,6 +243,7 @@ app.get('/api/users', verifyToken, async (req, res) => {
         const users = await User.find().select('-password').sort({ createdAt: -1 });
         res.json(users);
     } catch (err) {
+        console.error("Fetch users error:", err);
         res.status(500).json({ error: "Failed to fetch users" });
     }
 });
@@ -257,7 +258,7 @@ app.get('/api/users/me', verifyToken, async (req, res) => {
     }
 });
 
-app.post('/api/users', async (req, res) => {
+app.post('/api/users', verifyToken, async (req, res) => {
     try {
         const { username, password, role } = req.body;
         if (!username || !password) return res.status(400).json({ error: "Username and password required" });
@@ -265,9 +266,11 @@ app.post('/api/users', async (req, res) => {
         const existing = await User.findOne({ username });
         if (existing) return res.status(400).json({ error: "Username already exists" });
 
-        const newUser = new User({ username, password: hashPassword(password), role: role || 'staff' });
+        const newUser = new User({ username, password: hashPassword(password), role: role || 'admin' });
         await newUser.save();
-        res.json({ success: true, data: newUser });
+        const userResponse = newUser.toObject();
+        delete userResponse.password;
+        res.json({ success: true, data: userResponse });
     } catch (err) {
         console.error("User creation error:", err);
         res.status(500).json({ error: "Failed to create user" });
@@ -278,17 +281,18 @@ app.delete('/api/users/:id', verifyToken, async (req, res) => {
     try {
         // Prevent deleting the last admin
         const [count, userToDelete] = await Promise.all([
-            User.countDocuments({ role: 'admin' }),
+            User.countDocuments({ role: { $in: ['admin', 'superadmin'] } }),
             User.findById(req.params.id)
         ]);
 
-        if (userToDelete && userToDelete.role === 'admin' && count <= 1) {
+        if (userToDelete && ['admin', 'superadmin'].includes(userToDelete.role) && count <= 1) {
             return res.status(400).json({ error: "Cannot delete the last admin user" });
         }
 
         await User.findByIdAndDelete(req.params.id);
         res.json({ success: true });
     } catch (err) {
+        console.error("Delete user error:", err);
         res.status(500).json({ error: "Failed to delete user" });
     }
 });
@@ -296,11 +300,17 @@ app.delete('/api/users/:id', verifyToken, async (req, res) => {
 app.put('/api/users/:id', verifyToken, async (req, res) => {
     try {
         const { username, password, role } = req.body;
-        const updateData = { username, role };
-        if (password) updateData.password = hashPassword(password);
+        const updateData = {};
+        if (username) updateData.username = username;
+        if (role) updateData.role = role;
+        if (password && password.trim() !== '') {
+            updateData.password = hashPassword(password);
+        }
         const user = await User.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true }).select('-password');
+        if (!user) return res.status(404).json({ error: "User not found" });
         res.json({ success: true, data: user });
     } catch (err) {
+        console.error("Update user error:", err);
         res.status(500).json({ error: "Failed to update user" });
     }
 });
@@ -308,10 +318,16 @@ app.put('/api/users/:id', verifyToken, async (req, res) => {
 app.patch('/api/users/:id', verifyToken, async (req, res) => {
     try {
         const updateData = { ...req.body };
-        if (updateData.password) updateData.password = hashPassword(updateData.password);
+        if (updateData.password && updateData.password.trim() !== '') {
+            updateData.password = hashPassword(updateData.password);
+        } else {
+            delete updateData.password;
+        }
         const user = await User.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true }).select('-password');
+        if (!user) return res.status(404).json({ error: "User not found" });
         res.json({ success: true, data: user });
     } catch (err) {
+        console.error("Patch user error:", err);
         res.status(500).json({ error: "Failed to update user" });
     }
 });
@@ -3161,29 +3177,6 @@ if (require.main === module) {
         try {
             const data = await LibraryData.findOneAndUpdate({}, { $set: req.body }, { new: true, upsert: true });
             res.json(data);
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    });
-
-    // --- User Routes ---
-    app.put('/api/users/:id', async (req, res) => {
-        if (!isConnected) return res.status(503).json({ error: 'Database not connected' });
-        try {
-            const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-            if (!user) return res.status(404).json({ error: 'User not found' });
-            res.json(user);
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    });
-
-    app.patch('/api/users/:id', async (req, res) => {
-        if (!isConnected) return res.status(503).json({ error: 'Database not connected' });
-        try {
-            const user = await User.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
-            if (!user) return res.status(404).json({ error: 'User not found' });
-            res.json(user);
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
