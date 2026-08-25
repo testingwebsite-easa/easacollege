@@ -110,7 +110,7 @@ const Footer = ({ onOpenAdmission }) => {
                             <FaEnvelope style={{ color: 'var(--secondary)' }} /> info@ecetonline.com
                         </div>
                     </div>
-
+                    
                     {/* COLUMN 2: QUICK LINKS */}
                     <div>
                         <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', marginBottom: '1.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
