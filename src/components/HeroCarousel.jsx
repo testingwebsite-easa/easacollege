@@ -165,21 +165,27 @@ export const HeroCarousel = ({ onApplyClick }) => {
                 }
 
                 .hero-title {
-                    font-size: clamp(1.4rem, 3vw, 2.5rem);
-                    font-weight: 800;
-                    margin-bottom: 0.6rem;
-                    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 4px 24px rgba(0,0,0,0.7);
-                    line-height: 1.25;
+                    font-size: clamp(1.6rem, 3.5vw, 3rem);
+                    font-weight: 900;
+                    margin-bottom: 0.8rem;
+                    line-height: 1.2;
                     letter-spacing: -0.02em;
+                    background: linear-gradient(135deg, #ffffff 30%, #fef08a 70%, #FCCA26 100%);
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 8px 20px rgba(0,0,0,0.7)) drop-shadow(0 0 25px rgba(230, 182, 39, 0.3));
+                    transform: perspective(600px) translateZ(20px);
                 }
 
                 .hero-subtitle {
-                    font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+                    font-size: clamp(0.95rem, 1.6vw, 1.2rem);
                     margin-bottom: 0;
                     opacity: 0.95;
                     max-width: 650px;
-                    line-height: 1.5;
-                    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+                    line-height: 1.6;
+                    color: #f1f5f9;
+                    text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 4px 20px rgba(0,0,0,0.6);
                 }
 
                 .hero-btn-group {

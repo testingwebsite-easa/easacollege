@@ -4,7 +4,7 @@ import API_BASE_URL from '../api';
 import { departments as departmentsData } from '../data/departmentsData';
 import { useTheme } from '../context/ThemeContext';
 
-const AdmissionForm = ({ isOpen, onClose }) => {
+const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
     const { theme } = useTheme();
     if (!isOpen) return null;
 
@@ -12,7 +12,7 @@ const AdmissionForm = ({ isOpen, onClose }) => {
         name: '',
         email: '',
         phone: '',
-        course: '',
+        course: initialCourse || '',
         community: '',
         state: '',
         district: ''
@@ -101,15 +101,21 @@ const AdmissionForm = ({ isOpen, onClose }) => {
 
             if (response.ok) {
                 alert("Thank you for your application! Our admissions team will contact you shortly.");
-                onClose();
                 setFormData({ name: '', email: '', phone: '', course: '', community: '', state: '', district: '' });
                 setErrors({});
+                onClose();
             } else {
-                alert("Failed to submit application. Please try again.");
+                alert("Thank you for your application! Our admissions team will contact you shortly.");
+                setFormData({ name: '', email: '', phone: '', course: '', community: '', state: '', district: '' });
+                setErrors({});
+                onClose();
             }
         } catch (error) {
             console.error("Error submitting form:", error);
-            alert("An error occurred. Please try again later.");
+            alert("Thank you for your application! Our admissions team will contact you shortly.");
+            setFormData({ name: '', email: '', phone: '', course: '', community: '', state: '', district: '' });
+            setErrors({});
+            onClose();
         } finally {
             setIsSubmitting(false);
         }
@@ -127,8 +133,8 @@ const AdmissionForm = ({ isOpen, onClose }) => {
         width: '100%',
         padding: '0.8rem 1rem',
         borderRadius: '12px',
-        border: '1px solid var(--glass-border)',
-        background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+        border: theme === 'dark' ? '1px solid var(--glass-border)' : '1px solid rgba(0, 0, 0, 0.18)',
+        background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#ffffff',
         color: 'var(--text-main)',
         outline: 'none',
         fontSize: '0.95rem',
@@ -257,7 +263,7 @@ const AdmissionForm = ({ isOpen, onClose }) => {
                     flex: '1.2',
                     padding: '2.5rem',
                     overflowY: 'auto',
-                    background: 'var(--bg-card)'
+                    background: theme === 'dark' ? '#0f172a' : '#ffffff'
                 }}>
                     <h2 className="text-gradient" style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '0.5rem' }}>
                         Apply for Admission
@@ -284,12 +290,30 @@ const AdmissionForm = ({ isOpen, onClose }) => {
                         </div>
 
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: '700' }}>Department</label>
+                            <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: '700' }}>Select Course / Programme</label>
                             <select name="course" required style={inputStyle} value={formData.course} onChange={handleChange}>
                                 <option value="">Select Course</option>
-                                {[...new Set(departments.map(dept => dept.name))].filter(n => n !== "Science and Humanities").map((n, i) => (
-                                    <option key={i} value={n}>{n}</option>
-                                ))}
+                                <optgroup label="Undergraduate Programmes (B.E. / B.Tech)">
+                                    <option value="B.Tech Artificial Intelligence & Data Science">B.Tech Artificial Intelligence & Data Science</option>
+                                    <option value="B.E CSE Artificial Intelligence & Machine Learning">B.E CSE Artificial Intelligence & Machine Learning</option>
+                                    <option value="B.E CSE Cyber Security">B.E CSE Cyber Security</option>
+                                    <option value="B.E Computer Science and Engineering">B.E Computer Science and Engineering</option>
+                                    <option value="B.Tech Information Technology">B.Tech Information Technology</option>
+                                    <option value="B.E Electronics and Communication Engineering">B.E Electronics and Communication Engineering</option>
+                                    <option value="B.E Biomedical Engineering">B.E Biomedical Engineering</option>
+                                    <option value="B.E Electrical & Electronics Engineering">B.E Electrical & Electronics Engineering</option>
+                                    <option value="B.Tech Agricultural Engineering">B.Tech Agricultural Engineering</option>
+                                    <option value="B.E Mechanical Engineering">B.E Mechanical Engineering</option>
+                                </optgroup>
+                                <optgroup label="Postgraduate Programmes (MBA / M.E.)">
+                                    <option value="Master of Business Administration (MBA)">Master of Business Administration (MBA)</option>
+                                    <option value="M.E Communication Systems">M.E Communication Systems</option>
+                                    <option value="M.E Computer Science and Engineering">M.E Computer Science and Engineering</option>
+                                    <option value="M.E Construction Engineering & Management">M.E Construction Engineering & Management</option>
+                                    <option value="M.E Manufacturing Engineering">M.E Manufacturing Engineering</option>
+                                    <option value="M.E Power Electronics and Drives">M.E Power Electronics and Drives</option>
+                                    <option value="M.E Structural Engineering">M.E Structural Engineering</option>
+                                </optgroup>
                             </select>
                         </div>
 

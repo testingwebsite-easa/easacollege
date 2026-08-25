@@ -5,9 +5,13 @@ import {
     FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaChevronRight,
     FaPaperPlane
 } from 'react-icons/fa';
+import { useTheme } from '../context/ThemeContext';
+import headerLogoDark from '../assets/College Logo with White Letter.webp';
+import headerLogoLight from '../assets/College Logo with Blue Letter.webp';
 
 const Footer = ({ onOpenAdmission }) => {
     const navigate = useNavigate();
+    const { theme } = useTheme();
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -78,18 +82,21 @@ const Footer = ({ onOpenAdmission }) => {
                     paddingBottom: '5rem'
                 }} className="footer-grid">
                     {/* COLUMN 1: LOGO & IDENTITY */}
-                    <div style={{ maxWidth: '350px' }}>
-                        <h2 style={{
-                            fontSize: '2rem',
-                            fontWeight: '900',
-                            marginBottom: '1.5rem',
-                            color: 'var(--text-main)',
-                            fontFamily: 'Outfit, sans-serif'
-                        }}>
-                            EASA <span style={{ color: 'var(--secondary)' }}>College</span>
-                        </h2>
-                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', marginBottom: '2rem', fontSize: '1rem' }}>
-                            Empowering future leaders through excellence in technical education, innovation, and holistic development. NH-47, Palakkad Main Road, Navakkarai, Coimbatore.
+                    <div style={{ maxWidth: '380px' }}>
+                        <Link to="/" style={{ display: 'inline-block', textDecoration: 'none', marginBottom: '1.5rem' }}>
+                            <img
+                                src={theme === 'light' ? headerLogoLight : headerLogoDark}
+                                alt="EASA College of Engineering and Technology"
+                                style={{
+                                    maxHeight: '85px',
+                                    width: 'auto',
+                                    objectFit: 'contain',
+                                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.25))'
+                                }}
+                            />
+                        </Link>
+                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', marginBottom: '2rem', fontSize: '0.95rem' }}>
+                            Empowering future leaders through excellence in technical education, innovation, and holistic development. Approved by AICTE, New Delhi & Affiliated to Anna University, Chennai.
                         </p>
 
                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
@@ -100,7 +107,7 @@ const Footer = ({ onOpenAdmission }) => {
                             <FaPhoneAlt style={{ color: 'var(--secondary)' }} /> +91 93426 28013
                         </div>
                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                            <FaEnvelope style={{ color: 'var(--secondary)' }} /> info@easacollege.com
+                            <FaEnvelope style={{ color: 'var(--secondary)' }} /> info@ecetonline.com
                         </div>
                     </div>
 

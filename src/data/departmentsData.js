@@ -706,43 +706,6 @@ export const departments = [
         labCount: "3+"
     },
 
-    //PG MBA
-    {
-        id: "master-of-business-administration",
-        name: "Master of Business Administration",
-        slug: "master-of-business-administration",
-        type: "PG",
-        heroImage: "https://i.pinimg.com/736x/f4/ba/1a/f4ba1a8ccd41caaaa6fe57fe1028a28c.jpg",
-        overview: "The MBA program aims to develop future business leaders with a strong foundation in management principles and practices.",
-        vision: "To be a premier management institution developing ethical global business leaders.",
-        mission: [
-            "To provide quality management education through experiential learning.",
-            "To foster entrepreneurial spirit and leadership qualities.",
-            "To connect with industry for practical exposure and placement."
-        ],
-        peo: [
-            "Graduates will be successful managers and entrepreneurs.",
-            "Graduates will demonstrate ethical leadership and social responsibility.",
-            "Graduates will adapt to the dynamic business environment."
-        ],
-        pso: [
-            "Ability to apply management concepts to solve business problems.",
-            "Ability to lead and manage specialized areas such as finance, marketing, and HR."
-        ],
-        milestones: [
-            { year: "2010", desc: "MBA Department Established" }
-        ],
-        hod: {
-            name: "Dr.S.Saira Banu",
-            image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/hod/mba.jpeg",
-            designation: "Associate Professor & Director - MBA",
-            message: "Greetings from Department of Management Studeies, Easa College of Engineering and Technology. The Department if dedicated to nuturing future business leaders, entrepreneurs and change makers through a strong blend of academic excellence, ethical values, leadership development and real worls readiness. With a learner-centric approach, the MBA Program focuses on building managerial competence, critical thinking, innovation and problem solving skills required in today's  dynamic global business environment. Thencurriculum is industry alligned and enriched through experimental learning, case studies, internships, live projects and industry interactions, ensuring that students are well-prepared to meet professional challenges with confidence and integrity. The Department promotes research, creativity and innovation while fostering an inclusive and supportive learning environment that encoyrages holistic growth and social responsibility. "
-        },
-        studentCount: "120+",
-        facultyCount: "15+",
-        labCount: "2+"
-    },
-
     
     //UG SCIENCE AND HUMANITIES
     {
@@ -780,6 +743,443 @@ export const departments = [
         studentCount: "300+",
         facultyCount: "20+",
         labCount: "4+"
+    },
+
+    // MBA - Master of Business Administration
+    {
+        id: "master-of-business-administration",
+        name: "Master of Business Administration",
+        slug: "master-of-business-administration",
+        type: "PG",
+        degree: "MBA",
+        heroImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
+        overview: "MBA is a flagship program of EASA College of Engineering and Technology to develop influential leaders. The department of Master of Business Administration equips students in their personal and professional front to assume corporate and entrepreneurial responsibilities. The curriculum of our MBA program and our competent faculty members, who have the right combination of Academic and Industrial experiences have prepared our students to global standards. Our MBA program enables the students to attain successful employment for key positions in Financial, Human Resources, Marketing, Operations and Logistics. The School is on a progressive path with strict adherence to Quality Standards. The program nurtures rising managers to attain the realm of success. We are well equipped with state-of-art infrastructure, qualified, friendly teaching staff, who help students realize and achieve their potential. Our program provides opportunities for the students to pursue overseas higher education or in relevant domain leading to Ph. D. EASA's MBA course facilitates the learners to become socially and ethically responsible leaders. The department has a well-stocked library with International journals and the latest computers to promote our students' research and development. Through this course, we develop young men and women who take up responsibility effectively as management leaders, executives in the industry, and senior administrators.",
+        vision: "To inspire and empower individuals to become global leaders, entrepreneurs and change-makers, creating value for society through ethical and innovative management practices.",
+        mission: [
+            "To foster a culture of academic excellence, intellectual and personal growth and practical training in the field of management studies.",
+            "To prepare individuals to become effective, ethical and socially responsible leaders, entrepreneurs and managers who can create value for society and drive economic growth.",
+            "To acquire knowledge and drive innovation through cutting-edge research and development in the field of Management Studies.",
+            "To bridge the gap between academia and industry by offering industry aligned programs, practical experience and hands-on training that prepare students to lead, innovate and thrive in an ever-evolving global landscape.",
+            "To prioritise diversity, equity and inclusion to create a welcoming and inclusive environment that produces socially responsible leaders."
+        ],
+        peo: [
+            "PEO1: To have a thorough understanding of the core aspects of the business.",
+            "PEO2: To provide the learners with the management tools to identify, analyze and create business opportunities as well as solve business problems.",
+            "PEO3: To prepare them to have a holistic approach towards management functions.",
+            "PEO4: To inspire and make them practice ethical standards in business."
+        ],
+        po: [
+            "PO1 Management Knowledge: Demonstrate the ability to apply knowledge of management theories and practices to solve real business situations.",
+            "PO2 Problem Analysis: Foster analytical and critical thinking abilities for data-based decision making.",
+            "PO3 Leadership Ability: Ability to develop Value based Leadership and cross cultural skills and application of theoretical studies into real life circumstances.",
+            "PO4 Ethical Business Aspect: Ability to understand, analyze and communicate global, economic, legal, and ethical aspects of business.",
+            "PO5 Entrepreneurial Ability: Emanate leadership, creativity, passion, skills and learning which helps them empowering business excellence in the industry and academia.",
+            "PO6 The Manager and Society: Grooming budding business professionals into true management leaders by imparting quality education, training them to challenge the modern era complications and think innovatively."
+        ],
+        pso: [
+            "PSO1: To apply the fundamental knowledge of management domains to optimally solve the complex business problems.",
+            "PSO2: To inculcate the ability in students to gain multidisciplinary knowledge through simulated problems, case analysis, projects and industrial training.",
+            "PSO3: To develop competent management professionals with strong ethical values with an understanding of societal and ecological issues relevant to professional managerial practice through life-long learning."
+        ],
+        documents: [
+            { title: "Vision & Mission Portal", url: "https://www.easacollege.com/best-mba-colleges-in-coimbatore-tamil-nadu#vision", type: "Web" },
+            { title: "PEO, PO, PSO (PDF)", url: "https://www.easacollege.com/assets/dept/mba/PEO,%20PO,%20PSO.pdf", type: "PDF" },
+            { title: "Course Outcomes (CO.pdf)", url: "https://www.easacollege.com/assets/dept/mba/CO.pdf", type: "PDF" }
+        ],
+        milestones: [
+            { year: "2009", desc: "MBA Department Inception & AICTE Approval" },
+            { year: "2015", desc: "State-of-the-Art Management Research & Case Study Lab Launched" },
+            { year: "2024", desc: "Autonomous Curriculum Introduced with Industry Specializations" }
+        ],
+        hod: {
+            name: "Dr. S. Saira Banu",
+            image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/hod/mba.jpeg",
+            designation: "Associate Professor & Director - MBA",
+            message: "Greetings from Department of Management Studies, EASA College of Engineering and Technology. The Department is dedicated to nurturing future business leaders, entrepreneurs and change-makers through a strong blend of academic excellence, ethical values, leadership development and real-world readiness. With a learner-centric approach, the MBA Program focuses on building managerial competence, critical thinking, innovation and problem-solving skills required in today's dynamic global business environment."
+        },
+        studentCount: "120+",
+        facultyCount: "15+",
+        labCount: "3+",
+        specializations: [
+            { title: "Financial Management & FinTech", desc: "Corporate valuation, algorithmic trading, risk analytics, derivatives & investment banking.", icon: "FaChartLine", tag: "High Demand" },
+            { title: "Human Resource Management", desc: "Strategic HR, talent acquisition, people analytics, industrial relations & organizational design.", icon: "FaUsers", tag: "Core Track" },
+            { title: "Marketing Management & Digital Growth", desc: "Brand management, AI-driven digital marketing, consumer psychology & growth hacking.", icon: "FaBullseye", tag: "Trending" },
+            { title: "Operations & Supply Chain", desc: "Lean manufacturing, global logistics, enterprise ERP, procurement & Total Quality Management.", icon: "FaBoxes", tag: "Industry 4.0" },
+            { title: "Business Analytics & Systems", desc: "Predictive modeling, data visualization, business intelligence (PowerBI/Tableau) & cloud strategy.", icon: "FaLaptopCode", tag: "Tech Edge" }
+        ],
+        programFeatures: [
+            { title: "Harvard & IIM Case Pedagogy", desc: "Experiential learning through real corporate dilemmas and strategic simulation games." },
+            { title: "CXO Executive Mentorship", desc: "Direct 1-on-1 mentorship with Fortune 500 business leaders, entrepreneurs, and alumni." },
+            { title: "Venture Incubation & Seed Funding", desc: "Incubate startups on campus with access to angel investor networks and patent support." },
+            { title: "Global Dual Certifications", desc: "Integrated industry certifications in SAP ERP, Six Sigma Green Belt, and Google Analytics." }
+        ],
+        careerPaths: [
+            "Management Consultant",
+            "Investment Banker & Equity Analyst",
+            "HR Business Partner (HRBP)",
+            "Brand & Digital Marketing Strategist",
+            "Supply Chain & Logistics Director",
+            "FinTech Solutions Architect",
+            "Corporate Strategy Executive"
+        ],
+        keyMetrics: [
+            { label: "Placement Success", value: "96%", desc: "Track record with top MNCs" },
+            { label: "Corporate Partners", value: "150+", desc: "Active recruiting companies" },
+            { label: "Highest CTC Package", value: "12 LPA", desc: "Top tier placement offer" },
+            { label: "Paid Internships", value: "100%", desc: "Hands-on corporate exposure" }
+        ],
+        courseOutcomes: [
+            {
+                code: "BA5101",
+                name: "Economic Analysis for Business",
+                semester: "Semester I",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C101.1", text: "Apply the concept of opportunity cost", kLevel: "K3" },
+                    { id: "C101.2", text: "Employ marginal analysis for decision making", kLevel: "K2" },
+                    { id: "C101.3", text: "Analyze operations of markets under varying competitive conditions", kLevel: "K4" },
+                    { id: "C101.4", text: "Analyze causes and consequences of unemployment, inflation and economic growth", kLevel: "K4" },
+                    { id: "C101.5", text: "Apply the concept of opportunity cost", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5102",
+                name: "Principles of Management",
+                semester: "Semester I",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C102.1", text: "Describe and discuss the elements of effective management", kLevel: "K2" },
+                    { id: "C102.2", text: "Discuss and apply the planning, organizing and control processes", kLevel: "K2" },
+                    { id: "C102.3", text: "Describe various theories related to the development of leadership skills, motivation techniques, teamwork and effective communication", kLevel: "K2" },
+                    { id: "C102.4", text: "Communicate effectively through both oral and written presentation", kLevel: "K2" },
+                    { id: "C102.5", text: "Integrate management principles into management practices", kLevel: "K3" }
+                ]
+            },
+            {
+                code: "BA4103",
+                name: "Accounting for Management",
+                semester: "Semester I",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C103.1", text: "Possess a managerial outlook at accounts", kLevel: "K2" },
+                    { id: "C103.2", text: "Preparation of financial statement analysis", kLevel: "K3" },
+                    { id: "C103.3", text: "Understand the management and cost accounting techniques", kLevel: "K2" },
+                    { id: "C103.4", text: "Apply the management and cost accounting techniques for decision making", kLevel: "K3" },
+                    { id: "C103.5", text: "Assess the accountancy standards of practices in India", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5104",
+                name: "Legal Aspects of Business",
+                semester: "Semester I",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C104.1", text: "Understand the fundamental legal principles in developing various contracts and commercial laws in the business world", kLevel: "K2" },
+                    { id: "C104.2", text: "Identify the common forms of business associations and elements of corporate governance", kLevel: "K2" },
+                    { id: "C104.3", text: "Develop insights regarding the laws related to industrial environment", kLevel: "K3" },
+                    { id: "C104.4", text: "Ability to understand the fundamentals of corporate tax and GST", kLevel: "K2" },
+                    { id: "C104.5", text: "Understand the role of consumer rights and cyber laws in the modern business environment", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5105",
+                name: "Organisational Behaviour",
+                semester: "Semester I",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C105.1", text: "Understanding of various management concepts and skills required in the business world", kLevel: "K2" },
+                    { id: "C105.2", text: "In-depth knowledge of various functions of management in a real time management context", kLevel: "K2" },
+                    { id: "C105.3", text: "Understanding of the complexities associated with management of individual behavior in the organizations", kLevel: "K2" },
+                    { id: "C105.4", text: "Develop the skillset to have manage group behaviour in Organizations", kLevel: "K2" },
+                    { id: "C105.5", text: "Insights about the current trends in managing organizational behaviour", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5106",
+                name: "Statistics for Management",
+                semester: "Semester I",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C106.1", text: "Summarize data visually and numerically", kLevel: "K1" },
+                    { id: "C106.2", text: "Build and assess data-based models", kLevel: "K2" },
+                    { id: "C106.3", text: "Learn and apply the tools of formal inference", kLevel: "K3" },
+                    { id: "C106.4", text: "Mathematical and probabilistic foundations of statistical inference", kLevel: "K2" },
+                    { id: "C106.5", text: "Execute statistical analyses with professional software", kLevel: "K4" }
+                ]
+            },
+            {
+                code: "BA5107",
+                name: "Total Quality Management",
+                semester: "Semester I",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C107.1", text: "Understanding of the evolution of operations management practices and world class manufacturing processes", kLevel: "K2" },
+                    { id: "C107.2", text: "Knowledge about capacity planning, strategic sourcing and procurement in organizations", kLevel: "K2" },
+                    { id: "C107.3", text: "Enhances the understanding of product development and design process", kLevel: "K1" },
+                    { id: "C107.4", text: "Ability to forecast demand and overcome bottlenecks", kLevel: "K1" },
+                    { id: "C107.5", text: "Provides insight to Quality management tools and practices", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5201",
+                name: "Applied Operations Research",
+                semester: "Semester II",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C108.1", text: "Formulate and obtain the optimal solution for Linear Programming problems", kLevel: "K2" },
+                    { id: "C108.2", text: "Determine the optimal solution for Transportation problems", kLevel: "K2" },
+                    { id: "C108.3", text: "Determine the optimal solution for Assignment problems", kLevel: "K2" },
+                    { id: "C108.4", text: "Determine the best strategy and value of the given game model", kLevel: "K2" },
+                    { id: "C108.5", text: "Plan, Schedule and Control the given project", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5202",
+                name: "Business Research Methods",
+                semester: "Semester II",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C109.1", text: "Students will understand and appreciate scientific inquiry", kLevel: "K2" },
+                    { id: "C109.2", text: "Students would know to write research proposals", kLevel: "K1" },
+                    { id: "C109.3", text: "Undertake a systematic outlook towards business situation for objective decision making and scientific inquiry to solve organizational problems", kLevel: "K2" },
+                    { id: "C109.4", text: "Students would be able to analyze data and find solutions to the problems", kLevel: "K4" },
+                    { id: "C109.5", text: "Students could prepare research reports", kLevel: "K3" }
+                ]
+            },
+            {
+                code: "BA5203",
+                name: "Financial Management",
+                semester: "Semester II",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C110.1", text: "Identify the concepts of financial decision of an organization", kLevel: "K2" },
+                    { id: "C110.2", text: "Recognize the time value of money", kLevel: "K2" },
+                    { id: "C110.3", text: "Learn the capital budgeting and cost of capital techniques", kLevel: "K2" },
+                    { id: "C110.4", text: "Understand how to decide the decision of capital structure and distribution of dividend", kLevel: "K2" },
+                    { id: "C110.5", text: "Assess the short-term and long-term sources of finance", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5204",
+                name: "Human Resource Management",
+                semester: "Semester II",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C111.1", text: "Gained knowledge on the various aspects of HRM", kLevel: "K2" },
+                    { id: "C111.2", text: "Gain knowledge needed for success as a human resources professional", kLevel: "K2" },
+                    { id: "C111.3", text: "Develop the skills needed for a successful HR manager", kLevel: "K3" },
+                    { id: "C111.4", text: "Prepared to implement the concepts learned in the workplace", kLevel: "K3" },
+                    { id: "C111.5", text: "Aware of the emerging concepts in the field of HRM", kLevel: "K1" }
+                ]
+            },
+            {
+                code: "BA5205",
+                name: "Information Management",
+                semester: "Semester II",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C112.1", text: "Learn the basics of data and information system", kLevel: "K1" },
+                    { id: "C112.2", text: "Understand the system development methodologies", kLevel: "K2" },
+                    { id: "C112.3", text: "Understand database management system and its types", kLevel: "K2" },
+                    { id: "C112.4", text: "Learn the various technologies in information system and its security", kLevel: "K1" },
+                    { id: "C112.5", text: "Gains knowledge on effective applications of information systems in business", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5206",
+                name: "Operations Management",
+                semester: "Semester II",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C113.1", text: "Understanding of the evolution of operations management practices and world class manufacturing processes", kLevel: "K2" },
+                    { id: "C113.2", text: "Knowledge about capacity planning, strategic sourcing and procurement in organizations", kLevel: "K1" },
+                    { id: "C113.3", text: "Enhances the understanding of product development and design process", kLevel: "K2" },
+                    { id: "C113.4", text: "Ability to forecast demand and overcome bottlenecks", kLevel: "K1" },
+                    { id: "C113.5", text: "Provides insight to Quality management tools and practices", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5207",
+                name: "Marketing Management",
+                semester: "Semester II",
+                year: "2019-2020",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C114.1", text: "Applied knowledge of contemporary marketing theories to the demands of business and management practice", kLevel: "K1" },
+                    { id: "C114.2", text: "Enhanced knowledge of marketing strategies for consumer and industrial marketing", kLevel: "K2" },
+                    { id: "C114.3", text: "Deep understanding of choice of marketing mix elements and managing integrated marketing channels", kLevel: "K1" },
+                    { id: "C114.4", text: "Ability to analyze the nature of consumer buying behavior", kLevel: "K2" },
+                    { id: "C114.5", text: "Understanding of the marketing research and new trends in the arena of marketing", kLevel: "K1" }
+                ]
+            },
+            {
+                code: "BA5301",
+                name: "International Business Management",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C201.1", text: "In-depth knowledge of driving factors of international business", kLevel: "K1" },
+                    { id: "C201.2", text: "Understanding of theories of trade and investment practiced in the global world", kLevel: "K2" },
+                    { id: "C201.3", text: "Deep insights into various market entry strategies followed by Global Organizations", kLevel: "K2" },
+                    { id: "C201.4", text: "Ability to identify various global production and supply chain issues and understand foreign exchange determination system", kLevel: "K3" },
+                    { id: "C201.5", text: "Enhance cognitive knowledge of managing business across cultures", kLevel: "K1" }
+                ]
+            },
+            {
+                code: "BA5302",
+                name: "Strategic Management",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C202.1", text: "Ability to understand the Strategic management process and social responsibility of business organizations", kLevel: "K1" },
+                    { id: "C202.2", text: "In-depth understanding about the need for developing competitive advantage for organizations", kLevel: "K2" },
+                    { id: "C202.3", text: "Provides insights into various corporate and business level strategies", kLevel: "K2" },
+                    { id: "C202.4", text: "Facilitates identifying various control systems required for organizational strategy implementation process", kLevel: "K1" },
+                    { id: "C202.5", text: "Enhances cognitive knowledge about various strategic issues and development of new business models", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5002",
+                name: "Consumer Behaviour",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C203.1", text: "Consumer orientation and consumption analysis", kLevel: "K2" },
+                    { id: "C203.2", text: "Intrinsic influences on buyer decision making", kLevel: "K3" },
+                    { id: "C203.3", text: "Effects of external and social influences", kLevel: "K1" },
+                    { id: "C203.4", text: "Models of consumer and industrial buying", kLevel: "K2" },
+                    { id: "C203.5", text: "The comprehensive consumer decision making process", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5005",
+                name: "Retail Marketing",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "B204.1", text: "Provide insights on retail operations and structure", kLevel: "K1" },
+                    { id: "B204.2", text: "Understand effective methods and strategies required for retail management", kLevel: "K2" },
+                    { id: "B204.3", text: "Understand how to utilize resources and techniques used in retail management", kLevel: "K2" },
+                    { id: "B204.4", text: "Understand analysis of store location, merchandising, products and pricing", kLevel: "K2" },
+                    { id: "B204.5", text: "Gain knowledge about shopper behavior patterns", kLevel: "K1" }
+                ]
+            },
+            {
+                code: "BA5006",
+                name: "Service Marketing",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C205.1", text: "Demonstrate an extended understanding of the similarities and differences in service-based and physical product based marketing activities", kLevel: "K1" },
+                    { id: "C205.2", text: "Develop and justify marketing planning and control systems appropriate to service-based activities", kLevel: "K2" },
+                    { id: "C205.3", text: "Demonstrate integrative knowledge of marketing issues associated with service productivity, perceived quality, customer satisfaction and loyalty", kLevel: "K1" },
+                    { id: "C205.4", text: "Develop blueprint for the services sector and create strategies for service excellence", kLevel: "K2" },
+                    { id: "C205.5", text: "Recognise challenges faced in services delivery as outlined in the services gap model", kLevel: "K1" }
+                ]
+            },
+            {
+                code: "BA45008",
+                name: "Banking and Financial Services",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C206.1", text: "Understand the overall structure and functions of Indian financial system", kLevel: "K2" },
+                    { id: "C206.2", text: "Gain knowledge about regulations governing Indian banking system", kLevel: "K1" },
+                    { id: "C206.3", text: "Price various types of loans proposed by banks and evaluate bank performance", kLevel: "K3" },
+                    { id: "C206.4", text: "Familiarise with concepts of modern e-banking and digital banking", kLevel: "K1" },
+                    { id: "C206.5", text: "In-depth understanding of fee-based and fund-based financial services in India", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5010",
+                name: "Derivatives Management",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C207.1", text: "Possess good skills in hedging risks using derivatives", kLevel: "K1" },
+                    { id: "C207.2", text: "Understand about futures contract and option mechanisms", kLevel: "K2" },
+                    { id: "C207.3", text: "Learning in-depth about option pricing models and swaps", kLevel: "K3" },
+                    { id: "C207.4", text: "Knowing about the evolution and structure of derivative markets", kLevel: "K2" },
+                    { id: "C207.5", text: "Develop in-depth knowledge about stock options and index futures in NSE", kLevel: "K1" }
+                ]
+            },
+            {
+                code: "BA4001",
+                name: "Security Analysis and Portfolio Management",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C208.1", text: "Understand the concept of investment and identify investment alternatives for investors", kLevel: "K2" },
+                    { id: "C208.2", text: "Learn the nuances of fundamental analyses and technical analyses", kLevel: "K2" },
+                    { id: "C208.3", text: "Analyse and evaluate the intrinsic value of securities", kLevel: "K4" },
+                    { id: "C208.4", text: "Explain how to construct an efficient investment portfolio", kLevel: "K1" },
+                    { id: "C208.5", text: "Explore various methods through which portfolio evaluation is executed", kLevel: "K5" }
+                ]
+            },
+            {
+                code: "BA4032",
+                name: "Entrepreneurship Development",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C209.1", text: "Gain entrepreneurial competence to run business ventures efficiently", kLevel: "K1" },
+                    { id: "C209.2", text: "Undertake businesses in the dynamic entrepreneurial ecosystem", kLevel: "K2" },
+                    { id: "C209.3", text: "Capable of preparing robust business plans and feasible projects", kLevel: "K2" },
+                    { id: "C209.4", text: "Efficient in launching and scaling business ventures successfully", kLevel: "K1" },
+                    { id: "C209.5", text: "Monitor business metrics effectively towards growth and sustained development", kLevel: "K2" }
+                ]
+            },
+            {
+                code: "BA5015",
+                name: "Industrial Relations and Labour Welfare",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C210.1", text: "Industrial relations systems and Trade union operations", kLevel: "K1" },
+                    { id: "C210.2", text: "Industrial Disputes resolution and labour welfare measures", kLevel: "K2" },
+                    { id: "C210.3", text: "Labour legislation introduction and legal provisions for factory workers, wages and Bonus", kLevel: "K3" },
+                    { id: "C210.4", text: "Legal provisions for equal remuneration, gratuity, compensation and Apprenticeship", kLevel: "K2" },
+                    { id: "C210.5", text: "Legal provisions for EPF, ESI, Maternity, contract labours and child labour prevention", kLevel: "K1" }
+                ]
+            },
+            {
+                code: "BA5019",
+                name: "Strategic Human Resource Management",
+                semester: "Semester III",
+                year: "2020-2021",
+                regulations: "Regulations 2017",
+                cos: [
+                    { id: "C211.1", text: "Understand the relationship of HR strategy with overall corporate strategy and the strategic role of HR systems", kLevel: "K2" },
+                    { id: "C211.2", text: "Appreciate SHRM in changing organizational forms with modern tools and techniques", kLevel: "K1" },
+                    { id: "C211.3", text: "Develop cross-cultural sensitivity and international HRM comparative perspectives", kLevel: "K2" },
+                    { id: "C211.4", text: "Provide counselling and coaching processes with alternative problem-solving strategies", kLevel: "K1" },
+                    { id: "C211.5", text: "Understand career development theories and models to become effective strategic HR managers", kLevel: "K2" }
+                ]
+            }
+        ]
     }
 ];
 

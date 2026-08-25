@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaRocket, FaChartLine, FaStar, FaCalculator, FaUserTie, FaCode, FaUsers, FaGraduationCap } from 'react-icons/fa';
 import API_BASE_URL from '../api';
+import Tilt3DCard from './Tilt3DCard';
 
 const PlacementSection = () => {
     const [companies, setCompanies] = React.useState([]);
@@ -113,34 +114,44 @@ const PlacementSection = () => {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            style={{
-                                textAlign: 'center',
-                                padding: '2.5rem',
-                                background: 'var(--glass)',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '20px',
-                                color: 'var(--text-main)'
-                            }}
                         >
-                            <div style={{
-                                fontSize: '2.5rem',
-                                color: 'var(--secondary)',
-                                marginBottom: '1.5rem',
-                                display: 'flex',
-                                justifyContent: 'center'
-                            }}>
-                                {stat.icon}
-                            </div>
-                            <h3 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem' }}>{stat.value}</h3>
-                            <p style={{
-                                fontSize: '0.85rem',
-                                textTransform: 'uppercase',
-                                letterSpacing: '1px',
-                                color: 'var(--text-muted)',
-                                fontWeight: '700'
-                            }}>
-                                {stat.label}
-                            </p>
+                            <Tilt3DCard
+                                maxTilt={8}
+                                glareOpacity={0.15}
+                                style={{
+                                    textAlign: 'center',
+                                    padding: '2.5rem',
+                                    background: 'var(--glass)',
+                                    border: '1px solid var(--glass-border)',
+                                    borderRadius: '20px',
+                                    color: 'var(--text-main)',
+                                    height: '100%',
+                                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)'
+                                }}
+                            >
+                                <div style={{
+                                    fontSize: '2.5rem',
+                                    color: 'var(--secondary)',
+                                    marginBottom: '1.5rem',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    transform: 'translateZ(25px)',
+                                    transition: 'transform 0.3s ease'
+                                }}>
+                                    {stat.icon}
+                                </div>
+                                <h3 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem', transform: 'translateZ(15px)' }}>{stat.value}</h3>
+                                <p style={{
+                                    fontSize: '0.85rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    color: 'var(--text-muted)',
+                                    fontWeight: '700',
+                                    transform: 'translateZ(10px)'
+                                }}>
+                                    {stat.label}
+                                </p>
+                            </Tilt3DCard>
                         </motion.div>
                     ))}
                 </div>

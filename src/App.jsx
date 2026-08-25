@@ -161,6 +161,8 @@ function App() {
             <Route path="/scholarships" element={<ScholarshipPage />} />
             <Route path="/admissions" element={<AdmissionsPage />} />
             <Route path="/admission" element={<AdmissionsPage />} />
+            <Route path="/admissions-2026" element={<AdmissionsPage />} />
+            <Route path="/admission-2026" element={<AdmissionsPage />} />
             <Route path="/alumni" element={<AlumniConnectPage />} />
             <Route path="/alumni-connect" element={<AlumniConnectPage />} />
             <Route path="/alumni-registration" element={<AlumniRegistration />} />

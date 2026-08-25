@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaPhoneAlt, FaArrowRight } from 'react-icons/fa';
+import Tilt3DCard from './Tilt3DCard';
 
 const AdmissionCTA = ({ onApplyClick }) => {
     return (
@@ -45,14 +46,20 @@ const AdmissionCTA = ({ onApplyClick }) => {
                 color: 'white'
             }}>
                 <div style={{ textAlign: 'left', maxWidth: '700px' }}>
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6 }}
-                        style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', padding: '0.5rem 1.2rem', borderRadius: '50px', fontSize: '0.8rem', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '1.5rem', border: '1px solid rgba(255,255,255,0.2)' }}
-                    >
-                        Admissions Open 2025-26
-                    </motion.div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        {/* 3D Glowing Admissions Open Badge */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.6 }}
+                            className="badge-3d-offer"
+                            title="Admissions Open 2025-26"
+                        >
+                            <span className="badge-3d-offer-pill">ADMISSIONS OPEN</span>
+                            <span>Academic Year 2025 - 2026</span>
+                        </motion.div>
+                    </div>
+
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -85,50 +92,70 @@ const AdmissionCTA = ({ onApplyClick }) => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
-                    style={{
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        padding: '3rem',
-                        borderRadius: '32px',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '2rem',
-                        minWidth: '350px'
-                    }}
-                    className="cta-card"
+                    style={{ minWidth: '350px' }}
+                    className="cta-card-wrapper"
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--secondary)', color: 'var(--bg-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>
-                            <FaPhoneAlt />
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.7, marginBottom: '4px' }}>Admission Hotline</div>
-                            <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>+91 93426 28013</div>
-                        </div>
-                    </div>
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={onApplyClick}
+                    <Tilt3DCard
+                        maxTilt={6}
+                        glareOpacity={0.18}
                         style={{
-                            padding: '1.2rem',
-                            fontSize: '1.1rem',
-                            fontWeight: '800',
-                            borderRadius: '16px',
-                            background: 'white',
-                            color: 'var(--primary)',
-                            border: 'none',
-                            cursor: 'pointer',
+                            background: 'rgba(255, 255, 255, 0.07)',
+                            padding: '3rem',
+                            borderRadius: '32px',
+                            backdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(255,255,255,0.15)',
                             display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '12px',
-                            transition: '0.3s'
+                            flexDirection: 'column',
+                            gap: '2rem',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(230, 182, 39, 0.1)'
                         }}
+                        className="cta-card"
                     >
-                        Apply Online Now <FaArrowRight />
-                    </motion.button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', transform: 'translateZ(20px)' }}>
+                            <div style={{
+                                width: '60px',
+                                height: '60px',
+                                borderRadius: '50%',
+                                background: 'var(--secondary)',
+                                color: 'var(--bg-dark)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '1.5rem',
+                                boxShadow: '0 8px 20px rgba(230, 182, 39, 0.35)'
+                            }}>
+                                <FaPhoneAlt />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.7, marginBottom: '4px' }}>Admission Hotline</div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: '900' }}>+91 93426 28013</div>
+                            </div>
+                        </div>
+                        <motion.button
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={onApplyClick}
+                            style={{
+                                padding: '1.2rem',
+                                fontSize: '1.1rem',
+                                fontWeight: '800',
+                                borderRadius: '16px',
+                                background: 'white',
+                                color: 'var(--primary)',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '12px',
+                                transition: '0.3s',
+                                transform: 'translateZ(25px)',
+                                boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+                            }}
+                        >
+                            Apply Online Now <FaArrowRight />
+                        </motion.button>
+                    </Tilt3DCard>
                 </motion.div>
             </div>
 
@@ -136,6 +163,7 @@ const AdmissionCTA = ({ onApplyClick }) => {
                 @media (max-width: 1024px) {
                     .cta-flex { flex-direction: column !important; text-align: center !important; gap: 4rem !important; }
                     div[style*="textAlign: 'left'"] { text-align: center !important; display: flex !important; flexDirection: column !important; alignItems: center !important; }
+                    .cta-card-wrapper { width: 100% !important; min-width: 0 !important; }
                     .cta-card { width: 100% !important; min-width: 0 !important; padding: 2.5rem !important; }
                 }
             `}</style>

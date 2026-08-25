@@ -106,6 +106,14 @@ const ProgramsSection = () => {
                     min-height: 400px;
                     box-shadow: 0 25px 50px rgba(0,0,0,0.05);
                     position: relative;
+                    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s ease;
+                    transform-style: preserve-3d;
+                }
+
+                .program-card:hover {
+                    transform: perspective(1000px) translateY(-8px) rotateX(2deg) scale(1.01);
+                    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.35), 0 0 25px rgba(230, 182, 39, 0.12);
+                    border-color: rgba(230, 182, 39, 0.3);
                 }
 
                 .program-content {

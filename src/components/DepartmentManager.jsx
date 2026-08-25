@@ -2254,6 +2254,15 @@ const DepartmentManager = () => {
 
     const fetchDepartmentData = async () => {
         setLoading(true);
+        const staticDept = staticDepartments.find(d => d.slug === selectedDept) || {};
+        const fallbackVision = Array.isArray(staticDept.vision)
+            ? staticDept.vision
+            : (staticDept.vision ? [staticDept.vision] : []);
+        const fallbackMission = staticDept.mission || [];
+        const fallbackPEO = staticDept.peo || [];
+        const fallbackPO = staticDept.po || [];
+        const fallbackPSO = staticDept.pso || [];
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/departments/${selectedDept}`);
             if (res.ok) {
@@ -2261,25 +2270,55 @@ const DepartmentManager = () => {
                 if (json) {
                     setData({
                         _id: json._id,
-                        mission: json.mission || [],
-                        vision: json.vision || [],
-                        peo: json.peo || [],
-                        pso: json.pso || [],
-                        po: json.po || [],
+                        mission: (json.mission && json.mission.length > 0) ? json.mission : fallbackMission,
+                        vision: (json.vision && json.vision.length > 0) ? json.vision : fallbackVision,
+                        peo: (json.peo && json.peo.length > 0) ? json.peo : fallbackPEO,
+                        pso: (json.pso && json.pso.length > 0) ? json.pso : fallbackPSO,
+                        po: (json.po && json.po.length > 0) ? json.po : fallbackPO,
                         subjects: json.subjects || [],
                         bosMeetingDate: json.bosMeetingDate || '29.10.2024',
                         acMeetingDate: json.acMeetingDate || '25.11.2024',
                         regulation: json.regulation || 'R-2023'
                     });
                 } else {
-                    setData({ mission: [], vision: [], peo: [], pso: [], po: [], subjects: [], bosMeetingDate: '29.10.2024', acMeetingDate: '25.11.2024', regulation: 'R-2023' });
+                    setData({
+                        mission: fallbackMission,
+                        vision: fallbackVision,
+                        peo: fallbackPEO,
+                        pso: fallbackPSO,
+                        po: fallbackPO,
+                        subjects: [],
+                        bosMeetingDate: '29.10.2024',
+                        acMeetingDate: '25.11.2024',
+                        regulation: 'R-2023'
+                    });
                 }
             } else {
-                setData({ mission: [], vision: [], peo: [], pso: [], po: [], subjects: [], bosMeetingDate: '29.10.2024', acMeetingDate: '25.11.2024', regulation: 'R-2023' });
+                setData({
+                    mission: fallbackMission,
+                    vision: fallbackVision,
+                    peo: fallbackPEO,
+                    pso: fallbackPSO,
+                    po: fallbackPO,
+                    subjects: [],
+                    bosMeetingDate: '29.10.2024',
+                    acMeetingDate: '25.11.2024',
+                    regulation: 'R-2023'
+                });
             }
         } catch (error) {
             console.error('Error fetching department data:', error);
-            setData({ mission: [], vision: [], peo: [], pso: [], po: [], subjects: [], bosMeetingDate: '29.10.2024', acMeetingDate: '25.11.2024', regulation: 'R-2023' });
+            setData({
+                mission: fallbackMission,
+                vision: fallbackVision,
+                peo: fallbackPEO,
+                pso: fallbackPSO,
+                po: fallbackPO,
+                subjects: [],
+                bosMeetingDate: '29.10.2024',
+                acMeetingDate: '25.11.2024',
+                regulation: 'R-2023'
+            });
         }
         setLoading(false);
         // After loading department data, fetch credit distribution details
