@@ -320,7 +320,7 @@ export const HeroCarousel = ({ onApplyClick }) => {
                     }
                 }
 
-                /* Mobile Responsiveness */
+                /* Mobile Responsiveness - Full Screen Hero Banner */
                 @media (max-width: 767px) {
                     .hero-carousel,
                     .hero-carousel .slick-slider,
@@ -328,55 +328,65 @@ export const HeroCarousel = ({ onApplyClick }) => {
                     .hero-carousel .slick-track,
                     .hero-carousel .slick-slide > div,
                     .hero-slide-item {
-                        height: clamp(320px, 52vh, 480px);
-                        min-height: 320px;
+                        height: calc(100vh - 65px);
+                        height: calc(100svh - 65px);
+                        height: calc(100dvh - 65px);
+                        min-height: 520px;
+                    }
+
+                    .hero-bg-image {
+                        object-position: center top !important;
                     }
 
                     .hero-content-container {
-                        left: 16px;
-                        right: 16px;
-                        bottom: 45px;
-                        width: calc(100% - 32px);
+                        left: 14px;
+                        right: 14px;
+                        bottom: 35px;
+                        width: calc(100% - 28px);
                         max-width: 100%;
                         text-align: center;
-                        background: rgba(11, 15, 25, 0.4);
-                        backdrop-filter: blur(8px);
-                        -webkit-backdrop-filter: blur(8px);
-                        padding: 0.9rem 1rem;
-                        border-radius: 14px;
-                        border: 1px solid rgba(255, 255, 255, 0.12);
+                        background: rgba(11, 15, 25, 0.45);
+                        backdrop-filter: blur(10px);
+                        -webkit-backdrop-filter: blur(10px);
+                        padding: 0.75rem 1rem;
+                        border-radius: 12px;
+                        border: 1px solid rgba(255, 255, 255, 0.15);
                     }
 
                     .hero-title {
-                        font-size: clamp(1.1rem, 4.5vw, 1.5rem);
-                        margin-bottom: 0.3rem;
+                        font-size: clamp(1.05rem, 4.2vw, 1.4rem);
+                        margin-bottom: 0.25rem;
                     }
 
                     .hero-subtitle {
-                        font-size: clamp(0.78rem, 3vw, 0.92rem);
+                        font-size: clamp(0.75rem, 2.8vw, 0.88rem);
                     }
 
                     .hero-btn-group {
                         justify-content: center;
-                        margin-top: 0.8rem;
+                        margin-top: 0.6rem;
                     }
 
                     .hero-btn {
-                        padding: 0.55rem 1.4rem !important;
-                        font-size: 0.85rem !important;
+                        padding: 0.5rem 1.2rem !important;
+                        font-size: 0.82rem !important;
+                    }
+
+                    .hero-carousel .slick-dots {
+                        bottom: 10px !important;
                     }
 
                     .custom-slick-arrow {
-                        width: 36px;
-                        height: 36px;
+                        width: 34px;
+                        height: 34px;
                     }
 
                     .custom-prev-arrow {
-                        left: 8px;
+                        left: 6px;
                     }
 
                     .custom-next-arrow {
-                        right: 8px;
+                        right: 6px;
                     }
                 }
 
@@ -430,33 +440,35 @@ export const HeroCarousel = ({ onApplyClick }) => {
                             <div className="hero-slide-overlay" />
 
                             {/* Content Overlay */}
-                            <div className="hero-content-container">
-                                <motion.div
-                                    variants={containerVariants}
-                                    initial="hidden"
-                                    animate={index === currentSlide ? "visible" : "hidden"}
-                                >
-                                    {slide.title && (
-                                        <motion.h1
-                                            variants={itemVariants}
-                                            className="hero-title"
-                                            style={{ color: slide.titleColor || '#ffffff' }}
-                                        >
-                                            {slide.title}
-                                        </motion.h1>
-                                    )}
+                            {(slide.title || slide.subtitle) && (
+                                <div className="hero-content-container">
+                                    <motion.div
+                                        variants={containerVariants}
+                                        initial="hidden"
+                                        animate={index === currentSlide ? "visible" : "hidden"}
+                                    >
+                                        {slide.title && (
+                                            <motion.h1
+                                                variants={itemVariants}
+                                                className="hero-title"
+                                                style={{ color: slide.titleColor || '#ffffff' }}
+                                            >
+                                                {slide.title}
+                                            </motion.h1>
+                                        )}
 
-                                    {slide.subtitle && (
-                                        <motion.p
-                                            variants={itemVariants}
-                                            className="hero-subtitle"
-                                            style={{ color: slide.subtitleColor || '#ffffff' }}
-                                        >
-                                            {slide.subtitle}
-                                        </motion.p>
-                                    )}
-                                </motion.div>
-                            </div>
+                                        {slide.subtitle && (
+                                            <motion.p
+                                                variants={itemVariants}
+                                                className="hero-subtitle"
+                                                style={{ color: slide.subtitleColor || '#ffffff' }}
+                                            >
+                                                {slide.subtitle}
+                                            </motion.p>
+                                        )}
+                                    </motion.div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}

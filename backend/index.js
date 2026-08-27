@@ -28,6 +28,17 @@ console.log("FestPage Check:", FestPage);
 
 
 const app = express();
+app.disable('x-powered-by');
+
+// Standard HTTP Security Headers
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+});
+
 const port = process.env.PORT || 5000;
 const BASE_URL = process.env.BASE_URL;
 let isConnected = false;
