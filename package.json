@@ -19,6 +19,7 @@
     "express": "^5.2.1",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.24.12",
+    "helmet": "^8.3.0",
     "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.3",
     "lightgallery": "^2.9.0",
