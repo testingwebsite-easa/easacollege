@@ -11,9 +11,29 @@ const SECURITY_HEADERS = {
   'X-XSS-Protection': '1; mode=block'
 }
 
+const securityHeadersPlugin = () => ({
+  name: 'security-headers-plugin',
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+        res.setHeader(key, value);
+      });
+      next();
+    });
+  },
+  configurePreviewServer(server) {
+    server.middlewares.use((req, res, next) => {
+      Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+        res.setHeader(key, value);
+      });
+      next();
+    });
+  }
+});
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), securityHeadersPlugin()],
   server: {
     headers: SECURITY_HEADERS
   },

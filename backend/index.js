@@ -3853,7 +3853,31 @@ app.get('/api/department-research-overview', async (req, res) => {
     }
 });
 
-// 404 Handler
+// Serve frontend build if present
+const distPath = path.join(__dirname, '../dist');
+if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath, {
+        setHeaders: (res, filePath) => {
+            setSecurityHeaders(res);
+            if (filePath.endsWith('.html')) {
+                res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+            }
+        }
+    }));
+
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api/') || req.path.startsWith('/images/') || req.path.startsWith('/docs/')) {
+            return next();
+        }
+        setSecurityHeaders(res);
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+}
+
+// 404 Handler for unhandled API routes
 app.use((req, res) => {
     setSecurityHeaders(res);
     res.status(404).json({ success: false, error: "Resource Not Found" });
