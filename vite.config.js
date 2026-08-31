@@ -1,21 +1,25 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const asyncCssPlugin = () => {
-  return {
-    name: 'async-css-plugin',
-    transformIndexHtml(html) {
-      return html.replace(
-        /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)">/g,
-        '<link rel="preload" as="style" href="$1" /><link rel="stylesheet" href="$1" media="print" onload="this.media=\'all\'" /><noscript><link rel="stylesheet" href="$1" /></noscript>'
-      );
-    }
-  };
-};
+const SECURITY_HEADERS = {
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://*.cloudinary.com https://res.cloudinary.com https://*.amazonaws.com https://*.s3.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://assets.aceternity.com https://img.youtube.com https://i.ytimg.com https://*.google.com https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https: wss:; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://maps.google.com https://www.google.com; media-src 'self' data: blob: https://*.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://*.cloudinary.com https://res.cloudinary.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;",
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-XSS-Protection': '1; mode=block'
+}
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), asyncCssPlugin()],
+  plugins: [react()],
+  server: {
+    headers: SECURITY_HEADERS
+  },
+  preview: {
+    headers: SECURITY_HEADERS
+  },
   build: {
     rollupOptions: {
       output: {
@@ -40,4 +44,5 @@ export default defineConfig({
     },
   },
 })
+
 
