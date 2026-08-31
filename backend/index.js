@@ -30,6 +30,13 @@ console.log("FestPage Check:", FestPage);
 const app = express();
 app.disable('x-powered-by');
 
+const helmet = require('helmet');
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
 // Standard HTTP Security Headers & Defense in Depth
 const setSecurityHeaders = (res) => {
     res.removeHeader('X-Powered-By');
@@ -92,8 +99,8 @@ const upload = multer({
             cb(null, 'public/images')
         },
         filename: function (req, file, cb) {
-            // Keep original name but prepend timestamp to avoid collisions
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+            // Use randomUUID to avoid Unix timestamp disclosure
+            const uniqueSuffix = crypto.randomUUID();
             // Sanitize filename to remove special chars
             const cleanName = file.originalname.replace(/[^a-zA-Z0-9.]/g, "_");
             cb(null, `${uniqueSuffix}-${cleanName}`);

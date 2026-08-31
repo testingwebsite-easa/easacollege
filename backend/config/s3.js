@@ -16,6 +16,8 @@ const s3 = new S3Client({
     }
 });
 
+const crypto = require('crypto');
+
 const uploadS3 = multer({
     storage: multerS3({
         s3: s3,
@@ -24,7 +26,7 @@ const uploadS3 = multer({
             cb(null, { fieldName: file.fieldname });
         },
         key: function (req, file, cb) {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            const uniqueSuffix = crypto.randomUUID();
             const cleanName = file.originalname.replace(/[^a-zA-Z0-9.]/g, "_");
 
             let folder = 'uploads';
