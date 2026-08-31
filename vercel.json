@@ -6,7 +6,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https: data:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss:;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://*.cloudinary.com https://res.cloudinary.com https://*.amazonaws.com https://*.s3.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://assets.aceternity.com https://img.youtube.com https://i.ytimg.com https://*.google.com https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https: wss:; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://maps.google.com https://www.google.com; media-src 'self' data: blob: https://*.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://*.cloudinary.com https://res.cloudinary.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;"
         },
         {
           "key": "X-Frame-Options",
@@ -27,6 +27,10 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
         },
         {
           "key": "Cache-Control",

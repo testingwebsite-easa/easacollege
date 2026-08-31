@@ -31,13 +31,19 @@ const app = express();
 app.disable('x-powered-by');
 
 // Standard HTTP Security Headers & Defense in Depth
-app.use((req, res, next) => {
-    res.setHeader('Content-Security-Policy', "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https: data:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss:;");
+const setSecurityHeaders = (res) => {
+    res.removeHeader('X-Powered-By');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://*.cloudinary.com https://res.cloudinary.com https://*.amazonaws.com https://*.s3.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://assets.aceternity.com https://img.youtube.com https://i.ytimg.com https://*.google.com https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https: wss:; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://maps.google.com https://www.google.com; media-src 'self' data: blob: https://*.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://*.cloudinary.com https://res.cloudinary.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;");
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+};
+
+app.use((req, res, next) => {
+    setSecurityHeaders(res);
     
     // Prevent sensitive API response caching by proxies
     if (req.path.startsWith('/api/')) {
@@ -147,8 +153,18 @@ app.post('/api/upload', (req, res) => {
 });
 
 
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
-app.use('/docs', express.static(path.join(__dirname, 'public/docs')));
+app.use('/images', express.static(path.join(__dirname, 'public/images'), {
+    setHeaders: (res) => {
+        setSecurityHeaders(res);
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+}));
+app.use('/docs', express.static(path.join(__dirname, 'public/docs'), {
+    setHeaders: (res) => {
+        setSecurityHeaders(res);
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+    }
+}));
 
 // Register routes
 app.use('/api/auth', authRouter);
@@ -2985,15 +3001,6 @@ app.delete('/api/sports/:id', async (req, res) => {
     }
 });
 
-// Final Error Handler (Must be last)
-app.use((err, req, res, next) => {
-    console.error("Global Error Handler:", err);
-    res.status(500).json({
-        success: false,
-        error: "Internal Server Error",
-        message: err.message
-    });
-});
 
 // ==================== UNIFIED HERO MANAGER ====================
 app.get('/api/all-heroes', async (req, res) => {
@@ -3839,13 +3846,20 @@ app.get('/api/department-research-overview', async (req, res) => {
     }
 });
 
-app.get('/api/student-research-items', async (req, res) => {
-    try {
-        const { studentResearchData } = require('./data');
-        res.json(studentResearchData || []);
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch student research items data" });
-    }
+// 404 Handler
+app.use((req, res) => {
+    setSecurityHeaders(res);
+    res.status(404).json({ success: false, error: "Resource Not Found" });
+});
+
+// Final Error Handler (Must be last)
+app.use((err, req, res, next) => {
+    setSecurityHeaders(res);
+    console.error("Global Error Handler:", err.message || err);
+    res.status(err.status || 500).json({
+        success: false,
+        error: "Internal Server Error"
+    });
 });
 
 module.exports = app;
