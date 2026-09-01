@@ -37,6 +37,7 @@ const NAV_ITEMS = [
     },
     {
         title: 'ACADEMIC PROGRAMS',
+        href: '/academics',
         isMega: true,
         children: [
             {
@@ -542,7 +543,23 @@ const Navbar = ({ onApplyClick }) => {
                         <div style={{ width: '1px', height: '14px', background: 'var(--glass-border)' }}></div>
 
                         {/* 5. Portal Login */}
-                        <a href="https://portal.EASAcollege.com/Login" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'color 0.2s', color: 'var(--nav-text)' }} onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-main)'} onMouseOut={(e) => e.currentTarget.style.color = 'var(--nav-text)'}>
+                        <a
+                            href="https://portal.easacollege.com/Login"
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                transition: 'color 0.2s ease',
+                                color: '#ffffff',
+                                textDecoration: 'none',
+                                fontSize: '0.85rem',
+                                fontWeight: '500'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.color = '#FCCA26'}
+                            onMouseOut={(e) => e.currentTarget.style.color = '#ffffff'}
+                        >
                             <FaUser size={12} /> Portal Login
                         </a>
                         <div style={{ width: '1px', height: '14px', background: 'var(--glass-border)' }}></div>

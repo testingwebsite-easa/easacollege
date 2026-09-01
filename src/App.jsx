@@ -23,6 +23,7 @@ const SustainabilityPage = lazy(() => import('./pages/SustainabilityPage'));
 const CommunityOutreachPage = lazy(() => import('./pages/CommunityOutreachPage'));
 // 
 const DepartmentPage = lazy(() => import('./pages/DepartmentPage'));
+const AcademicsPage = lazy(() => import('./pages/AcademicsPage'));
 // 
 const ResearchPage = lazy(() => import('./pages/ResearchPage'));
 const ResourcePage = lazy(() => import('./pages/ResourcePage'));
@@ -150,6 +151,9 @@ function App() {
             <Route path="/research" element={<ResearchPage />} />
             <Route path="/rd" element={<ResearchPage />} />
             <Route path="/rd-cell" element={<ResearchPage />} />
+            <Route path="/academics" element={<AcademicsPage />} />
+            <Route path="/academic-programs" element={<AcademicsPage />} />
+            <Route path="/departments" element={<AcademicsPage />} />
             <Route path="/department/:id" element={<DepartmentPage />} />
             {/* Research Listing Routes */}
             <Route path="/department-research" element={<ResearchListingPage />} />
