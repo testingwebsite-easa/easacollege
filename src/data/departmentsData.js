@@ -24,7 +24,7 @@ export const departments = [
 
         heroImage: "https://i.pinimg.com/736x/51/f2/33/51f233f4e9ceab328fda4882eb6457ad.jpg",
         overview: "The Department of AI & Data Science combines the power of artificial intelligence with the analytical capabilities of data science to solve complex problems.",
-         vision: "The Vision of the department is to produce competent graduates suitable for industries and organizations at global level including research and development with social responsibility.",
+        vision: "The Vision of the department is to produce competent graduates suitable for industries and organizations at global level including research and development with social responsibility.",
         mission: [
             "Fostering excellence in education, innovation and entrepreneurship to create change agents for inclusive growth.",
             "Encouraging inter-disciplinary studies and research to embrace the changing dimensions of the society and industry",
@@ -63,7 +63,7 @@ export const departments = [
     },
 
     //CSE
-    
+
     {
         id: "computer-science-and-engineering",
         name: "Computer Science and Engineering",
@@ -106,11 +106,11 @@ export const departments = [
         labCount: "05",
         mou: [
             { partner: "MAHAT LABS PRIVATE LIMITED", purpose: "Saas based low code application development platform", year: "2026", benefits: "App Development" },
-            ]
+        ]
     },
 
     //AI ML
-     {
+    {
         id: "artificial-intelligence-and-machine-learning",
         name: "CSE - Artificial Intelligence & Machine Learning",
         slug: "artificial-intelligence-and-machine-learning",
@@ -203,7 +203,7 @@ export const departments = [
         ]
     },
 
-     //IT
+    //IT
     {
         id: "information-technology",
         name: "Information Technology",
@@ -437,8 +437,8 @@ export const departments = [
             { partner: "Prakash Gears Coimbatore", purpose: "Industry Internships & Consultancy Services", year: "2024", benefits: "Machine Design" }
         ]
     },
-    
-   //AGRI
+
+    //AGRI
     {
         id: "agriculture-engineering",
         name: "Agriculture Engineering",
@@ -706,7 +706,7 @@ export const departments = [
         labCount: "3+"
     },
 
-    
+
     //UG SCIENCE AND HUMANITIES
     {
         id: "science-and-humanities",
@@ -825,7 +825,7 @@ export const departments = [
         keyMetrics: [
             { label: "Placement Success", value: "96%", desc: "Track record with top MNCs" },
             { label: "Corporate Partners", value: "150+", desc: "Active recruiting companies" },
-            { label: "Highest CTC Package", value: "12 LPA", desc: "Top tier placement offer" },
+            { label: "Highest CTC Package", value: "16 LPA", desc: "Top tier placement offer" },
             { label: "Paid Internships", value: "100%", desc: "Hands-on corporate exposure" }
         ],
         courseOutcomes: [

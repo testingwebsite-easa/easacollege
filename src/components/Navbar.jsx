@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaAward, FaMedal, FaTrophy, FaCertificate, FaBars, FaTimes, FaPhone, FaEnvelope, FaUser, FaGlobe, FaChevronDown } from 'react-icons/fa';
+import { FaAward, FaMedal, FaTrophy, FaCertificate, FaBars, FaTimes, FaPhone, FaEnvelope, FaUser, FaGlobe, FaChevronDown, FaLeaf } from 'react-icons/fa';
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from '../context/ThemeContext';
 import API_BASE_URL from '../api';
@@ -132,7 +132,7 @@ const NAV_ITEMS = [
                     { title: 'Committee', href: '/iqac-committee' }
                 ]
             },
-            // { title: 'SDGS @EASA', href: '/sdgs' },
+            { title: 'SDGS @EASA', href: '/sdgs' },
             { title: 'Centre of Excellence', href: '/coe' },
             { title: "Professional Chapters", href: "/professional-chapters" },
             { title: 'Idea Lab', href: '/idea-lab' },
@@ -580,33 +580,26 @@ const Navbar = ({ onApplyClick }) => {
                             </div>
                         </div>
                         
-                        {/* 8. Language Selector */}
-                        <div className="nav-item-dropdown" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', position: 'relative' }}
-                            onClick={(e) => { e.stopPropagation(); setMobileExpanded(prev => ({ ...prev, 'LANG_UTILITY': !prev['LANG_UTILITY'] })) }}>
-                            <FaGlobe size={12} /> {selectedLanguage.name} <FaChevronDown size={10} />
-                            <div className="dropdown-menu" style={{
-                                minWidth: '140px', left: 'auto', right: 0, top: '100%',
-                                background: theme === 'dark' ? '#000' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                display: mobileExpanded['LANG_UTILITY'] ? 'block' : 'none'
-                            }}>
-                                {languages.map((lang) => (
-                                    <a
-                                        key={lang.code}
-                                        href="#"
-                                        className="dropdown-item"
-                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            setSelectedLanguage(lang);
-                                        }}
-                                    >
-                                        {lang.name} <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{lang.code}</span>
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
+                        {/* 8. SDGs @ EASA */}
+                        <a
+                            href="/sdgs"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                padding: '0.2rem 0.75rem',
+                                borderRadius: '50px',
+                                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                                color: '#ffffff',
+                                fontWeight: '800',
+                                fontSize: '0.75rem',
+                                textDecoration: 'none',
+                                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.35)',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <FaLeaf size={10} /> SDGs @ EASA
+                        </a>
                         <div style={{ width: '1px', height: '14px', background: 'var(--glass-border)' }}></div>
 
                         {/* 9. Theme Switch */}

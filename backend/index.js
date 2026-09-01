@@ -40,7 +40,7 @@ app.use(helmet({
 // Standard HTTP Security Headers & Defense in Depth
 const setSecurityHeaders = (res) => {
     res.removeHeader('X-Powered-By');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://images.unsplash.com https://*.cloudinary.com https://res.cloudinary.com https://*.amazonaws.com https://*.s3.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://assets.aceternity.com https://img.youtube.com https://i.ytimg.com https://*.google.com https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.amazonaws.com https://*.cloudinary.com https://res.cloudinary.com https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://maps.google.com https://www.google.com; media-src 'self' data: blob: https://*.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://*.cloudinary.com https://res.cloudinary.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://*.cloudinary.com https://res.cloudinary.com https://*.amazonaws.com https://*.s3.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://assets.aceternity.com https://img.youtube.com https://i.ytimg.com https://*.google.com https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https: wss: http:; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://maps.google.com https://www.google.com; media-src 'self' data: blob: https://*.amazonaws.com https://easa-college.s3.eu-north-1.amazonaws.com https://*.cloudinary.com https://res.cloudinary.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;");
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -3867,7 +3867,10 @@ if (fs.existsSync(distPath)) {
         }
     }));
 
-    app.get('*', (req, res, next) => {
+    app.use((req, res, next) => {
+        if (req.method !== 'GET') {
+            return next();
+        }
         if (req.path.startsWith('/api/') || req.path.startsWith('/images/') || req.path.startsWith('/docs/')) {
             return next();
         }

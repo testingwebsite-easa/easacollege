@@ -39,7 +39,7 @@ const AboutSection = () => {
             description: "Our dedicated Training & Placement Cell partners with 150+ top multinational corporations, providing continuous bootcamps, mock interviews, and high-paying career opportunities.",
             features: [
                 { icon: <FaRocket />, title: "150+ Recruiters", desc: "TCS, Infosys, Wipro, Cognizant, Zoho & more." },
-                { icon: <FaCheckCircle />, title: "Highest 12 LPA", desc: "Consistently rising career packages." }
+                { icon: <FaCheckCircle />, title: "Highest 16 LPA", desc: "Consistently rising career packages." }
             ],
             badge: "TOP RECRUITERS",
             stat: "150+ Hiring Partners"

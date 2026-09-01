@@ -25,7 +25,7 @@ const PlacementSection = () => {
 
     const stats = [
         { label: "Placement Percentage", value: "96%", icon: <FaCheckCircle />, color: "#ffffff" },
-        { label: "Highest Package", value: "12 LPA", icon: <FaRocket />, color: "#ffffff" },
+        { label: "Highest Package", value: "16 LPA", icon: <FaRocket />, color: "#ffffff" },
         { label: "Average Package", value: "4.5 LPA", icon: <FaChartLine />, color: "#ffffff" },
         { label: "Top Recruiters", value: "150+", icon: <FaStar />, color: "#ffffff" }
     ];

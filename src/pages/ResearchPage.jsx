@@ -8,12 +8,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useScrollAnimation from '../hooks/useScrollAnimation';
 import missionBg from '../assets/mission-bg.webp';
 import GlobalHero from '../components/GlobalHero';
+import { useTheme } from '../context/ThemeContext';
 import {
     FaLightbulb,
-    FaBullseye,
     FaRocket,
     FaUserTie,
-    FaDiagramNext,
+    FaBookOpen,
     FaFileContract,
     FaScaleBalanced,
     FaHandshake,
@@ -23,9 +23,7 @@ import {
     FaArrowRight,
     FaQuoteLeft,
     FaMicroscope,
-    FaBookOpen,
     FaCertificate,
-    FaUsersViewfinder,
     FaGraduationCap,
     FaShieldHalved,
     FaAward
@@ -33,6 +31,9 @@ import {
 
 const ResearchPage = () => {
     useScrollAnimation();
+    const { theme } = useTheme();
+    const isDark = theme !== 'light';
+
     const [showAdmissionForm, setShowAdmissionForm] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [activePillar, setActivePillar] = useState(null);
@@ -212,6 +213,15 @@ const ResearchPage = () => {
         }
     };
 
+    // Card styling helper based on theme
+    const cardBg = isDark ? 'var(--bg-card)' : '#ffffff';
+    const cardBorder = isDark ? '1px solid var(--glass-border)' : '1px solid rgba(226, 232, 240, 0.9)';
+    const cardShadow = isDark ? '0 20px 40px rgba(0,0,0,0.3)' : '0 12px 35px rgba(0,0,0,0.05)';
+    const sectionBadgeBg = isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)';
+    const sectionBadgeColor = isDark ? '#38BDF8' : '#1D4ED8';
+    const primaryTextColor = isDark ? '#f8fafc' : '#0F172A';
+    const secondaryTextColor = isDark ? '#94a3b8' : '#475569';
+
     return (
         <div className="research-page" style={{ position: 'relative', overflowX: 'hidden', background: 'var(--bg-main)', color: 'var(--text-main)' }}>
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
@@ -226,13 +236,13 @@ const ResearchPage = () => {
 
             {/* QUICK NAVIGATION STRIP */}
             <section style={{
-                background: 'var(--bg-card)',
-                borderBottom: '1px solid var(--glass-border)',
+                background: isDark ? 'var(--bg-card)' : 'rgba(255, 255, 255, 0.92)',
+                borderBottom: cardBorder,
                 position: 'sticky',
                 top: '70px',
                 zIndex: 40,
                 backdropFilter: 'blur(12px)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
+                boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.2)' : '0 4px 20px rgba(0,0,0,0.04)'
             }}>
                 <div className="container" style={{ maxWidth: '1300px', margin: '0 auto', padding: '0.8rem 1.5rem', display: 'flex', gap: '1rem', overflowX: 'auto', scrollbarWidth: 'none' }}>
                     {[
@@ -249,14 +259,15 @@ const ResearchPage = () => {
                             style={{
                                 padding: '0.6rem 1.2rem',
                                 borderRadius: '50px',
-                                border: '1px solid var(--glass-border)',
-                                background: 'var(--bg-section)',
-                                color: 'var(--text-main)',
+                                border: isDark ? '1px solid var(--glass-border)' : '1px solid rgba(203, 213, 225, 0.8)',
+                                background: isDark ? 'var(--bg-section)' : '#ffffff',
+                                color: primaryTextColor,
                                 fontSize: '0.88rem',
                                 fontWeight: '700',
                                 cursor: 'pointer',
                                 whiteSpace: 'nowrap',
-                                transition: 'all 0.25s ease'
+                                transition: 'all 0.25s ease',
+                                boxShadow: isDark ? 'none' : '0 2px 6px rgba(0,0,0,0.04)'
                             }}
                             className="quick-nav-btn"
                         >
@@ -278,10 +289,10 @@ const ResearchPage = () => {
                         transition={{ duration: 0.6 }}
                         style={{ textAlign: 'center', marginBottom: '3.5rem' }}
                     >
-                        <span style={{ padding: '0.4rem 1.2rem', background: 'var(--primary-glow)', color: '#38BDF8', borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <span style={{ padding: '0.4rem 1.2rem', background: sectionBadgeBg, color: sectionBadgeColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             Core Foundation
                         </span>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: 'var(--text-main)' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: primaryTextColor }}>
                             Vision & Mission
                         </h2>
                         <div style={{ width: '80px', height: '4px', background: 'linear-gradient(90deg, #3B82F6, #F59E0B)', margin: '1rem auto 0', borderRadius: '2px' }} />
@@ -295,11 +306,11 @@ const ResearchPage = () => {
                             viewport={{ once: true, margin: '-50px' }}
                             transition={{ duration: 0.7 }}
                             style={{
-                                background: 'var(--bg-card)',
+                                background: cardBg,
                                 borderRadius: '24px',
-                                border: '1px solid var(--glass-border)',
+                                border: cardBorder,
                                 padding: '3rem 2.5rem',
-                                boxShadow: '0 20px 40px rgba(0,0,0,0.06)',
+                                boxShadow: cardShadow,
                                 position: 'relative',
                                 overflow: 'hidden'
                             }}
@@ -315,12 +326,12 @@ const ResearchPage = () => {
                                 justifyContent: 'center',
                                 fontSize: '1.9rem',
                                 marginBottom: '1.8rem',
-                                boxShadow: '0 12px 24px rgba(37,99,235,0.4)'
+                                boxShadow: '0 12px 24px rgba(37,99,235,0.35)'
                             }}>
                                 <FaLightbulb />
                             </div>
 
-                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1.5rem', color: '#38BDF8' }}>
+                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1.5rem', color: isDark ? '#38BDF8' : '#1E40AF' }}>
                                 Our Vision
                             </h3>
 
@@ -329,7 +340,7 @@ const ResearchPage = () => {
                                     <span style={{ background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)', color: '#ffffff', padding: '0.45rem', borderRadius: '50%', flexShrink: 0, marginTop: '0.2rem', boxShadow: '0 4px 10px rgba(16,185,129,0.3)' }}>
                                         <FaCircleCheck size={14} />
                                     </span>
-                                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-main)', fontWeight: '500', margin: 0 }}>
+                                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: primaryTextColor, fontWeight: '500', margin: 0 }}>
                                         To create an innovative research environment that allows for the flourishing of research innovation and knowledge generation aimed at benefiting society.
                                     </p>
                                 </div>
@@ -337,7 +348,7 @@ const ResearchPage = () => {
                                     <span style={{ background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)', color: '#ffffff', padding: '0.45rem', borderRadius: '50%', flexShrink: 0, marginTop: '0.2rem', boxShadow: '0 4px 10px rgba(16,185,129,0.3)' }}>
                                         <FaCircleCheck size={14} />
                                     </span>
-                                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-main)', fontWeight: '500', margin: 0 }}>
+                                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: primaryTextColor, fontWeight: '500', margin: 0 }}>
                                         To promote high-quality research that supports academic excellence, drives industry advancements and encourages sustainable development.
                                     </p>
                                 </div>
@@ -351,11 +362,11 @@ const ResearchPage = () => {
                             viewport={{ once: true, margin: '-50px' }}
                             transition={{ duration: 0.7, delay: 0.1 }}
                             style={{
-                                background: 'var(--bg-card)',
+                                background: cardBg,
                                 borderRadius: '24px',
-                                border: '1px solid var(--glass-border)',
+                                border: cardBorder,
                                 padding: '3rem 2.5rem',
-                                boxShadow: '0 20px 40px rgba(0,0,0,0.06)',
+                                boxShadow: cardShadow,
                                 position: 'relative',
                                 overflow: 'hidden'
                             }}
@@ -371,12 +382,12 @@ const ResearchPage = () => {
                                 justifyContent: 'center',
                                 fontSize: '1.9rem',
                                 marginBottom: '1.8rem',
-                                boxShadow: '0 12px 24px rgba(245,158,11,0.4)'
+                                boxShadow: '0 12px 24px rgba(245,158,11,0.35)'
                             }}>
                                 <FaRocket />
                             </div>
 
-                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1.5rem', color: '#FBBF24' }}>
+                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1.5rem', color: isDark ? '#FBBF24' : '#B45309' }}>
                                 Our Mission
                             </h3>
 
@@ -389,9 +400,9 @@ const ResearchPage = () => {
                                     'Nurture collaborative partnerships with industries, research institutes, and universities.',
                                     'Adopt an ethical approach to research activities by establishing research ethics and advisory committees to guide and oversee such efforts.',
                                     'Offer innovative solutions to tackle challenges faced by society and various industries.'
-                                ].map((item, idx) => (
-                                    <li key={idx} style={{ display: 'flex', gap: '0.9rem', alignItems: 'flex-start', fontSize: '0.98rem', lineHeight: '1.6', color: 'var(--text-main)', fontWeight: '500' }}>
-                                        <span style={{ color: '#F59E0B', flexShrink: 0, marginTop: '0.2rem' }}>
+                               ].map((item, idx) => (
+                                    <li key={idx} style={{ display: 'flex', gap: '0.9rem', alignItems: 'flex-start', fontSize: '0.98rem', lineHeight: '1.6', color: primaryTextColor, fontWeight: '500' }}>
+                                        <span style={{ color: isDark ? '#F59E0B' : '#D97706', flexShrink: 0, marginTop: '0.2rem' }}>
                                             <FaArrowRight size={13} />
                                         </span>
                                         <span>{item}</span>
@@ -411,13 +422,13 @@ const ResearchPage = () => {
                         transition={{ duration: 0.6 }}
                         style={{ textAlign: 'center', marginBottom: '3.5rem' }}
                     >
-                        <span style={{ padding: '0.4rem 1.2rem', background: 'var(--primary-glow)', color: '#38BDF8', borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <span style={{ padding: '0.4rem 1.2rem', background: sectionBadgeBg, color: sectionBadgeColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             Strategic Focus
                         </span>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: 'var(--text-main)' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: primaryTextColor }}>
                             Key Objectives
                         </h2>
-                        <p style={{ color: 'var(--text-muted)', maxWidth: '650px', margin: '0.8rem auto 0', fontSize: '1.05rem' }}>
+                        <p style={{ color: secondaryTextColor, maxWidth: '650px', margin: '0.8rem auto 0', fontSize: '1.05rem' }}>
                             Driving impactful outcomes through structured consultancy, industry presence, and academic identity.
                         </p>
                     </motion.div>
@@ -460,28 +471,28 @@ const ResearchPage = () => {
                                 viewport={{ once: true, margin: '-50px' }}
                                 transition={{ duration: 0.5, delay: i * 0.1 }}
                                 style={{
-                                    background: 'var(--bg-card)',
+                                    background: cardBg,
                                     borderRadius: '20px',
                                     padding: '2.2rem 1.8rem',
-                                    border: '1px solid var(--glass-border)',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.04)',
+                                    border: cardBorder,
+                                    boxShadow: cardShadow,
                                     position: 'relative',
                                     transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                                 }}
                                 className="objective-card"
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
-                                    <span style={{ fontSize: '2.2rem', fontWeight: '900', color: 'rgba(56, 189, 248, 0.4)', fontFamily: 'Outfit, sans-serif' }}>
+                                    <span style={{ fontSize: '2.2rem', fontWeight: '900', color: isDark ? 'rgba(56, 189, 248, 0.4)' : 'rgba(37, 99, 235, 0.25)', fontFamily: 'Outfit, sans-serif' }}>
                                         {obj.num}
                                     </span>
                                     <div style={{ padding: '0.8rem', background: obj.iconBg, color: '#ffffff', borderRadius: '16px', fontSize: '1.4rem', boxShadow: '0 8px 16px rgba(0,0,0,0.15)' }}>
                                         <obj.icon />
                                     </div>
                                 </div>
-                                <h4 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.8rem', color: 'var(--text-main)' }}>
+                                <h4 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '0.8rem', color: primaryTextColor }}>
                                     {obj.title}
                                 </h4>
-                                <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>
+                                <p style={{ fontSize: '0.95rem', color: secondaryTextColor, lineHeight: '1.6', margin: 0 }}>
                                     {obj.text}
                                 </p>
                             </motion.div>
@@ -497,11 +508,13 @@ const ResearchPage = () => {
                         viewport={{ once: true, margin: '-50px' }}
                         transition={{ duration: 0.7 }}
                         style={{
-                            background: 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg-section) 100%)',
+                            background: isDark
+                                ? 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg-section) 100%)'
+                                : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
                             borderRadius: '32px',
-                            border: '1px solid var(--glass-border)',
+                            border: cardBorder,
                             padding: '3.5rem 3rem',
-                            boxShadow: '0 25px 60px rgba(0,0,0,0.06)',
+                            boxShadow: cardShadow,
                             position: 'relative',
                             overflow: 'hidden'
                         }}
@@ -512,7 +525,7 @@ const ResearchPage = () => {
                             top: '-20px',
                             right: '30px',
                             fontSize: '12rem',
-                            color: 'rgba(56, 189, 248, 0.12)',
+                            color: isDark ? 'rgba(56, 189, 248, 0.12)' : 'rgba(37, 99, 235, 0.06)',
                             pointerEvents: 'none',
                             lineHeight: 1
                         }}>
@@ -536,12 +549,12 @@ const ResearchPage = () => {
                                         width: '100%',
                                         height: '100%',
                                         borderRadius: '50%',
-                                        background: 'var(--bg-card)',
+                                        background: isDark ? 'var(--bg-card)' : '#F1F5F9',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         fontSize: '4.5rem',
-                                        color: '#38BDF8'
+                                        color: isDark ? '#38BDF8' : '#2563EB'
                                     }}>
                                         <FaUserTie />
                                     </div>
@@ -558,20 +571,20 @@ const ResearchPage = () => {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         fontSize: '1.3rem',
-                                        border: '3px solid var(--bg-card)',
+                                        border: `3px solid ${isDark ? 'var(--bg-card)' : '#FFFFFF'}`,
                                         boxShadow: '0 4px 12px rgba(245,158,11,0.4)'
                                     }}>
                                         <FaAward />
                                     </span>
                                 </div>
 
-                                <h3 style={{ fontSize: '1.6rem', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 0.3rem' }}>
+                                <h3 style={{ fontSize: '1.6rem', fontWeight: '900', color: primaryTextColor, margin: '0 0 0.3rem' }}>
                                     Dr. M. Sivakumar
                                 </h3>
-                                <p style={{ fontSize: '1rem', fontWeight: '800', color: '#FBBF24', margin: '0 0 0.4rem' }}>
+                                <p style={{ fontSize: '1rem', fontWeight: '800', color: isDark ? '#FBBF24' : '#D97706', margin: '0 0 0.4rem' }}>
                                     Dean of R&D
                                 </p>
-                                <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>
+                                <p style={{ fontSize: '0.88rem', color: secondaryTextColor, margin: 0, lineHeight: '1.4' }}>
                                     Research and Development Cell<br />
                                     EASA College of Engineering and Technology, Coimbatore
                                 </p>
@@ -579,14 +592,14 @@ const ResearchPage = () => {
 
                             {/* DEAN MESSAGE CONTENT */}
                             <div>
-                                <span style={{ padding: '0.35rem 1rem', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', borderRadius: '50px', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                <span style={{ padding: '0.35rem 1rem', background: sectionBadgeBg, color: sectionBadgeColor, borderRadius: '50px', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                     Dean's Message
                                 </span>
-                                <h2 style={{ fontSize: '2.2rem', fontWeight: '900', marginTop: '0.8rem', marginBottom: '1.5rem', color: 'var(--text-main)' }}>
+                                <h2 style={{ fontSize: '2.2rem', fontWeight: '900', marginTop: '0.8rem', marginBottom: '1.5rem', color: primaryTextColor }}>
                                     Inspiring Innovation & Impactful Research
                                 </h2>
 
-                                <div style={{ fontSize: '1.05rem', lineHeight: '1.8', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                <div style={{ fontSize: '1.05rem', lineHeight: '1.8', color: isDark ? '#E2E8F0' : '#334155', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                                     <p style={{ margin: 0 }}>
                                         Welcome to the Research and Development (R&D) Cell of EASA College of Engineering and Technology.
                                     </p>
@@ -599,7 +612,7 @@ const ResearchPage = () => {
                                     <p style={{ margin: 0 }}>
                                         We believe that research should create new knowledge and offer practical solutions to real-world challenges. We aim to foster creativity, critical thinking, and innovation within our research efforts.
                                     </p>
-                                    <p style={{ margin: 0, fontWeight: '700', color: '#FBBF24' }}>
+                                    <p style={{ margin: 0, fontWeight: '700', color: isDark ? '#FBBF24' : '#B45309' }}>
                                         We encourage all faculty members and students to engage actively in research activities, pursue innovative ideas, and collaborate with both academic and industry partners. I wish all researchers success and look forward to your valuable contributions to the growth and advancement of our institution.
                                     </p>
                                 </div>
@@ -617,13 +630,13 @@ const ResearchPage = () => {
                         transition={{ duration: 0.6 }}
                         style={{ textAlign: 'center', marginBottom: '3.5rem' }}
                     >
-                        <span style={{ padding: '0.4rem 1.2rem', background: 'var(--primary-glow)', color: '#38BDF8', borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <span style={{ padding: '0.4rem 1.2rem', background: sectionBadgeBg, color: sectionBadgeColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             Governance & Architecture
                         </span>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: 'var(--text-main)' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: primaryTextColor }}>
                             Organizational Structure
                         </h2>
-                        <p style={{ color: 'var(--text-muted)', maxWidth: '700px', margin: '0.8rem auto 0', fontSize: '1.05rem' }}>
+                        <p style={{ color: secondaryTextColor, maxWidth: '700px', margin: '0.8rem auto 0', fontSize: '1.05rem' }}>
                             Hierarchical flow guiding strategic research execution, ethical governance, industry collaborations, and financial infrastructure.
                         </p>
                     </motion.div>
@@ -635,11 +648,11 @@ const ResearchPage = () => {
                         viewport={{ once: true, margin: '-50px' }}
                         transition={{ duration: 0.7 }}
                         style={{
-                            background: 'var(--bg-card)',
+                            background: cardBg,
                             borderRadius: '28px',
-                            border: '1px solid var(--glass-border)',
+                            border: cardBorder,
                             padding: '4rem 2rem',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.04)',
+                            boxShadow: cardShadow,
                             overflowX: 'auto'
                         }}
                     >
@@ -672,7 +685,7 @@ const ResearchPage = () => {
                                         <FaUserTie />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', tracking: '1px', opacity: 0.9, fontWeight: '800' }}>Executive Leader</div>
+                                        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9, fontWeight: '800' }}>Executive Leader</div>
                                         <div style={{ fontSize: '1.5rem', fontWeight: '900' }}>Principal</div>
                                     </div>
                                 </motion.div>
@@ -707,7 +720,7 @@ const ResearchPage = () => {
                                         <FaMicroscope />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', tracking: '1px', opacity: 0.9, fontWeight: '800' }}>Head of R&D Cell</div>
+                                        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9, fontWeight: '800' }}>Head of R&D Cell</div>
                                         <div style={{ fontSize: '1.5rem', fontWeight: '900' }}>Research Dean</div>
                                     </div>
                                 </motion.div>
@@ -715,7 +728,15 @@ const ResearchPage = () => {
 
                             {/* DIVIDER & CONNECTOR HUB TO 4 PILLARS */}
                             <div style={{ textAlign: 'center', margin: '-1rem 0 2rem 0' }}>
-                                <span style={{ padding: '0.4rem 1.2rem', background: 'var(--glass-highlight)', borderRadius: '50px', fontSize: '0.85rem', fontWeight: '800', color: '#38BDF8' }}>
+                                <span style={{
+                                    padding: '0.4rem 1.2rem',
+                                    background: isDark ? 'var(--glass-highlight)' : 'rgba(37, 99, 235, 0.08)',
+                                    borderRadius: '50px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '800',
+                                    color: isDark ? '#38BDF8' : '#1D4ED8',
+                                    border: isDark ? '1px solid var(--glass-border)' : '1px solid rgba(37, 99, 235, 0.2)'
+                                }}>
                                     4 Functional Pillars of R&D
                                 </span>
                             </div>
@@ -780,23 +801,24 @@ const ResearchPage = () => {
                                             const IconComp = p.icon;
                                             return (
                                                 <div style={{
-                                                    background: 'var(--bg-section)',
+                                                    background: isDark ? 'var(--bg-section)' : '#F8FAFC',
                                                     borderRadius: '20px',
                                                     padding: '2rem 2.5rem',
                                                     borderLeft: `6px solid ${p.color}`,
-                                                    border: '1px solid var(--glass-border)',
+                                                    border: cardBorder,
                                                     display: 'flex',
                                                     gap: '1.5rem',
-                                                    alignItems: 'center'
+                                                    alignItems: 'center',
+                                                    boxShadow: isDark ? 'none' : '0 8px 24px rgba(0,0,0,0.04)'
                                                 }}>
                                                     <div style={{ fontSize: '2.8rem', color: p.color, flexShrink: 0 }}>
                                                         <IconComp />
                                                     </div>
                                                     <div>
-                                                        <h4 style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '0.4rem' }}>
+                                                        <h4 style={{ fontSize: '1.3rem', fontWeight: '900', color: primaryTextColor, marginBottom: '0.4rem' }}>
                                                             {p.title} - Scope & Responsibilities
                                                         </h4>
-                                                        <p style={{ margin: 0, fontSize: '1.02rem', color: 'var(--text-main)', lineHeight: '1.6' }}>
+                                                        <p style={{ margin: 0, fontSize: '1.02rem', color: isDark ? '#E2E8F0' : '#334155', lineHeight: '1.6' }}>
                                                             {p.description}
                                                         </p>
                                                     </div>
@@ -820,13 +842,13 @@ const ResearchPage = () => {
                         transition={{ duration: 0.6 }}
                         style={{ textAlign: 'center', marginBottom: '3.5rem' }}
                     >
-                        <span style={{ padding: '0.4rem 1.2rem', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <span style={{ padding: '0.4rem 1.2rem', background: sectionBadgeBg, color: sectionBadgeColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             Leadership Team
                         </span>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: 'var(--text-main)' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: primaryTextColor }}>
                             Research & Development (R&D) Committee Members 2026-2027
                         </h2>
-                        <p style={{ color: 'var(--text-muted)', maxWidth: '650px', margin: '0.8rem auto 0', fontSize: '1.05rem' }}>
+                        <p style={{ color: secondaryTextColor, maxWidth: '650px', margin: '0.8rem auto 0', fontSize: '1.05rem' }}>
                             Dedicated academic leaders representing diverse engineering disciplines overseeing research quality and innovation.
                         </p>
                     </motion.div>
@@ -838,29 +860,47 @@ const ResearchPage = () => {
                         viewport={{ once: true, margin: '-50px' }}
                         transition={{ duration: 0.6 }}
                         style={{
-                            background: 'var(--bg-card)',
+                            background: cardBg,
                             borderRadius: '20px',
-                            border: '1px solid rgba(56, 189, 248, 0.3)',
+                            border: cardBorder,
                             padding: '1rem 1.5rem',
                             marginBottom: '2rem',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             gap: '1rem',
-                            boxShadow: '0 8px 30px rgba(0,0,0,0.06)'
+                            boxShadow: isDark ? '0 8px 30px rgba(0,0,0,0.2)' : '0 8px 30px rgba(0,0,0,0.04)'
                         }}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', width: '100%', maxWidth: '450px', background: 'var(--bg-section)', padding: '0.7rem 1.2rem', borderRadius: '14px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                            <FaMagnifyingGlass style={{ color: '#38BDF8', fontSize: '1.1rem' }} />
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.8rem',
+                            width: '100%',
+                            maxWidth: '450px',
+                            background: isDark ? 'var(--bg-section)' : '#F1F5F9',
+                            padding: '0.7rem 1.2rem',
+                            borderRadius: '14px',
+                            border: isDark ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(203, 213, 225, 0.8)'
+                        }}>
+                            <FaMagnifyingGlass style={{ color: isDark ? '#38BDF8' : '#2563EB', fontSize: '1.1rem' }} />
                             <input
                                 type="text"
                                 placeholder="Search by name, designation, or department..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: '600' }}
+                                style={{
+                                    border: 'none',
+                                    background: 'transparent',
+                                    outline: 'none',
+                                    width: '100%',
+                                    color: primaryTextColor,
+                                    fontSize: '0.95rem',
+                                    fontWeight: '600'
+                                }}
                             />
                         </div>
-                        <span style={{ fontSize: '0.9rem', color: '#38BDF8', fontWeight: '800', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '0.9rem', color: isDark ? '#38BDF8' : '#2563EB', fontWeight: '800', whiteSpace: 'nowrap' }}>
                             Showing {filteredMembers.length} of {committeeMembers.length} Members
                         </span>
                     </motion.div>
@@ -872,11 +912,11 @@ const ResearchPage = () => {
                         viewport={{ once: true, margin: '-50px' }}
                         transition={{ duration: 0.7 }}
                         style={{
-                            background: 'var(--bg-card)',
+                            background: cardBg,
                             borderRadius: '24px',
-                            border: '2px solid rgba(59, 130, 246, 0.3)',
+                            border: isDark ? '2px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(226, 232, 240, 0.9)',
                             overflow: 'hidden',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.1)'
+                            boxShadow: cardShadow
                         }}
                     >
                         <div style={{ overflowX: 'auto' }}>
@@ -892,7 +932,7 @@ const ResearchPage = () => {
                                 <tbody>
                                     {filteredMembers.length === 0 ? (
                                         <tr>
-                                            <td colSpan="4" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: '700', fontSize: '1.1rem' }}>
+                                            <td colSpan="4" style={{ padding: '3rem', textAlign: 'center', color: primaryTextColor, fontWeight: '700', fontSize: '1.1rem' }}>
                                                 No committee members found matching "{searchTerm}".
                                             </td>
                                         </tr>
@@ -908,12 +948,12 @@ const ResearchPage = () => {
                                                     viewport={{ once: true }}
                                                     transition={{ duration: 0.4, delay: index * 0.05 }}
                                                     style={{
-                                                        borderBottom: index === filteredMembers.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
+                                                        borderBottom: index === filteredMembers.length - 1 ? 'none' : isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(226, 232, 240, 0.8)',
                                                         background: member.isLead
-                                                            ? 'rgba(37, 99, 235, 0.18)'
+                                                            ? isDark ? 'rgba(37, 99, 235, 0.18)' : 'rgba(37, 99, 235, 0.07)'
                                                             : index % 2 === 0
                                                                 ? 'transparent'
-                                                                : 'rgba(255, 255, 255, 0.03)',
+                                                                : isDark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(248, 250, 252, 0.7)',
                                                         transition: 'background 0.2s ease'
                                                     }}
                                                     className="table-row-hover"
@@ -931,7 +971,7 @@ const ResearchPage = () => {
                                                             justifyContent: 'center',
                                                             fontWeight: '900',
                                                             fontSize: '0.95rem',
-                                                            boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                                                            boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
                                                         }}>
                                                             {member.sno}
                                                         </span>
@@ -939,7 +979,7 @@ const ResearchPage = () => {
 
                                                     {/* MEMBER NAME */}
                                                     <td style={{ padding: '1.3rem 1.5rem' }}>
-                                                        <div style={{ fontWeight: '900', color: 'var(--text-main)', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                        <div style={{ fontWeight: '900', color: primaryTextColor, fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                                                             {member.name}
                                                             {member.isLead && (
                                                                 <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.55rem', background: '#F59E0B', color: '#000000', borderRadius: '50px', fontWeight: '900', textTransform: 'uppercase' }}>LEAD</span>
@@ -948,7 +988,7 @@ const ResearchPage = () => {
                                                     </td>
 
                                                     {/* DESIGNATION */}
-                                                    <td style={{ padding: '1.3rem 1.5rem', fontWeight: '800', fontSize: '1rem', color: member.isLead ? '#FBBF24' : '#38BDF8' }}>
+                                                    <td style={{ padding: '1.3rem 1.5rem', fontWeight: '800', fontSize: '1rem', color: member.isLead ? isDark ? '#FBBF24' : '#D97706' : isDark ? '#38BDF8' : '#2563EB' }}>
                                                         {member.designation}
                                                     </td>
 
@@ -962,7 +1002,7 @@ const ResearchPage = () => {
                                                             fontSize: '0.88rem',
                                                             fontWeight: '800',
                                                             display: 'inline-block',
-                                                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                                            boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
                                                             lineHeight: '1.4'
                                                         }}>
                                                             {member.department}
@@ -987,13 +1027,13 @@ const ResearchPage = () => {
                         transition={{ duration: 0.6 }}
                         style={{ textAlign: 'center', marginBottom: '3.5rem' }}
                     >
-                        <span style={{ padding: '0.4rem 1.2rem', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <span style={{ padding: '0.4rem 1.2rem', background: sectionBadgeBg, color: sectionBadgeColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             Opportunities & Ecosystem
                         </span>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: 'var(--text-main)' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginTop: '0.8rem', color: primaryTextColor }}>
                             Research Programs Offered
                         </h2>
-                        <p style={{ color: 'var(--text-muted)', maxWidth: '750px', margin: '0.8rem auto 0', fontSize: '1.05rem' }}>
+                        <p style={{ color: secondaryTextColor, maxWidth: '750px', margin: '0.8rem auto 0', fontSize: '1.05rem' }}>
                             The Research & Development (R&D) Cell promotes a vibrant research culture by encouraging faculty members and students to engage in innovative and interdisciplinary research.
                         </p>
                     </motion.div>
@@ -1009,11 +1049,11 @@ const ResearchPage = () => {
                                     viewport={{ once: true, margin: '-50px' }}
                                     transition={{ duration: 0.6, delay: index * 0.08 }}
                                     style={{
-                                        background: 'var(--bg-card)',
+                                        background: cardBg,
                                         borderRadius: '24px',
-                                        border: '1px solid var(--glass-border)',
+                                        border: cardBorder,
                                         padding: '2.5rem 2rem',
-                                        boxShadow: '0 15px 35px rgba(0,0,0,0.05)',
+                                        boxShadow: cardShadow,
                                         display: 'flex',
                                         flexDirection: 'column',
                                         justifyContent: 'space-between',
@@ -1034,15 +1074,15 @@ const ResearchPage = () => {
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 fontSize: '1.8rem',
-                                                boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
+                                                boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
                                             }}>
                                                 <IconC />
                                             </div>
                                             <span style={{
                                                 padding: '0.4rem 1rem',
                                                 borderRadius: '50px',
-                                                background: 'rgba(56, 189, 248, 0.15)',
-                                                color: '#38BDF8',
+                                                background: sectionBadgeBg,
+                                                color: sectionBadgeColor,
                                                 fontSize: '0.78rem',
                                                 fontWeight: '900',
                                                 textTransform: 'uppercase',
@@ -1052,11 +1092,11 @@ const ResearchPage = () => {
                                             </span>
                                         </div>
 
-                                        <h3 style={{ fontSize: '1.45rem', fontWeight: '900', marginBottom: '1rem', color: 'var(--text-main)', lineHeight: '1.3' }}>
+                                        <h3 style={{ fontSize: '1.45rem', fontWeight: '900', marginBottom: '1rem', color: primaryTextColor, lineHeight: '1.3' }}>
                                             {prog.title}
                                         </h3>
 
-                                        <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.65', marginBottom: '2rem' }}>
+                                        <p style={{ fontSize: '1rem', color: secondaryTextColor, lineHeight: '1.65', marginBottom: '2rem' }}>
                                             {prog.description}
                                         </p>
                                     </div>
@@ -1067,7 +1107,7 @@ const ResearchPage = () => {
                                             display: 'inline-flex',
                                             alignItems: 'center',
                                             gap: '0.6rem',
-                                            color: '#38BDF8',
+                                            color: isDark ? '#38BDF8' : '#2563EB',
                                             fontWeight: '800',
                                             fontSize: '0.98rem',
                                             textDecoration: 'none',
@@ -1092,7 +1132,7 @@ const ResearchPage = () => {
             <style>{`
                 .quick-nav-btn:hover {
                     background: #2563EB !important;
-                    color: #fff !important;
+                    color: #ffffff !important;
                     border-color: #2563EB !important;
                 }
                 .objective-card:hover {
@@ -1107,7 +1147,7 @@ const ResearchPage = () => {
                     text-decoration: underline;
                 }
                 .table-row-hover:hover {
-                    background: rgba(59, 130, 246, 0.2) !important;
+                    background: ${isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(37, 99, 235, 0.12)'} !important;
                 }
                 @media (max-width: 968px) {
                     .dean-grid {
@@ -1124,4 +1164,3 @@ const ResearchPage = () => {
 };
 
 export default ResearchPage;
-

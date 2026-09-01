@@ -49,6 +49,17 @@ const LibraryPage = lazy(() => import('./pages/LibraryPage'));
 const ScholarshipPage = lazy(() => import('./pages/ScholarshipPage'));
 const PlacementPage = lazy(() => import('./pages/PlacementPage'));
 const SkillingPage = lazy(() => import('./pages/SkillingPage'));
+const HigherEducationPage = lazy(() => import('./pages/HigherEducationPage'));
+const EntrepreneurshipPage = lazy(() => import('./pages/EntrepreneurshipPage'));
+const AscendCenterPage = lazy(() => import('./pages/AscendCenterPage'));
+const PacPage = lazy(() => import('./pages/PacPage'));
+const BosPage = lazy(() => import('./pages/autonomous/BosPage'));
+const CdcPage = lazy(() => import('./pages/autonomous/CdcPage'));
+const StandingCommitteePage = lazy(() => import('./pages/autonomous/StandingCommitteePage'));
+const GoverningBodiesPage = lazy(() => import('./pages/autonomous/GoverningBodiesPage'));
+const AcademicCouncilPage = lazy(() => import('./pages/autonomous/AcademicCouncilPage'));
+const ResultPassingBoardPage = lazy(() => import('./pages/autonomous/ResultPassingBoardPage'));
+const CoursesRegisteredPage = lazy(() => import('./pages/autonomous/CoursesRegisteredPage'));
 const AdmissionsPage = lazy(() => import('./pages/AdmissionsPage'));
 const AlumniSocial = lazy(() => import('./pages/AlumniSocial'));
 import './index.css';
@@ -90,6 +101,7 @@ const AicteEoaPage = lazy(() => import('./pages/AicteEoaPage'));
 const SdgsPage = lazy(() => import('./pages/SdgsPage'));
 const ObePage = lazy(() => import('./pages/ObePage'));
 const NirfPage = lazy(() => import('./pages/NirfPage'));
+const NbaPage = lazy(() => import('./pages/NbaPage'));
 const Login = lazy(() => import('./pages/Login'));
 const IdeaLabPage = lazy(() => import('./pages/IdeaLabPage'));
 
@@ -183,9 +195,36 @@ function App() {
             <Route path="/page/amenities" element={<AmenitiesPage />} />
             <Route path="/page/placement" element={<PlacementPage />} />
             <Route path="/page/skilling" element={<SkillingPage />} />
+            <Route path="/page/higher-education" element={<HigherEducationPage />} />
+            <Route path="/higher-education" element={<HigherEducationPage />} />
+            <Route path="/page/entrepreneurship" element={<EntrepreneurshipPage />} />
+            <Route path="/entrepreneurship" element={<EntrepreneurshipPage />} />
+            <Route path="/ascend-center" element={<AscendCenterPage />} />
+            <Route path="/page/ascend-center" element={<AscendCenterPage />} />
+            <Route path="/ascend" element={<AscendCenterPage />} />
+            <Route path="/page/pac" element={<PacPage />} />
+            <Route path="/pac" element={<PacPage />} />
+            <Route path="/program-advisory-committee" element={<PacPage />} />
+
+            {/* Autonomous & Academic Bodies */}
+            <Route path="/page/bos" element={<BosPage />} />
+            <Route path="/bos" element={<BosPage />} />
+            <Route path="/page/cdc" element={<CdcPage />} />
+            <Route path="/cdc" element={<CdcPage />} />
+            <Route path="/page/standing-committee" element={<StandingCommitteePage />} />
+            <Route path="/standing-committee" element={<StandingCommitteePage />} />
+            <Route path="/page/governing-bodies" element={<GoverningBodiesPage />} />
+            <Route path="/governing-bodies" element={<GoverningBodiesPage />} />
+            <Route path="/governing-body" element={<GoverningBodiesPage />} />
+            <Route path="/page/academic-council" element={<AcademicCouncilPage />} />
+            <Route path="/academic-council" element={<AcademicCouncilPage />} />
+            <Route path="/page/result-passing-board" element={<ResultPassingBoardPage />} />
+            <Route path="/result-passing-board" element={<ResultPassingBoardPage />} />
+            <Route path="/page/courses-registered" element={<CoursesRegisteredPage />} />
+            <Route path="/courses-registered" element={<CoursesRegisteredPage />} />
+            <Route path="/page/autonomous-regulations" element={<RegulationsPage />} />
 
             <Route path="/page/fest" element={<DhruvaFestPage />} />
-
             <Route path="/page/cells" element={<StudentCellsPage />} />
 
             {/* IQAC Pages */}
@@ -212,6 +251,8 @@ function App() {
             <Route path="/sdgs" element={<SdgsPage />} />
             <Route path="/obe" element={<ObePage />} />
             <Route path="/nirf" element={<NirfPage />} />
+            <Route path="/nba" element={<NbaPage />} />
+            <Route path="/page/nba" element={<NbaPage />} />
             <Route path="/idea-lab" element={<IdeaLabPage />} />
             <Route path="/page/cafeteria" element={<CafeteriaPage />} />
             <Route path="/page/food-court" element={<FoodCourtPage />} />

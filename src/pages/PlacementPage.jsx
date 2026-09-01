@@ -30,7 +30,7 @@ const defaultRecruiters = [
     { name: "Trans Energy", logo: "", sector: "Core Engineering", package: "5 LPA" },
     { name: "Motherson", logo: "", sector: "Core Engineering", package: "3 LPA" },
     { name: "KGIS", logo: "", sector: "Information Technology", package: "3 LPA" },
-    { name: "Zoho Corporation", logo: "https://upload.wikimedia.org/wikipedia/commons/1/15/Zoho_Corporation_logo.png", sector: "Information Technology", package: "6–12 LPA" },
+    { name: "Zoho Corporation", logo: "https://upload.wikimedia.org/wikipedia/commons/1/15/Zoho_Corporation_logo.png", sector: "Information Technology", package: "6–16 LPA" },
     { name: "Cognizant", logo: "https://upload.wikimedia.org/wikipedia/commons/2/23/Cognizant_logo.svg", sector: "Information Technology", package: "4–6 LPA" },
     { name: "Infosys", logo: "https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg", sector: "Information Technology", package: "4–7 LPA" },
     { name: "L&T Construction", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/Larsen%26Toubro_logo.svg", sector: "Core Engineering", package: "4.5–6 LPA" },

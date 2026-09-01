@@ -821,7 +821,7 @@ const placementPageData = {
     overview: `The Training and Placement Cell at EASA College is dedicated to ensuring that every student gets the best possible start to their career. We act as a bridge between the industry and academia, facilitating a smooth transition for our students. Our comprehensive training programs, industry partnerships, and dedicated team work tirelessly to bring the best recruiters to campus. We focus not just on job placement, but on holistic career development, equipping our students with the skills, confidence, and knowledge required to excel in the global marketplace.`,
     stats: [
         { label: "Placement Percentage", value: "98%", icon: "FaCheckCircle" },
-        { label: "Highest Package", value: "12 LPA", icon: "FaRocket" },
+        { label: "Highest Package", value: "16 LPA", icon: "FaRocket" },
         { label: "Average Package", value: "4.5 LPA", icon: "FaChartLine" },
         { label: "Recruiters", value: "150+", icon: "FaBuilding" },
         { label: "Internships Offered", value: "500+", icon: "FaIdBadge" }

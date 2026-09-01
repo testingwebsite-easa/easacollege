@@ -156,7 +156,7 @@ const AdmissionsPage = () => {
     const stats = [
         { value: "2763", label: "TNEA Counselling Code", highlight: true, subtext: "Official Code" },
         { value: "96%", label: "Placement Track Record", highlight: false, subtext: "Verified Placements" },
-        { value: "₹12 LPA", label: "Highest Salary Package", highlight: false, subtext: "Top Product Tier" },
+        { value: "₹16 LPA", label: "Highest Salary Package", highlight: false, subtext: "Top Product Tier" },
         { value: "150+", label: "Top Global Recruiters", highlight: false, subtext: "Active Partners" },
         { value: "100+", label: "Patents & Publications", highlight: false, subtext: "R&D Innovations" },
         { value: "25+ Acres", label: "Hi-Tech Green Campus", highlight: false, subtext: "Western Ghats Belt" }
@@ -1419,7 +1419,7 @@ const AdmissionsPage = () => {
             }}>
                 <div className="container" style={{ maxWidth: '1280px', margin: '0 auto' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 540px), 1fr))', gap: '3rem' }}>
-                        
+
                         {/* Left: TNEA Schedule */}
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1rem' }}>
