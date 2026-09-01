@@ -242,13 +242,6 @@ const UTILITY_ITEMS = [
         children: [
             { title: 'Job Openings', href: '/careers' }
         ]
-    },
-    {
-        title: 'ALUMNI',
-        children: [
-            { title: 'Registration', href: '/alumni-registration' },
-            { title: 'Alumni Social', href: '/alumni-social' }
-        ]
     }
 ];
 
@@ -581,23 +574,7 @@ const Navbar = ({ onApplyClick }) => {
                         <div style={{ width: '1px', height: '14px', background: 'var(--glass-border)' }}></div>
 
 
-                        {/* 7. ALUMNI Dropdown */}
-                        <div className="nav-item-dropdown" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', position: 'relative' }}
-                            onClick={(e) => { e.stopPropagation(); setMobileExpanded(prev => ({ ...prev, 'ALUMNI_UTILITY': !prev['ALUMNI_UTILITY'] })) }}>
-                            <span style={{ fontSize: '0.85rem' }}>ALUMNI</span> <FaChevronDown size={10} />
-                            <div className="dropdown-menu" style={{
-                                minWidth: '190px', left: 'auto', right: 0, top: '100%',
-                                background: theme === 'dark' ? '#000' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                display: mobileExpanded['ALUMNI_UTILITY'] ? 'block' : 'none'
-                            }}>
-                                <a href="/alumni" className="dropdown-item">Alumni Connect Hub</a>
-                                <a href="/alumni-registration" className="dropdown-item">Alumni Registration</a>
-                                <a href="/alumni-social" className="dropdown-item">Alumni Social Hub</a>
-                            </div>
-                        </div>
-                        
-                        {/* 8. SDGs @ EASA */}
+                        {/* 7. SDGs @ EASA */}
                         <a
                             href="/sdgs"
                             style={{

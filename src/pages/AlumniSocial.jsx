@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaGraduationCap, FaBriefcase, FaEnvelope, FaPhone, FaSearch, FaFilter, FaIdCard, FaLinkedin, FaGithub, FaTwitter, FaSpinner, FaTimes, FaDownload, FaShieldAlt, FaCheckCircle } from 'react-icons/fa';
+import { FaGraduationCap, FaBriefcase, FaEnvelope, FaPhone, FaSearch, FaFilter, FaIdCard, FaSpinner, FaTimes, FaDownload, FaShieldAlt, FaCheckCircle, FaUserGraduate } from 'react-icons/fa';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import Navbar from '../components/Navbar';
@@ -9,8 +9,12 @@ import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
 import API_BASE_URL from '../api';
 import collegeLogo from '../assets/College Logo with White Letter.webp';
+import { useTheme } from '../context/ThemeContext';
 
 const AlumniSocial = () => {
+    const { theme } = useTheme();
+    const isDark = theme !== 'light';
+
     const [alumni, setAlumni] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -102,66 +106,78 @@ Email: ${person.email || 'N/A'}
 Status: Verified Lifetime Alumni`;
     };
 
+    const cardBg = isDark ? 'var(--bg-card)' : '#ffffff';
+    const cardBorder = isDark ? '1px solid var(--glass-border)' : '1px solid rgba(226, 232, 240, 0.9)';
+    const cardShadow = isDark ? '0 15px 35px rgba(0,0,0,0.35)' : '0 10px 30px rgba(0,0,0,0.06)';
+    const primaryTextColor = isDark ? '#f8fafc' : '#0F172A';
+    const secondaryTextColor = isDark ? '#cbd5e1' : '#475569';
+    const goldAccent = isDark ? '#F8D53D' : '#D97706';
+    const blueAccent = isDark ? '#38BDF8' : '#2563EB';
+
     return (
-        <div style={{ background: 'var(--bg-dark)', minHeight: '100vh' }}>
-            <SEO title="Alumni Social" description="Connect with the global EASA Alumni network. Reconnect, share, and grow together." />
+        <div style={{ background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)', transition: 'background-color 0.3s ease' }}>
+            <SEO title="Alumni Social Hub | EASA College" description="Connect with the global EASA Alumni network. Reconnect, share, and grow together." />
             <Navbar />
 
             <GlobalHero 
                 pageKey="alumni-social"
                 defaultTitle="Alumni Social Hub"
-                defaultSubtitle="Discover and connect with your fellow graduates. Building a lifelong network of EASAians."
+                defaultSubtitle="Discover and connect with your fellow graduates. Building a lifelong network of EASAians worldwide."
                 defaultImage="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2084&auto=format&fit=crop"
             />
 
-            <main className="container" style={{ padding: '4rem 2rem' }}>
+            <main className="container" style={{ padding: '4rem 1.5rem', maxWidth: '1300px', margin: '0 auto' }}>
                 {/* Search & Filter Bar */}
                 <div style={{ 
                     display: 'flex', 
                     flexWrap: 'wrap', 
                     gap: '1.5rem', 
-                    marginBottom: '4rem',
-                    background: 'rgba(255,255,255,0.03)',
-                    padding: '1.5rem',
+                    marginBottom: '3.5rem',
+                    background: cardBg,
+                    padding: '1.5rem 2rem',
                     borderRadius: '24px',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    border: cardBorder,
+                    boxShadow: cardShadow,
                     alignItems: 'center'
                 }}>
-                    <div style={{ flex: 1, position: 'relative', minWidth: '250px' }}>
-                        <FaSearch style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+                    <div style={{ flex: 1, position: 'relative', minWidth: 'min(100%, 280px)' }}>
+                        <FaSearch style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: secondaryTextColor }} />
                         <input 
                             type="text" 
-                            placeholder="Search by name or batch year..."
+                            placeholder="Search alumni by name or batch year..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             style={{
                                 width: '100%',
-                                padding: '1rem 1rem 1rem 3.5rem',
-                                background: 'rgba(0,0,0,0.2)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '14px',
-                                color: '#fff',
-                                outline: 'none'
+                                padding: '0.85rem 1rem 0.85rem 3.2rem',
+                                background: isDark ? 'rgba(0,0,0,0.25)' : '#F8FAFC',
+                                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #CBD5E1',
+                                borderRadius: '50px',
+                                color: primaryTextColor,
+                                outline: 'none',
+                                fontSize: '0.92rem'
                             }}
                         />
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <FaFilter style={{ color: '#F8D53D' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', minWidth: 'min(100%, 260px)' }}>
+                        <FaFilter style={{ color: goldAccent, flexShrink: 0 }} />
                         <select 
                             value={filterDept}
                             onChange={(e) => setFilterDept(e.target.value)}
                             style={{
-                                padding: '0.8rem 1.5rem',
-                                background: 'rgba(0,0,0,0.2)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '14px',
-                                color: '#fff',
+                                flex: 1,
+                                padding: '0.85rem 1.2rem',
+                                background: isDark ? '#0F172A' : '#F8FAFC',
+                                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #CBD5E1',
+                                borderRadius: '50px',
+                                color: primaryTextColor,
                                 outline: 'none',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                fontSize: '0.92rem'
                             }}
                         >
-                            <option value="All">All Departments</option>
+                            <option value="All">All Departments ({alumni.length})</option>
                             {departments.map(dept => (
                                 <option key={dept._id || dept.id || dept.name} value={dept.name}>{dept.name}</option>
                             ))}
@@ -170,9 +186,15 @@ Status: Verified Lifetime Alumni`;
                 </div>
 
                 {loading ? (
-                    <div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
-                        <FaSpinner className="spin" size={40} />
-                        <p style={{ marginTop: '1rem' }}>Bringing our community together...</p>
+                    <div style={{ textAlign: 'center', padding: '6rem 2rem', color: secondaryTextColor }}>
+                        <FaSpinner className="spin" size={40} style={{ color: goldAccent }} />
+                        <p style={{ marginTop: '1.2rem', fontSize: '1.1rem', fontWeight: '700' }}>Bringing our alumni community together...</p>
+                    </div>
+                ) : filteredAlumni.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '6rem 2rem', background: cardBg, borderRadius: '24px', border: cardBorder, boxShadow: cardShadow }}>
+                        <FaUserGraduate size={50} style={{ color: goldAccent, opacity: 0.6, marginBottom: '1rem' }} />
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: primaryTextColor, margin: '0 0 0.5rem 0' }}>No Alumni Found</h3>
+                        <p style={{ color: secondaryTextColor, margin: 0 }}>Try searching with a different keyword or batch year.</p>
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '2.5rem' }}>
@@ -188,31 +210,32 @@ Status: Verified Lifetime Alumni`;
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.9 }}
-                                        transition={{ duration: 0.3, delay: index * 0.04 }}
-                                        whileHover={{ y: -8 }}
+                                        transition={{ duration: 0.3, delay: index * 0.03 }}
+                                        whileHover={{ y: -8, boxShadow: isDark ? '0 20px 45px rgba(0,0,0,0.5)' : '0 18px 40px rgba(0,0,0,0.1)' }}
                                         style={{
-                                            background: 'rgba(15, 23, 42, 0.75)',
-                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            background: cardBg,
+                                            border: cardBorder,
                                             borderRadius: '24px',
                                             overflow: 'hidden',
                                             position: 'relative',
-                                            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
+                                            boxShadow: cardShadow,
                                             display: 'flex',
                                             flexDirection: 'column',
-                                            justify: 'space-between'
+                                            justifyContent: 'space-between',
+                                            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                                         }}
                                     >
                                         {/* Top Accent Strip */}
-                                        <div style={{ height: '5px', background: 'linear-gradient(90deg, #F8D53D 0%, #EAB308 50%, #3B82F6 100%)' }} />
+                                        <div style={{ height: '5px', background: 'linear-gradient(90deg, #F59E0B 0%, #D97706 50%, #2563EB 100%)' }} />
 
                                         {/* Header Badges */}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.2rem 1.5rem 0.5rem 1.5rem' }}>
                                             <span style={{ 
                                                 fontSize: '0.72rem', 
                                                 fontWeight: '800', 
-                                                color: '#F8D53D',
-                                                background: 'rgba(248, 213, 61, 0.15)',
-                                                border: '1px solid rgba(248, 213, 61, 0.3)',
+                                                color: goldAccent,
+                                                background: isDark ? 'rgba(248, 213, 61, 0.15)' : 'rgba(217, 119, 6, 0.1)',
+                                                border: isDark ? '1px solid rgba(248, 213, 61, 0.3)' : '1px solid rgba(217, 119, 6, 0.3)',
                                                 padding: '3px 10px',
                                                 borderRadius: '20px',
                                                 fontFamily: "'Courier New', monospace"
@@ -221,28 +244,28 @@ Status: Verified Lifetime Alumni`;
                                             </span>
 
                                             <span style={{ 
-                                                background: 'rgba(255, 255, 255, 0.08)', 
-                                                color: 'rgba(255, 255, 255, 0.9)',
+                                                background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9', 
+                                                color: primaryTextColor,
                                                 padding: '4px 12px',
                                                 borderRadius: '50px',
                                                 fontSize: '0.78rem',
-                                                fontWeight: '700'
+                                                fontWeight: '800'
                                             }}>
                                                 Class of {person.batch?.match(/20\d{2}/g)?.pop() || person.batch || 'Alumni'}
                                             </span>
                                         </div>
 
                                         {/* Member Info Body */}
-                                        <div style={{ padding: '1.5rem 1.5rem 2rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                        <div style={{ padding: '1.2rem 1.5rem 1.8rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
                                                 <div style={{ 
-                                                    width: '75px', 
-                                                    height: '75px', 
+                                                    width: '74px', 
+                                                    height: '74px', 
                                                     borderRadius: '50%', 
-                                                    border: '3px solid #F8D53D',
+                                                    border: `3px solid ${goldAccent}`,
                                                     overflow: 'hidden',
                                                     flexShrink: 0,
-                                                    boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
+                                                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
                                                     position: 'relative'
                                                 }}>
                                                     <img 
@@ -256,31 +279,31 @@ Status: Verified Lifetime Alumni`;
                                                     />
                                                 </div>
                                                 <div style={{ flex: 1 }}>
-                                                    <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#fff', margin: '0 0 0.3rem 0', lineHeight: '1.2' }}>
+                                                    <h3 style={{ fontSize: '1.25rem', fontWeight: '900', color: primaryTextColor, margin: '0 0 0.3rem 0', lineHeight: '1.2' }}>
                                                         {person.name}
                                                     </h3>
-                                                    <p style={{ color: '#F8D53D', fontSize: '0.88rem', fontWeight: '700', margin: 0 }}>
+                                                    <p style={{ color: goldAccent, fontSize: '0.85rem', fontWeight: '800', margin: 0 }}>
                                                         {person.department}
                                                     </p>
                                                 </div>
                                             </div>
 
                                             {/* Details Rows */}
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC', padding: '1rem', borderRadius: '16px', border: cardBorder }}>
                                                 {person.currentJob && (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem' }}>
-                                                        <FaBriefcase style={{ color: '#F8D53D', flexShrink: 0 }} />
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: secondaryTextColor, fontSize: '0.88rem' }}>
+                                                        <FaBriefcase style={{ color: goldAccent, flexShrink: 0 }} />
                                                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{person.currentJob}</span>
                                                     </div>
                                                 )}
 
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem' }}>
-                                                    <FaPhone style={{ color: '#F8D53D', flexShrink: 0 }} />
-                                                    <span style={{ fontWeight: '700', color: '#FFFFFF' }}>{displayPhone || 'Not Provided'}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: secondaryTextColor, fontSize: '0.88rem' }}>
+                                                    <FaPhone style={{ color: goldAccent, flexShrink: 0 }} />
+                                                    <span style={{ fontWeight: '700', color: primaryTextColor }}>{displayPhone || 'Not Provided'}</span>
                                                 </div>
 
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255,255,255,0.85)', fontSize: '0.88rem' }}>
-                                                    <FaEnvelope style={{ color: '#F8D53D', flexShrink: 0 }} />
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: secondaryTextColor, fontSize: '0.88rem' }}>
+                                                    <FaEnvelope style={{ color: goldAccent, flexShrink: 0 }} />
                                                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{person.email}</span>
                                                 </div>
                                             </div>
@@ -292,27 +315,27 @@ Status: Verified Lifetime Alumni`;
                                                 onClick={() => setSelectedAlumni(person)}
                                                 style={{ 
                                                     flex: 1, 
-                                                    padding: '0.8rem 1.2rem', 
-                                                    background: 'linear-gradient(135deg, rgba(248, 213, 61, 0.2) 0%, rgba(248, 213, 61, 0.08) 100%)', 
-                                                    border: '1px solid rgba(248, 213, 61, 0.4)', 
-                                                    borderRadius: '12px', 
-                                                    color: '#F8D53D', 
-                                                    fontWeight: '800',
-                                                    fontSize: '0.9rem',
+                                                    padding: '0.85rem 1.2rem', 
+                                                    background: isDark ? 'rgba(248, 213, 61, 0.12)' : '#FEF3C7', 
+                                                    border: isDark ? '1px solid rgba(248, 213, 61, 0.3)' : '1px solid #FDE68A', 
+                                                    borderRadius: '14px', 
+                                                    color: goldAccent, 
+                                                    fontWeight: '900',
+                                                    fontSize: '0.88rem',
                                                     cursor: 'pointer', 
                                                     display: 'flex', 
                                                     alignItems: 'center', 
-                                                    justify: 'center', 
+                                                    justifyContent: 'center', 
                                                     gap: '8px',
-                                                    transition: 'all 0.3s ease'
+                                                    transition: 'all 0.2s ease'
                                                 }}
                                                 onMouseOver={e => {
-                                                    e.currentTarget.style.background = '#F8D53D';
-                                                    e.currentTarget.style.color = '#000';
+                                                    e.currentTarget.style.background = 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)';
+                                                    e.currentTarget.style.color = '#ffffff';
                                                 }}
                                                 onMouseOut={e => {
-                                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(248, 213, 61, 0.2) 0%, rgba(248, 213, 61, 0.08) 100%)';
-                                                    e.currentTarget.style.color = '#F8D53D';
+                                                    e.currentTarget.style.background = isDark ? 'rgba(248, 213, 61, 0.12)' : '#FEF3C7';
+                                                    e.currentTarget.style.color = goldAccent;
                                                 }}
                                             >
                                                 <FaIdCard size={15} /> VIEW DIGITAL CARD
@@ -341,11 +364,11 @@ Status: Verified Lifetime Alumni`;
                             right: 0,
                             bottom: 0,
                             background: 'rgba(0, 0, 0, 0.85)',
-                            backdropFilter: 'blur(10px)',
+                            backdropFilter: 'blur(8px)',
                             zIndex: 9999,
                             display: 'flex',
                             alignItems: 'center',
-                            justify: 'center',
+                            justifyContent: 'center',
                             padding: '1.5rem',
                             overflowY: 'auto'
                         }}
@@ -356,10 +379,10 @@ Status: Verified Lifetime Alumni`;
                             exit={{ scale: 0.9, y: 20 }}
                             onClick={(e) => e.stopPropagation()}
                             style={{
-                                background: '#0F172A',
-                                border: '1px solid rgba(255, 255, 255, 0.15)',
+                                background: cardBg,
+                                border: cardBorder,
                                 borderRadius: '28px',
-                                padding: '1.5rem 1.8rem 2rem 1.8rem',
+                                padding: '2rem 2.2rem 2.2rem 2.2rem',
                                 maxWidth: '620px',
                                 width: '100%',
                                 maxHeight: '92vh',
@@ -367,8 +390,8 @@ Status: Verified Lifetime Alumni`;
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                gap: '1.2rem',
-                                boxShadow: '0 30px 90px rgba(0, 0, 0, 0.9)',
+                                gap: '1.4rem',
+                                boxShadow: '0 30px 90px rgba(0, 0, 0, 0.8)',
                                 position: 'relative',
                                 margin: 'auto'
                             }}
@@ -380,21 +403,19 @@ Status: Verified Lifetime Alumni`;
                                     position: 'absolute',
                                     top: '1.2rem',
                                     right: '1.2rem',
-                                    background: 'rgba(255, 255, 255, 0.1)',
+                                    background: isDark ? 'rgba(255, 255, 255, 0.1)' : '#F1F5F9',
                                     border: 'none',
-                                    color: '#FFF',
+                                    color: primaryTextColor,
                                     width: '36px',
                                     height: '36px',
                                     borderRadius: '50%',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justify: 'center',
+                                    justifyContent: 'center',
                                     cursor: 'pointer',
                                     transition: '0.2s',
                                     zIndex: 10
                                 }}
-                                onMouseOver={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.8)'}
-                                onMouseOut={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
                             >
                                 <FaTimes size={18} />
                             </button>
@@ -404,7 +425,7 @@ Status: Verified Lifetime Alumni`;
                                     display: 'inline-flex', 
                                     alignItems: 'center', 
                                     gap: '6px', 
-                                    color: '#F8D53D', 
+                                    color: goldAccent, 
                                     fontSize: '0.8rem', 
                                     fontWeight: '800', 
                                     marginBottom: '0.3rem',
@@ -413,7 +434,7 @@ Status: Verified Lifetime Alumni`;
                                 }}>
                                     <FaShieldAlt /> EASA ALUMNI ASSOCIATION
                                 </div>
-                                <h2 style={{ fontSize: '1.6rem', fontWeight: '900', color: '#FFF', margin: 0 }}>Official Alumni Digital ID</h2>
+                                <h2 style={{ fontSize: '1.6rem', fontWeight: '900', color: primaryTextColor, margin: 0 }}>Official Alumni Digital ID</h2>
                             </div>
 
                             {/* ID CARD RENDERED FOR DOWNLOAD */}
@@ -583,7 +604,7 @@ Status: Verified Lifetime Alumni`;
                                     paddingTop: '0.7rem', 
                                     borderTop: '1px dashed rgba(255, 255, 255, 0.15)', 
                                     display: 'flex', 
-                                    justify: 'space-between', 
+                                    justifyContent: 'space-between', 
                                     alignItems: 'center',
                                     position: 'relative',
                                     zIndex: 2
@@ -615,7 +636,7 @@ Status: Verified Lifetime Alumni`;
                                             borderRadius: '8px',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justify: 'center',
+                                            justifyContent: 'center',
                                             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
                                             flexShrink: 0
                                         }}>
@@ -638,15 +659,19 @@ Status: Verified Lifetime Alumni`;
                             {/* Download Button */}
                             <button
                                 onClick={() => downloadIDCard(selectedAlumni.name)}
-                                className="btn-gold-impressive"
                                 style={{
                                     padding: '1rem 3rem',
                                     borderRadius: '50px',
                                     fontSize: '1rem',
+                                    fontWeight: '900',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '10px',
                                     cursor: 'pointer',
+                                    border: 'none',
+                                    background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                                    color: '#ffffff',
+                                    boxShadow: '0 10px 25px rgba(217, 119, 6, 0.35)',
                                     marginTop: '0.5rem',
                                     flexShrink: 0
                                 }}
@@ -661,22 +686,6 @@ Status: Verified Lifetime Alumni`;
             <Footer />
 
             <style>{`
-                .btn-gold-impressive {
-                    background: linear-gradient(135deg, #FFE770 0%, #F8D53D 50%, #D4A017 100%) !important;
-                    color: #070B14 !important;
-                    font-weight: 900 !important;
-                    letter-spacing: 0.5px !important;
-                    border: 1px solid #FFE566 !important;
-                    box-shadow: 0 12px 35px rgba(248, 213, 61, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-                    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-                    position: relative;
-                    overflow: hidden;
-                }
-                .btn-gold-impressive:hover {
-                    transform: translateY(-4px) scale(1.03) !important;
-                    box-shadow: 0 20px 50px rgba(248, 213, 61, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-                    background: linear-gradient(135deg, #FFFFFF 0%, #F8D53D 60%, #EAB308 100%) !important;
-                }
                 .spin { animation: spin 1s linear infinite; }
                 @keyframes spin { 100% { transform: rotate(360deg); } }
             `}</style>
