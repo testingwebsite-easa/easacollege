@@ -91,6 +91,16 @@ body {
   transition: background-color 0.5s var(--ease-apple), color 0.5s var(--ease-apple);
 }
 
+select option {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+[data-theme="light"] select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
 #root {
   width: 100%;
   overflow-x: hidden;
