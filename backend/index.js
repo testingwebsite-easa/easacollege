@@ -2188,8 +2188,12 @@ app.get('/api/pages/:slug', async (req, res) => {
         return page ? res.json(page) : res.status(404).json({ error: "Page not found" });
     }
     try {
-        const page = await PageContent.findOne({ slug: req.params.slug });
-        if (!page) return res.status(404).json({ error: "Page not found" });
+        let page = await PageContent.findOne({ slug: req.params.slug });
+        if (!page) {
+            const fallback = pagesData.find(p => p.slug === req.params.slug);
+            if (fallback) return res.json(fallback);
+            return res.status(404).json({ error: "Page not found" });
+        }
         res.json(page);
     } catch (err) {
         console.error("Error fetching page:", err);
@@ -2538,10 +2542,17 @@ app.get('/api/pages', async (req, res) => {
 });
 
 app.get('/api/pages/:slug', async (req, res) => {
-    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    if (!isConnected) {
+        const fallback = pagesData.find(p => p.slug === req.params.slug);
+        return fallback ? res.json(fallback) : res.status(404).json({ error: "Page not found" });
+    }
     try {
-        const page = await PageContent.findOne({ slug: req.params.slug });
-        if (!page) return res.status(404).json({ error: "Page not found" });
+        let page = await PageContent.findOne({ slug: req.params.slug });
+        if (!page) {
+            const fallback = pagesData.find(p => p.slug === req.params.slug);
+            if (fallback) return res.json(fallback);
+            return res.status(404).json({ error: "Page not found" });
+        }
         res.json(page);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch page" });

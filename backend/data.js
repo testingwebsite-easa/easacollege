@@ -1519,6 +1519,65 @@ The Women Grievance Redressal Cell was established under Act No. 20 of 1990 by t
                 image: 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?q=80&w=2070&auto=format&fit=crop'
             }
         ]
+    },
+    {
+        slug: 'center-of-excellence',
+        title: 'Center of Excellence',
+        subtitle: 'Advancing Frontier Research, Emerging Technologies & Industry Innovation',
+        heroImage: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=2070&auto=format&fit=crop',
+        content: `EASA College of Engineering and Technology has established high-caliber Centers of Excellence (CoE) to serve as epicenters of technological innovation, multi-disciplinary research, and industry-aligned competency building.
+        Designed in tandem with premier technology corporations and regulatory frameworks, these centers empower students to work on live industrial problem statements, file intellectual patents, and emerge as leaders in deep-tech domains.`,
+        sections: [
+            {
+                heading: 'AI, Machine Learning & Data Analytics Hub',
+                body: `Equipped with NVIDIA RTX GPU computing nodes, deep learning accelerators, and big data clusters for LLMs, computer vision, natural language processing, and predictive analytics.\n\n• GPU Deep Learning Workstations (NVIDIA RTX/Tesla)\n• Frameworks: PyTorch, TensorFlow, OpenCV, HuggingFace, CUDA\n• Edge AI Kits: NVIDIA Jetson AGX Orin & Raspberry Pi 5\n• Research projects in automated agricultural vision and Indic healthcare NLP`,
+                image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?q=80&w=2070&auto=format&fit=crop'
+            },
+            {
+                heading: 'Robotics, Automation & Industrial IoT Lab',
+                body: `Bridging mechanical engineering, embedded electronics, and cloud analytics for Industry 4.0 applications, collaborative robots, and autonomous mobile robotics.\n\n• 6-Axis Articulated Industrial Robotic Arm with vision guidance\n• Siemens S7-1200 / Schneider Modicon PLCs with SCADA & HMI\n• Autonomous Mobile Robots (AMR) with LiDAR & ROS2 SLAM\n• Industrial IoT gateways with MQTT, Modbus & LoRaWAN`,
+                image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2070&auto=format&fit=crop'
+            },
+            {
+                heading: 'Electric Vehicles & Clean Energy Center',
+                body: `Dedicated to green mobility and renewable energy systems, housing battery testing chambers, BLDC motor dynamometers, solar microgrids, and power conversion testbenches.\n\n• 5kW BLDC/PMSM Regenerative Motor Dynamometer\n• Battery Management System (BMS) testing & active balancing emulation\n• 10kW Hybrid Solar Microgrid with LiFePO4 battery bank\n• AC & DC Fast Charging test setups for EV infrastructure compliance`,
+                image: 'https://images.unsplash.com/photo-1558441719-646b22ad4409?q=80&w=2070&auto=format&fit=crop'
+            },
+            {
+                heading: 'VLSI Design & Embedded Edge Systems',
+                body: `Focusing on custom ASIC/FPGA digital design, mixed-signal layouts, and embedded firmware development on ARM Cortex and RISC-V platforms.\n\n• Xilinx Vivado, Spartan-7, Artix-7 & Zynq SoC boards\n• Cadence & ModelSim EDA CAD simulation suites\n• Keysight 4-Channel 500MHz Mixed-Signal DSOs\n• Real-Time Operating Systems (FreeRTOS, Zephyr) on 32-bit MCUs`,
+                image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop'
+            },
+            {
+                heading: 'Cyber Security & Cloud Sandbox',
+                body: `Isolated air-gapped cyber range sandbox training students in penetration testing, threat detection, digital forensics, multi-cloud management, and smart contracts.\n\n• Isolated Red vs. Blue Team offensive/defensive cyber range\n• SIEM tools: Splunk, Wireshark, Metasploit, Burp Suite\n• Multi-cloud clusters with AWS Academy, GCP & Azure\n• Hyperledger & Ethereum blockchain decentralized ledger testnet`,
+                image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=2070&auto=format&fit=crop'
+            },
+            {
+                heading: 'Additive Manufacturing & Prototyping (IDEA Lab)',
+                body: `State-of-the-art precision 3D printing, CNC machining, laser cutting, PCB milling, and optical 3D scanning to translate concepts into functional prototypes.\n\n• Industrial FDM and 4K SLA Resin 3D Printers\n• CNC PCB Prototyping machine with 60,000 RPM spindle\n• Handheld 0.02mm Optical Laser 3D Scanner\n• AICTE IDEA Lab integrated fabrication facility`,
+                image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=2070&auto=format&fit=crop'
+            }
+        ]
+    },
+    {
+        slug: 'mandatory-disclosure',
+        title: 'Mandatory Disclosure',
+        subtitle: 'Statutory Information as per AICTE & Regulatory Guidelines',
+        heroImage: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=2070&auto=format&fit=crop',
+        content: `Mandatory Disclosure under AICTE Regulations, Anna University, and Government of Tamil Nadu for EASA College of Engineering and Technology, Navakkarai, Coimbatore.\n\nThis document provides transparent, verifiable details on institution governance, approved academic programs, faculty credentials, infrastructural facilities, library resources, fee structures, and anti-ragging statutory committees.`,
+        sections: [
+            {
+                heading: 'Institutional Information',
+                body: `• **Institution Name:** EASA College of Engineering and Technology\n• **Address:** NH-47, Palakkad Main Road, Navakkarai (PO), Coimbatore - 641105, Tamil Nadu\n• **Approval Status:** Approved by AICTE, New Delhi; Affiliated to Anna University, Chennai\n• **Type of Institution:** Autonomous, Self-Financed, Linguistic Minority (Malayalam)\n• **Contact:** +91 93426 28013 | info@ecetonline.com`,
+                image: 'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop'
+            },
+            {
+                heading: 'Programs Offered & Approvals',
+                body: `• B.E. Computer Science and Engineering\n• B.Tech Artificial Intelligence and Data Science\n• B.Tech Information Technology\n• B.E. Electronics and Communication Engineering\n• B.E. Electrical and Electronics Engineering\n• B.E. Mechanical Engineering\n• B.E. Agriculture Engineering\n• B.E. Biomedical Engineering\n• M.E. Computer Science and Engineering\n• M.E. Structural Engineering\n• Master of Business Administration (MBA)`,
+                image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop'
+            }
+        ]
     }
 ];
 

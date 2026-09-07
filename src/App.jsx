@@ -104,6 +104,7 @@ const ObePage = lazy(() => import('./pages/ObePage'));
 const NirfPage = lazy(() => import('./pages/NirfPage'));
 const NbaPage = lazy(() => import('./pages/NbaPage'));
 const IdeaLabPage = lazy(() => import('./pages/IdeaLabPage'));
+const CenterOfExcellencePage = lazy(() => import('./pages/CenterOfExcellencePage'));
 const AdmissionEnquiryAdmin = lazy(() => import('./pages/AdmissionEnquiryAdmin'));
 
 
@@ -262,6 +263,12 @@ function App() {
             <Route path="/nba" element={<NbaPage />} />
             <Route path="/page/nba" element={<NbaPage />} />
             <Route path="/idea-lab" element={<IdeaLabPage />} />
+            <Route path="/center-of-excellence" element={<CenterOfExcellencePage />} />
+            <Route path="/page/center-of-excellence" element={<CenterOfExcellencePage />} />
+            <Route path="/centers-of-excellence" element={<CenterOfExcellencePage />} />
+            <Route path="/page/centers-of-excellence" element={<CenterOfExcellencePage />} />
+            <Route path="/coe" element={<CenterOfExcellencePage />} />
+            <Route path="/page/coe" element={<CenterOfExcellencePage />} />
             <Route path="/page/cafeteria" element={<CafeteriaPage />} />
             <Route path="/page/food-court" element={<FoodCourtPage />} />
             <Route path="/page/:slug" element={<DynamicPage />} />

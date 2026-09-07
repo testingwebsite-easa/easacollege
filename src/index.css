@@ -23,6 +23,14 @@
   --bg-main: var(--bg-dark);
   --nav-bg: #1B2A6B;
   --nav-text: #ffffff;
+
+  /* 20% 3D Depth & Elevation Tokens (Dark Mode) */
+  --perspective-3d: 1200px;
+  --elevation-3d-1: 0 4px 14px -2px rgba(0, 0, 0, 0.35), 0 2px 4px -1px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  --elevation-3d-2: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 6px 12px -3px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  --elevation-3d-3: 0 20px 45px -8px rgba(0, 0, 0, 0.55), 0 10px 18px -4px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+  --elevation-3d-hover: 0 24px 50px -10px rgba(0, 0, 0, 0.6), 0 12px 22px -6px rgba(45, 44, 122, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  --bevel-3d-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .line-clamp-1 {
@@ -66,6 +74,13 @@
   --glass-highlight: rgba(0, 0, 0, 0.02);
   --nav-bg: #1B2A6B;
   --nav-text: #ffffff;
+
+  /* 20% 3D Depth & Elevation Tokens (Light Mode) */
+  --elevation-3d-1: 0 4px 14px -2px rgba(0, 0, 0, 0.08), 0 2px 5px -1px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  --elevation-3d-2: 0 12px 26px -4px rgba(0, 0, 0, 0.1), 0 6px 12px -3px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  --elevation-3d-3: 0 20px 40px -8px rgba(0, 0, 0, 0.12), 0 10px 18px -4px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(255, 255, 255, 1);
+  --elevation-3d-hover: 0 22px 45px -10px rgba(45, 44, 122, 0.18), 0 12px 20px -6px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(255, 255, 255, 1);
+  --bevel-3d-top: 1px solid rgba(255, 255, 255, 0.9);
 }
 
 * {
@@ -1577,4 +1592,255 @@ a {
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
   transform: perspective(600px) translateZ(20px);
 }
+
+/* ==========================================================================
+   PROJECT-WIDE 20% 3D DEPTH & ELEVATION SYSTEM
+   ========================================================================== */
+
+/* 1. Global Perspective Containers */
+section,
+.section-padding,
+.container,
+.grid-1,
+.grid-2,
+.grid-3,
+.grid-4,
+.grid-cols-2,
+.grid-cols-3,
+.grid-cols-4,
+.cards-grid,
+.dashboard-grid {
+  perspective: var(--perspective-3d);
+}
+
+/* 2. Universal 20% 3D Card Elements */
+.glass-card,
+.card,
+.dept-card,
+.department-card,
+.faculty-card,
+.news-card,
+.news-card-premium,
+.program-card,
+.placement-card,
+.event-card,
+.hero-card,
+.iqac-card,
+.naac-card,
+.governance-card,
+.leadership-card,
+.research-card,
+.course-card,
+.amenity-card,
+.stat-card,
+.dashboard-card,
+.metric-card,
+.alumni-card,
+.career-card,
+.form-card,
+.contact-card,
+.info-card,
+.portal-card,
+.syllabus-card,
+.feature-box,
+.quick-link-card,
+.tilt-3d-wrapper,
+.hover-3d {
+  transform-style: preserve-3d;
+  box-shadow: var(--elevation-3d-2);
+  border-top: var(--bevel-3d-top);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), 
+              box-shadow 0.35s cubic-bezier(0.25, 1, 0.5, 1), 
+              border-color 0.3s ease, 
+              background-color 0.3s ease;
+  will-change: transform, box-shadow;
+  position: relative;
+}
+
+/* 20% 3D Hover Lift & Subtle Rotation */
+.glass-card:hover,
+.card:hover,
+.dept-card:hover,
+.department-card:hover,
+.faculty-card:hover,
+.news-card:hover,
+.news-card-premium:hover,
+.program-card:hover,
+.placement-card:hover,
+.event-card:hover,
+.hero-card:hover,
+.iqac-card:hover,
+.naac-card:hover,
+.governance-card:hover,
+.leadership-card:hover,
+.research-card:hover,
+.course-card:hover,
+.amenity-card:hover,
+.stat-card:hover,
+.dashboard-card:hover,
+.metric-card:hover,
+.alumni-card:hover,
+.career-card:hover,
+.form-card:hover,
+.info-card:hover,
+.portal-card:hover,
+.syllabus-card:hover,
+.feature-box:hover,
+.quick-link-card:hover,
+.hover-3d:hover {
+  transform: perspective(var(--perspective-3d)) translateY(-6px) translateZ(12px) rotateX(1.5deg) scale(1.015);
+  box-shadow: var(--elevation-3d-hover);
+  border-color: rgba(230, 182, 39, 0.45);
+}
+
+/* 3. Pop-out Depth for Card Inner Media & Icons */
+.glass-card img,
+.card img,
+.dept-card img,
+.faculty-card img,
+.news-card img,
+.program-card img,
+.placement-card img,
+.event-card img,
+.alumni-card img,
+.stat-icon-wrapper,
+.card-icon,
+.icon-container {
+  transform: translateZ(8px);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-style: preserve-3d;
+}
+
+.glass-card:hover img,
+.card:hover img,
+.dept-card:hover img,
+.faculty-card:hover img,
+.news-card:hover img,
+.program-card:hover img,
+.placement-card:hover img,
+.event-card:hover img,
+.alumni-card:hover img,
+.stat-icon-wrapper:hover {
+  transform: translateZ(16px) scale(1.03);
+}
+
+/* 4. Tactile 3D Buttons */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-yellow,
+.btn-warning,
+.cta-button,
+button.submit-btn,
+.action-btn,
+.tab-btn {
+  transform-style: preserve-3d;
+  border-top: var(--bevel-3d-top);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), 
+              box-shadow 0.25s ease, 
+              background 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+.btn:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-yellow:hover,
+.btn-warning:hover,
+.cta-button:hover,
+button.submit-btn:hover,
+.action-btn:hover,
+.tab-btn:hover {
+  transform: perspective(600px) translateY(-3px) translateZ(8px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 0 15px rgba(230, 182, 39, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-yellow:active,
+.btn-warning:active,
+.cta-button:active,
+button.submit-btn:active,
+.action-btn:active,
+.tab-btn:active {
+  transform: perspective(600px) translateY(2px) translateZ(0px) scale(0.98);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* 5. 3D Floating Badges, Pills & Labels */
+.badge,
+.tag,
+.pill,
+.chip,
+.badge-3d,
+.status-pill {
+  transform: translateZ(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.badge:hover,
+.tag:hover,
+.pill:hover,
+.chip:hover,
+.status-pill:hover {
+  transform: translateZ(16px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* 6. Form Inputs 3D Inset Depth */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.25), 0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  transition: all 0.25s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  transform: translateY(-1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 12px var(--primary-glow), 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: var(--secondary);
+}
+
+/* 7. 3D Navigation Elevation */
+.header-row {
+  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid var(--glass-border);
+  transform-style: preserve-3d;
+}
+
+.scroll-menu-container {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 8. 3D Section Headers & Headings Depth */
+.section-title,
+h2.title,
+h3.sub-title {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transform: translateZ(6px);
+}
+
+[data-theme="light"] .section-title,
+[data-theme="light"] h2.title,
+[data-theme="light"] h3.sub-title {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 
