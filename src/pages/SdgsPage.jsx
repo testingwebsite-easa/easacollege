@@ -10,6 +10,7 @@ import {
     FaFilePdf, FaBookOpen, FaCalendarAlt
 } from 'react-icons/fa';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
@@ -419,6 +420,7 @@ const SdgsPage = () => {
         return darkAccessiblePalette[item.id] || '#38BDF8';
     };
 
+    const { showToast } = useToast();
     const cardBg = isDark ? 'var(--bg-card)' : '#ffffff';
     const cardBorder = isDark ? '1px solid var(--glass-border)' : '1px solid rgba(226, 232, 240, 0.9)';
     const cardShadow = isDark ? '0 20px 50px rgba(0,0,0,0.35)' : '0 12px 35px rgba(0,0,0,0.05)';
@@ -428,12 +430,35 @@ const SdgsPage = () => {
 
     const handlePartnerSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!partnerForm.orgName?.trim()) {
+            showToast('Please enter your Organization / Institution Name', 'warning', 'Missing: Organization');
+            return;
+        }
+        if (!partnerForm.contactPerson?.trim()) {
+            showToast('Please enter the Contact Person Name', 'warning', 'Missing: Contact Person');
+            return;
+        }
+        if (!partnerForm.email?.trim() || !/^\S+@\S+\.\S+$/.test(partnerForm.email)) {
+            showToast('Please enter a valid Email Address', 'warning', 'Invalid: Email');
+            return;
+        }
+        const cleanPhone = (partnerForm.phone || '').replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            showToast('Phone number must be exactly 10 digits', 'warning', 'Invalid: Phone Number');
+            return;
+        }
+        if (!partnerForm.proposalDetails?.trim()) {
+            showToast('Please provide a brief proposal or collaboration idea', 'warning', 'Missing: Proposal Details');
+            return;
+        }
+
         setFormSubmitted(true);
         try {
             const res = await fetch(`${API_BASE_URL}/api/partner-connect`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(partnerForm)
+                body: JSON.stringify({ ...partnerForm, phone: cleanPhone })
             });
             const data = await res.json();
             if (data.success) {
@@ -447,17 +472,16 @@ const SdgsPage = () => {
                     targetSdg: 'SDG 07: Affordable & Clean Energy',
                     proposalDetails: ''
                 });
-                alert('🌿 Thank you for reaching out! EASA College SDG Coordinator will get in touch with you shortly to explore mutual sustainability collaborations.');
+                showToast('Thank you for reaching out! EASA College SDG Coordinator will get in touch with you shortly.', 'success', 'Proposal Received');
             } else {
-                alert(data.message || 'Failed to submit proposal. Please try again.');
+                showToast(data.message || 'Failed to submit proposal. Please try again.', 'error', 'Submission Failed');
                 setFormSubmitted(false);
             }
         } catch (err) {
             console.error('Error submitting SDG partner request:', err);
-            // Fallback optimistic success
             setPartnerModal(false);
             setFormSubmitted(false);
-            alert('🌿 Thank you for reaching out! EASA College SDG Coordinator will get in touch with you shortly.');
+            showToast('Thank you for reaching out! EASA College SDG Coordinator will get in touch with you shortly.', 'success', 'Proposal Received');
         }
     };
 
@@ -1048,9 +1072,12 @@ const SdgsPage = () => {
                                         <input
                                             type="tel"
                                             required
+                                            maxLength={10}
+                                            pattern="[0-9]{10}"
+                                            title="Please enter a 10-digit mobile number"
                                             value={partnerForm.phone}
-                                            onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
-                                            placeholder="+91 9876543210"
+                                            onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                            placeholder="10-digit Phone Number"
                                             style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
                                         />
                                     </div>

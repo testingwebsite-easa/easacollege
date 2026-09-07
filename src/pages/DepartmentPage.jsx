@@ -97,13 +97,13 @@ const DepartmentPage = () => {
                     setDepartment(null);
                     return;
                 }
-                
+
                 // If the static dept's slug differs from the URL id, redirect
                 if (currentStatic.slug !== id) {
                     navigate(`/department/${currentStatic.slug}`, { replace: true });
                     return;
                 }
-                
+
                 // Merge the live data with the static data
                 if (data && (data.mission?.length > 0 || data.vision?.length > 0 || data.peo?.length > 0 || data.pso?.length > 0 || data.po?.length > 0)) {
                     setDepartment({
@@ -1551,7 +1551,7 @@ const DepartmentPage = () => {
                         Ready to Accelerate Your Management Career?
                     </h3>
                     <p style={{ color: 'rgba(255,255,255,0.75)', margin: 0, fontSize: '0.95rem' }}>
-                        Admissions Open for Academic Year 2025 - 2026. Fast-track your application today.
+                        Admissions Open for Academic Year 2026 - 2027. Fast-track your application today.
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>

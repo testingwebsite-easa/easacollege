@@ -418,7 +418,13 @@ const AdminDashboard = () => {
     };
 
     const handleCreateUserChange = (e) => {
-        setCreateUserData({ ...createUserData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'phone') {
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+            setCreateUserData({ ...createUserData, phone: digitsOnly });
+        } else {
+            setCreateUserData({ ...createUserData, [name]: value });
+        }
         setError('');
     };
 
@@ -429,6 +435,11 @@ const AdminDashboard = () => {
 
         if (createUserData.password.length < 6) {
             setError('Password must be at least 6 characters long');
+            return;
+        }
+
+        if (createUserData.phone && createUserData.phone.replace(/\D/g, '').length !== 10) {
+            setError('Phone number must be exactly 10 digits');
             return;
         }
 
@@ -698,7 +709,10 @@ const AdminDashboard = () => {
                                             <input
                                                 type="tel"
                                                 name="phone"
-                                                placeholder="Enter phone number"
+                                                maxLength={10}
+                                                pattern="[0-9]{10}"
+                                                title="Please enter a 10-digit mobile number"
+                                                placeholder="10-digit phone number"
                                                 value={createUserData.phone}
                                                 onChange={handleCreateUserChange}
                                             />

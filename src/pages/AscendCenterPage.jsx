@@ -10,6 +10,7 @@ import {
     FaCogs, FaCheckDouble, FaMicrochip, FaTools
 } from 'react-icons/fa';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
@@ -153,6 +154,7 @@ const AscendCenterPage = () => {
         window.scrollTo(0, 0);
     }, []);
 
+    const { showToast } = useToast();
     const cardBg = isDark ? 'var(--bg-card)' : '#ffffff';
     const cardBorder = isDark ? '1px solid var(--glass-border)' : '1px solid rgba(226, 232, 240, 0.9)';
     const cardShadow = isDark ? '0 20px 50px rgba(0,0,0,0.3)' : '0 12px 35px rgba(0,0,0,0.05)';
@@ -162,6 +164,25 @@ const AscendCenterPage = () => {
 
     const handleCounselingSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!counselingForm.name?.trim()) {
+            showToast('Please enter your Full Name', 'warning', 'Missing: Full Name');
+            return;
+        }
+        if (!counselingForm.email?.trim() || !/^\S+@\S+\.\S+$/.test(counselingForm.email)) {
+            showToast('Please enter a valid Email Address', 'warning', 'Invalid: Email Address');
+            return;
+        }
+        const cleanPhone = (counselingForm.phone || '').replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            showToast('Phone number must be exactly 10 digits', 'warning', 'Invalid: Phone Number');
+            return;
+        }
+        if (!counselingForm.department?.trim()) {
+            showToast('Please specify your Department / Branch', 'warning', 'Missing: Department');
+            return;
+        }
+
         setFormSubmitted(true);
         try {
             const res = await fetch(`${API_BASE_URL}/api/counseling`, {
@@ -169,17 +190,18 @@ const AscendCenterPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...counselingForm,
+                    phone: cleanPhone,
                     message: `ASCEND Career Counseling Booking - Year: ${counselingForm.year}, Track: ${counselingForm.primaryInterest}`
                 })
             });
             if (res.ok) {
-                alert('✨ Thank you! Your ASCEND Career Counseling Request has been received and saved. Our career advisor will contact you shortly.');
+                showToast('Your ASCEND Career Counseling Request has been received. Our career advisor will contact you shortly.', 'success', 'Session Booked');
             } else {
-                alert('✨ Thank you! Your request has been recorded. Our career team will contact you shortly.');
+                showToast('Your request has been recorded. Our career team will contact you shortly.', 'success', 'Session Booked');
             }
         } catch (err) {
             console.error('Counseling submit error:', err);
-            alert('✨ Thank you! Your request has been recorded.');
+            showToast('Your request has been recorded.', 'info', 'Submitted');
         } finally {
             setCounselingModal(false);
             setFormSubmitted(false);
@@ -719,9 +741,12 @@ const AscendCenterPage = () => {
                                         <input
                                             type="tel"
                                             required
+                                            maxLength={10}
+                                            pattern="[0-9]{10}"
+                                            title="Please enter a 10-digit mobile number"
                                             value={counselingForm.phone}
-                                            onChange={(e) => setCounselingForm({ ...counselingForm, phone: e.target.value })}
-                                            placeholder="+91 9876543210"
+                                            onChange={(e) => setCounselingForm({ ...counselingForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                            placeholder="10-digit Phone Number"
                                             style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
                                         />
                                     </div>

@@ -919,14 +919,11 @@ function InstitutionPage() {
             {/* MANAGEMENT & GOVERNANCE SECTION */}
             <ManagementSection title="Our Leadership & Governance" subtitle="The visionaries and academic leaders guiding EASA College" />
 
-            {/* ADMISSION CALL TO ACTION */}
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
-
             {/* ADMISSION FORM MODAL */}
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
 
             {/* FOOTER */}
-            <Footer />
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
 
             <style>{`
                 .highlight-card:hover {

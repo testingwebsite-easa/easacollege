@@ -6,10 +6,12 @@ import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
 import API_BASE_URL from '../api';
+import { useToast } from '../context/ToastContext';
 import { FaCheckCircle, FaExclamationCircle, FaUser, FaEnvelope, FaPhone, FaBuilding, FaIdCard, FaHeading, FaCommentAlt } from 'react-icons/fa';
 
 const GrievancePage = () => {
     const { type } = useParams();
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -29,29 +31,61 @@ const GrievancePage = () => {
     const formattedType = type ? type.charAt(0).toUpperCase() + type.slice(1) : 'General';
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'phone') {
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+            setFormData({ ...formData, phone: digitsOnly });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!formData.name?.trim()) {
+            showToast('Please enter your Full Name', 'warning', 'Missing: Full Name');
+            return;
+        }
+        if (!formData.email?.trim() || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+            showToast('Please enter a valid Email Address', 'warning', 'Invalid: Email Address');
+            return;
+        }
+        const cleanPhone = (formData.phone || '').replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            showToast('Phone number must be exactly 10 digits', 'warning', 'Invalid: Phone Number');
+            return;
+        }
+        if (!formData.subject?.trim()) {
+            showToast('Please specify the Grievance Subject / Topic', 'warning', 'Missing: Subject');
+            return;
+        }
+        if (!formData.message?.trim()) {
+            showToast('Please provide details regarding your grievance', 'warning', 'Missing: Message Details');
+            return;
+        }
+
         setStatus('submitting');
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/grievances`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, type: formattedType })
+                body: JSON.stringify({ ...formData, phone: cleanPhone, type: formattedType })
             });
 
             if (response.ok) {
                 setStatus('success');
+                showToast('Your grievance has been submitted securely. The cell will review it confidentially.', 'success', 'Grievance Submitted');
                 setFormData({ name: '', email: '', phone: '', subject: '', message: '', rollNo: '', department: '' });
             } else {
                 setStatus('error');
+                showToast('Failed to submit grievance. Please try again or contact support.', 'error', 'Submission Failed');
             }
         } catch (error) {
             console.error(error);
             setStatus('error');
+            showToast('Submission error. Please check your network connection.', 'error', 'Network Error');
         }
     };
 
@@ -126,10 +160,13 @@ const GrievancePage = () => {
                                             type="tel"
                                             name="phone"
                                             required
+                                            maxLength={10}
+                                            pattern="[0-9]{10}"
+                                            title="Please enter a 10-digit mobile number"
                                             value={formData.phone}
                                             onChange={handleChange}
                                             style={{ width: '100%', padding: '1.2rem', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', borderRadius: '14px', color: 'var(--text-main)', outline: 'none', transition: '0.3s' }}
-                                            placeholder="Mobile number"
+                                            placeholder="10-digit mobile number"
                                             onFocus={(e) => e.target.style.borderColor = 'var(--secondary)'}
                                             onBlur={(e) => e.target.style.borderColor = 'var(--glass-border)'}
                                         />

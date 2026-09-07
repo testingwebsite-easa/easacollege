@@ -9,8 +9,9 @@ import { useTheme } from '../context/ThemeContext';
 import headerLogoDark from '../assets/College Logo with White Letter.webp';
 import headerLogoLight from '../assets/College Logo with Blue Letter.webp';
 import { API_BASE_URL } from '../api';
+import AdmissionCTA from './AdmissionCTA';
 
-const Footer = ({ onOpenAdmission }) => {
+const Footer = ({ onOpenAdmission, showAdmissionCTA = true }) => {
     const navigate = useNavigate();
     const { theme } = useTheme();
     const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -77,13 +78,17 @@ const Footer = ({ onOpenAdmission }) => {
     };
 
     return (
-        <footer style={{
-            background: 'var(--bg-card)',
-            borderTop: '1px solid var(--glass-border)',
-            paddingTop: '6rem',
-            position: 'relative',
-            overflow: 'hidden'
-        }}>
+        <div className="site-footer-wrapper" style={{ width: '100%' }}>
+            {showAdmissionCTA && (
+                <AdmissionCTA onApplyClick={onOpenAdmission} />
+            )}
+            <footer style={{
+                background: 'var(--bg-card)',
+                borderTop: '1px solid var(--glass-border)',
+                paddingTop: '6rem',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
             <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 2rem' }}>
                 <div style={{
                     display: 'grid',
@@ -114,7 +119,7 @@ const Footer = ({ onOpenAdmission }) => {
                             <span>NH-47, Palakkad Main Road, Navakkarai, Coimbatore - 641105</span>
                         </div>
                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                            <FaPhoneAlt style={{ color: 'var(--secondary)' }} /> +91 93426 28013
+                            <FaPhoneAlt style={{ color: 'var(--secondary)' }} /> +91 73737 32569 , +919342628013 
                         </div>
                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                             <FaEnvelope style={{ color: 'var(--secondary)' }} /> info@ecetonline.com
@@ -128,7 +133,7 @@ const Footer = ({ onOpenAdmission }) => {
                         </h3>
                         <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {[
-                                { name: 'Admission', action: true },
+                                { name: 'Admission', path: '/admissions' },
                                 { name: 'Academics', path: '/academics' },
                                 { name: 'Research', path: '/research' },
                                 { name: 'Placements', path: '/page/placement' },
@@ -351,6 +356,7 @@ const Footer = ({ onOpenAdmission }) => {
                 }
             `}</style>
         </footer>
+        </div>
     );
 };
 

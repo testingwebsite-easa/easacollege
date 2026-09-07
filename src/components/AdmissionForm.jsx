@@ -3,9 +3,11 @@ import { FaCheckCircle, FaUniversity, FaUserGraduate, FaBriefcase, FaGlobe, FaTi
 import API_BASE_URL from '../api';
 import { departments as departmentsData } from '../data/departmentsData';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 
 const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
     const { theme } = useTheme();
+    const { showToast } = useToast();
     if (!isOpen) return null;
 
     const [formData, setFormData] = useState({
@@ -65,16 +67,48 @@ const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
     const validate = () => {
         const newErrors = {};
 
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            newErrors.email = "Please enter a valid email address.";
+        // Student Name
+        if (!formData.name?.trim()) {
+            newErrors.name = "Student Name is required.";
+            showToast("Please enter the Student's Full Name.", "warning", "Missing: Student Name");
+            setErrors(newErrors);
+            return false;
         }
 
-        // Phone validation (10 digits, optionally starting with +91)
-        const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[6-9]\d{9}$/;
-        if (!phoneRegex.test(formData.phone)) {
-            newErrors.phone = "Please enter a valid 10-digit Indian mobile number.";
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email?.trim()) {
+            newErrors.email = "Email address is required.";
+            showToast("Please enter your Email Address.", "warning", "Missing: Email");
+            setErrors(newErrors);
+            return false;
+        } else if (!emailRegex.test(formData.email)) {
+            newErrors.email = "Please enter a valid email address.";
+            showToast("Please enter a valid email address (e.g. name@domain.com).", "warning", "Invalid Email");
+            setErrors(newErrors);
+            return false;
+        }
+
+        // Phone validation (exactly 10 digits)
+        const cleanPhone = (formData.phone || '').replace(/\D/g, '');
+        if (!cleanPhone) {
+            newErrors.phone = "Phone number is required.";
+            showToast("Please enter your 10-digit Mobile Number.", "warning", "Missing: Phone Number");
+            setErrors(newErrors);
+            return false;
+        } else if (cleanPhone.length !== 10) {
+            newErrors.phone = "Phone number must be exactly 10 digits.";
+            showToast(`Phone number has ${cleanPhone.length} digits. It must be exactly 10 digits.`, "warning", "Invalid Phone Number");
+            setErrors(newErrors);
+            return false;
+        }
+
+        // Course Selection
+        if (!formData.course?.trim()) {
+            newErrors.course = "Please select a course.";
+            showToast("Please select a Course / Programme to apply for.", "warning", "Missing: Course Selection");
+            setErrors(newErrors);
+            return false;
         }
 
         setErrors(newErrors);
@@ -100,19 +134,19 @@ const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
             });
 
             if (response.ok) {
-                alert("Thank you for your application! Our admissions team will contact you shortly.");
+                showToast("Thank you for your application! Our admissions team will contact you shortly.", "success", "Application Submitted!");
                 setFormData({ name: '', email: '', phone: '', course: '', community: '', state: '', district: '' });
                 setErrors({});
                 onClose();
             } else {
-                alert("Thank you for your application! Our admissions team will contact you shortly.");
+                showToast("Thank you for your application! Our admissions team will contact you shortly.", "success", "Application Received");
                 setFormData({ name: '', email: '', phone: '', course: '', community: '', state: '', district: '' });
                 setErrors({});
                 onClose();
             }
         } catch (error) {
             console.error("Error submitting form:", error);
-            alert("Thank you for your application! Our admissions team will contact you shortly.");
+            showToast("Thank you for your application! Our admissions team will contact you shortly.", "success", "Application Received");
             setFormData({ name: '', email: '', phone: '', course: '', community: '', state: '', district: '' });
             setErrors({});
             onClose();
@@ -122,10 +156,16 @@ const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'phone') {
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+            setFormData({ ...formData, phone: digitsOnly });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
         // Clear error when user starts typing
-        if (errors[e.target.name]) {
-            setErrors({ ...errors, [e.target.name]: '' });
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: '' });
         }
     };
 
@@ -284,8 +324,20 @@ const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
                                 <input type="email" name="email" required style={{ ...inputStyle, border: errors.email ? '1px solid #ef4444' : '1px solid var(--glass-border)' }} value={formData.email} onChange={handleChange} placeholder="Email" />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: '700' }}>Phone</label>
-                                <input type="tel" name="phone" required style={{ ...inputStyle, border: errors.phone ? '1px solid #ef4444' : '1px solid var(--glass-border)' }} value={formData.phone} onChange={handleChange} placeholder="Phone" />
+                                <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: '700' }}>Phone *</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    required
+                                    maxLength={10}
+                                    pattern="[0-9]{10}"
+                                    title="Please enter a 10-digit mobile number"
+                                    style={{ ...inputStyle, border: errors.phone ? '1px solid #ef4444' : '1px solid var(--glass-border)' }}
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                    placeholder="10-digit mobile"
+                                />
+                                {errors.phone && <span style={{ color: '#ef4444', fontSize: '0.78rem', marginTop: '0.25rem', display: 'block' }}>{errors.phone}</span>}
                             </div>
                         </div>
 

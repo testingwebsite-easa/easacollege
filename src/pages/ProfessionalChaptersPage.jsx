@@ -89,7 +89,21 @@ const ProfessionalChaptersPage = () => {
             id: 'qcfi',
             name: 'QCFI',
             fullName: 'Quality Circle Forum of India',
+            vision: 'To develop quality-conscious, innovative, ethical, and future-ready students who strive for continuous improvement and excellence in academic, professional, and social life.',
+            mission: [
+                'To empower students with Quality Concepts, Quality Circle practices, teamwork, problem-solving, leadership, and innovation, enabling them to become Total Quality Professionals and responsible contributors to society.'
+            ],
             description: 'The Quality Circle Forum of India (QCFI) is a national body committed to promoting quality concepts, continuous improvement, and excellence in organizations. The QCFI chapter encourages students/members to develop problem-solving skills, teamwork, and a culture of quality through participative management practices.',
+            departmentMembers: [
+                {
+                    department: 'Department of Mechanical Engineering',
+                    staffInCharge: 'Mr R. Nithyananth',
+                    students: [
+                        { name: 'Inbaganesan R', year: 'Final Year' },
+                        { name: 'Madura K', year: 'Third Year' }
+                    ]
+                }
+            ],
             activities: [
                 'Awareness programs on quality concepts and tools',
                 'Quality circle formation and case study discussions',
@@ -161,10 +175,16 @@ const ProfessionalChaptersPage = () => {
     ];
 
     const ieeeEvents = [
-        { name: 'IEEE Orientation Program', date: 'DD/MM/YYYY', participants: '200+' },
-        { name: 'AI Workshop', date: 'DD/MM/YYYY', participants: '150+' },
-        { name: 'Hackathon', date: 'DD/MM/YYYY', participants: '300+' },
-        { name: 'Industry Expert Lecture', date: 'DD/MM/YYYY', participants: '180+' }
+        { sNo: 1, date: '29.08.2025', duration: '1 Hr', name: 'IEEE Awareness Drive', participants: 62 },
+        { sNo: 2, date: '22.11.2025', duration: '1 Hr', name: 'IEEE Student branch Inauguration', participants: 31 },
+        { sNo: 3, date: '27.12.2025', duration: '1 Hr', name: 'AI in Health Care', participants: 40 },
+        { sNo: 4, date: '27.12.2025', duration: '1 Hr', name: 'AI in Computer Vision', participants: 35 },
+        { sNo: 5, date: '11.02.2026', duration: '1.30 Hr', name: 'Short-Term Money and Long-Term Success', participants: 100 },
+        { sNo: 6, date: '16.02.2026', duration: '1 Hr', name: 'Electric Vehicle Technology: From Fundamentals to Future Mobility', participants: 60 },
+        { sNo: 7, date: '02.03.2026 to 06.03.2026', duration: '5 Days', name: 'Advances In Energy Storage and Power Electronics for Sustainable Transportation and Smart Grids', participants: 100 },
+        { sNo: 8, date: '07.03.2026', duration: '1 Day', name: "International Women's Day", participants: 350 },
+        { sNo: 9, date: '14.03.2026', duration: '1 Day', name: 'Build & Program Robots – GAADI & DOG', participants: 73 },
+        { sNo: 10, date: '26.03.2026', duration: '1 Day', name: 'Sustainable Project Expo', participants: 41 }
     ];
 
     const ieeeAchievements = [
@@ -357,7 +377,7 @@ const ProfessionalChaptersPage = () => {
                                     {showIeeeSub('committee') && (
                                         <div style={{ marginBottom: '3.5rem' }}>
                                             <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1.8rem', color: 'var(--text-main)' }}>Faculty Counselor & Executive Committee</h3>
-                                            
+
                                             {/* Counselor Card */}
                                             <div style={{
                                                 background: 'linear-gradient(135deg, var(--bg-section), var(--bg-card))',
@@ -367,7 +387,7 @@ const ProfessionalChaptersPage = () => {
                                                 <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.8rem' }}>Faculty Counselor</div>
                                                 <h4 style={{ fontSize: '1.8rem', fontWeight: '900', margin: '0 0 0.4rem 0', color: 'var(--text-main)' }}>Mrs.Indhumathi.R </h4>
                                                 <p style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--secondary)', margin: '0 0 1.5rem 0' }}>Assistant Professor, Department of EEE</p>
-                                                
+
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--text-muted)' }}>
                                                         <FaEnvelope style={{ color: 'var(--secondary)' }} />
@@ -428,23 +448,97 @@ const ProfessionalChaptersPage = () => {
                                     {/* Major Events Table */}
                                     {showIeeeSub('events') && (
                                         <div style={{ marginBottom: '3.5rem' }}>
-                                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1.8rem', color: 'var(--text-main)' }}>Major Events</h3>
-                                            <div style={{ background: 'var(--bg-section)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--glass-border)', overflowX: 'auto' }}>
-                                                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+                                                <div>
+                                                    <div style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem',
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: '800',
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: '1.5px',
+                                                        color: 'var(--secondary)',
+                                                        marginBottom: '0.4rem'
+                                                    }}>
+                                                        <span>Consolidated Report (2025–2026)</span> • <span>Chapter: IEEE</span>
+                                                    </div>
+                                                    <h3 style={{ fontSize: '1.8rem', fontWeight: '900', margin: 0, color: 'var(--text-main)' }}>
+                                                        Major Events & Technical Activities
+                                                    </h3>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                                    <span style={{
+                                                        background: 'rgba(217, 119, 6, 0.12)',
+                                                        color: 'var(--secondary)',
+                                                        border: '1px solid rgba(217, 119, 6, 0.3)',
+                                                        padding: '0.4rem 0.9rem',
+                                                        borderRadius: '20px',
+                                                        fontWeight: '700',
+                                                        fontSize: '0.85rem'
+                                                    }}>
+                                                        10 Total Events
+                                                    </span>
+                                                    <span style={{
+                                                        background: 'rgba(46, 204, 113, 0.15)',
+                                                        color: '#2ecc71',
+                                                        border: '1px solid rgba(46, 204, 113, 0.3)',
+                                                        padding: '0.4rem 0.9rem',
+                                                        borderRadius: '20px',
+                                                        fontWeight: '700',
+                                                        fontSize: '0.85rem'
+                                                    }}>
+                                                        892+ Participants
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="card-3d-subtle" style={{ background: 'var(--bg-section)', borderRadius: '24px', padding: '1.5rem', border: '1px solid var(--glass-border)', overflowX: 'auto' }}>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '650px' }}>
                                                     <thead>
                                                         <tr style={{ borderBottom: '2px solid var(--glass-border)' }}>
-                                                            <th style={{ padding: '1.2rem 1rem', fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)' }}>Event</th>
-                                                            <th style={{ padding: '1.2rem 1rem', fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)' }}>Date</th>
-                                                            <th style={{ padding: '1.2rem 1rem', fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)' }}>Participants</th>
+                                                            <th style={{ padding: '1rem 0.8rem', fontSize: '0.9rem', fontWeight: '800', color: 'var(--secondary)', width: '60px' }}>S.NO</th>
+                                                            <th style={{ padding: '1rem 0.8rem', fontSize: '0.9rem', fontWeight: '800', color: 'var(--secondary)', width: '160px' }}>Date</th>
+                                                            <th style={{ padding: '1rem 0.8rem', fontSize: '0.9rem', fontWeight: '800', color: 'var(--secondary)', width: '100px' }}>Duration</th>
+                                                            <th style={{ padding: '1rem 0.8rem', fontSize: '0.9rem', fontWeight: '800', color: 'var(--secondary)' }}>Name of the Event</th>
+                                                            <th style={{ padding: '1rem 0.8rem', fontSize: '0.9rem', fontWeight: '800', color: 'var(--secondary)', textAlign: 'center', width: '140px' }}>No. of Participants</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {ieeeEvents.map((ev, idx) => (
-                                                            <tr key={idx} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                                <td style={{ padding: '1.2rem 1rem', fontWeight: '700', color: 'var(--text-main)' }}>{ev.name}</td>
-                                                                <td style={{ padding: '1.2rem 1rem', color: 'var(--text-muted)' }}>{ev.date}</td>
-                                                                <td style={{ padding: '1.2rem 1rem' }}>
-                                                                    <span style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71', padding: '0.4rem 0.9rem', borderRadius: '20px', fontWeight: '800', fontSize: '0.9rem' }}>
+                                                        {ieeeEvents.map((ev) => (
+                                                            <tr key={ev.sNo} style={{ borderBottom: '1px solid var(--glass-border)', transition: 'background 0.2s ease' }} className="table-row-hover">
+                                                                <td style={{ padding: '1rem 0.8rem', fontWeight: '700', color: 'var(--secondary)' }}>
+                                                                    {ev.sNo}.
+                                                                </td>
+                                                                <td style={{ padding: '1rem 0.8rem', color: 'var(--text-muted)', fontSize: '0.92rem', fontWeight: '600' }}>
+                                                                    {ev.date}
+                                                                </td>
+                                                                <td style={{ padding: '1rem 0.8rem', color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+                                                                    <span style={{
+                                                                        background: 'rgba(255, 255, 255, 0.05)',
+                                                                        padding: '0.2rem 0.5rem',
+                                                                        borderRadius: '6px',
+                                                                        border: '1px solid var(--glass-border)',
+                                                                        fontSize: '0.82rem',
+                                                                        fontWeight: '600'
+                                                                    }}>
+                                                                        {ev.duration}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '1rem 0.8rem', fontWeight: '700', color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                                                                    {ev.name}
+                                                                </td>
+                                                                <td style={{ padding: '1rem 0.8rem', textAlign: 'center' }}>
+                                                                    <span style={{
+                                                                        background: 'rgba(46, 204, 113, 0.15)',
+                                                                        color: '#2ecc71',
+                                                                        padding: '0.35rem 0.85rem',
+                                                                        borderRadius: '20px',
+                                                                        fontWeight: '800',
+                                                                        fontSize: '0.88rem',
+                                                                        display: 'inline-block',
+                                                                        border: '1px solid rgba(46, 204, 113, 0.25)'
+                                                                    }}>
                                                                         {ev.participants}
                                                                     </span>
                                                                 </td>
@@ -560,7 +654,193 @@ const ProfessionalChaptersPage = () => {
                             ) : (
                                 /* Default Chapter Render for other chapters */
                                 <div>
-                                    <p style={{ fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--text-muted)', marginBottom: '4rem', maxWidth: '800px' }}>{activeChapter.description}</p>
+                                    <p style={{ fontSize: '1.2rem', lineHeight: '1.8', color: 'var(--text-muted)', marginBottom: (activeChapter.vision || activeChapter.mission) ? '2.5rem' : '4rem', maxWidth: '850px' }}>
+                                        {activeChapter.description}
+                                    </p>
+
+                                    {/* Vision & Mission Cards Grid if available */}
+                                    {(activeChapter.vision || activeChapter.mission) && (
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3.5rem' }}>
+                                            {activeChapter.vision && (
+                                                <div className="card-3d-subtle" style={{ background: 'var(--bg-section)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1rem' }}>
+                                                        <FaEye style={{ color: activeChapter.color || 'var(--secondary)', fontSize: '1.8rem' }} />
+                                                        <h4 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Vision</h4>
+                                                    </div>
+                                                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-muted)', margin: 0 }}>
+                                                        {activeChapter.vision}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {activeChapter.mission && (
+                                                <div className="card-3d-subtle" style={{ background: 'var(--bg-section)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1rem' }}>
+                                                        <FaBullseye style={{ color: activeChapter.color || 'var(--secondary)', fontSize: '1.8rem' }} />
+                                                        <h4 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Mission</h4>
+                                                    </div>
+                                                    {Array.isArray(activeChapter.mission) ? (
+                                                        <ul style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', color: 'var(--text-muted)', fontSize: '1rem', lineHeight: '1.6' }}>
+                                                            {activeChapter.mission.map((m, i) => <li key={i}>{m}</li>)}
+                                                        </ul>
+                                                    ) : (
+                                                        <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-muted)', margin: 0 }}>
+                                                            {activeChapter.mission}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Department Representatives / Chapter Committee */}
+                                    {activeChapter.departmentMembers && activeChapter.departmentMembers.length > 0 && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <h3 style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-main)' }}>
+                                                <FaUsers style={{ color: activeChapter.color || 'var(--secondary)' }} /> Chapter Members & Coordinators
+                                            </h3>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem' }}>
+                                                {activeChapter.departmentMembers.map((dept, dIdx) => (
+                                                    <div
+                                                        key={dIdx}
+                                                        className="card-3d-subtle"
+                                                        style={{
+                                                            background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(255,255,255,0.02) 100%)',
+                                                            borderRadius: '24px',
+                                                            padding: '2.2rem',
+                                                            border: '1px solid var(--glass-border)',
+                                                            boxShadow: '0 15px 35px rgba(0,0,0,0.04)',
+                                                            position: 'relative',
+                                                            overflow: 'hidden'
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.8rem' }}>
+                                                            <div style={{
+                                                                width: '48px',
+                                                                height: '48px',
+                                                                borderRadius: '14px',
+                                                                background: 'rgba(231, 76, 60, 0.15)',
+                                                                color: activeChapter.color || '#e74c3c',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                fontSize: '1.3rem',
+                                                                flexShrink: 0
+                                                            }}>
+                                                                <FaCogs />
+                                                            </div>
+                                                            <div>
+                                                                <h4 style={{ fontSize: '1.3rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>
+                                                                    {dept.department}
+                                                                </h4>
+                                                                <span style={{ fontSize: '0.85rem', color: 'var(--secondary)', fontWeight: '600' }}>
+                                                                    Quality Circle Cell
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Staff In-charge */}
+                                                        <div style={{
+                                                            background: 'var(--bg-card)',
+                                                            border: '1px solid var(--glass-border)',
+                                                            borderRadius: '16px',
+                                                            padding: '1.2rem 1.4rem',
+                                                            marginBottom: '1.4rem',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                            gap: '1rem'
+                                                        }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+                                                                <div style={{
+                                                                    width: '38px',
+                                                                    height: '38px',
+                                                                    borderRadius: '10px',
+                                                                    background: 'rgba(59, 130, 246, 0.15)',
+                                                                    color: '#60a5fa',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    fontSize: '1.05rem',
+                                                                    flexShrink: 0
+                                                                }}>
+                                                                    <FaUserTie />
+                                                                </div>
+                                                                <div>
+                                                                    <div style={{ fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                                                                        {dept.staffInCharge}
+                                                                    </div>
+                                                                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                                                        Staff In-charge
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <span style={{
+                                                                padding: '0.3rem 0.8rem',
+                                                                background: 'rgba(59, 130, 246, 0.12)',
+                                                                color: '#93c5fd',
+                                                                borderRadius: '50px',
+                                                                fontSize: '0.78rem',
+                                                                fontWeight: '700',
+                                                                whiteSpace: 'nowrap'
+                                                            }}>
+                                                                Staff i/c
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Student Members */}
+                                                        <div>
+                                                            <div style={{
+                                                                fontSize: '0.85rem',
+                                                                fontWeight: '700',
+                                                                color: 'var(--text-muted)',
+                                                                textTransform: 'uppercase',
+                                                                letterSpacing: '0.05em',
+                                                                marginBottom: '0.8rem',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '0.5rem'
+                                                            }}>
+                                                                <FaGraduationCap style={{ color: 'var(--secondary)' }} /> Student Members
+                                                            </div>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.8rem' }}>
+                                                                {dept.students.map((stu, sIdx) => (
+                                                                    <div
+                                                                        key={sIdx}
+                                                                        style={{
+                                                                            background: 'var(--bg-card)',
+                                                                            border: '1px solid var(--glass-border)',
+                                                                            borderRadius: '14px',
+                                                                            padding: '1rem',
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            gap: '0.3rem'
+                                                                        }}
+                                                                    >
+                                                                        <span style={{
+                                                                            fontSize: '0.75rem',
+                                                                            color: 'var(--secondary)',
+                                                                            fontWeight: '700',
+                                                                            textTransform: 'uppercase'
+                                                                        }}>
+                                                                            {stu.year}
+                                                                        </span>
+                                                                        <span style={{ fontSize: '0.98rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                                                                            {stu.name}
+                                                                        </span>
+                                                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                                            Student Member
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div>
                                         <h3 style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-main)' }}>
@@ -593,24 +873,6 @@ const ProfessionalChaptersPage = () => {
                     </AnimatePresence>
                 </main>
             </div>
-
-            <section style={{ background: 'linear-gradient(135deg, var(--bg-card), var(--bg-main))', padding: '6rem 2rem', textAlign: 'center', position: 'relative', overflow: 'hidden', borderTop: '1px solid var(--glass-border)' }}>
-                <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', margin: '0 auto' }}>
-                    <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-                        <p style={{ fontSize: '1.4rem', color: 'var(--secondary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '1.5rem' }}>Ready to Join Us?</p>
-                        <a href="tel:+918220008082" style={{ fontSize: '3.5rem', fontWeight: '900', color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', textDecoration: 'none', transition: 'all 0.3s ease' }}>
-                            <div style={{ width: '80px', height: '80px', background: 'var(--secondary)', color: 'var(--bg-dark)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(230, 182, 39, 0.4)' }}>
-                                <FaPhoneAlt size={30} />
-                            </div>
-                            <span>+91 82200 08082</span>
-                        </a>
-                        <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '2.5rem auto 0', lineHeight: '1.7' }}>
-                            Have questions about chapters, activities, or admissions?
-                            Our expert counselors are just a call away to guide you.
-                        </p>
-                    </motion.div>
-                </div>
-            </section>
 
             <Footer />
             <style>{`

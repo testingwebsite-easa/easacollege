@@ -961,7 +961,6 @@ const CareerPage = () => {
         )}
       </AnimatePresence>
 
-      <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
       <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
       
       <JobApplicationForm
@@ -971,7 +970,7 @@ const CareerPage = () => {
         department={applyingDepartment}
       />
 
-      <Footer />
+      <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
 
       <style>{`
         @keyframes spin {

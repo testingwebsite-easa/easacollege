@@ -75,9 +75,8 @@ function SustainabilityPage() {
                 </motion.div>
             </div>
 
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
-            <Footer />
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
 
             <style>{`
                 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

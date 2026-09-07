@@ -10,6 +10,7 @@ import API_BASE_URL from '../api';
 import collegeLogo from '../assets/College Logo with White Letter.webp';
 import GlobalHero from '../components/GlobalHero';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 
 const AlumniRegistration = () => {
     const { theme } = useTheme();
@@ -55,8 +56,16 @@ const AlumniRegistration = () => {
     }, []);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'phone') {
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+            setFormData({ ...formData, phone: digitsOnly });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
+
+    const { showToast } = useToast();
 
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
@@ -68,10 +77,33 @@ const AlumniRegistration = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!formData.name?.trim()) {
+            showToast('Please enter your Full Name', 'warning', 'Missing: Full Name');
+            return;
+        }
+        if (!formData.batch?.trim()) {
+            showToast('Please enter your Graduation Year (Batch)', 'warning', 'Missing: Batch Year');
+            return;
+        }
+        if (!formData.department?.trim()) {
+            showToast('Please select your Department / Branch', 'warning', 'Missing: Department');
+            return;
+        }
+        if (!formData.email?.trim() || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+            showToast('Please enter a valid Email Address', 'warning', 'Invalid: Email Address');
+            return;
+        }
+        const cleanPhone = (formData.phone || '').replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            showToast('Phone number must be exactly 10 digits', 'warning', 'Invalid: Phone Number');
+            return;
+        }
+
         setLoading(true);
 
         const data = new FormData();
-        data.append('data', JSON.stringify(formData));
+        data.append('data', JSON.stringify({ ...formData, phone: cleanPhone }));
         if (photo) {
             data.append('photo', photo);
         }
@@ -86,12 +118,13 @@ const AlumniRegistration = () => {
             if (result.success) {
                 setSubmitted(true);
                 setAlumniData(result.alumni);
+                showToast('Registration successful! Welcome to the EASA Alumni Network.', 'success', 'Registration Completed');
             } else {
-                alert(result.message || 'Registration failed');
+                showToast(result.message || 'Registration failed', 'error', 'Registration Error');
             }
         } catch (err) {
             console.error(err);
-            alert('Something went wrong!');
+            showToast('Something went wrong. Please check your connection and try again.', 'error', 'Submission Error');
         } finally {
             setLoading(false);
         }
@@ -112,9 +145,10 @@ const AlumniRegistration = () => {
             link.download = `EASA_Alumni_ID_${(formData.name || 'Card').replace(/\s+/g, '_')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
+            showToast('Alumni ID Card downloaded successfully!', 'success', 'ID Card Saved');
         } catch (err) {
             console.error("ID Card Generation Failed", err);
-            alert("Could not generate ID card. Please try again.");
+            showToast("Could not generate ID card. Please try again.", "error", "Export Failed");
         }
     };
 
@@ -230,7 +264,18 @@ Status: Verified Lifetime Alumni`;
 
                                     <div className="input-group">
                                         <label style={{ color: primaryTextColor, fontWeight: '700', fontSize: '0.9rem', marginBottom: '0.5rem', display: 'block' }}>Phone Number *</label>
-                                        <input type="tel" name="phone" required value={formData.phone} onChange={handleChange} className="custom-input-themed" placeholder="+91 XXXX XXX XXX" />
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            required
+                                            maxLength={10}
+                                            pattern="[0-9]{10}"
+                                            title="Please enter a 10-digit mobile number"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            className="custom-input-themed"
+                                            placeholder="10-digit Phone Number"
+                                        />
                                     </div>
 
                                     <div className="input-group">

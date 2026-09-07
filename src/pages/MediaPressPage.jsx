@@ -120,9 +120,8 @@ function MediaPressPage() {
                 </div>
             </div>
 
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
-            <Footer />
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
 
             <style>{`
                 .news-image:hover { transform: scale(1.1); }

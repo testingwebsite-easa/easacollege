@@ -150,9 +150,8 @@ function GovernancePage() {
                 </motion.div>
             </div>
 
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
-            <Footer />
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
         </div>
     );
 }

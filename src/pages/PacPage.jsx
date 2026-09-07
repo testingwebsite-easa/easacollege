@@ -10,6 +10,7 @@ import {
     FaHeartbeat, FaSeedling, FaFilePdf, FaExternalLinkAlt
 } from 'react-icons/fa';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
@@ -255,6 +256,7 @@ const PacPage = () => {
         { id: 'faqs', label: 'FAQs & Feedback', icon: <FaLightbulb /> }
     ];
 
+    const { showToast } = useToast();
     const cardBg = isDark ? 'var(--bg-card)' : '#ffffff';
     const cardBorder = isDark ? '1px solid var(--glass-border)' : '1px solid rgba(226, 232, 240, 0.9)';
     const cardShadow = isDark ? '0 20px 50px rgba(0,0,0,0.3)' : '0 12px 35px rgba(0,0,0,0.05)';
@@ -264,6 +266,20 @@ const PacPage = () => {
 
     const handleFeedbackSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!feedbackForm.name?.trim()) {
+            showToast('Please enter your Full Name', 'warning', 'Missing: Full Name');
+            return;
+        }
+        if (!feedbackForm.email?.trim() || !/^\S+@\S+\.\S+$/.test(feedbackForm.email)) {
+            showToast('Please enter a valid Email Address', 'warning', 'Invalid: Email Address');
+            return;
+        }
+        if (!feedbackForm.message?.trim()) {
+            showToast('Please enter your recommendation or feedback', 'warning', 'Missing: Feedback Details');
+            return;
+        }
+
         setFeedbackSubmitted(true);
         try {
             const res = await fetch(`${API_BASE_URL}/api/pac-feedback`, {
@@ -272,13 +288,13 @@ const PacPage = () => {
                 body: JSON.stringify(feedbackForm)
             });
             if (res.ok) {
-                alert('✨ Thank you! Your recommendation has been submitted to the Program Advisory Committee (PAC) and saved for review.');
+                showToast('Your recommendation has been submitted to the Program Advisory Committee (PAC).', 'success', 'Feedback Submitted');
             } else {
-                alert('✨ Thank you! Your recommendation has been received.');
+                showToast('Your recommendation has been received.', 'success', 'Submitted');
             }
         } catch (err) {
             console.error('PAC submit error:', err);
-            alert('✨ Thank you! Your recommendation has been received.');
+            showToast('Your recommendation has been received.', 'info', 'Submitted');
         } finally {
             setFeedbackModal(false);
             setFeedbackSubmitted(false);

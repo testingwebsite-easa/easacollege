@@ -48,7 +48,6 @@ function Home() {
                 <LifeAtEASASection />
                 <AdviceSection />
                 <ManagementSection isStatic={true} />
-                <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
                 <AdmissionForm
                     isOpen={showAdmissionForm}
                     onClose={() => setShowAdmissionForm(false)}

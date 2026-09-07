@@ -10,6 +10,7 @@ import {
     FaComments, FaIndustry, FaUserTie, FaCheckDouble
 } from 'react-icons/fa';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
@@ -233,6 +234,7 @@ const EntrepreneurshipPage = () => {
         { id: 'faqs', label: 'FAQs & Policies', icon: <FaLightbulb /> }
     ];
 
+    const { showToast } = useToast();
     const cardBg = isDark ? 'var(--bg-card)' : '#ffffff';
     const cardBorder = isDark ? '1px solid var(--glass-border)' : '1px solid rgba(226, 232, 240, 0.9)';
     const cardShadow = isDark ? '0 20px 40px rgba(0,0,0,0.3)' : '0 12px 35px rgba(0,0,0,0.05)';
@@ -242,21 +244,44 @@ const EntrepreneurshipPage = () => {
 
     const handlePitchSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!pitchForm.founderName?.trim()) {
+            showToast('Please enter the Founder / Student Name', 'warning', 'Missing: Founder Name');
+            return;
+        }
+        if (!pitchForm.email?.trim() || !/^\S+@\S+\.\S+$/.test(pitchForm.email)) {
+            showToast('Please enter a valid Email Address', 'warning', 'Invalid: Email Address');
+            return;
+        }
+        const cleanPhone = (pitchForm.phone || '').replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            showToast('Phone number must be exactly 10 digits', 'warning', 'Invalid: Phone Number');
+            return;
+        }
+        if (!pitchForm.startupName?.trim()) {
+            showToast('Please enter your Startup or Project Name', 'warning', 'Missing: Startup Name');
+            return;
+        }
+        if (!pitchForm.ideaSummary?.trim()) {
+            showToast('Please provide a brief Executive Summary / Problem statement', 'warning', 'Missing: Idea Summary');
+            return;
+        }
+
         setPitchSubmitted(true);
         try {
             const res = await fetch(`${API_BASE_URL}/api/startup-pitches`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pitchForm)
+                body: JSON.stringify({ ...pitchForm, phone: cleanPhone })
             });
             if (res.ok) {
-                alert('🎉 Congratulations! Your Startup Pitch has been submitted to EASA Incubation Cell and saved. Our team will review your proposal and invite you for an evaluation pitch.');
+                showToast('Congratulations! Your Startup Pitch has been submitted to EASA Incubation Cell. Our team will review your proposal.', 'success', 'Pitch Submitted');
             } else {
-                alert('🎉 Your proposal has been received. Our incubation team will contact you soon.');
+                showToast('Your proposal has been received. Our incubation team will contact you soon.', 'success', 'Proposal Received');
             }
         } catch (err) {
             console.error('Pitch submit error:', err);
-            alert('🎉 Your proposal has been received.');
+            showToast('Your proposal has been received.', 'info', 'Submitted');
         } finally {
             setPitchModal(false);
             setPitchSubmitted(false);
@@ -1015,9 +1040,12 @@ const EntrepreneurshipPage = () => {
                                         <input
                                             type="tel"
                                             required
+                                            maxLength={10}
+                                            pattern="[0-9]{10}"
+                                            title="Please enter a 10-digit mobile number"
                                             value={pitchForm.phone}
-                                            onChange={(e) => setPitchForm({ ...pitchForm, phone: e.target.value })}
-                                            placeholder="+91 9876543210"
+                                            onChange={(e) => setPitchForm({ ...pitchForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                            placeholder="10-digit Phone Number"
                                             style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
                                         />
                                     </div>

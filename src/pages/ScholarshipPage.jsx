@@ -147,7 +147,7 @@ const ScholarshipPage = () => {
                                 </p>
                                 <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                                     <button onClick={() => setShowAdmissionForm(true)} className="btn btn-primary" style={{ background: 'white', color: 'var(--primary)', padding: '1rem 2.5rem', borderRadius: '50px', fontWeight: '800' }}>Contact Admissions</button>
-                                    <a href="tel:+919342628013" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', textDecoration: 'none', padding: '1rem 2.5rem', borderRadius: '50px', fontWeight: '800', border: '1px solid rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>Call Nodal Officer</a>
+                                    <a href="tel:+917373732569" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', textDecoration: 'none', padding: '1rem 2.5rem', borderRadius: '50px', fontWeight: '800', border: '1px solid rgba(255,255,255,0.2)', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>Call Admissions / Nodal Officer</a>
                                 </div>
                             </div>
                             <div style={{ textAlign: 'center' }}>
@@ -280,9 +280,8 @@ const ScholarshipPage = () => {
                 )}
             </AnimatePresence>
 
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
-            <Footer />
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
 
             <style>{`
                 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

@@ -138,9 +138,8 @@ function LeadershipPage() {
                 <ManagementSection title="Key Decision Makers" subtitle="The core team driving our strategic goals" category="management" isStatic={true} />
             </div>
 
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
-            <Footer />
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
         </div>
     );
 }

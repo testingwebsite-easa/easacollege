@@ -1521,7 +1521,7 @@ app.post(['/api/admissions', '/api/admissions/register'], async (req, res) => {
                             <li><strong>Course:</strong> ${req.body.course}</li>
                             <li><strong>District:</strong> ${req.body.district}</li>
                         </ul>
-                        <p>If you have any urgent queries, feel free to contact us at +91 93450 12345.</p>
+                        <p>If you have any urgent queries, feel free to contact us at +91 73737 32569.</p>
                         <p>Best regards,<br/><strong>Admissions Team<br/>EASA College</strong></p>
                     </div>
                 `

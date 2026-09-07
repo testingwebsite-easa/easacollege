@@ -7,6 +7,7 @@ import AdmissionForm from '../components/AdmissionForm';
 import Tilt3DCard from '../components/Tilt3DCard';
 import API_BASE_URL from '../api';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import {
     FaGraduationCap,
     FaCheckCircle,
@@ -35,6 +36,7 @@ import {
 const AdmissionsPage = () => {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
+    const { showToast } = useToast();
 
     const [showModalForm, setShowModalForm] = useState(false);
     const [selectedCourseForModal, setSelectedCourseForModal] = useState('');
@@ -72,6 +74,35 @@ const AdmissionsPage = () => {
 
     const handleEnquirySubmit = async (e) => {
         e.preventDefault();
+
+        if (!enquiryForm.name?.trim()) {
+            showToast("Please enter the Student's Full Name.", "warning", "Missing: Student Name");
+            return;
+        }
+
+        const cleanPhone = (enquiryForm.phone || '').replace(/\D/g, '');
+        if (!cleanPhone) {
+            showToast("Please enter your 10-digit Phone / WhatsApp Number.", "warning", "Missing: Phone Number");
+            return;
+        } else if (cleanPhone.length !== 10) {
+            showToast(`Phone number has ${cleanPhone.length} digits. It must be exactly 10 digits.`, "warning", "Invalid Phone Number");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!enquiryForm.email?.trim()) {
+            showToast("Please enter your Email Address.", "warning", "Missing: Email");
+            return;
+        } else if (!emailRegex.test(enquiryForm.email)) {
+            showToast("Please enter a valid Email Address.", "warning", "Invalid Email");
+            return;
+        }
+
+        if (!enquiryForm.course) {
+            showToast("Please select a Course of interest.", "warning", "Missing: Course");
+            return;
+        }
+
         setIsSubmittingEnquiry(true);
         try {
             const response = await fetch(`${API_BASE_URL}/api/admissions/register`, {
@@ -80,7 +111,7 @@ const AdmissionsPage = () => {
                 body: JSON.stringify({
                     name: enquiryForm.name,
                     email: enquiryForm.email,
-                    phone: enquiryForm.phone,
+                    phone: cleanPhone,
                     course: enquiryForm.course,
                     state: enquiryForm.state,
                     district: enquiryForm.city,
@@ -89,13 +120,11 @@ const AdmissionsPage = () => {
                 })
             });
 
-            if (response.ok) {
-                setEnquirySuccess(true);
-            } else {
-                setEnquirySuccess(true);
-            }
+            showToast("Enquiry submitted successfully! Our admissions counselor will contact you.", "success", "Enquiry Received");
+            setEnquirySuccess(true);
         } catch (err) {
             console.warn("Backend submit fallback:", err);
+            showToast("Enquiry submitted successfully! Our admissions counselor will contact you.", "success", "Enquiry Received");
             setEnquirySuccess(true);
         } finally {
             setIsSubmittingEnquiry(false);
@@ -524,13 +553,13 @@ const AdmissionsPage = () => {
                 <span style={{ color: '#ffffff' }}>🎓 Admissions Open for Academic Year 2026 - 2027 (UG / PG / Lateral Entry)</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                     <a
-                        href="tel:+919500777518"
+                        href="tel:+917373732569"
                         style={{ color: '#ffffff', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(255,255,255,0.2)', padding: '0.25rem 0.75rem', borderRadius: '8px', transition: 'all 0.2s ease' }}
                     >
-                        <FaPhoneAlt style={{ fontSize: '0.8rem' }} /> +91 95007 77518
+                        <FaPhoneAlt style={{ fontSize: '0.8rem' }} /> +91 73737 32569
                     </a>
                     <a
-                        href="https://wa.me/919500777518?text=Hello%20EASA%20Admissions%20Team,%20I%20would%20like%20to%20know%20more%20about%20admission%20details."
+                        href="https://wa.me/917373732569?text=Hello%20EASA%20Admissions%20Team,%20I%20would%20like%20to%20know%20more%20about%20admission%20details."
                         target="_blank"
                         rel="noreferrer"
                         style={{ color: '#ffffff', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: '#25D366', padding: '0.25rem 0.75rem', borderRadius: '8px', fontWeight: '700', boxShadow: '0 4px 14px rgba(37, 211, 102, 0.4)' }}
@@ -807,7 +836,7 @@ const AdmissionsPage = () => {
                                             letterSpacing: '0.05em',
                                             boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)'
                                         }}>
-                                            2026 INTAKE
+                                            2027 INTAKE
                                         </span>
                                     </div>
                                     <p style={{ fontSize: '0.88rem', color: isDark ? 'var(--text-muted)' : '#64748b', marginTop: '0.4rem', margin: 0 }}>
@@ -872,9 +901,12 @@ const AdmissionsPage = () => {
                                                 <input
                                                     type="tel"
                                                     required
+                                                    maxLength={10}
+                                                    pattern="[0-9]{10}"
+                                                    title="Please enter a 10-digit mobile number"
                                                     placeholder="10-digit mobile"
                                                     value={enquiryForm.phone}
-                                                    onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value })}
+                                                    onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                                                     style={{
                                                         width: '100%',
                                                         padding: '0.8rem 1rem',
@@ -1919,7 +1951,7 @@ const AdmissionsPage = () => {
                                         <div>
                                             <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Admissions Hotline</div>
                                             <div style={{ fontWeight: '900', color: '#ffffff', fontSize: '1.15rem' }}>
-                                                +91 95007 77518 / +91 95007 77519 / +91 95007 77520
+                                                <a href="tel:+917373732569" style={{ color: '#ffffff', textDecoration: 'none' }}>+91 73737 32569</a> / <a href="tel:+917373722922" style={{ color: '#ffffff', textDecoration: 'none' }}>+91 73737 22922</a>
                                             </div>
                                         </div>
                                     </div>
@@ -1931,7 +1963,7 @@ const AdmissionsPage = () => {
                                         <div>
                                             <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>WhatsApp Direct Chat</div>
                                             <a
-                                                href="https://wa.me/919500777518?text=Hello%20EASA%20College%20Admissions,%20I%20need%20assistance%20with%20engineering%20admission."
+                                                href="https://wa.me/917373732569?text=Hello%20EASA%20College%20Admissions,%20I%20need%20assistance%20with%20engineering%20admission."
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 style={{ fontWeight: '800', color: '#25D366', fontSize: '1.08rem', textDecoration: 'none' }}
@@ -2005,7 +2037,7 @@ const AdmissionsPage = () => {
                 onClose={() => setShowModalForm(false)}
             />
 
-            <Footer onOpenAdmission={() => handleOpenModal()} />
+            <Footer showAdmissionCTA={false} onOpenAdmission={() => handleOpenModal()} />
         </div>
     );
 };

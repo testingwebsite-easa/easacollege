@@ -200,11 +200,17 @@ const AdmissionEnquiryAdmin = () => {
     // Add Manual Admission
     const handleAddAdmissionSubmit = async (e) => {
         e.preventDefault();
+        const cleanPhone = (newAdmissionForm.phone || '').replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            alert('Please enter a valid 10-digit mobile number.');
+            return;
+        }
+
         try {
             const res = await fetch(`${baseUrl}/api/admissions`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newAdmissionForm)
+                body: JSON.stringify({ ...newAdmissionForm, phone: cleanPhone })
             });
             if (res.ok) {
                 alert('Admission entry added successfully!');
@@ -285,11 +291,17 @@ const AdmissionEnquiryAdmin = () => {
     // Add Manual Enquiry
     const handleAddEnquirySubmit = async (e) => {
         e.preventDefault();
+        const cleanPhone = (newEnquiryForm.phone || '').replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            alert('Please enter a valid 10-digit mobile number.');
+            return;
+        }
+
         try {
             const res = await fetch(`${baseUrl}/api/enquiry`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newEnquiryForm)
+                body: JSON.stringify({ ...newEnquiryForm, phone: cleanPhone })
             });
             if (res.ok) {
                 alert('Enquiry logged successfully!');
@@ -1641,8 +1653,12 @@ const AdmissionEnquiryAdmin = () => {
                                     <input
                                         type="tel"
                                         required
+                                        maxLength={10}
+                                        pattern="[0-9]{10}"
+                                        title="Please enter a 10-digit mobile number"
+                                        placeholder="10-digit Phone"
                                         value={newAdmissionForm.phone}
-                                        onChange={(e) => setNewAdmissionForm({ ...newAdmissionForm, phone: e.target.value })}
+                                        onChange={(e) => setNewAdmissionForm({ ...newAdmissionForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                                         style={{ width: '100%', padding: '0.65rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }}
                                     />
                                 </div>
@@ -1792,8 +1808,12 @@ const AdmissionEnquiryAdmin = () => {
                                     <input
                                         type="tel"
                                         required
+                                        maxLength={10}
+                                        pattern="[0-9]{10}"
+                                        title="Please enter a 10-digit mobile number"
+                                        placeholder="10-digit Phone"
                                         value={newEnquiryForm.phone}
-                                        onChange={(e) => setNewEnquiryForm({ ...newEnquiryForm, phone: e.target.value })}
+                                        onChange={(e) => setNewEnquiryForm({ ...newEnquiryForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                                         style={{ width: '100%', padding: '0.65rem', background: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }}
                                     />
                                 </div>

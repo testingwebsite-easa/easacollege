@@ -188,9 +188,8 @@ function MilestonesPage() {
                 </motion.div>
             </div>
 
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
-            <Footer />
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
 
             <style>{`
                 .timeline-grid {

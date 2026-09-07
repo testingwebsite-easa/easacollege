@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import API_BASE_URL from '../api';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import {
     FaDownload, FaLock, FaUser, FaBriefcase, FaUsers,
     FaPlus, FaEdit, FaTrash, FaEye, FaSearch, FaFilter,
@@ -43,6 +44,7 @@ const departmentOptions = [
 
 const JobApplicationsView = () => {
     const { theme } = useTheme();
+    const { showToast } = useToast();
     const isDark = theme === 'dark';
 
     // Navigation Tab
@@ -104,8 +106,16 @@ const JobApplicationsView = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        if (!credentials.username?.trim()) {
+            showToast("Please enter your admin username", "warning", "Missing: Username");
+            return;
+        }
+        if (!credentials.password?.trim()) {
+            showToast("Please enter your admin password", "warning", "Missing: Password");
+            return;
+        }
         if (credentials.username.toLowerCase() !== 'admin') {
-            alert("Invalid Username");
+            showToast("Invalid Username", "error", "Auth Failed");
             return;
         }
 
@@ -121,14 +131,15 @@ const JobApplicationsView = () => {
             if (data.success) {
                 localStorage.setItem('admin_token', data.token);
                 setIsAuthenticated(true);
+                showToast("Admin session authenticated successfully", "success", "Welcome");
                 fetchApplications();
                 fetchCareers();
             } else {
-                alert("Invalid Password");
+                showToast("Invalid Password", "error", "Auth Failed");
             }
         } catch (error) {
             console.error(error);
-            alert("Login Verification Failed. Check backend connection.");
+            showToast("Login Verification Failed. Check backend connection.", "error", "Network Error");
         }
     };
 
@@ -183,12 +194,13 @@ const JobApplicationsView = () => {
                 if (selectedApp && selectedApp._id === appId) {
                     setSelectedApp(prev => ({ ...prev, status: newStatus }));
                 }
+                showToast(`Application status updated to ${newStatus}`, 'success', 'Status Updated');
             } else {
-                alert('Failed to update status');
+                showToast('Failed to update status', 'error', 'Update Failed');
             }
         } catch (err) {
             console.error("Error updating status:", err);
-            alert('Error updating status');
+            showToast('Error updating status', 'error', 'Error');
         }
     };
 
@@ -208,13 +220,13 @@ const JobApplicationsView = () => {
                 if (selectedApp && selectedApp._id === appId) {
                     setSelectedApp(null);
                 }
-                alert("Application deleted successfully");
+                showToast("Application deleted successfully", "success", "Deleted");
             } else {
-                alert("Failed to delete application");
+                showToast("Failed to delete application", "error", "Delete Failed");
             }
         } catch (err) {
             console.error(err);
-            alert("Error deleting application");
+            showToast("Error deleting application", "error", "Delete Error");
         }
     };
 
@@ -244,6 +256,10 @@ const JobApplicationsView = () => {
     // Save Job (POST / PUT)
     const handleSaveJob = async (e) => {
         e.preventDefault();
+        if (!jobForm.title?.trim()) {
+            showToast("Please enter the Job Title", "warning", "Missing: Job Title");
+            return;
+        }
         setSubmittingJob(true);
         try {
             const token = localStorage.getItem('admin_token') || localStorage.getItem('authToken') || localStorage.getItem('token');
@@ -271,21 +287,21 @@ const JobApplicationsView = () => {
                 const saved = await res.json();
                 if (editingJobId) {
                     setCareers(prev => prev.map(j => j._id === editingJobId ? saved : j));
-                    alert("Job opening updated successfully!");
+                    showToast("Job opening updated successfully!", "success", "Job Updated");
                 } else {
                     setCareers(prev => [saved, ...prev]);
-                    alert("New job opening posted successfully!");
+                    showToast("New job opening posted successfully!", "success", "Job Posted");
                 }
                 setJobModalOpen(false);
                 setJobForm(defaultJobForm);
                 setEditingJobId(null);
             } else {
                 const errData = await res.json().catch(() => ({}));
-                alert(`Failed to save job: ${errData.error || 'Server error'}`);
+                showToast(`Failed to save job: ${errData.error || 'Server error'}`, "error", "Save Failed");
             }
         } catch (err) {
             console.error("Save job error:", err);
-            alert("Error saving job");
+            showToast("Error saving job", "error", "Error");
         } finally {
             setSubmittingJob(false);
         }
@@ -307,12 +323,13 @@ const JobApplicationsView = () => {
 
             if (res.ok) {
                 setCareers(prev => prev.map(j => j._id === job._id ? { ...j, status: newStatus } : j));
+                showToast(`Job listing is now ${newStatus}`, "info", "Status Changed");
             } else {
-                alert("Failed to update status");
+                showToast("Failed to update status", "error", "Update Failed");
             }
         } catch (err) {
             console.error(err);
-            alert("Error toggling status");
+            showToast("Error toggling status", "error", "Error");
         }
     };
 
@@ -330,20 +347,20 @@ const JobApplicationsView = () => {
 
             if (res.ok) {
                 setCareers(prev => prev.filter(j => j._id !== jobId));
-                alert("Job posting deleted successfully");
+                showToast("Job posting deleted successfully", "success", "Deleted");
             } else {
-                alert("Failed to delete job posting");
+                showToast("Failed to delete job posting", "error", "Delete Failed");
             }
         } catch (err) {
             console.error(err);
-            alert("Error deleting job");
+            showToast("Error deleting job", "error", "Delete Error");
         }
     };
 
     // Download Applications Excel
     const downloadExcel = () => {
         if (applications.length === 0) {
-            alert("No applications data to export");
+            showToast("No applications data to export", "info", "Export");
             return;
         }
 

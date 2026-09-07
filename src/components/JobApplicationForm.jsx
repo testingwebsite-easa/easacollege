@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import API_BASE_URL from '../api';
 
 const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' }) => {
     // Theme Hook
     const { theme } = useTheme();
     const isDark = theme === 'dark';
+    const { showToast } = useToast();
 
     const [loading, setLoading] = useState(false);
     const [resumeFile, setResumeFile] = useState(null);
@@ -140,6 +142,12 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
             } else {
                 setFormData({ ...formData, [name]: checked });
             }
+        } else if (name === 'mobileNo') {
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+            setFormData({ ...formData, mobileNo: digitsOnly });
+            if (errors[name]) {
+                setErrors({ ...errors, [name]: '' });
+            }
         } else {
             setFormData({ ...formData, [name]: value });
             // Clear error when user types
@@ -204,16 +212,40 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
     const validate = () => {
         const newErrors = {};
 
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            newErrors.email = "Please enter a valid email address.";
+        // Applicant Name
+        if (!formData.fullName?.trim()) {
+            newErrors.fullName = "Full Name is required.";
+            showToast("Please enter your Full Name.", "warning", "Missing: Full Name");
+            setErrors(newErrors);
+            return false;
         }
 
-        // Phone validation (10 digits, optionally starting with +91)
-        const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[6-9]\d{9}$/;
-        if (!phoneRegex.test(formData.mobileNo)) {
-            newErrors.mobileNo = "Please enter a valid 10-digit Indian mobile number.";
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email?.trim()) {
+            newErrors.email = "Email Address is required.";
+            showToast("Please enter your Email Address.", "warning", "Missing: Email");
+            setErrors(newErrors);
+            return false;
+        } else if (!emailRegex.test(formData.email)) {
+            newErrors.email = "Please enter a valid email address.";
+            showToast("Please enter a valid email address.", "warning", "Invalid Email");
+            setErrors(newErrors);
+            return false;
+        }
+
+        // Phone validation (exactly 10 digits)
+        const cleanPhone = (formData.mobileNo || '').replace(/\D/g, '');
+        if (!cleanPhone) {
+            newErrors.mobileNo = "Mobile number is required.";
+            showToast("Please enter your 10-digit Mobile Number.", "warning", "Missing: Mobile No");
+            setErrors(newErrors);
+            return false;
+        } else if (cleanPhone.length !== 10) {
+            newErrors.mobileNo = "Please enter a valid 10-digit mobile number.";
+            showToast(`Mobile number has ${cleanPhone.length} digits. It must be exactly 10 digits.`, "warning", "Invalid Mobile No");
+            setErrors(newErrors);
+            return false;
         }
 
         setErrors(newErrors);
@@ -227,66 +259,57 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
             return;
         }
 
-        setLoading(true);
-
         // --- VALIDATION ---
         // 1. Fresher / Experience
         if (!formData.isFresher) {
             const expYears = parseFloat(formData.totalExperienceYears);
             if (isNaN(expYears) || expYears < 1) {
-                alert("Since you are not a fresher, Total Experience must be at least 1 year.");
-                setLoading(false);
+                showToast("Since you are not a fresher, Total Experience must be at least 1 year.", "warning", "Missing: Experience");
                 return;
             }
         }
 
-        // 2. Declaration
-        if (!formData.declaration) {
-            alert("Please accept the declaration to proceed.");
-            setLoading(false);
-            return;
-        }
-
-        // 3. Gender
+        // 2. Gender
         if (!formData.gender) {
-            alert("Gender is mandatory.");
-            setLoading(false);
+            showToast("Please select your Gender.", "warning", "Missing: Gender");
             return;
         }
 
-        // 4. Contact Details
-        if (!formData.mobileNo || !formData.email || !formData.presentAddress) {
-            alert("Mobile No, Email, and Present Address are mandatory.");
-            setLoading(false);
+        // 3. Present Address
+        if (!formData.presentAddress?.trim()) {
+            showToast("Please enter your Present Residential Address.", "warning", "Missing: Address");
             return;
         }
 
-        // 5. Education (SSLC, HSC, UG mandatory)
-        // Check if Institution and Year are filled for the first 3 rows
-        const mandatoryEduLabels = ['SSLC', 'HSC / Diploma', 'UG Degree'];
+        // 4. Education (SSLC, HSC, UG mandatory)
+        const mandatoryEduLabels = ['SSLC (10th)', 'HSC / Diploma (12th)', 'UG Degree'];
         for (let i = 0; i < 3; i++) {
             const edu = formData.education[i];
             if (!edu.institution || !edu.year) {
-                alert(`${mandatoryEduLabels[i]} details (Institution & Year) are mandatory.`);
-                setLoading(false);
+                showToast(`Please fill ${mandatoryEduLabels[i]} Institution & Passing Year.`, "warning", `Missing: ${mandatoryEduLabels[i]}`);
                 return;
             }
         }
 
-        // 6. Salary & Skills
-        if (!formData.expectedSalary) {
-            alert("Expected Salary is mandatory.");
-            setLoading(false);
+        // 5. Salary
+        if (!formData.expectedSalary?.trim()) {
+            showToast("Please enter your Expected Monthly / Annual Salary.", "warning", "Missing: Expected Salary");
             return;
         }
 
-        // 7. Resume
+        // 6. Resume
         if (!resumeFile) {
-            alert("Please upload your Resume/CV (PDF format).");
-            setLoading(false);
+            showToast("Please upload your Resume / CV in PDF format.", "warning", "Missing: Resume / CV");
             return;
         }
 
+        // 7. Declaration
+        if (!formData.declaration) {
+            showToast("Please check and accept the declaration checkbox to proceed.", "warning", "Declaration Required");
+            return;
+        }
+
+        setLoading(true);
 
         try {
             const baseUrl = API_BASE_URL;
@@ -307,20 +330,20 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
             if (!contentType || !contentType.includes("application/json")) {
                 const text = await response.text();
                 console.error("Received non-JSON response:", text);
-                throw new Error("Server Error: The backend returned an invalid response. Please checking console for details.");
+                throw new Error("Server Error: The backend returned an invalid response.");
             }
 
             const data = await response.json();
 
             if (data.success) {
-                alert("Application Submitted Successfully!");
+                showToast("Your job application has been submitted successfully! Our HR team will review your profile.", "success", "Application Submitted!");
                 onClose();
             } else {
                 throw new Error(data.message || "Submission failed");
             }
         } catch (error) {
             console.error(error);
-            alert("Failed to submit application: " + error.message);
+            showToast("Failed to submit application: " + error.message, "error", "Submission Failed");
         } finally {
             setLoading(false);
         }
@@ -556,6 +579,10 @@ const JobApplicationForm = ({ isOpen, onClose, position = '', department = '' })
                                                 name="mobileNo"
                                                 value={formData.mobileNo}
                                                 onChange={handleChange}
+                                                maxLength={10}
+                                                pattern="[0-9]{10}"
+                                                title="Please enter a 10-digit mobile number"
+                                                placeholder="10-digit Mobile No"
                                                 style={{
                                                     ...inputStyle,
                                                     border: errors.mobileNo ? '1px solid #ef4444' : inputStyle.border

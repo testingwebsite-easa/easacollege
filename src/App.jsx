@@ -85,6 +85,7 @@ const IqacAboutPage = lazy(() => import('./pages/IqacAboutPage'));
 const IqacCommitteePage = lazy(() => import('./pages/IqacCommitteePage'));
 import PopupAlert from './components/PopupAlert';
 import { ThemeProvider } from './context/ThemeContext';
+import { ToastProvider } from './context/ToastContext';
 const ProfessionalChaptersPage = lazy(() => import('./pages/ProfessionalChaptersPage'));
 const StorePage = lazy(() => import('./pages/StorePage'));
 const TransportPage = lazy(() => import('./pages/TransportPage'));
@@ -113,11 +114,12 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <LoadingBar />
-        <Router>
-          <PopupAlert />
-          <ScrollToTop />
-          <Suspense fallback={<div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}><div className="loading-spinner" /></div>}>
+        <ToastProvider>
+          <LoadingBar />
+          <Router>
+            <PopupAlert />
+            <ScrollToTop />
+            <Suspense fallback={<div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}><div className="loading-spinner" /></div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/professional-chapters" element={<ProfessionalChaptersPage />} />
@@ -281,6 +283,7 @@ function App() {
           <ScrollToTopButton />
           <StickyContactBar />
         </Router>
+        </ToastProvider>
       </ThemeProvider>
     </AuthProvider>
   );

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { FaTimes, FaPaperPlane } from 'react-icons/fa';
 import API_BASE_URL from '../api';
+import { useToast } from '../context/ToastContext';
 
 const EnquiryForm = ({ isOpen, onClose }) => {
+    const { showToast } = useToast();
     if (!isOpen) return null;
 
     const [formData, setFormData] = useState({
@@ -23,30 +25,64 @@ const EnquiryForm = ({ isOpen, onClose }) => {
     }, []);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'phone') {
+            const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+            setFormData({ ...formData, phone: digitsOnly });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!formData.name?.trim()) {
+            showToast("Please enter your Full Name.", "warning", "Missing: Name");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email?.trim()) {
+            showToast("Please enter your Email Address.", "warning", "Missing: Email");
+            return;
+        } else if (!emailRegex.test(formData.email)) {
+            showToast("Please enter a valid Email Address.", "warning", "Invalid Email");
+            return;
+        }
+
+        const cleanPhone = (formData.phone || '').replace(/\D/g, '');
+        if (!cleanPhone) {
+            showToast("Please enter your 10-digit Phone Number.", "warning", "Missing: Phone Number");
+            return;
+        } else if (cleanPhone.length !== 10) {
+            showToast(`Phone number has ${cleanPhone.length} digits. It must be exactly 10 digits.`, "warning", "Invalid Phone Number");
+            return;
+        }
+
+        if (!formData.message?.trim()) {
+            showToast("Please enter your message or enquiry.", "warning", "Missing: Message");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
-            // Replace with your actual API endpoint for enquiries
             const response = await fetch(`${API_BASE_URL}/api/enquiry`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ ...formData, phone: cleanPhone })
             });
 
             if (response.ok) {
-                alert('Enquiry submitted successfully!');
+                showToast("Enquiry submitted successfully! Our team will contact you shortly.", "success", "Enquiry Sent");
                 onClose();
                 setFormData({ name: '', email: '', phone: '', message: '' });
             } else {
-                alert('Failed to submit enquiry. Please try again.');
+                showToast("Failed to submit enquiry. Please try again.", "error", "Submission Failed");
             }
         } catch (error) {
             console.error('Error submitting enquiry:', error);
-            alert('An error occurred. Please try again.');
+            showToast("An error occurred while submitting. Please try again.", "error", "Error");
         } finally {
             setIsSubmitting(false);
         }
@@ -107,8 +143,15 @@ const EnquiryForm = ({ isOpen, onClose }) => {
                         style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--glass-highlight)', color: 'var(--text-main)', outline: 'none' }}
                     />
                     <input
-                        type="tel" name="phone" placeholder="Phone Number" required
-                        value={formData.phone} onChange={handleChange}
+                        type="tel"
+                        name="phone"
+                        placeholder="10-digit Phone Number"
+                        required
+                        maxLength={10}
+                        pattern="[0-9]{10}"
+                        title="Please enter a 10-digit mobile number"
+                        value={formData.phone}
+                        onChange={handleChange}
                         style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--glass-highlight)', color: 'var(--text-main)', outline: 'none' }}
                     />
                     <textarea

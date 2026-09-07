@@ -1125,9 +1125,8 @@ const ResearchPage = () => {
             </main>
 
             {/* CALL TO ACTION & MODALS */}
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
-            <Footer />
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
 
             <style>{`
                 .quick-nav-btn:hover {

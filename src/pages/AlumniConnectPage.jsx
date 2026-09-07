@@ -13,10 +13,12 @@ import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import aboutMain from '../assets/about-main.webp';
 
 const AlumniConnectPage = () => {
     const { theme } = useTheme();
+    const { showToast } = useToast();
     const isDark = theme !== 'light';
 
     const [isMentorModalOpen, setIsMentorModalOpen] = useState(false);
@@ -36,7 +38,22 @@ const AlumniConnectPage = () => {
 
     const handleMentorSubmit = (e) => {
         e.preventDefault();
+        if (!mentorFormData.name?.trim()) {
+            showToast('Please enter your Full Name', 'warning', 'Missing: Full Name');
+            return;
+        }
+        if (!mentorFormData.email?.trim() || !/^\S+@\S+\.\S+$/.test(mentorFormData.email)) {
+            showToast('Please enter a valid Email Address', 'warning', 'Invalid: Email');
+            return;
+        }
+        const cleanPhone = (mentorFormData.phone || '').replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            showToast('Phone number must be exactly 10 digits', 'warning', 'Invalid: Phone Number');
+            return;
+        }
+
         setMentorFormSubmitted(true);
+        showToast('Thank you for volunteering as an Alumni Mentor! Our team will connect with you.', 'success', 'Registration Received');
         setTimeout(() => {
             setMentorFormSubmitted(false);
             setIsMentorModalOpen(false);
@@ -1071,7 +1088,17 @@ const AlumniConnectPage = () => {
                                         </div>
                                         <div>
                                             <label style={{ display: 'block', color: primaryTextColor, fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.4rem' }}>Phone *</label>
-                                            <input type="tel" required value={mentorFormData.phone} onChange={e => setMentorFormData({ ...mentorFormData, phone: e.target.value })} style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'rgba(0,0,0,0.3)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }} placeholder="+91 XXX XXX XXXX" />
+                                            <input
+                                                type="tel"
+                                                required
+                                                maxLength={10}
+                                                pattern="[0-9]{10}"
+                                                title="Please enter a 10-digit mobile number"
+                                                value={mentorFormData.phone}
+                                                onChange={e => setMentorFormData({ ...mentorFormData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                                style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'rgba(0,0,0,0.3)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
+                                                placeholder="10-digit Phone Number"
+                                            />
                                         </div>
                                     </div>
 

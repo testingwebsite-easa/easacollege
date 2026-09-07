@@ -70,7 +70,7 @@ const ScrollToTopButton = () => {
             {/* Mobile WhatsApp Button */}
             {isMobile && (
                 <motion.a
-                    href="https://wa.me/918220008082"
+                    href="https://wa.me/917373732569"
                     target="_blank"
                     rel="noreferrer"
                     aria-label="Contact us on WhatsApp"

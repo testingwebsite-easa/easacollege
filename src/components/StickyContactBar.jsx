@@ -39,10 +39,10 @@ const StickyContactBar = () => {
                     {/* Call (Hover for more) */}
                     <div className="sidebar-item">
                         <div className="sidebar-numbers">
-                            <a href="tel:+918220008082" className="number-link">Admission: +91 82200 08082</a>
-                            <a href="tel:+917373722922" className="number-link">Office: +91 73737 22922</a>
-                            <a href="tel:+914224050500" className="number-link">Landline: 0422 4050500</a>
-                            <a href="tel:+918098000000" className="number-link">Enquiry: +91 80980 00000</a>
+                            <a href="tel:+917373732569" className="number-link">Admission: +91 73737 32569</a>
+                            <a href="tel: +919342628013" className="number-link">Office: +91 9342628013</a>
+                            {/* <a href="tel:+914224050500" className="number-link">Landline: 0422 4050500</a> */}
+                            <a href="tel:+917373732569" className="number-link">Enquiry: +91 7373732569</a>
                         </div>
                         <div className="sidebar-icon" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}>
                             <FaPhoneAlt />
@@ -50,7 +50,7 @@ const StickyContactBar = () => {
                     </div>
 
                     {/* WhatsApp */}
-                    <a href="https://wa.me/918220008082" target="_blank" rel="noreferrer" className="sidebar-link" aria-label="Contact via WhatsApp">
+                    <a href="https://wa.me/917373732569" target="_blank" rel="noreferrer" className="sidebar-link" aria-label="Contact via WhatsApp">
                         <span className="sidebar-label">WhatsApp</span>
                         <div className="sidebar-icon" style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
                             <FaWhatsapp />

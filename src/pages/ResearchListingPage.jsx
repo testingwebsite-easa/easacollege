@@ -186,10 +186,9 @@ const ResearchListingPage = () => {
                 )}
             </main>
 
-            <AdmissionCTA onApplyClick={() => setShowAdmissionForm(true)} />
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
-            <Footer />
-        </div >
+            <Footer onOpenAdmission={() => setShowAdmissionForm(true)} />
+        </div>
     );
 };
 
