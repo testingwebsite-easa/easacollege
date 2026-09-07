@@ -248,6 +248,12 @@ const AdminDashboard = () => {
     const [sportForm, setSportForm] = useState({ name: '', type: 'Outdoor', count: '', image: '', description: '', gallery: '[]' });
     const [festPageData, setFestPageData] = useState(null);
     const [users, setUsers] = useState([]); // User Management State
+    const [jobApplications, setJobApplications] = useState([]); // Job Applications
+    const [counselingList, setCounselingList] = useState([]); // Career / Higher Ed Counseling
+    const [startupPitches, setStartupPitches] = useState([]); // Startup EDC Pitches
+    const [pacFeedbacks, setPacFeedbacks] = useState([]); // PAC Feedback
+    const [partnerConnects, setPartnerConnects] = useState([]); // SDG Partner Connect
+    const [newsletterSubscribers, setNewsletterSubscribers] = useState([]); // Newsletter Subscribers
 
 
     // Department Form State
@@ -343,6 +349,12 @@ const AdminDashboard = () => {
                 case 'sports': endpoint = '/api/sports'; setter = setSports; break;
                 case 'fest': endpoint = '/api/fest-page'; setter = setFestPageData; break;
                 case 'users': endpoint = '/api/users'; setter = setUsers; break; // User Management Case
+                case 'job-applications': endpoint = '/api/job-applications'; setter = setJobApplications; break;
+                case 'counseling': endpoint = '/api/counseling'; setter = setCounselingList; break;
+                case 'startup-pitches': endpoint = '/api/startup-pitches'; setter = setStartupPitches; break;
+                case 'pac-feedback': endpoint = '/api/pac-feedback'; setter = setPacFeedbacks; break;
+                case 'partner-connect': endpoint = '/api/partner-connect'; setter = setPartnerConnects; break;
+                case 'newsletter': endpoint = '/api/newsletter'; setter = setNewsletterSubscribers; break;
 
                 // Management Sub-categories (Reusable endpoint)
                 case 'leadership':
@@ -380,7 +392,7 @@ const AdminDashboard = () => {
                 const data = await res.json();
 
                 // Safety check for list-based data to prevent crashes if API returns object/error
-                if (['scholarships', 'instituteMilestones', 'life-of-EASA', 'careers', 'research-items', 'gallery', 'placement', 'news', 'programs', 'management', 'sessions', 'research-courses', 'beliefs', 'departments', 'leadership', 'administration', 'governance', 'chairperson', 'secretary', 'correspondent', 'principal', 'deans', 'founder', 'pages', 'alumni', 'enquiries', 'users'].includes(tab) || tab === 'milestones') {
+                if (['scholarships', 'instituteMilestones', 'life-of-EASA', 'careers', 'research-items', 'gallery', 'placement', 'news', 'programs', 'management', 'sessions', 'research-courses', 'beliefs', 'departments', 'leadership', 'administration', 'governance', 'chairperson', 'secretary', 'correspondent', 'principal', 'deans', 'founder', 'pages', 'alumni', 'enquiries', 'users', 'job-applications', 'counseling', 'startup-pitches', 'pac-feedback', 'partner-connect', 'newsletter'].includes(tab) || tab === 'milestones') {
                     if (!Array.isArray(data)) {
                         console.error(`Expected array for ${tab} but received:`, data);
                         setter([]);
@@ -531,6 +543,66 @@ const AdminDashboard = () => {
         } catch (error) {
             console.error(error);
             alert('Error updating status');
+        }
+    };
+
+    // Generic Form Status Update Helper
+    const handleUpdateFormStatus = async (endpoint, id, newStatus, setter) => {
+        try {
+            const token = localStorage.getItem('admin_token') || localStorage.getItem('authToken') || localStorage.getItem('token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const res = await fetch(`${API_BASE_URL}${endpoint}/${id}`, {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+                setter(prev => prev.map(item => item._id === id ? { ...item, status: newStatus } : item));
+            } else {
+                alert('Failed to update status');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error updating status');
+        }
+    };
+
+    // Generic CSV Export Helper
+    const exportTableToCsv = (filename, rows) => {
+        if (!rows || !rows.length) {
+            alert('No data available to export');
+            return;
+        }
+        try {
+            const keys = Object.keys(rows[0]).filter(k => k !== '__v' && k !== 'password');
+            const separator = ',';
+            const csvContent =
+                keys.join(separator) +
+                '\n' +
+                rows.map(row => {
+                    return keys.map(k => {
+                        let cell = row[k] === null || row[k] === undefined ? '' : row[k];
+                        if (typeof cell === 'object') cell = JSON.stringify(cell);
+                        cell = String(cell).replace(/"/g, '""');
+                        if (cell.search(/("|,|\n)/g) >= 0) {
+                            cell = `"${cell}"`;
+                        }
+                        return cell;
+                    }).join(separator);
+                }).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', `${filename}_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error('Export CSV error:', e);
+            alert('Failed to export CSV');
         }
     };
 
@@ -995,7 +1067,7 @@ const AdminDashboard = () => {
         }
     };
 
-    const [openMenus, setOpenMenus] = useState({ about: true, academics: false, campus: false });
+    const [openMenus, setOpenMenus] = useState({ forms: true, about: false, academics: false, campus: false });
 
     const toggleMenu = (menu) => {
         setOpenMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
@@ -1123,12 +1195,24 @@ const AdminDashboard = () => {
                     <a href="/" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textDecoration: 'none' }}>&larr; Back to Website</a>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '1rem' }}>
-                    {renderTabButton('enquiries', 'General Enquiries')}
-                    {renderTabButton('grievances', 'Grievances')}
-                    {renderTabButton('admissions', 'Admissions')}
-                    {renderTabButton('scholarships', 'Scholarships')}
-                    {renderTabButton('sessions', 'Sessions')}
+                {renderGroup('forms', '📋 Form Submissions & Leads', (
+                    <>
+                        {renderTabButton('admissions', '🎓 Admissions')}
+                        {renderTabButton('enquiries', '📩 General Enquiries')}
+                        {renderTabButton('grievances', '⚖️ Grievances / Feedback')}
+                        {renderTabButton('job-applications', '💼 Job Applications')}
+                        {renderTabButton('counseling', '🧭 Career Counseling')}
+                        {renderTabButton('startup-pitches', '🚀 Startup Pitches (EDC)')}
+                        {renderTabButton('pac-feedback', '📊 PAC / Feedback')}
+                        {renderTabButton('partner-connect', '🤝 Partner Connect (SDG)')}
+                        {renderTabButton('newsletter', '📬 Newsletter Subs')}
+                        {renderTabButton('alumni', '🎓 Alumni Registry')}
+                        {renderTabButton('scholarships', '🏆 Scholarships')}
+                    </>
+                ))}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '1rem', marginTop: '0.5rem' }}>
+                    {renderTabButton('sessions', 'Academic Sessions')}
                     {renderTabButton('hero', 'Landing Hero Slider')}
                     {renderTabButton('pageHeroes', 'Page Hero Images')}
                     {renderTabButton('sports', 'Sports Facilities')}
@@ -1143,7 +1227,6 @@ const AdminDashboard = () => {
                     {renderTabButton('life-of-EASA', 'Life of EASA')}
                     {renderTabButton('pages', 'Custom Pages')}
                     {renderTabButton('library', 'Library Management')}
-                    {renderTabButton('alumni', 'Alumni Registry')}
                     {renderTabButton('users', 'User Management')}
                 </div>
 
@@ -1178,20 +1261,15 @@ const AdminDashboard = () => {
                     <>
                         {renderTabButton('departments', 'Departments')}
                         {renderTabButton('programs', 'Programs')}
-                        {/* UG & PG Buttons Removed */}
                         {renderTabButton('research-courses', 'Research Courses')}
                     </>
                 ))}
-
-                {/* Placements, Research, Careers moved to sidebar bottom or keep in groups? 
-                    User asked specifically for "About Us" options. Keeping others as is but "Management" button removed from top level 
-                    since it's now broken down. */}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginTop: '1rem' }}>
                     {renderTabButton('placement', 'Placement Partners')}
                     {renderTabButton('placement-page', 'Placement Page Content')}
                     {renderTabButton('research-items', 'Research')}
-                    {renderTabButton('careers', 'Careers')}
+                    {renderTabButton('careers', 'Careers (Job Posts)')}
                 </div>
             </div>
 
@@ -1203,6 +1281,12 @@ const AdminDashboard = () => {
                                 'enquiries': 'General Enquiries',
                                 'grievances': 'Grievances / Feedback',
                                 'admissions': 'Admissions',
+                                'job-applications': 'Job & Faculty Applications',
+                                'counseling': 'Career Counseling & Higher Education Requests',
+                                'startup-pitches': 'Startup & Incubation Pitches (EDC)',
+                                'pac-feedback': 'PAC / Stakeholder Curriculum Feedback',
+                                'partner-connect': 'SDG & Institutional Partner Connects',
+                                'newsletter': 'Newsletter Subscribers',
                                 'scholarships': 'Scholarships',
                                 'sessions': 'Sessions',
                                 'hero': 'Hero Section',
@@ -3599,7 +3683,21 @@ const AdminDashboard = () => {
                         {
                             activeTab === 'enquiries' && (
                                 <div>
-
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <h2 style={{ margin: 0 }}>General Enquiries</h2>
+                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                {enquiries.length}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => exportTableToCsv('general_enquiries', enquiries)}
+                                            className="btn btn-primary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                        >
+                                            Download CSV ⬇
+                                        </button>
+                                    </div>
                                     <div style={{ overflowX: 'auto' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                             <thead>
@@ -3614,41 +3712,528 @@ const AdminDashboard = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {enquiries.map(item => (
-                                                    <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                            {new Date(item.submittedAt).toLocaleDateString()}
-                                                        </td>
-                                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.name}</td>
-                                                        <td style={{ padding: '1rem' }}>{item.email}</td>
-                                                        <td style={{ padding: '1rem' }}>{item.phone}</td>
-                                                        <td style={{ padding: '1rem', maxWidth: '300px' }}>{item.message}</td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <select
-                                                                value={item.status}
-                                                                onChange={async (e) => {
-                                                                    const newStatus = e.target.value;
-                                                                    try {
-                                                                        await fetch(`${API_BASE_URL}/api/enquiry/${item._id}`, {
-                                                                            method: 'PUT',
-                                                                            headers: { 'Content-Type': 'application/json' },
-                                                                            body: JSON.stringify({ status: newStatus })
-                                                                        });
-                                                                        fetchData('enquiries');
-                                                                    } catch (err) { console.error(err); }
-                                                                }}
-                                                                style={{ padding: '0.3rem', borderRadius: '4px', background: item.status === 'New' ? '#3b82f6' : 'var(--bg-input)', color: item.status === 'New' ? 'white' : 'var(--text-main)' }}
-                                                            >
-                                                                <option value="New">New</option>
-                                                                <option value="Contacted">Contacted</option>
-                                                                <option value="Resolved">Resolved</option>
-                                                            </select>
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <button onClick={() => handleGenericDelete(item._id, '/api/enquiry', setEnquiries)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                        </td>
+                                                {enquiries.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No enquiries found.</td>
                                                     </tr>
-                                                ))}
+                                                ) : (
+                                                    enquiries.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                            </td>
+                                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.name}</td>
+                                                            <td style={{ padding: '1rem' }}>{item.email}</td>
+                                                            <td style={{ padding: '1rem' }}>{item.phone}</td>
+                                                            <td style={{ padding: '1rem', maxWidth: '300px' }}>{item.message}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <select
+                                                                    value={item.status || 'New'}
+                                                                    onChange={(e) => handleUpdateFormStatus('/api/enquiry', item._id, e.target.value, setEnquiries)}
+                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: item.status === 'New' ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-section)', color: item.status === 'New' ? '#60a5fa' : 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                >
+                                                                    <option value="New">New</option>
+                                                                    <option value="Contacted">Contacted</option>
+                                                                    <option value="Resolved">Resolved</option>
+                                                                </select>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/enquiry', setEnquiries)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {/* JOB APPLICATIONS TAB */}
+                        {
+                            activeTab === 'job-applications' && (
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <h2 style={{ margin: 0 }}>Job & Faculty Applications</h2>
+                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                {jobApplications.length}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => exportTableToCsv('job_applications', jobApplications)}
+                                            className="btn btn-primary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                        >
+                                            Download CSV ⬇
+                                        </button>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                    <th style={{ padding: '1rem' }}>Date</th>
+                                                    <th style={{ padding: '1rem' }}>Candidate</th>
+                                                    <th style={{ padding: '1rem' }}>Position & Dept</th>
+                                                    <th style={{ padding: '1rem' }}>Qualification</th>
+                                                    <th style={{ padding: '1rem' }}>Experience</th>
+                                                    <th style={{ padding: '1rem' }}>Resume</th>
+                                                    <th style={{ padding: '1rem' }}>Status</th>
+                                                    <th style={{ padding: '1rem' }}>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {jobApplications.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No job applications found.</td>
+                                                    </tr>
+                                                ) : (
+                                                    jobApplications.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ fontWeight: '600', color: 'var(--text-highlight)' }}>{item.position || item.jobTitle || 'Faculty'}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.department}</div>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>{item.qualification}</td>
+                                                            <td style={{ padding: '1rem' }}>{item.experience}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                {item.resumeUrl ? (
+                                                                    <a href={item.resumeUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8', fontWeight: 'bold', textDecoration: 'underline' }}>
+                                                                        View Resume 📄
+                                                                    </a>
+                                                                ) : (
+                                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No File</span>
+                                                                )}
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <select
+                                                                    value={item.status || 'Pending'}
+                                                                    onChange={(e) => handleUpdateFormStatus('/api/job-applications', item._id, e.target.value, setJobApplications)}
+                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                >
+                                                                    <option value="Pending">Pending</option>
+                                                                    <option value="Shortlisted">Shortlisted</option>
+                                                                    <option value="Interviewed">Interviewed</option>
+                                                                    <option value="Hired">Hired</option>
+                                                                    <option value="Rejected">Rejected</option>
+                                                                </select>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/job-applications', setJobApplications)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {/* COUNSELING TAB */}
+                        {
+                            activeTab === 'counseling' && (
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <h2 style={{ margin: 0 }}>Career Counseling & Guidance (ASCEND)</h2>
+                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                {counselingList.length}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => exportTableToCsv('counseling_requests', counselingList)}
+                                            className="btn btn-primary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                        >
+                                            Download CSV ⬇
+                                        </button>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                    <th style={{ padding: '1rem' }}>Date</th>
+                                                    <th style={{ padding: '1rem' }}>Student / Applicant</th>
+                                                    <th style={{ padding: '1rem' }}>Year & Branch</th>
+                                                    <th style={{ padding: '1rem' }}>Service Requested</th>
+                                                    <th style={{ padding: '1rem' }}>Preferred Slot</th>
+                                                    <th style={{ padding: '1rem' }}>Message / Goals</th>
+                                                    <th style={{ padding: '1rem' }}>Status</th>
+                                                    <th style={{ padding: '1rem' }}>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {counselingList.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No counseling requests found.</td>
+                                                    </tr>
+                                                ) : (
+                                                    counselingList.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>{item.currentYearBranch || 'N/A'}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                                    {item.serviceType || 'General Career Guidance'}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>{item.preferredSlot || 'Any Time'}</td>
+                                                            <td style={{ padding: '1rem', maxWidth: '280px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.message}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <select
+                                                                    value={item.status || 'Pending'}
+                                                                    onChange={(e) => handleUpdateFormStatus('/api/counseling', item._id, e.target.value, setCounselingList)}
+                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                >
+                                                                    <option value="Pending">Pending</option>
+                                                                    <option value="Contacted">Contacted</option>
+                                                                    <option value="Scheduled">Scheduled</option>
+                                                                    <option value="Completed">Completed</option>
+                                                                </select>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/counseling', setCounselingList)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {/* STARTUP PITCHES TAB */}
+                        {
+                            activeTab === 'startup-pitches' && (
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <h2 style={{ margin: 0 }}>Startup & Incubation Pitches (EDC)</h2>
+                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                {startupPitches.length}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => exportTableToCsv('startup_pitches', startupPitches)}
+                                            className="btn btn-primary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                        >
+                                            Download CSV ⬇
+                                        </button>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                    <th style={{ padding: '1rem' }}>Date</th>
+                                                    <th style={{ padding: '1rem' }}>Founder / Team</th>
+                                                    <th style={{ padding: '1rem' }}>Startup Title</th>
+                                                    <th style={{ padding: '1rem' }}>Category & Stage</th>
+                                                    <th style={{ padding: '1rem' }}>Problem & Solution</th>
+                                                    <th style={{ padding: '1rem' }}>Deck / Link</th>
+                                                    <th style={{ padding: '1rem' }}>Status</th>
+                                                    <th style={{ padding: '1rem' }}>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {startupPitches.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No startup pitches found.</td>
+                                                    </tr>
+                                                ) : (
+                                                    startupPitches.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ fontWeight: 'bold' }}>{item.founderName}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                            </td>
+                                                            <td style={{ padding: '1rem', fontWeight: '600', color: 'var(--text-highlight)' }}>{item.startupTitle}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ fontSize: '0.9rem' }}>{item.category}</div>
+                                                                <span style={{ fontSize: '0.75rem', background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', marginTop: '4px' }}>
+                                                                    {item.currentStage || 'Ideation'}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.problemSolution}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                {item.pitchDeckUrl ? (
+                                                                    <a href={item.pitchDeckUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8', fontWeight: 'bold', textDecoration: 'underline' }}>
+                                                                        Pitch Deck 🔗
+                                                                    </a>
+                                                                ) : (
+                                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No Link</span>
+                                                                )}
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <select
+                                                                    value={item.status || 'Pending'}
+                                                                    onChange={(e) => handleUpdateFormStatus('/api/startup-pitches', item._id, e.target.value, setStartupPitches)}
+                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                >
+                                                                    <option value="Pending">Pending</option>
+                                                                    <option value="Under Review">Under Review</option>
+                                                                    <option value="Shortlisted">Shortlisted</option>
+                                                                    <option value="Approved">Approved</option>
+                                                                    <option value="Rejected">Rejected</option>
+                                                                </select>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/startup-pitches', setStartupPitches)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {/* PAC FEEDBACK TAB */}
+                        {
+                            activeTab === 'pac-feedback' && (
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <h2 style={{ margin: 0 }}>Program Advisory Committee (PAC) Feedback</h2>
+                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                {pacFeedbacks.length}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => exportTableToCsv('pac_curriculum_feedback', pacFeedbacks)}
+                                            className="btn btn-primary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                        >
+                                            Download CSV ⬇
+                                        </button>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                    <th style={{ padding: '1rem' }}>Date</th>
+                                                    <th style={{ padding: '1rem' }}>Stakeholder</th>
+                                                    <th style={{ padding: '1rem' }}>Category</th>
+                                                    <th style={{ padding: '1rem' }}>Department & Year</th>
+                                                    <th style={{ padding: '1rem' }}>Rating</th>
+                                                    <th style={{ padding: '1rem' }}>Curriculum Suggestions</th>
+                                                    <th style={{ padding: '1rem' }}>Status</th>
+                                                    <th style={{ padding: '1rem' }}>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {pacFeedbacks.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No PAC feedback found.</td>
+                                                    </tr>
+                                                ) : (
+                                                    pacFeedbacks.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                                    {item.stakeholderType || 'Industry Expert'}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div>{item.department}</div>
+                                                                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{item.academicYear}</div>
+                                                            </td>
+                                                            <td style={{ padding: '1rem', fontWeight: 'bold', color: '#F59E0B' }}>
+                                                                {'★'.repeat(item.rating || 5)} ({item.rating || 5}/5)
+                                                            </td>
+                                                            <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.feedback}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <select
+                                                                    value={item.status || 'New'}
+                                                                    onChange={(e) => handleUpdateFormStatus('/api/pac-feedback', item._id, e.target.value, setPacFeedbacks)}
+                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                >
+                                                                    <option value="New">New</option>
+                                                                    <option value="Reviewed">Reviewed</option>
+                                                                    <option value="Action Taken">Action Taken</option>
+                                                                </select>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/pac-feedback', setPacFeedbacks)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {/* PARTNER CONNECT TAB */}
+                        {
+                            activeTab === 'partner-connect' && (
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <h2 style={{ margin: 0 }}>SDG & Institutional Partner Connects</h2>
+                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                {partnerConnects.length}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => exportTableToCsv('sdg_partner_connects', partnerConnects)}
+                                            className="btn btn-primary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                        >
+                                            Download CSV ⬇
+                                        </button>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                    <th style={{ padding: '1rem' }}>Date</th>
+                                                    <th style={{ padding: '1rem' }}>Organization</th>
+                                                    <th style={{ padding: '1rem' }}>Contact Person</th>
+                                                    <th style={{ padding: '1rem' }}>Contact Details</th>
+                                                    <th style={{ padding: '1rem' }}>Target SDG</th>
+                                                    <th style={{ padding: '1rem' }}>Proposal Details</th>
+                                                    <th style={{ padding: '1rem' }}>Status</th>
+                                                    <th style={{ padding: '1rem' }}>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {partnerConnects.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No partner requests found.</td>
+                                                    </tr>
+                                                ) : (
+                                                    partnerConnects.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                            </td>
+                                                            <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>{item.orgName}</td>
+                                                            <td style={{ padding: '1rem', fontWeight: '600' }}>{item.contactPerson}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ fontSize: '0.85rem' }}>{item.email}</div>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                                    {item.targetSdg}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.proposalDetails}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <select
+                                                                    value={item.status || 'New'}
+                                                                    onChange={(e) => handleUpdateFormStatus('/api/partner-connect', item._id, e.target.value, setPartnerConnects)}
+                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                >
+                                                                    <option value="New">New</option>
+                                                                    <option value="Contacted">Contacted</option>
+                                                                    <option value="In Discussion">In Discussion</option>
+                                                                    <option value="Partnered">Partnered</option>
+                                                                    <option value="Archived">Archived</option>
+                                                                </select>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/partner-connect', setPartnerConnects)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )
+                        }
+
+                        {/* NEWSLETTER SUBSCRIBERS TAB */}
+                        {
+                            activeTab === 'newsletter' && (
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <h2 style={{ margin: 0 }}>Newsletter Subscribers</h2>
+                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                {newsletterSubscribers.length}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => exportTableToCsv('newsletter_subscribers', newsletterSubscribers)}
+                                            className="btn btn-primary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                        >
+                                            Download CSV ⬇
+                                        </button>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', maxWidth: '900px' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                    <th style={{ padding: '1rem' }}>Date Subscribed</th>
+                                                    <th style={{ padding: '1rem' }}>Subscriber Email</th>
+                                                    <th style={{ padding: '1rem' }}>Status</th>
+                                                    <th style={{ padding: '1rem' }}>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {newsletterSubscribers.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No subscribers found.</td>
+                                                    </tr>
+                                                ) : (
+                                                    newsletterSubscribers.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                {item.subscribedAt ? new Date(item.subscribedAt).toLocaleDateString() : 'N/A'}
+                                                            </td>
+                                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.email}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <span style={{ padding: '4px 10px', borderRadius: '50px', background: item.status === 'Active' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: item.status === 'Active' ? '#22c55e' : '#ef4444', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                                                    {item.status || 'Active'}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/newsletter', setNewsletterSubscribers)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>

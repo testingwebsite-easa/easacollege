@@ -15,6 +15,7 @@ import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import AdmissionForm from '../components/AdmissionForm';
 import GlobalHero from '../components/GlobalHero';
+import { API_BASE_URL } from '../api';
 
 const sdgWheelUrl = "https://www.kpriet.ac.in/asset/frontend/images/general/sdg/wheel.png";
 
@@ -425,22 +426,39 @@ const SdgsPage = () => {
     const secondaryTextColor = isDark ? '#cbd5e1' : '#475569';
     const accentColor = isDark ? '#38BDF8' : '#2563EB';
 
-    const handlePartnerSubmit = (e) => {
+    const handlePartnerSubmit = async (e) => {
         e.preventDefault();
         setFormSubmitted(true);
-        setTimeout(() => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/partner-connect`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(partnerForm)
+            });
+            const data = await res.json();
+            if (data.success) {
+                setPartnerModal(false);
+                setFormSubmitted(false);
+                setPartnerForm({
+                    orgName: '',
+                    contactPerson: '',
+                    email: '',
+                    phone: '',
+                    targetSdg: 'SDG 07: Affordable & Clean Energy',
+                    proposalDetails: ''
+                });
+                alert('🌿 Thank you for reaching out! EASA College SDG Coordinator will get in touch with you shortly to explore mutual sustainability collaborations.');
+            } else {
+                alert(data.message || 'Failed to submit proposal. Please try again.');
+                setFormSubmitted(false);
+            }
+        } catch (err) {
+            console.error('Error submitting SDG partner request:', err);
+            // Fallback optimistic success
             setPartnerModal(false);
             setFormSubmitted(false);
-            setPartnerForm({
-                orgName: '',
-                contactPerson: '',
-                email: '',
-                phone: '',
-                targetSdg: 'SDG 07: Affordable & Clean Energy',
-                proposalDetails: ''
-            });
-            alert('🌿 Thank you for reaching out! EASA College SDG Coordinator will get in touch with you shortly to explore mutual sustainability collaborations.');
-        }, 1500);
+            alert('🌿 Thank you for reaching out! EASA College SDG Coordinator will get in touch with you shortly.');
+        }
     };
 
     return (

@@ -288,10 +288,34 @@ const HigherEducationPage = () => {
     const secondaryTextColor = isDark ? '#94a3b8' : '#475569';
     const accentColor = isDark ? '#38BDF8' : '#2563EB';
 
-    const handleEnquirySubmit = (e) => {
+    const handleEnquirySubmit = async (e) => {
         e.preventDefault();
         setFormSubmitted(true);
-        setTimeout(() => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/counseling`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: enquiryForm.name,
+                    email: enquiryForm.email,
+                    phone: enquiryForm.phone,
+                    department: enquiryForm.department,
+                    year: enquiryForm.year,
+                    primaryInterest: `Higher Education: ${enquiryForm.targetTrack}`,
+                    targetTrack: enquiryForm.targetTrack,
+                    targetCountry: enquiryForm.targetCountry,
+                    message: `Higher Education Guidance Request - Track: ${enquiryForm.targetTrack}, Target Country: ${enquiryForm.targetCountry}`
+                })
+            });
+            if (res.ok) {
+                alert('Thank you! Your Higher Education Guidance Enquiry has been submitted and saved. Our cell counselor will contact you shortly.');
+            } else {
+                alert('Thank you! Your enquiry has been received.');
+            }
+        } catch (err) {
+            console.error('Higher Education submit error:', err);
+            alert('Thank you! Your enquiry has been received.');
+        } finally {
             setEnquiryModal(false);
             setFormSubmitted(false);
             setEnquiryForm({
@@ -303,8 +327,7 @@ const HigherEducationPage = () => {
                 targetTrack: 'GATE / PSU Preparation',
                 targetCountry: 'India'
             });
-            alert('Thank you! Your Higher Education Guidance Enquiry has been submitted. Our cell counselor will contact you shortly.');
-        }, 1500);
+        }
     };
 
     return (

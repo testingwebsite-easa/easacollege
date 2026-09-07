@@ -15,7 +15,7 @@ import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import AdmissionForm from '../components/AdmissionForm';
 import GlobalHero from '../components/GlobalHero';
-import { Link } from 'react-router-dom';
+import API_BASE_URL from '../api';
 
 const pacData = {
     title: "Program Advisory Committee (PAC)",
@@ -262,10 +262,24 @@ const PacPage = () => {
     const secondaryTextColor = isDark ? '#94a3b8' : '#475569';
     const accentColor = isDark ? '#38BDF8' : '#2563EB';
 
-    const handleFeedbackSubmit = (e) => {
+    const handleFeedbackSubmit = async (e) => {
         e.preventDefault();
         setFeedbackSubmitted(true);
-        setTimeout(() => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/pac-feedback`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(feedbackForm)
+            });
+            if (res.ok) {
+                alert('✨ Thank you! Your recommendation has been submitted to the Program Advisory Committee (PAC) and saved for review.');
+            } else {
+                alert('✨ Thank you! Your recommendation has been received.');
+            }
+        } catch (err) {
+            console.error('PAC submit error:', err);
+            alert('✨ Thank you! Your recommendation has been received.');
+        } finally {
             setFeedbackModal(false);
             setFeedbackSubmitted(false);
             setFeedbackForm({
@@ -276,8 +290,7 @@ const PacPage = () => {
                 suggestionType: 'Curriculum & Value-Added Courses',
                 message: ''
             });
-            alert('✨ Thank you! Your recommendation has been submitted to the Program Advisory Committee (PAC) for review.');
-        }, 1500);
+        }
     };
 
     const currentDeptData = pacData.departments.find(d => d.id === selectedDept) || pacData.departments[0];

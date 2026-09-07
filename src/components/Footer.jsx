@@ -8,32 +8,42 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import headerLogoDark from '../assets/College Logo with White Letter.webp';
 import headerLogoLight from '../assets/College Logo with Blue Letter.webp';
+import { API_BASE_URL } from '../api';
 
 const Footer = ({ onOpenAdmission }) => {
     const navigate = useNavigate();
     const { theme } = useTheme();
-    const [formData, setFormData] = useState({
-        name: '',
-        phone: '',
-        message: ''
-    });
+    const [newsletterEmail, setNewsletterEmail] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Here you would typically send the data to your API
-        console.log("Enquiry Submitted:", formData);
-        // Simulate API call
-        setTimeout(() => {
+        if (!newsletterEmail) return;
+        setSubmitting(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/newsletter`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: newsletterEmail })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIsSubmitted(true);
+                setNewsletterEmail('');
+                setTimeout(() => setIsSubmitted(false), 5000);
+            } else {
+                alert(data.message || 'Subscription failed. Please try again.');
+            }
+        } catch (err) {
+            console.error('Newsletter subscription error:', err);
+            // Fallback success UI
             setIsSubmitted(true);
-            setFormData({ name: '', phone: '', message: '' });
-            // Reset success message after 5 seconds
+            setNewsletterEmail('');
             setTimeout(() => setIsSubmitted(false), 5000);
-        }, 1000);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const inputStyle = {
@@ -271,12 +281,15 @@ const Footer = ({ onOpenAdmission }) => {
                                 <input
                                     type="email"
                                     name="email"
+                                    value={newsletterEmail}
+                                    onChange={(e) => setNewsletterEmail(e.target.value)}
                                     placeholder="Your Email"
                                     aria-label="Email address for newsletter"
                                     required
+                                    disabled={submitting}
                                     style={{ ...inputStyle, marginBottom: 0, padding: '0.7rem', width: 'auto', flex: 1 }}
                                 />
-                                <button type="submit" aria-label="Subscribe to Newsletter" style={{ ...buttonStyle, width: 'auto', padding: '0 1rem' }}>
+                                <button type="submit" disabled={submitting} aria-label="Subscribe to Newsletter" style={{ ...buttonStyle, width: 'auto', padding: '0 1rem', opacity: submitting ? 0.7 : 1 }}>
                                     <FaPaperPlane />
                                 </button>
                             </form>

@@ -22,9 +22,11 @@ const {
     Institution, Infrastructure, Sustainability, CommunityOutreach, Alumni,
     Enquiry, TickerAlert, LibraryData, Scholarship, PopupAlert, PlacementPage,
     VideoGallery, Grievance, VirtualTour, PageHero, Sport, Moment, Advice,
-    FestPage, User, ProgramOutcome
+    FestPage, User, ProgramOutcome, Counseling, StartupPitch, PacFeedback,
+    PartnerConnect, NewsletterSubscriber
 } = require('./models/Schemas');
 console.log("FestPage Check:", FestPage);
+
 
 
 const app = express();
@@ -1483,7 +1485,7 @@ app.delete('/api/life-at-EASA/:id', async (req, res) => {
     }
 });
 
-app.post('/api/admissions', async (req, res) => {
+app.post(['/api/admissions', '/api/admissions/register'], async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const newAdmission = new Admission(req.body);
@@ -2775,7 +2777,7 @@ app.delete('/api/alumni/:id', async (req, res) => {
 
 // ==================== ENQUIRY ENDPOINTS ====================
 
-app.post('/api/enquiry', async (req, res) => {
+app.post(['/api/enquiry', '/api/enquiries'], async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = new Enquiry(req.body);
@@ -2791,6 +2793,7 @@ app.post('/api/enquiry', async (req, res) => {
                     <p><strong>Name:</strong> ${req.body.name}</p>
                     <p><strong>Email:</strong> ${req.body.email}</p>
                     <p><strong>Phone:</strong> ${req.body.phone}</p>
+                    <p><strong>Course / Interest:</strong> ${req.body.course || req.body.category || 'General'}</p>
                     <p><strong>Message/Query:</strong> ${req.body.message || 'No message provided'}</p>
                     <hr />
                     <p>This is an automated notification from the EASA College website.</p>
@@ -2827,7 +2830,7 @@ app.post('/api/enquiry', async (req, res) => {
     }
 });
 
-app.get('/api/enquiry', async (req, res) => {
+app.get(['/api/enquiry', '/api/enquiries'], async (req, res) => {
     if (!isConnected) return res.json([]);
     try {
         const items = await Enquiry.find().sort({ submittedAt: -1 });
@@ -2837,7 +2840,7 @@ app.get('/api/enquiry', async (req, res) => {
     }
 });
 
-app.put('/api/enquiry/:id', async (req, res) => {
+app.put(['/api/enquiry/:id', '/api/enquiries/:id'], async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = await Enquiry.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -2847,7 +2850,7 @@ app.put('/api/enquiry/:id', async (req, res) => {
     }
 });
 
-app.patch('/api/enquiry/:id', async (req, res) => {
+app.patch(['/api/enquiry/:id', '/api/enquiries/:id'], async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = await Enquiry.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
@@ -2857,7 +2860,7 @@ app.patch('/api/enquiry/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/enquiry/:id', async (req, res) => {
+app.delete(['/api/enquiry/:id', '/api/enquiries/:id'], async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         await Enquiry.findByIdAndDelete(req.params.id);
@@ -2866,6 +2869,7 @@ app.delete('/api/enquiry/:id', async (req, res) => {
         res.status(500).json({ error: "Failed to delete enquiry" });
     }
 });
+
 
 // Ticker Alert Routes (Moved outside require.main)
 app.get('/api/ticker-alerts', async (req, res) => {
@@ -3852,6 +3856,310 @@ app.get('/api/department-research-overview', async (req, res) => {
         res.status(500).json({ error: "Failed to fetch department research overview data" });
     }
 });
+
+// ==================== COUNSELING & GUIDANCE ENDPOINTS ====================
+app.post('/api/counseling', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const item = new Counseling(req.body);
+        await item.save();
+
+        // Email Notification
+        try {
+            const adminMail = {
+                to: process.env.SMTP_TO || 'enquiry@ecetonline.com',
+                subject: `New Career Counseling Request - ${req.body.name}`,
+                html: `
+                    <h2>New Career Counseling Request Received</h2>
+                    <p><strong>Student Name:</strong> ${req.body.name}</p>
+                    <p><strong>Email:</strong> ${req.body.email}</p>
+                    <p><strong>Phone:</strong> ${req.body.phone}</p>
+                    <p><strong>Department:</strong> ${req.body.department}</p>
+                    <p><strong>Year of Study:</strong> ${req.body.year || '2nd Year'}</p>
+                    <p><strong>Primary Interest / Track:</strong> ${req.body.primaryInterest || req.body.targetTrack || 'Corporate Placements'}</p>
+                    <p><strong>Target Country:</strong> ${req.body.targetCountry || 'N/A'}</p>
+                    <p><strong>Message / Notes:</strong> ${req.body.message || 'No specific notes'}</p>
+                    <hr />
+                    <p>Automated notification from EASA College ASCEND / Higher Education Portal.</p>
+                `
+            };
+            await sendEmail(adminMail);
+        } catch (mailErr) {
+            console.error("Counseling email error:", mailErr.message);
+        }
+
+        res.status(201).json({ success: true, message: "Counseling request booked successfully", data: item });
+    } catch (err) {
+        console.error("Counseling Error:", err);
+        res.status(500).json({ error: "Failed to submit counseling request" });
+    }
+});
+
+app.get('/api/counseling', async (req, res) => {
+    if (!isConnected) return res.json([]);
+    try {
+        const items = await Counseling.find().sort({ submittedAt: -1 });
+        res.json(items);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch counseling requests" });
+    }
+});
+
+app.put('/api/counseling/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const updated = await Counseling.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update counseling request" });
+    }
+});
+
+app.delete('/api/counseling/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        await Counseling.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete counseling request" });
+    }
+});
+
+// ==================== STARTUP PITCH (EDC / INCUBATION) ENDPOINTS ====================
+app.post('/api/startup-pitches', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const item = new StartupPitch(req.body);
+        await item.save();
+
+        try {
+            const adminMail = {
+                to: process.env.SMTP_TO || 'enquiry@ecetonline.com',
+                subject: `New Startup Pitch Submission - ${req.body.startupName} (${req.body.founderName})`,
+                html: `
+                    <h2>New Startup Pitch Received (EDC Cell)</h2>
+                    <p><strong>Startup / Venture Name:</strong> ${req.body.startupName}</p>
+                    <p><strong>Founder Name:</strong> ${req.body.founderName}</p>
+                    <p><strong>Email:</strong> ${req.body.email}</p>
+                    <p><strong>Phone:</strong> ${req.body.phone}</p>
+                    <p><strong>Department & Year:</strong> ${req.body.department} - ${req.body.year}</p>
+                    <p><strong>Sector:</strong> ${req.body.sector}</p>
+                    <p><strong>Current Stage:</strong> ${req.body.currentStage}</p>
+                    <p><strong>Idea Summary:</strong></p>
+                    <blockquote style="background: #f4f4f4; padding: 10px; border-left: 3px solid #f59e0b;">${req.body.ideaSummary}</blockquote>
+                `
+            };
+            await sendEmail(adminMail);
+        } catch (mailErr) {
+            console.error("Pitch email error:", mailErr.message);
+        }
+
+        res.status(201).json({ success: true, message: "Startup pitch proposal submitted successfully", data: item });
+    } catch (err) {
+        console.error("Startup Pitch Error:", err);
+        res.status(500).json({ error: "Failed to submit startup pitch" });
+    }
+});
+
+app.get('/api/startup-pitches', async (req, res) => {
+    if (!isConnected) return res.json([]);
+    try {
+        const items = await StartupPitch.find().sort({ submittedAt: -1 });
+        res.json(items);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch startup pitches" });
+    }
+});
+
+app.put('/api/startup-pitches/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const updated = await StartupPitch.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update startup pitch" });
+    }
+});
+
+app.delete('/api/startup-pitches/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        await StartupPitch.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete startup pitch" });
+    }
+});
+
+// ==================== PAC / CURRICULUM FEEDBACK ENDPOINTS ====================
+app.post('/api/pac-feedback', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const item = new PacFeedback(req.body);
+        await item.save();
+
+        try {
+            const adminMail = {
+                to: process.env.SMTP_TO || 'enquiry@ecetonline.com',
+                subject: `New PAC Curriculum Recommendation - ${req.body.department}`,
+                html: `
+                    <h2>New Program Advisory Committee Feedback</h2>
+                    <p><strong>Name:</strong> ${req.body.name}</p>
+                    <p><strong>Email:</strong> ${req.body.email}</p>
+                    <p><strong>Role:</strong> ${req.body.role}</p>
+                    <p><strong>Department:</strong> ${req.body.department}</p>
+                    <p><strong>Suggestion Type:</strong> ${req.body.suggestionType}</p>
+                    <p><strong>Message / Recommendation:</strong></p>
+                    <blockquote style="background: #f4f4f4; padding: 10px; border-left: 3px solid #2563eb;">${req.body.message}</blockquote>
+                `
+            };
+            await sendEmail(adminMail);
+        } catch (mailErr) {
+            console.error("PAC email error:", mailErr.message);
+        }
+
+        res.status(201).json({ success: true, message: "PAC feedback submitted successfully", data: item });
+    } catch (err) {
+        console.error("PAC Feedback Error:", err);
+        res.status(500).json({ error: "Failed to submit PAC feedback" });
+    }
+});
+
+app.get('/api/pac-feedback', async (req, res) => {
+    if (!isConnected) return res.json([]);
+    try {
+        const items = await PacFeedback.find().sort({ submittedAt: -1 });
+        res.json(items);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch PAC feedback" });
+    }
+});
+
+app.put('/api/pac-feedback/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const updated = await PacFeedback.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update PAC feedback" });
+    }
+});
+
+app.delete('/api/pac-feedback/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        await PacFeedback.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete PAC feedback" });
+    }
+});
+
+// ==================== SDG & PARTNER CONNECT ENDPOINTS ====================
+app.post('/api/partner-connect', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const item = new PartnerConnect(req.body);
+        await item.save();
+
+        try {
+            const adminMail = {
+                to: process.env.SMTP_TO || 'enquiry@ecetonline.com',
+                subject: `New SDG / CSR Collaboration Proposal - ${req.body.orgName}`,
+                html: `
+                    <h2>New SDG Collaboration Proposal</h2>
+                    <p><strong>Organization / Foundation:</strong> ${req.body.orgName}</p>
+                    <p><strong>Contact Person:</strong> ${req.body.contactPerson}</p>
+                    <p><strong>Email:</strong> ${req.body.email}</p>
+                    <p><strong>Phone:</strong> ${req.body.phone}</p>
+                    <p><strong>Target SDG:</strong> ${req.body.targetSdg}</p>
+                    <p><strong>Proposal Details:</strong></p>
+                    <blockquote style="background: #f4f4f4; padding: 10px; border-left: 3px solid #10b981;">${req.body.proposalDetails}</blockquote>
+                `
+            };
+            await sendEmail(adminMail);
+        } catch (mailErr) {
+            console.error("Partner connect email error:", mailErr.message);
+        }
+
+        res.status(201).json({ success: true, message: "Partnership proposal submitted successfully", data: item });
+    } catch (err) {
+        console.error("Partner Connect Error:", err);
+        res.status(500).json({ error: "Failed to submit partnership proposal" });
+    }
+});
+
+app.get('/api/partner-connect', async (req, res) => {
+    if (!isConnected) return res.json([]);
+    try {
+        const items = await PartnerConnect.find().sort({ submittedAt: -1 });
+        res.json(items);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch partner connects" });
+    }
+});
+
+app.put('/api/partner-connect/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const updated = await PartnerConnect.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update partner connect" });
+    }
+});
+
+app.delete('/api/partner-connect/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        await PartnerConnect.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete partner connect" });
+    }
+});
+
+// ==================== NEWSLETTER SUBSCRIBERS ENDPOINTS ====================
+app.post('/api/newsletter', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ error: "Email is required" });
+
+        const existing = await NewsletterSubscriber.findOne({ email: email.toLowerCase() });
+        if (existing) {
+            return res.json({ success: true, message: "Already subscribed!" });
+        }
+
+        const item = new NewsletterSubscriber({ email: email.toLowerCase() });
+        await item.save();
+        res.status(201).json({ success: true, message: "Subscribed successfully!" });
+    } catch (err) {
+        console.error("Newsletter Error:", err);
+        res.status(500).json({ error: "Failed to subscribe" });
+    }
+});
+
+app.get('/api/newsletter', async (req, res) => {
+    if (!isConnected) return res.json([]);
+    try {
+        const items = await NewsletterSubscriber.find().sort({ subscribedAt: -1 });
+        res.json(items);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch newsletter subscribers" });
+    }
+});
+
+app.delete('/api/newsletter/:id', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        await NewsletterSubscriber.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete subscriber" });
+    }
+});
+
 
 // Serve frontend build if present
 const distPath = path.join(__dirname, '../dist');

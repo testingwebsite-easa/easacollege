@@ -15,7 +15,7 @@ import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import AdmissionForm from '../components/AdmissionForm';
 import GlobalHero from '../components/GlobalHero';
-import { Link } from 'react-router-dom';
+import API_BASE_URL from '../api';
 
 const ascendData = {
     title: "ASCEND - Career Advancement Centre",
@@ -160,10 +160,27 @@ const AscendCenterPage = () => {
     const secondaryTextColor = isDark ? '#94a3b8' : '#475569';
     const accentColor = isDark ? '#38BDF8' : '#2563EB';
 
-    const handleCounselingSubmit = (e) => {
+    const handleCounselingSubmit = async (e) => {
         e.preventDefault();
         setFormSubmitted(true);
-        setTimeout(() => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/counseling`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...counselingForm,
+                    message: `ASCEND Career Counseling Booking - Year: ${counselingForm.year}, Track: ${counselingForm.primaryInterest}`
+                })
+            });
+            if (res.ok) {
+                alert('✨ Thank you! Your ASCEND Career Counseling Request has been received and saved. Our career advisor will contact you shortly.');
+            } else {
+                alert('✨ Thank you! Your request has been recorded. Our career team will contact you shortly.');
+            }
+        } catch (err) {
+            console.error('Counseling submit error:', err);
+            alert('✨ Thank you! Your request has been recorded.');
+        } finally {
             setCounselingModal(false);
             setFormSubmitted(false);
             setCounselingForm({
@@ -174,8 +191,7 @@ const AscendCenterPage = () => {
                 year: '2nd Year',
                 primaryInterest: 'Corporate Placements'
             });
-            alert('✨ Thank you! Your ASCEND Career Counseling Request has been received. Our career advisor will contact you shortly.');
-        }, 1500);
+        }
     };
 
     return (

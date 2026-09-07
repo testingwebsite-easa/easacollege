@@ -103,8 +103,8 @@ const SdgsPage = lazy(() => import('./pages/SdgsPage'));
 const ObePage = lazy(() => import('./pages/ObePage'));
 const NirfPage = lazy(() => import('./pages/NirfPage'));
 const NbaPage = lazy(() => import('./pages/NbaPage'));
-const Login = lazy(() => import('./pages/Login'));
 const IdeaLabPage = lazy(() => import('./pages/IdeaLabPage'));
+const AdmissionEnquiryAdmin = lazy(() => import('./pages/AdmissionEnquiryAdmin'));
 
 
 
@@ -122,7 +122,7 @@ function App() {
             <Route path="/professional-chapters" element={<ProfessionalChaptersPage />} />
             <Route path="/mission-vision" element={<MissionPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/admin/login" element={<Login />} />
+            <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
               path="/dashboard"
@@ -148,6 +148,10 @@ function App() {
             <Route path="/sustainability" element={<SustainabilityPage />} />
             <Route path="/community-outreach" element={<CommunityOutreachPage />} />
             <Route path="/admin/applications" element={<JobApplicationsView />} />
+            <Route path="/admin/admission" element={<AdmissionEnquiryAdmin />} />
+            <Route path="/admin/addmission" element={<AdmissionEnquiryAdmin />} />
+            <Route path="/admin/admissions" element={<AdmissionEnquiryAdmin />} />
+            <Route path="/admin/enquiries" element={<AdmissionEnquiryAdmin />} />
             <Route path="/research" element={<ResearchPage />} />
             <Route path="/rd" element={<ResearchPage />} />
             <Route path="/rd-cell" element={<ResearchPage />} />
@@ -269,7 +273,6 @@ function App() {
         </Suspense>
           <ScrollToTopButton />
           <StickyContactBar />
-
         </Router>
       </ThemeProvider>
     </AuthProvider>

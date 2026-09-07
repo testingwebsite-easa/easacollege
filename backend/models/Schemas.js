@@ -277,6 +277,7 @@ module.exports = {
         state: String,
         school: String,
         percentage: String,
+        remarks: String,
         status: { type: String, default: 'Pending', enum: ['Pending', 'Reviewed', 'Accepted', 'Rejected'] },
         date: { type: Date, default: Date.now }
     })),
@@ -284,9 +285,62 @@ module.exports = {
         name: String,
         email: String,
         phone: String,
+        course: String,
+        category: { type: String, default: 'General' },
         message: String,
         status: { type: String, default: 'New', enum: ['New', 'Contacted', 'Resolved'] },
         submittedAt: { type: Date, default: Date.now }
+    })),
+    Counseling: mongoose.model('Counseling', new mongoose.Schema({
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, required: true },
+        department: String,
+        year: { type: String, default: '2nd Year' },
+        primaryInterest: { type: String, default: 'Corporate Placements' },
+        targetCountry: String,
+        targetTrack: String,
+        message: String,
+        status: { type: String, default: 'Pending', enum: ['Pending', 'In Review', 'Contacted', 'Scheduled', 'Completed', 'Cancelled'] },
+        submittedAt: { type: Date, default: Date.now }
+    })),
+    StartupPitch: mongoose.model('StartupPitch', new mongoose.Schema({
+        founderName: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, required: true },
+        department: String,
+        year: { type: String, default: '3rd Year' },
+        startupName: { type: String, required: true },
+        sector: { type: String, default: 'Software & AI' },
+        ideaSummary: { type: String, required: true },
+        currentStage: { type: String, default: 'Idea Stage' },
+        status: { type: String, default: 'New', enum: ['New', 'Under Evaluation', 'Shortlisted', 'Invited for Pitch', 'Funded / Incubated', 'Rejected'] },
+        submittedAt: { type: Date, default: Date.now }
+    })),
+    PacFeedback: mongoose.model('PacFeedback', new mongoose.Schema({
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+        role: { type: String, default: 'Student' },
+        department: { type: String, default: 'CSE' },
+        suggestionType: { type: String, default: 'Curriculum & Value-Added Courses' },
+        message: { type: String, required: true },
+        status: { type: String, default: 'New', enum: ['New', 'Reviewed', 'Incorporated into BOS', 'Archived'] },
+        submittedAt: { type: Date, default: Date.now }
+    })),
+    PartnerConnect: mongoose.model('PartnerConnect', new mongoose.Schema({
+        orgName: { type: String, required: true },
+        contactPerson: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, required: true },
+        targetSdg: { type: String, default: 'SDG 07: Affordable & Clean Energy' },
+        proposalDetails: { type: String, required: true },
+        status: { type: String, default: 'New', enum: ['New', 'In Discussion', 'MoU Signed', 'Closed'] },
+        submittedAt: { type: Date, default: Date.now }
+    })),
+    NewsletterSubscriber: mongoose.model('NewsletterSubscriber', new mongoose.Schema({
+        email: { type: String, required: true, unique: true },
+        status: { type: String, default: 'Active', enum: ['Active', 'Unsubscribed'] },
+        subscribedAt: { type: Date, default: Date.now }
     })),
     Session: mongoose.model('Session', new mongoose.Schema({
         title: String,

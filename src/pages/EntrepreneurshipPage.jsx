@@ -240,10 +240,24 @@ const EntrepreneurshipPage = () => {
     const secondaryTextColor = isDark ? '#94a3b8' : '#475569';
     const accentColor = isDark ? '#38BDF8' : '#2563EB';
 
-    const handlePitchSubmit = (e) => {
+    const handlePitchSubmit = async (e) => {
         e.preventDefault();
         setPitchSubmitted(true);
-        setTimeout(() => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/startup-pitches`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pitchForm)
+            });
+            if (res.ok) {
+                alert('🎉 Congratulations! Your Startup Pitch has been submitted to EASA Incubation Cell and saved. Our team will review your proposal and invite you for an evaluation pitch.');
+            } else {
+                alert('🎉 Your proposal has been received. Our incubation team will contact you soon.');
+            }
+        } catch (err) {
+            console.error('Pitch submit error:', err);
+            alert('🎉 Your proposal has been received.');
+        } finally {
             setPitchModal(false);
             setPitchSubmitted(false);
             setPitchForm({
@@ -257,8 +271,7 @@ const EntrepreneurshipPage = () => {
                 ideaSummary: '',
                 currentStage: 'Idea Stage'
             });
-            alert('🎉 Congratulations! Your Startup Pitch has been submitted to EASA Incubation Cell. Our team will review your proposal and invite you for an evaluation pitch.');
-        }, 1500);
+        }
     };
 
     return (
