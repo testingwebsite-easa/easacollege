@@ -2,13 +2,27 @@
 const COMMON_UG_PO = [
     "PO1 Engineering Knowledge: Apply knowledge of mathematics, natural science, computing, engineering fundamentals and an engineering specialization as specified in WK1 to WK4 respectively to develop to the solution of complex engineering problems.",
     "PO2 Problem Analysis: Identify, formulate, review research literature and analyze complex engineering problems reaching substantiated conclusions with consideration for sustainable development. (WK1 to WK4)",
-    "PO3 Design/Development of Solutions: Design creative solutions for complex problems and design/develop systems/components/processes to meet identified needs with consideration for the public health and safety, whole-life cost, net zero carbon, culture, society and environment as required. (WK5)",
-    "PO4 Conduct Investigations of Complex Problems: Conduct investigations of complex engineering problems using research-based knowledge including design of experiments, modelling, analysis & interpretation of data to provide valid conclusions. (WK8).",
+    "PO3 Design/Development of Solutions: Design creative solutions for complex engineering problems and design/develop systems/components/processes to meet identified needs with consideration for the public health and safety, whole-life cost, net zero carbon, culture, society and environment as required. (WK5)",
+    "PO4 Conduct Investigations of Complex Problems: Conduct investigations of complex engineering problems using research-based knowledge including design of experiments, modelling, analysis & interpretation of data to provide valid conclusions.(WK8).",
     "PO5 Engineering Tool Usage: Create, select and apply appropriate techniques, resources and modern engineering & IT tools, including prediction and modelling recognizing their limitations to solve complex engineering problems. (WK2 and WK6)",
-    "PO6 The Engineer and The World: Analyze and evaluate societal and environmental aspects while solving complex engineering problems for its impact on sustainability with reference to economy, health, safety, legal framework, culture and environment. (WK1, WK5, and WK7).",
+    "PO6 The Engineer and The World: Analyze and evaluate societal and environmental aspects while solving complex engineering problems for its impact on sustainability with reference to economy, health, safety, legal framework, culture and environment.(WK1, WK5, and WK7).",
     "PO7 Ethics: Apply ethical principles and commit to professional ethics, human values, diversity and inclusion; adhere to national & international laws. (WK9)",
     "PO8 Individual and Collaborative Team work: Function effectively as an individual, and as a member or leader in diverse/multi-disciplinary teams.",
-    "PO9 Communication: Communicate effectively and inclusively within the engineering community and society at large, such as being able to comprehend and write effective reports and design documentation, make effective presentations, and give and receive clear instructions."
+    "PO9 Communication: Communicate effectively and inclusively within the engineering community and society at large, such as being able to comprehend and write effective reports and design documentation, make effective presentations considering cultural, language, and learning differences.",
+    "PO10 Project Management and Finance: Apply knowledge and understanding of engineering management principles and economic decision-making and apply these to one’s own work, as a member and leader in a team, and to manage projects and in multidisciplinary environments.",
+    "PO11 Life-Long Learning: Recognize the need for, and have the preparation and ability for i) independent and life-long learning ii) adaptability to new and emerging technologies and iii) critical thinking in the broadest context of technological change. (WK8)"
+];
+
+const COMMON_UG_WK = [
+    "WK1 Natural Sciences: A systematic, theory-based understanding of the natural sciences applicable to the discipline and awareness of relevant social sciences.",
+    "WK2 Mathematics & Computing Analysis: Conceptually-based mathematics, numerical analysis, data analysis, statistics and formal aspects of computer and information science to support detailed analysis and modelling applicable to the discipline.",
+    "WK3 Engineering Fundamentals: A systematic, theory-based formulation of engineering fundamentals required in the engineering discipline.",
+    "WK4 Specialist Knowledge: Engineering specialist knowledge that provides theoretical frameworks and bodies of knowledge for the accepted practice areas in the engineering discipline; much is at the forefront of the discipline.",
+    "WK5 Sustainable Engineering & Operations: Knowledge, including efficient resource use, environmental impacts, whole-life cost, re-use of resources, net zero carbon, and similar concepts, that supports engineering design and operations in a practice area.",
+    "WK6 Engineering Practice (Technology): Knowledge of engineering practice (technology) in the practice areas in the engineering discipline.",
+    "WK7 Society, Safety & Sustainability: Knowledge of the role of engineering in society and identified issues in engineering safety and sustainable development.",
+    "WK8 Research & Critical Thinking: Engagement with selected knowledge in the current research literature of the discipline, awareness of the power of critical thinking and creative approaches to evaluate emerging issues.",
+    "WK9 Ethics & Inclusive Conduct: Ethics, inclusive behavior and conduct. Knowledge of professional ethics, responsibilities, and norms of engineering practice. Awareness of the need for diversity by reason of ethnicity, gender, age, physical ability etc. with mutual understanding and respect, and of inclusive attitudes."
 ];
 
 export const departments = [
@@ -21,26 +35,26 @@ export const departments = [
         slug: "artificial-intelligence-and-data-science",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
 
         heroImage: "https://i.pinimg.com/736x/51/f2/33/51f233f4e9ceab328fda4882eb6457ad.jpg",
         overview: "The Department of AI & Data Science combines the power of artificial intelligence with the analytical capabilities of data science to solve complex problems.",
-        vision: "The Vision of the department is to produce competent graduates suitable for industries and organizations at global level including research and development with social responsibility.",
+        vision: "To achieve value-based education and bring idealistic, ethical engineers to meet the thriving trends and technology in the field of Artificial Intelligence and Data Science.",
         mission: [
-            "Fostering excellence in education, innovation and entrepreneurship to create change agents for inclusive growth.",
-            "Encouraging inter-disciplinary studies and research to embrace the changing dimensions of the society and industry",
-            "Providing academic and research facilities with ambience that conform to global benchmarks.",
-            "Partnering with national and international institutions for leveraging synergies.",
-            "Engaging communities through extension activities for neighborhood development.",
-            "Supporting policy development and practices through continuous engagement with stakeholders."
+            "M1: Activate students potential in developing core competencies to solve real world problems through the effective application of Artificial Intelligence.",
+            "M2: Involve students with industry collaboration, career guidance and leadership skills.",
+            "M3: Discover students potential to become technically proficient engineers through innovation in Data Science.",
+            "M4: Strengthen students ethical foundation to in-still morals in both personal and societal contexts."
         ],
         peo: [
             "Apply their technical competence in computer science to solve real world problems, with technical and people leadership.",
-            "Conduct cutting edge research and develop solutions on problems of social relevance",
+            "Conduct cutting edge research and develop solutions on problems of social relevance.",
             "Work in a business environment, exhibiting team skills, work ethics, adaptability and lifelong learning."
         ],
         pso: [
-            "Ability to apply AI & ML techniques to solve real-world problems.",
-            "Ability to design and implement intelligent agents."
+            "PSO1: Exhibit proficiency of Artificial Intelligence and Data Science to evolve AI based efficient domain specific processes for effective decision making in several domains such as business and governance domains.",
+            "PSO2: Exhibit proficiency of Artificial Intelligence and Data Science in providing sustainable solutions by adapting to societal, environmental and ethical concerns to real world problems.",
+            "PSO3: Develop data analytics and data visualization skills, skills pertaining to knowledge acquisition, knowledge representation and knowledge engineering, and hence be capable of coordinating complex projects."
         ],
         milestones: [
             { year: "2023", desc: "Department Established" }
@@ -54,6 +68,12 @@ export const departments = [
         studentCount: "60+",
         facultyCount: "5+",
         labCount: "3+",
+        coe: {
+            code: "CoE-AIMAA",
+            name: "Centre of Excellence in AI, ML & Advanced Analytics",
+            tagline: "Transforming Data into Intelligence, Innovation, and Impact.",
+            logo: "/images/coe-aimaa-logo.png"
+        },
         mou: [
             { partner: "Maxbite Technologies Pvt. Ltd", purpose: "Advanced Industrial Training & Research Collaboration", year: "2023", benefits: "IoT & Smart Manufacturing" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
@@ -70,25 +90,62 @@ export const departments = [
         slug: "computer-science-and-engineering",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://i.pinimg.com/1200x/dd/b1/78/ddb1781bd633b45439f140e0437e1480.jpg",
         overview: "The Department of Computer Science and Engineering was established with the vision of producing high-quality computer science professionals who can adapt to the changing needs of the industry and society. The department has state-of-the-art laboratories and highly qualified faculty members.",
         vision: "To be a globally pre - eminent hub for education and research in Computer Science and Engineering, equipping students with the expertise, knowledge and creative mind set to become leaders and catalysts for positive change in the fast-changing global technology arena.",
         mission: [
-            "To provide a dynamic learning environment that fosters academic excellence, personal growth and practical training in the field of Computer Science Engineering, preparing students for successful careers and fulfilling lives.",
-            "To advance knowledge and drive innovation in Computer Science Engineering through cutting-edge research and development, contributing to the technological progress of society.",
-            "To bridge the gap between academia and industry by offering industry aligned programs, hands-on training and practical experience in Computer Science Engineering, preparing students to lead, innovate and thrive in a rapidly evolving technological landscape.",
-            "To promote diversity, equity and inclusion in all aspects of Computer Science Engineering education and research, creating a welcoming and inclusive environment that produces socially responsible citizens.",
-            "To instill ethical principles and a commitment to social responsibility in our students, equipping them with the knowledge, skills and leadership qualities needed to contribute to the betterment of society through Computer Science Engineering."
+            "M1: To provide a dynamic learning environment that fosters academic excellence, personal growth and practical training in the field of Computer Science Engineering, preparing students for successful careers and fulfilling lives.",
+            "M2: To advance knowledge and drive innovation in Computer Science Engineering through cutting-edge research and development, contributing to the technological progress of society.",
+            "M3: To bridge the gap between academia and industry by offering industry aligned programs, hands-on training and practical experience in Computer Science Engineering, preparing students to lead, innovate and thrive in a rapidly evolving technological landscape.",
+            "M4: To promote diversity, equity and inclusion in all aspects of Computer Science Engineering education and research, creating a welcoming and inclusive environment that produces socially responsible citizens.",
+            "M5: To instill ethical principles and a commitment to social responsibility in our students, equipping them with the knowledge, skills and leadership qualities needed to contribute to the betterment of society through Computer Science Engineering."
         ],
         peo: [
-            "Graduates will be able to analyze, design, and develop software solutions for real-world problems.",
-            "Graduates will demonstrate professional ethics, leadership skills, and team spirit in their career.",
-            "Graduates will pursue higher education and research to adapt to technological advancements."
+            "PEO1: Graduates will be able to analyze, design, and develop software solutions for real-world problems.",
+            "PEO2: Graduates will demonstrate professional ethics, leadership skills, and team spirit in their career.",
+            "PEO3: Graduates will pursue higher education and research to adapt to technological advancements."
         ],
         pso: [
-            "Exhibit design and programming skills to build and automate business solutions using cutting edge technologies.",
-            "Strong theoretical foundation leading to excellence and excitement towards research, to provide elegant solutions to complex problems.",
-            "Ability to work effectively with various engineering fields as a team to design, build and develop system applications."
+            "PSO1: Exhibit design and programming skills to build and automate business solutions using cutting edge technologies.",
+            "PSO2: Strong theoretical foundation leading to excellence and excitement towards research, to provide elegant solutions to complex problems.",
+            "PSO3: Ability to work effectively with various engineering fields as a team to design, build and develop system applications."
+        ],
+        curriculum: [
+            {
+                year: "II CSE",
+                semester: "Semester IV",
+                regulation: "R24",
+                courses: [
+                    { sl: 1, code: "U24MA401", name: "Engineering Mathematics - IV", strength: 40, l: 3, t: 2, p: 0, credits: 4 },
+                    { sl: 2, code: "U24CS401", name: "Theory of Computation", strength: 40, l: 3, t: 2, p: 0, credits: 4 },
+                    { sl: 3, code: "U24CS403", name: "Database Management Systems", strength: 40, l: 4, t: 0, p: 0, credits: 3 },
+                    { sl: 4, code: "U24BS401", name: "Environmental Sciences and Sustainability", strength: 40, l: 3, t: 0, p: 0, credits: 3 },
+                    { sl: 5, code: "U24CS405", name: "Introduction to Operating Systems", strength: 40, l: 4, t: 0, p: 0, credits: 3 },
+                    { sl: 6, code: "U24CS402", name: "Artificial Intelligence and Machine Learning", strength: 40, l: 3, t: 0, p: 2, credits: 4 },
+                    { sl: 7, code: "U24CS404", name: "Algorithms", strength: 40, l: 3, t: 0, p: 2, credits: 4 },
+                    { sl: 8, code: "U24CS4L1", name: "Operating Systems Laboratory", strength: 40, l: 0, t: 0, p: 3, credits: 1.5 },
+                    { sl: 9, code: "U24CS4L2", name: "Database Management Systems Laboratory", strength: 40, l: 0, t: 0, p: 3, credits: 1.5 },
+                    { sl: 10, code: "U24MC41", name: "Indian Constitution", strength: 40, l: 2, t: 0, p: 0, credits: 0 }
+                ]
+            },
+            {
+                year: "III CSE",
+                semester: "Semester VI",
+                regulation: "R21",
+                courses: [
+                    { sl: 1, code: "CCS356", name: "Object oriented software engineering", strength: 47, l: 3, t: 0, p: 2, credits: 4 },
+                    { sl: 2, code: "CS3691", name: "Embedded systems & IoT", strength: 47, l: 3, t: 0, p: 2, credits: 4 },
+                    { sl: 3, code: "OIE351", name: "Introduction to Industrial Engineering", strength: 47, l: 3, t: 0, p: 0, credits: 3 },
+                    { sl: 4, code: "CCS338", name: "Computer Vision", strength: 47, l: 2, t: 0, p: 2, credits: 3 },
+                    { sl: 5, code: "CCS372", name: "Virtualization", strength: 32, l: 2, t: 0, p: 2, credits: 3 },
+                    { sl: 6, code: "CCS343", name: "Digital and Mobile Forensics", strength: 15, l: 2, t: 0, p: 2, credits: 3 },
+                    { sl: 7, code: "CCS365", name: "Software Defined Networks", strength: 31, l: 2, t: 0, p: 2, credits: 3 },
+                    { sl: 8, code: "CCS363", name: "Social Network Security", strength: 16, l: 2, t: 0, p: 2, credits: 3 },
+                    { sl: 9, code: "CCS370", name: "UI and UX Design", strength: 47, l: 2, t: 0, p: 2, credits: 3 },
+                    { sl: 10, code: "MX3089", name: "Industrial Safety MC", strength: 47, l: 3, t: 0, p: 0, credits: 0 }
+                ]
+            }
         ],
         milestones: [
             { year: "2008", desc: "Department Established" },
@@ -116,26 +173,27 @@ export const departments = [
         slug: "artificial-intelligence-and-machine-learning",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://i.pinimg.com/736x/3f/68/48/3f684852a3474b0127539eeede3f72d5.jpg",
         overview: "The Department of AI & ML focuses on the study of intelligent agents and the construction of such agents, which are systems that perceive their environment and take actions that maximize their chances of achieving their goals.",
         vision: "The Vision of the department is to produce competent graduates suitable for industries and organizations at global level including research and development with social responsibility.",
         mission: [
-            "Fostering excellence in education, innovation and entrepreneurship to create change agents for inclusive growth.",
-            "Encouraging inter-disciplinary studies and research to embrace the changing dimensions of the society and industry",
-            "Providing academic and research facilities with ambience that conform to global benchmarks.",
-            "Partnering with national and international institutions for leveraging synergies.",
-            "Engaging communities through extension activities for neighborhood development.",
-            "Supporting policy development and practices through continuous engagement with stakeholders."
+            "M1: Fostering excellence in education, innovation and entrepreneurship to create change agents for inclusive growth.",
+            "M2: Encouraging inter-disciplinary studies and research to embrace the changing dimensions of the society and industry.",
+            "M3: Providing academic and research facilities with ambience that conform to global benchmarks.",
+            "M4: Partnering with national and international institutions for leveraging synergies.",
+            "M5: Engaging communities through extension activities for neighborhood development.",
+            "M6: Supporting policy development and practices through continuous engagement with stakeholders."
         ],
 
         peo: [
-            "Apply their technical competence in computer science to solve real world problems, with technical and people leadership.",
-            "Conduct cutting edge research and develop solutions on problems of social relevance",
-            "Work in a business environment, exhibiting team skills, work ethics, adaptability and lifelong learning."
+            "PEO1: Apply their technical competence in computer science to solve real world problems, with technical and people leadership.",
+            "PEO2: Conduct cutting edge research and develop solutions on problems of social relevance.",
+            "PEO3: Work in a business environment, exhibiting team skills, work ethics, adaptability and lifelong learning."
         ],
         pso: [
-            "Ability to apply AI & ML techniques to solve real-world problems.",
-            "Ability to design and implement intelligent agents."
+            "PSO1: Ability to apply AI & ML techniques to solve real-world problems.",
+            "PSO2: Ability to design and implement intelligent agents."
         ],
         milestones: [
             { year: "2023", desc: "Department Established" }
@@ -164,24 +222,25 @@ export const departments = [
         slug: "computer-science-and-engineering-cyber-security",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://img.freepik.com/free-photo/cyber-security-concept-digital-art_23-2151637760.jpg?semt=ais_wordcount_boost&w=740&q=80",
         overview: "The Department of CSE (Cyber Security) is dedicated to training professionals who can protect information systems and networks from cyber threats.",
         vision: "To be a centre of excellence in Cyber Security, fostering innovation, ethics, and technological advancements to empower students for a secure digital future.",
         mission: [
-            "To impart strong theoretical foundations and practical skills in computer science and cyber security, preparing students for the evolving technological landscape.",
-            "To foster innovation, critical thinking, and problem-solving abilities in addressing modern cyber threats.",
-            "To promote industry collaboration, research, and continuous learning in areas of cyber security, ethical hacking, digital forensics, and secure software development.",
-            "To inculcate ethical responsibility, leadership qualities, and social awareness among graduates to safeguard the digital world.",
-            "To contribute to the nation’s cyber defence ecosystem through skilled manpower and impactful research."
+            "M1: To impart strong theoretical foundations and practical skills in computer science and cyber security, preparing students for the evolving technological landscape.",
+            "M2: To foster innovation, critical thinking, and problem-solving abilities in addressing modern cyber threats.",
+            "M3: To promote industry collaboration, research, and continuous learning in areas of cyber security, ethical hacking, digital forensics, and secure software development.",
+            "M4: To inculcate ethical responsibility, leadership qualities, and social awareness among graduates to safeguard the digital world.",
+            "M5: To contribute to the nation’s cyber defence ecosystem through skilled manpower and impactful research."
         ],
         peo: [
-            "Apply their technical competence in computer science to solve real world problems, with technical and people leadership.",
-            "Conduct cutting edge research and develop solutions on problems of social relevance.",
-            "Work in a business environment, exhibiting team skills, work ethics, adaptability and lifelong learning."
+            "PEO1: Apply their technical competence in computer science to solve real world problems, with technical and people leadership.",
+            "PEO2: Conduct cutting edge research and develop solutions on problems of social relevance.",
+            "PEO3: Work in a business environment, exhibiting team skills, work ethics, adaptability and lifelong learning."
         ],
         pso: [
-            "Exhibit design and programming skills to build and automate business solutions using cutting edge technologies.",
-            "Strong theoretical foundation leading to excellence and excitement towards research, to provide elegant solutions to complex problems."
+            "PSO1: Exhibit design and programming skills to build and automate business solutions using cutting edge technologies.",
+            "PSO2: Strong theoretical foundation leading to excellence and excitement towards research, to provide elegant solutions to complex problems."
         ],
         milestones: [
             { year: "2024", desc: "Department Established" }
@@ -210,22 +269,24 @@ export const departments = [
         slug: "information-technology",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://i.pinimg.com/736x/63/3e/64/633e646d4b03b384ddf2c316e920fbde.jpg",
         overview: "The Department of Information Technology focuses on the management and processing of information using computer systems.",
-        vision: "To be a world-class hub of excellence in Information Technology, fostering higher-level learning, cutting-edge research, and innovative technologies that transform students into global IT leaders and innovators.",
+        vision: "To be a world-class hub of excellence in Information Technology, fostering higher-level learning, cutting-edge research, and innovative technologies.",
         mission: [
-            "DELIVER high-quality IT education that aligns with student aspirations and potential, equipping them with cutting-edge skills for a dynamic digital world.",
-            "INSPIRE a passion for learning and innovation by fostering creativity, problem-solving, and hands-on experience with emerging technologies.",
-            "TRANSFORM talents into socially responsible IT professionals who leverage technology to address real-world challenges and serve society ethically."
+            "M1: DELIVER high-quality IT education that aligns with student aspirations and potential, equipping them with cutting-edge skills for a dynamic digital world.",
+            "M2: INSPIRE a passion for learning and innovation by fostering creativity, problem-solving, and hands-on experience with emerging technologies.",
+            "M3: TRANSFORM talents into socially responsible IT professionals who leverage technology to address real-world challenges and serve society ethically."
         ],
         peo: [
-            "Graduates will have sound foundation in the mathematical, scientific and engineering fundamentals to formulate, solve, and analyze problems related to Information and Technology.",
-            "Graduates will have employment in IT industries who are socially responsible and integrated with professional and ethical skills.",
-            "Graduates will involve in research, higher studies and/or to become entrepreneurs in the long run."
+            "PEO1: Graduates will have sound foundation in the mathematical, scientific and engineering fundamentals to formulate, solve, and analyze problems related to Information and Technology.",
+            "PEO2: Graduates will have employment in IT industries who are socially responsible and integrated with professional and ethical skills.",
+            "PEO3: Graduates will involve in research, higher studies and/or to become entrepreneurs in the long run."
         ],
         pso: [
-            "Ability to develop and maintain software applications.",
-            "Ability to manage networks and databases."
+            "PSO1: Have proficiency in programming skills to design, develop and apply appropriate techniques, to solve complex engineering problems.",
+            "PSO2: Have knowledge to build, automate and manage IT solutions using cutting-edge technologies.",
+            "PSO3: Have the ability to research, create, and build new technology solutions that solve real-world problems and move the industry forward."
         ],
         milestones: [
             { year: "2010", desc: "Department Established" }
@@ -254,25 +315,26 @@ export const departments = [
         slug: "electronics-and-communication-engineering",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://static.vecteezy.com/system/resources/thumbnails/029/767/602/small/ict-information-and-communications-technology-on-modern-server-room-background-virtual-screen-photo.jpg",
         overview: "The Department of Electronics and Communication Engineering is dedicated to imparting quality education in the field of electronics and communication. The department focuses on the overall development of students by providing them with practical exposure and industry interaction.",
         vision: "To be a leading hub in Electronics and communication engineering, driving innovation, interdisciplinary collaboration, and socially impactful solutions through cutting – edge Education, Research and Entrepreneurship.",
         mission: [
-            "To advance knowledge and practice in Electronics and Communication Engineering Through hands on, industry relevant education that prepares students for innovation, Entrepreneurship and multidisciplinary collaboration.",
-            "To foster a culture of research and development that addresses real world challenges and creates transformative solutions at the intersection of the Electronics, Communication and Computing.",
-            "To empower individuals and communities by leveraging technology for positive social impact through inclusive education, collaborative outreach and interdisciplinary teamwork."
+            "M1: To advance knowledge and practice in Electronics and Communication Engineering Through hands on, industry relevant education that prepares students for innovation, Entrepreneurship and multidisciplinary collaboration.",
+            "M2: To foster a culture of research and development that addresses real world challenges and creates transformative solutions at the intersection of the Electronics, Communication and Computing.",
+            "M3: To empower individuals and communities by leveraging technology for positive social impact through inclusive education, collaborative outreach and interdisciplinary teamwork."
         ],
         peo: [
-            "Graduates will have thorough grounding in the fundamental sciences, facilitating their future academic pursuits in Electronics and Communication Engineering.",
-            "Graduates will demonstrate expertise in Electronics and Communication Engineering, empowering individuals to excel in industry applications, advanced studies, and innovative research.",
-            "Graduates will have spirit of inquiry and learning, empowering individuals to stay current with industry trends and technological breakthroughs.",
-            "Graduates will have the ability to critically assess literature, identify knowledge gaps, and develop novel, ethics-guided research approaches to tackle complex challenges.",
-            "Graduates will have the ability to integrate professional ethics with social awareness, addressing engineering challenges in a holistic manner."
+            "PEO1: Graduates will have thorough grounding in the fundamental sciences, facilitating their future academic pursuits in Electronics and Communication Engineering.",
+            "PEO2: Graduates will demonstrate expertise in Electronics and Communication Engineering, empowering individuals to excel in industry applications, advanced studies, and innovative research.",
+            "PEO3: Graduates will have spirit of inquiry and learning, empowering individuals to stay current with industry trends and technological breakthroughs.",
+            "PEO4: Graduates will have the ability to critically assess literature, identify knowledge gaps, and develop novel, ethics-guided research approaches to tackle complex challenges.",
+            "PEO5: Graduates will have the ability to integrate professional ethics with social awareness, addressing engineering challenges in a holistic manner."
         ],
         pso: [
-            "Apply electronic, mathematical, and engineering principles to design, develop, and analyse sophisticated electronic systems",
-            "Design, simulate, and optimize communication systems.",
-            "Leverage latest advancements in electronics and communication to design and develop ground breaking solutions"
+            "PSO1: Apply electronic, mathematical, and engineering principles to design, develop, and analyse sophisticated electronic systems.",
+            "PSO2: Design, simulate, and optimize communication systems.",
+            "PSO3: Leverage latest advancements in electronics and communication to design and develop ground breaking solutions."
         ],
         milestones: [
             { year: "2009", desc: "Department Established" },
@@ -302,22 +364,22 @@ export const departments = [
         slug: "electrical-and-electronics-engineering",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://csdieselgenerators.com/wp-content/uploads/2023/05/4-768x512.png",
         overview: "The Department of Electrical and Electronics Engineering is committed to providing high-quality education and research opportunities in the fields of electrical, electronics, and power engineering. We aim to produce competent engineers who can contribute effectively to the technological advancement of society.",
         vision: "To create and sustain a centre of excellence in Electrical & Electronics Engineering that enables students to experience an unparalleled educational journey that is intellectually, socially, and personally transformative.",
         mission: [
-            "To provide a comprehensive education in electrical and electronics engineering principles and applications.",
-            "To promote research and development in emerging technologies required for the power and energy sectors.",
-            "To prepare students for successful careers in industry, academia, and research organizations."
+            "M1: Equip the students with adequate knowledge in the field of Electrical and Electronics Engineering that comprehends their aspiration and potential",
+            "M2: Evolve passion for learning and foster innovation in a diverse environment",
+            "M3: Endorse and nurture the talents towards serving the society"
         ],
         peo: [
-            "Graduates will demonstrate technical competence in analyzing and designing electrical and electronic systems.",
-            "Graduates will exhibit professional ethics, leadership qualities, and communication skills.",
-            "Graduates will engage in lifelong learning to adapt to technological changes."
+            "PEO1: Graduates will demonstrate technical competence in analyzing and designing electrical and electronic systems.",
+            "PEO2: Graduates will exhibit professional ethics, leadership qualities, and communication skills.",
+            "PEO3: Graduates will engage in lifelong learning to adapt to technological changes."
         ],
         pso: [
-            "Ability to design, simulate, and analyze electrical and electronic circuits and systems.",
-            "Ability to limit the usage of power and energy by implementing energy conservation techniques."
+            "PSO1: Understand electrical and electronics devices / instruments and to design circuits and provide innovative methodologies to solve real time / industrial problems."
         ],
         milestones: [
             { year: "2008", desc: "Establishment The Department of Electrical and Electronics Engineering was founded along with the inception of EASA College of Engineering and Technology, offering the B.E. program in EEE." },
@@ -349,23 +411,23 @@ export const departments = [
         slug: "biomedical-engineering",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://i.pinimg.com/736x/fc/09/a1/fc09a17dacc7858942e496384864b6b9.jpg",
         overview: "The Department of Biomedical Engineering integrates engineering principles with medical sciences to improve healthcare diagnosis and treatment.",
         vision: "To empower ethical biomedical innovation through education and research that bridges engineering and healthcare for community well-being.",
         mission: [
-            "Build biomedical invention through focused education and practical skills imbibed with ethics.",
-            "Motivate students for interdisciplinary learning to solve real world health care challenges.",
-            "Engage with industry, hospitals, and research institutions to enhance collective welfare through accessible healthcare innovations."
+            "M1: Build biomedical invention through focused education and practical skills imbibed with ethics.",
+            "M2: Motivate students for interdisciplinary learning to solve real world health care challenges.",
+            "M3: Engage with industry, hospitals, and research institutions to enhance collective welfare through accessible healthcare innovations."
         ],
         peo: [
-            "Graduates will be able to develop the ability to identify healthcare challenges in society and apply analytical and design skills to create effective, practical solutions.",
-            "Graduates will be able to be biomedical innovators who can lead sustainable startups for impactful healthcare solutions.",
-            "Graduates will be able to demonstrate a lifelong learning attitude to adapt and succeed in evolving multidisciplinary careers in Engineering and medicine."
+            "PEO1: Graduates will be able to develop the ability to identify healthcare challenges in society and apply analytical and design skills to create effective, practical solutions.",
+            "PEO2: Graduates will be able to be biomedical innovators who can lead sustainable startups for impactful healthcare solutions.",
+            "PEO3: Graduates will be able to demonstrate a lifelong learning attitude to adapt and succeed in evolving multidisciplinary careers in Engineering and medicine."
         ],
         pso: [
-            "Graduates will be able to design ergonomic medical devices that support clinicians, reduce workload, and enhance patient care using biomedical engineering principles.",
-            "Graduates will be equipped to leverage software tools and emerging technologies to develop cost-effective, indigenous healthcare solutions addressing real-world clinical and societal needs."
-
+            "PSO1: Graduates will be able to design ergonomic medical devices that support clinicians, reduce workload, and enhance patient care using biomedical engineering principles.",
+            "PSO2: Graduates will be equipped to leverage software tools and emerging technologies to develop cost-effective, indigenous healthcare solutions addressing real-world clinical and societal needs."
         ],
         milestones: [
             { year: "2024", desc: "Establishment & Infrastructure Development: The Department of Biomedical Engineering was established with the launch of the B.E. Biomedical Engineering programme, along with the initiation of core laboratories such as Medical Instrumentation, Biosciences, and Biomedical Signal Processing to strengthen hands-on and experiential learning." },
@@ -395,27 +457,28 @@ export const departments = [
         slug: "mechanical-engineering",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://anandice.ac.in/wp-content/uploads/2025/07/human-hand-passing-gear-robotic-hand-scaled.jpg",
         overview: "The Department of Mechanical Engineering was established in the year of 2009 with an intake of 60 UG students. The Department has grown significantly and offers B.E. Mechanical Engineering with sanctioned intake increased to 180 during the year 2012-13. Post graduate M.E. Computer Aided Design in the year 2013-14 and Manufacturing Engineering in the year 2014-15 courses are introduced with an intake of 18 students. Department of Mechanical Engineering is recognized as approved Research Centre of Anna University, Chennai. The department has state of art equipment's in the laboratories to provide deep experimental knowledge to the students. The department has well-qualified, industry oriented and experienced team of faculty members with specialized in different fields of Mechanical Engineering committed to provide quality education. The department is also committed to provide industry oriented research/consultancy work by the experienced faculty members. The department is also having tie-up with Maxbite Technologies Pvt. Ltd, Rabwin industry, CADD centre, Thirumaarul machinist and Prakash Gears Coimbatore etc., for training and placements.",
         vision: "To provide a comprehensive education and research environment that prepares students to design, develop and innovate mechanical systems and technologies that address real-world challenges, while promoting sustainability, safety, ethical and social responsibility.",
         mission: [
-            "To provide a challenging and engaging learning experience that prepares students for careers in mechanical engineering and collaborate with industry partners for a relevant curriculum.",
-            "To empower students with technical skills, critical thinking, and leadership qualities. Provide industry internships and professional experiences.",
-            "To conduct interdisciplinary research on energy systems, robotics, biomedical engineering, materials science and sustainability Collaborate with industry partners for research solutions.",
-            "To promote excellence in teaching, research, service and outreach. Connect students with industry partners and alumni for job placement support.",
-            "To foster collaboration and diversity among faculty, students and stakeholders. Collaborate with industry partners for real-world projects and research experiences, while enhancing the department’s reputation."
+            "M1: To provide a challenging and engaging learning experience that prepares students for careers in mechanical engineering and collaborate with industry partners for a relevant curriculum.",
+            "M2: To empower students with technical skills, critical thinking, and leadership qualities. Provide industry internships and professional experiences.",
+            "M3: To conduct interdisciplinary research on energy systems, robotics, biomedical engineering, materials science and sustainability Collaborate with industry partners for research solutions.",
+            "M4: To promote excellence in teaching, research, service and outreach. Connect students with industry partners and alumni for job placement support.",
+            "M5: To foster collaboration and diversity among faculty, students and stakeholders. Collaborate with industry partners for real-world projects and research experiences, while enhancing the department’s reputation."
         ],
         peo: [
-            "Effectuating success in careers by exploring with the design, digital and computational analysis of engineering systems, experimentation and testing, smart manufacturing, technical services, and research.",
-            "Amalgamating effectively with stakeholders to update and improve their core competencies and abilities to ethically compete in the ever-changing multicultural global enterprise.",
-            "To encourage multi-disciplinary research and development to foster advanced technology, and to nurture innovation and entrepreneurship in order to compete successfully in the global economy.",
-            "To globally share and apply technical knowledge to create new opportunities that proactively advances our society through team efforts and to solve various challenging technical, environmental and societal problems.",
-            "To create world class mechanical engineers capable of practice engineering ethically with a solid vision to become great leaders in academia, industries and society."
+            "PEO1: Effectuating success in careers by exploring with the design, digital and computational analysis of engineering systems, experimentation and testing, smart manufacturing, technical services, and research.",
+            "PEO2: Amalgamating effectively with stakeholders to update and improve their core competencies and abilities to ethically compete in the ever-changing multicultural global enterprise.",
+            "PEO3: To encourage multi-disciplinary research and development to foster advanced technology, and to nurture innovation and entrepreneurship in order to compete successfully in the global economy.",
+            "PEO4: To globally share and apply technical knowledge to create new opportunities that proactively advances our society through team efforts and to solve various challenging technical, environmental and societal problems.",
+            "PEO5: To create world class mechanical engineers capable of practice engineering ethically with a solid vision to become great leaders in academia, industries and society."
         ],
         pso: [
-            "Apply the knowledge gained in Mechanical Engineering for design and development and manufacture of engineering systems.",
-            "Apply the knowledge acquired to investigate research-oriented problems in mechanical engineering with due consideration for environmental and social impacts.",
-            "Use the engineering analysis and data management tools for effective management of multidisciplinaryprojects."
+            "PSO1: Apply the knowledge gained in Mechanical Engineering for design and development and manufacture of engineering systems.",
+            "PSO2: Apply the knowledge acquired to investigate research-oriented problems in mechanical engineering with due consideration for environmental and social impacts.",
+            "PSO3: Use the engineering analysis and data management tools for effective management of multidisciplinaryprojects."
         ],
         milestones: [
             { year: "2008", desc: "Department Established" },
@@ -445,31 +508,32 @@ export const departments = [
         slug: "agriculture-engineering",
         type: "UG",
         po: COMMON_UG_PO,
+        wk: COMMON_UG_WK,
         heroImage: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
         overview: "The Department of Agriculture Engineering applies engineering principles to agricultural production and processing.",
         vision: "To be a global leader in the research, education, and application of innovative engineering solutions for sustainable agriculture, with a focus on creating a more food-secure and resilient world.",
         mission: [
-            "To advance the frontier of knowledge and practice in agricultural engineering.",
-            "To equip students with the skills and knowledge to design and implement sustainable engineering solutions for the agriculture sector.",
-            "To foster a culture of innovation, collaboration, and excellence in research that addresses real-world problems and creates new opportunities at the intersection of engineering, agriculture, and the environment.",
-            "To empower individuals, communities, and nations to achieve food security and environmental sustainability through our education, research, and outreach programs.",
-            "To value diversity, inclusion, and ethics, creating a safe and supportive environment that produces socially responsible leaders in agricultural engineering and entrepreneurship."
+            "M1: To advance the frontier of knowledge and practice in agricultural engineering.",
+            "M2: To equip students with the skills and knowledge to design and implement sustainable engineering solutions for the agriculture sector.",
+            "M3: To foster a culture of innovation, collaboration, and excellence in research that addresses real-world problems and creates new opportunities at the intersection of engineering, agriculture, and the environment.",
+            "M4: To empower individuals, communities, and nations to achieve food security and environmental sustainability through our education, research, and outreach programs.",
+            "M5: To value diversity, inclusion, and ethics, creating a safe and supportive environment that produces socially responsible leaders in agricultural engineering and entrepreneurship."
         ],
         peo: [
-            " To train and educate students with general knowledge and skills in agricultural water management, agricultural production process, farm machinery and farm management.",
-            "To provide a sound theoretical knowledge in engineering principles applied to agriculture.",
-            "To prepare students for a successful agricultural engineering career integrating all aspects of engineering in agriculture.",
-            "To develop innovative capacity of students for increasing agricultural production with scarce water resources available.",
-            "To impart positive and responsive out their mission as engineers. reach attitudes, initiative and creative thinking in their mission as engineers.",
-            "To understand ethical issues and responsibility of serving the society and the environment at  large.",
+            "PEO1: To train and educate students with general knowledge and skills in agricultural water management, agricultural production process, farm machinery and farm management.",
+            "PEO2: To provide a sound theoretical knowledge in engineering principles applied to agriculture.",
+            "PEO3: To prepare students for a successful agricultural engineering career integrating all aspects of engineering in agriculture.",
+            "PEO4: To develop innovative capacity of students for increasing agricultural production with scarce water resources available.",
+            "PEO5: To impart positive and responsive outreach attitudes, initiative and creative thinking in their mission as engineers.",
+            "PEO6: To understand ethical issues and responsibility of serving the society and the environment at large."
         ],
         pso: [
-            "To make expertise in design and engineering problem solving approach in agriculture with proper knowledge and skill.",
-            "To enhance the ability of the students to formulate solutions to real-world problems pertaining to sustained agricultural productivity using modern technologies.",
-            "To inculcate entrepreneurial skills through strong Industry-Institution linkage."
+            "PSO1: To make expertise in design and engineering problem solving approach in agriculture with proper knowledge and skill.",
+            "PSO2: To enhance the ability of the students to formulate solutions to real-world problems pertaining to sustained agricultural productivity using modern technologies.",
+            "PSO3: To inculcate entrepreneurial skills through strong Industry-Institution linkage."
         ],
         milestones: [
-            { year: "2020", desc: " Establishment of the Department The Department of Agricultural Engineering was established to address the growing technological needs of sustainable agriculture and to develop skilled agricultural engineers." }
+            { year: "2020", desc: "Establishment of the Department The Department of Agricultural Engineering was established to address the growing technological needs of sustainable agriculture and to develop skilled agricultural engineers." }
         ],
         hod: {
             name: "GOKULDEEPAN P",
@@ -605,18 +669,28 @@ export const departments = [
         overview: "The PG program in Manufacturing Engineering focuses on modern manufacturing processes and systems.",
         vision: "To excel in manufacturing education and research.",
         mission: [
-            "To teach advanced manufacturing technologies.",
-            "To promote research in automation and robotics.",
-            "To collaborate with manufacturing industries."
+            "M1: To teach advanced manufacturing technologies.",
+            "M2: To promote research in automation and robotics.",
+            "M3: To collaborate with manufacturing industries."
         ],
         peo: [
-            "Graduates will optimize manufacturing processes.",
-            "Graduates will implement Industry 4.0 solutions.",
-            "Graduates will lead manufacturing units."
+            "PEO1: To prepare students to know and utilize the modern manufacturing facility in order to improve productivity.",
+            "PEO2: To impart skills to use smart machines and apply latest technology in manufacturing field to innovate production process that will be useful to the Society.",
+            "PEO3: To imbibe skills for integrated problem-solving techniques to optimize the Manufacturing resources for sustainable development.",
+            "PEO4: To develop research attitude, new product, and process to solve problems in the field of manufacturing and to prepare the necessary reports."
+        ],
+        po: [
+            "PO1: An ability to independently carry out research/investigation and development work to solve practical problems",
+            "PO2: An ability to write and present a substantial technical report/document",
+            "PO3: Students should be able to demonstrate a degree of mastery over the area as per the specialization of the program. The mastery should be at a level higher than the requirements in the appropriate bachelor program",
+            "PO4: An ability to design systems, components, or processes meeting specified needs for the manufacturing industry and to improve its efficiency.",
+            "PO5: To use modern equipment and problem-solving tools for improving the manufacturing systems and processes in all aspects including technical, financial and management",
+            "PO6: To pursue higher studies / pursue their career or entrepreneur in manufacturing and allied industries"
         ],
         pso: [
-            "Ability to design manufacturing systems.",
-            "Ability to improve product quality and productivity."
+            "PSO1: Apply the knowledge gained in Manufacturing Engineering for manufacture of engineering systems.",
+            "PSO2: Apply the knowledge acquired to investigate research-oriented problems in Manufacturing engineering with due consideration for environmental and social impacts.",
+            "PSO3: Use the engineering analysis and data management tools for effective management of multidisciplinary projects."
         ],
         milestones: [
             { year: "2016", desc: "PG Program Started" }
@@ -638,6 +712,14 @@ export const departments = [
         name: "Power Electronics and Drives",
         slug: "power-electronics-and-drives",
         type: "PG",
+        po: [
+            "PO1: An ability to independently carry out research/investigation and development work to solve practical problems",
+            "PO2: An ability to write and present a substantial technical report/document.",
+            "PO3: Students should be able to demonstrate a degree of mastery over the area as per the specialization of the program. The mastery should be at a level higher than the requirements in the appropriate bachelor program.",
+            "PO4: Apply knowledge of basic science and engineering in design and testing of power electronic systems and drives.",
+            "PO5: Interact with Industry in a professional and ethical manner to meet the requirements of societal needs and to contribute sustainable development of the society.",
+            "PO6: Implement cost effective and cutting edge technologies in power electronics and drives system."
+        ],
         heroImage: "https://i.pinimg.com/736x/d1/71/92/d17192262b72c69cddb76efdc68bba6d.jpg",
         overview: "The PG program in Power Electronics and Drives covers the design and control of power electronic converters and electric drives.",
         vision: "To be a leader in power electronics research.",
@@ -754,13 +836,13 @@ export const departments = [
         degree: "MBA",
         heroImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
         overview: "MBA is a flagship program of EASA College of Engineering and Technology to develop influential leaders. The department of Master of Business Administration equips students in their personal and professional front to assume corporate and entrepreneurial responsibilities. The curriculum of our MBA program and our competent faculty members, who have the right combination of Academic and Industrial experiences have prepared our students to global standards. Our MBA program enables the students to attain successful employment for key positions in Financial, Human Resources, Marketing, Operations and Logistics. The School is on a progressive path with strict adherence to Quality Standards. The program nurtures rising managers to attain the realm of success. We are well equipped with state-of-art infrastructure, qualified, friendly teaching staff, who help students realize and achieve their potential. Our program provides opportunities for the students to pursue overseas higher education or in relevant domain leading to Ph. D. EASA's MBA course facilitates the learners to become socially and ethically responsible leaders. The department has a well-stocked library with International journals and the latest computers to promote our students' research and development. Through this course, we develop young men and women who take up responsibility effectively as management leaders, executives in the industry, and senior administrators.",
-        vision: "To inspire and empower individuals to become global leaders, entrepreneurs and change-makers, creating value for society through ethical and innovative management practices.",
+        vision: "To inspire and empower individuals to become global leaders, entrepreneurs and change makers, creating value for society through ethical and innovative management practices.",
         mission: [
-            "To foster a culture of academic excellence, intellectual and personal growth and practical training in the field of management studies.",
-            "To prepare individuals to become effective, ethical and socially responsible leaders, entrepreneurs and managers who can create value for society and drive economic growth.",
-            "To acquire knowledge and drive innovation through cutting-edge research and development in the field of Management Studies.",
-            "To bridge the gap between academia and industry by offering industry aligned programs, practical experience and hands-on training that prepare students to lead, innovate and thrive in an ever-evolving global landscape.",
-            "To prioritise diversity, equity and inclusion to create a welcoming and inclusive environment that produces socially responsible leaders."
+            "M1: To foster a culture of academic excellence, intellectual and personal growth and practical training in the field of management studies.",
+            "M2: To prepare individuals to become effective, ethical and socially responsible leaders, entrepreneurs and managers who can create value for the society and drive economic growth.",
+            "M3: To acquire knowledge and drive innovation through cutting-edge research and development in the field of management studies.",
+            "M4: To bridge the gap between academia and industry by offering industry aligned programs, practical experience and hands on training that prepare students to lead, innovate and thrive in an ever evolving global landscape.",
+            "M5: To prioritize diversity, equity and inclusion to create a welcoming and inclusive environment that produces socially responsible leaders."
         ],
         peo: [
             "PEO1: To have a thorough understanding of the core aspects of the business.",
@@ -769,16 +851,16 @@ export const departments = [
             "PEO4: To inspire and make them practice ethical standards in business."
         ],
         po: [
-            "PO1 Management Knowledge: Demonstrate the ability to apply knowledge of management theories and practices to solve real business situations.",
-            "PO2 Problem Analysis: Foster analytical and critical thinking abilities for data-based decision making.",
-            "PO3 Leadership Ability: Ability to develop Value based Leadership and cross cultural skills and application of theoretical studies into real life circumstances.",
-            "PO4 Ethical Business Aspect: Ability to understand, analyze and communicate global, economic, legal, and ethical aspects of business.",
-            "PO5 Entrepreneurial Ability: Emanate leadership, creativity, passion, skills and learning which helps them empowering business excellence in the industry and academia.",
-            "PO6 The Manager and Society: Grooming budding business professionals into true management leaders by imparting quality education, training them to challenge the modern era complications and think innovatively."
+            "PO1: Ability to apply the business acumen gained in practice.",
+            "PO2: Ability to understand and solve managerial issues.",
+            "PO3: Ability to communicate and negotiate effectively, to achieve organizational and individual goals.",
+            "PO4: Ability to understand one’s own ability to set achievable targets and complete them.",
+            "PO5: Ability to fulfill social outreach.",
+            "PO6: Ability to take up challenging assignments."
         ],
         pso: [
             "PSO1: To apply the fundamental knowledge of management domains to optimally solve the complex business problems.",
-            "PSO2: To inculcate the ability in students to gain multidisciplinary knowledge through simulated problems, case analysis, projects and industrial training.",
+            "PSO2: To inculcate the ability in students to gain multi-disciplinary knowledge through simulated problems, case analysis, projects and industrial training.",
             "PSO3: To develop competent management professionals with strong ethical values with an understanding of societal and ecological issues relevant to professional managerial practice through life-long learning."
         ],
         documents: [

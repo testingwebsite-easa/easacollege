@@ -207,7 +207,7 @@ const placementData = {
     contact: {
         name: "Training & Placement Officer",
         designation: "Head - Training & Placement Cell",
-        email: "placement@easacollege.com",
+        email: "placement@ecetonline.com",
         phone: "+91 93426 28013",
         address: "Placement Office, Main Block, EASA College Campus"
     }

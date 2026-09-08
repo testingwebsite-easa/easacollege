@@ -876,7 +876,7 @@ const placementPageData = {
     contact: {
         name: "Mr. Placement Officer",
         designation: "Head - Training & Placement",
-        email: "placement@easacollege.com",
+        email: "placement@ecetonline.com",
         phone: "+91 98765 43210",
         address: "Placement Cell, Main Block, EASA College of Engineering & Technology, Coimbatore."
     }

@@ -98,6 +98,7 @@ const NaacRti = lazy(() => import('./pages/NaacRti'));
 const NaacFeedback = lazy(() => import('./pages/NaacFeedback'));
 const NaacExtendedProfile = lazy(() => import('./pages/NaacExtendedProfile'));
 const NaacCommittee = lazy(() => import('./pages/NaacCommittee'));
+const MandatoryDisclosurePage = lazy(() => import('./pages/MandatoryDisclosurePage'));
 const AictePage = lazy(() => import('./pages/AictePage'));
 const AicteEoaPage = lazy(() => import('./pages/AicteEoaPage'));
 const SdgsPage = lazy(() => import('./pages/SdgsPage'));
@@ -257,7 +258,10 @@ function App() {
             <Route path="/naac-feedback" element={<NaacFeedback />} />
             <Route path="/naac-extended-profile" element={<NaacExtendedProfile />} />
             <Route path="/naac-committee" element={<NaacCommittee />} />
-            <Route path="/aicte" element={<AictePage />} />
+            <Route path="/aicte" element={<MandatoryDisclosurePage />} />
+            <Route path="/mandatory-disclosure" element={<MandatoryDisclosurePage />} />
+            <Route path="/page/mandatory-disclosure" element={<MandatoryDisclosurePage />} />
+            <Route path="/aicte-mandatory-disclosure" element={<MandatoryDisclosurePage />} />
             <Route path="/aicte-eoa" element={<AicteEoaPage />} />
             <Route path="/sdgs" element={<SdgsPage />} />
             <Route path="/obe" element={<ObePage />} />

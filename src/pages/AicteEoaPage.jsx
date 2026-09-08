@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+    import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import GlobalHero from '../components/GlobalHero';
@@ -85,12 +85,33 @@ const AicteEoaPage = () => {
                         <h2 style={{ fontSize: '2.2rem', fontWeight: '900', marginTop: '0.8rem', color: primaryTextColor }}>
                             AICTE Extension of Approval (EOA)
                         </h2>
-                        <p style={{ color: secondaryTextColor, maxWidth: '650px', margin: '0.6rem auto 0', fontSize: '1rem' }}>
+                        <p style={{ color: secondaryTextColor, maxWidth: '650px', margin: '0.6rem auto 1.5rem', fontSize: '1rem' }}>
                             Mandatory annual Extension of Approval letters issued by the All India Council for Technical Education (AICTE), New Delhi.
                         </p>
+                        <Link to="/mandatory-disclosure" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                            <motion.span
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '0.6rem 1.4rem',
+                                    borderRadius: '12px',
+                                    background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)',
+                                    color: linkTextColor,
+                                    fontWeight: '800',
+                                    fontSize: '0.88rem',
+                                    border: '1px solid var(--glass-border)'
+                                }}
+                            >
+                                <span>View Full AICTE Mandatory Disclosure</span>
+                                <FaFileContract />
+                            </motion.span>
+                        </Link>
                     </div>
 
-                    <div style={{ overflowX: 'auto', borderRadius: '18px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(226, 232, 240, 0.9)' }}>
+                    <div style={{ borderRadius: '18px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(226, 232, 240, 0.9)' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ background: 'linear-gradient(135deg, #1B2A6B 0%, #2563EB 100%)', color: '#ffffff' }}>

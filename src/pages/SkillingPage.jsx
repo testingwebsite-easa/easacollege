@@ -134,7 +134,7 @@ const skillingData = {
     contact: {
         name: "Head - Skilling & Development",
         designation: "Center for Skilling & Professional Development",
-        email: "skilling@easacollege.com",
+        email: "skilling@ecetonline.com",
         phone: "+91 93426 28013",
         address: "Skill Center, Tech Block, EASA College of Engineering & Technology, Coimbatore."
     }

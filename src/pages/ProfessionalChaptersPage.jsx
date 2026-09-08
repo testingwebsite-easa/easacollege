@@ -640,7 +640,7 @@ const ProfessionalChaptersPage = () => {
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '1.05rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
                                                         <FaEnvelope style={{ color: 'var(--secondary)' }} />
-                                                        <a href="mailto:ieee@easacollege.edu.in" style={{ color: 'var(--secondary)', textDecoration: 'none', fontWeight: '700' }}>ieee@easacollege.edu.in</a>
+                                                        <a href="mailto:ieee@ecetonline.com" style={{ color: 'var(--secondary)', textDecoration: 'none', fontWeight: '700' }}>ieee@ecetonline.com</a>
                                                     </div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
                                                         <FaPhoneAlt style={{ color: 'var(--secondary)' }} />

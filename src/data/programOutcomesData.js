@@ -2,18 +2,17 @@
 // Program Specific Outcomes (PSO), and Work Knowledge (WK) for all departments
 
 export const COMMON_UG_PO = [
-    { id: 'PO1', code: 'PO1', title: 'Engineering Knowledge', description: 'Apply knowledge of mathematics, natural science, computing, engineering fundamentals and an engineering specialization as specified in WK1 to WK4 respectively to develop solution of complex engineering problems.' },
-    { id: 'PO2', code: 'PO2', title: 'Problem Analysis', description: 'Identify, formulate, review research literature, and analyze complex engineering problems reaching substantiated conclusions using first principles of mathematics, natural sciences, and engineering sciences.' },
-    { id: 'PO3', code: 'PO3', title: 'Design/Development of Solutions', description: 'Design solutions for complex engineering problems and design system components or processes that meet the specified needs with appropriate consideration for the public health and safety, and the cultural, societal, and environmental considerations.' },
-    { id: 'PO4', code: 'PO4', title: 'Conduct Investigations', description: 'Conduct investigations of complex problems using research-based knowledge and research methods including design of experiments, analysis and interpretation of data, and synthesis of the information to provide valid conclusions.' },
-    { id: 'PO5', code: 'PO5', title: 'Modern Tool Usage', description: 'Create, select, and apply appropriate techniques, resources, and modern engineering and IT tools including prediction and modeling to complex engineering activities with an understanding of the limitations.' },
-    { id: 'PO6', code: 'PO6', title: 'The Engineer and Society', description: 'Apply reasoning informed by the contextual knowledge to assess societal, health, safety, legal and cultural issues and the consequent responsibilities relevant to the professional engineering practice.' },
-    { id: 'PO7', code: 'PO7', title: 'Environment and Sustainability', description: 'Understand the impact of the professional engineering solutions in societal and environmental contexts, and demonstrate the knowledge of, and need for sustainable development.' },
-    { id: 'PO8', code: 'PO8', title: 'Ethics', description: 'Apply ethical principles and commit to professional ethics and responsibilities and norms of the engineering practice.' },
-    { id: 'PO9', code: 'PO9', title: 'Individual and Team Work', description: 'Function effectively as an individual, and as a member or leader in diverse teams, and in multidisciplinary settings.' },
-    { id: 'PO10', code: 'PO10', title: 'Communication', description: 'Communicate effectively on complex engineering activities with the engineering community and with society at large, such as, being able to comprehend and write effective reports and design documentation, make effective presentations, and give and receive clear instructions.' },
-    { id: 'PO11', code: 'PO11', title: 'Project Management', description: 'Demonstrate knowledge and understanding of the engineering and management principles and apply these to one\'s own work, as a member and leader in a team, to manage projects and in multidisciplinary environments.' },
-    { id: 'PO12', code: 'PO12', title: 'Lifelong Learning', description: 'Recognize the need for, and have the preparation and ability to engage in independent and life-long learning in the broadest context of technological change.' }
+    { id: 'PO1', code: 'PO1', title: 'Engineering Knowledge', description: 'Apply knowledge of mathematics, natural science, computing, engineering fundamentals and an engineering specialization as specified in WK1 to WK4 respectively to develop to the solution of complex engineering problems.' },
+    { id: 'PO2', code: 'PO2', title: 'Problem Analysis', description: 'Identify, formulate, review research literature and analyze complex engineering problems reaching substantiated conclusions with consideration for sustainable development. (WK1 to WK4)' },
+    { id: 'PO3', code: 'PO3', title: 'Design/Development of Solutions', description: 'Design creative solutions for complex engineering problems and design/develop systems/components/processes to meet identified needs with consideration for the public health and safety, whole-life cost, net zero carbon, culture, society and environment as required. (WK5)' },
+    { id: 'PO4', code: 'PO4', title: 'Conduct Investigations of Complex Problems', description: 'Conduct investigations of complex engineering problems using research-based knowledge including design of experiments, modelling, analysis & interpretation of data to provide valid conclusions.(WK8).' },
+    { id: 'PO5', code: 'PO5', title: 'Engineering Tool Usage', description: 'Create, select and apply appropriate techniques, resources and modern engineering & IT tools, including prediction and modelling recognizing their limitations to solve complex engineering problems. (WK2 and WK6)' },
+    { id: 'PO6', code: 'PO6', title: 'The Engineer and The World', description: 'Analyze and evaluate societal and environmental aspects while solving complex engineering problems for its impact on sustainability with reference to economy, health, safety, legal framework, culture and environment.(WK1, WK5, and WK7).' },
+    { id: 'PO7', code: 'PO7', title: 'Ethics', description: 'Apply ethical principles and commit to professional ethics, human values, diversity and inclusion; adhere to national & international laws. (WK9)' },
+    { id: 'PO8', code: 'PO8', title: 'Individual and Collaborative Team work', description: 'Function effectively as an individual, and as a member or leader in diverse/multi-disciplinary teams.' },
+    { id: 'PO9', code: 'PO9', title: 'Communication', description: 'Communicate effectively and inclusively within the engineering community and society at large, such as being able to comprehend and write effective reports and design documentation, make effective presentations considering cultural, language, and learning differences.' },
+    { id: 'PO10', code: 'PO10', title: 'Project Management and Finance', description: 'Apply knowledge and understanding of engineering management principles and economic decision-making and apply these to one’s own work, as a member and leader in a team, and to manage projects and in multidisciplinary environments.' },
+    { id: 'PO11', code: 'PO11', title: 'Life-Long Learning', description: 'Recognize the need for, and have the preparation and ability for i) independent and life-long learning ii) adaptability to new and emerging technologies and iii) critical thinking in the broadest context of technological change. (WK8)' }
 ];
 
 export const COMMON_UG_PEO = [
@@ -24,37 +23,72 @@ export const COMMON_UG_PEO = [
 ];
 
 export const COMMON_UG_WK = [
-    { id: 'WK1', code: 'WK1', title: 'Mathematics', description: 'Knowledge of applied mathematics including differential equations, linear algebra, probability, and statistics relevant to the discipline.' },
-    { id: 'WK2', code: 'WK2', title: 'Science', description: 'Knowledge of science including physics, chemistry, and other natural sciences relevant to the discipline.' },
-    { id: 'WK3', code: 'WK3', title: 'Engineering Fundamentals', description: 'Knowledge of engineering fundamentals covering engineering graphics, computer programming, data structures, and algorithms.' },
-    { id: 'WK4', code: 'WK4', title: 'Domain-Specific Knowledge', description: 'Knowledge specific to the engineering discipline covering theoretical concepts and practical applications in the domain.' }
+    { id: 'WK1', code: 'WK1', title: 'Natural & Social Sciences', description: 'A systematic, theory-based understanding of the natural sciences applicable to the discipline and awareness of relevant social sciences.' },
+    { id: 'WK2', code: 'WK2', title: 'Mathematics & Computing Analysis', description: 'Conceptually-based mathematics, numerical analysis, data analysis, statistics and formal aspects of computer and information science to support detailed analysis and modelling applicable to the discipline.' },
+    { id: 'WK3', code: 'WK3', title: 'Engineering Fundamentals', description: 'A systematic, theory-based formulation of engineering fundamentals required in the engineering discipline.' },
+    { id: 'WK4', code: 'WK4', title: 'Specialist Engineering Knowledge', description: 'Engineering specialist knowledge that provides theoretical frameworks and bodies of knowledge for the accepted practice areas in the engineering discipline; much is at the forefront of the discipline.' },
+    { id: 'WK5', code: 'WK5', title: 'Sustainable Engineering & Operations', description: 'Knowledge, including efficient resource use, environmental impacts, whole-life cost, re-use of resources, net zero carbon, and similar concepts, that supports engineering design and operations in a practice area.' },
+    { id: 'WK6', code: 'WK6', title: 'Engineering Practice (Technology)', description: 'Knowledge of engineering practice (technology) in the practice areas in the engineering discipline.' },
+    { id: 'WK7', code: 'WK7', title: 'Societal Role, Safety & Sustainability', description: 'Knowledge of the role of engineering in society and identified issues in engineering safety and sustainable development.' },
+    { id: 'WK8', code: 'WK8', title: 'Research Literature & Critical Thinking', description: 'Engagement with selected knowledge in the current research literature of the discipline, awareness of the power of critical thinking and creative approaches to evaluate emerging issues.' },
+    { id: 'WK9', code: 'WK9', title: 'Ethics & Inclusive Conduct', description: 'Ethics, inclusive behavior and conduct. Knowledge of professional ethics, responsibilities, and norms of engineering practice. Awareness of the need for diversity by reason of ethnicity, gender, age, physical ability etc. with mutual understanding and respect, and of inclusive attitudes.' }
 ];
 
 // Department-Specific Program Specific Outcomes (PSO)
 export const departmentPSO = {
     'computer-science-and-engineering': [
-        { id: 'PSO1', code: 'PSO1', title: 'Software Development', description: 'Ability to develop and maintain software applications using modern tools and frameworks.' },
-        { id: 'PSO2', code: 'PSO2', title: 'System Design', description: 'Ability to design and implement scalable computing systems with focus on efficiency and security.' },
-        { id: 'PSO3', code: 'PSO3', title: 'Problem Solving', description: 'Ability to analyze complex computational problems and develop optimal solutions.' }
+        { id: 'PSO1', code: 'PSO1', title: 'Design & Automation', description: 'Exhibit design and programming skills to build and automate business solutions using cutting edge technologies.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Theoretical Foundation & Research', description: 'Strong theoretical foundation leading to excellence and excitement towards research, to provide elegant solutions to complex problems.' },
+        { id: 'PSO3', code: 'PSO3', title: 'Multidisciplinary System Development', description: 'Ability to work effectively with various engineering fields as a team to design, build and develop system applications.' }
     ],
     'artificial-intelligence-and-data-science': [
-        { id: 'PSO1', code: 'PSO1', title: 'AI/ML Application', description: 'Ability to develop and deploy machine learning models for real-world applications.' },
-        { id: 'PSO2', code: 'PSO2', title: 'Data Analysis', description: 'Ability to extract meaningful insights from large datasets using statistical and analytical techniques.' },
-        { id: 'PSO3', code: 'PSO3', title: 'Intelligent Systems', description: 'Ability to design intelligent systems that learn and adapt to changing environments.' }
+        { id: 'PSO1', code: 'PSO1', title: 'Domain-Specific AI Decision Making', description: 'Exhibit proficiency of Artificial Intelligence and Data Science to evolve AI based efficient domain specific processes for effective decision making in several domains such as business and governance domains.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Sustainable & Ethical AI Solutions', description: 'Exhibit proficiency of Artificial Intelligence and Data Science in providing sustainable solutions by adapting to societal, environmental and ethical concerns to real world problems.' },
+        { id: 'PSO3', code: 'PSO3', title: 'Data Analytics & Knowledge Engineering', description: 'Develop data analytics and data visualization skills, skills pertaining to knowledge acquisition, knowledge representation and knowledge engineering, and hence be capable of coordinating complex projects.' }
+    ],
+    'artificial-intelligence-and-machine-learning': [
+        { id: 'PSO1', code: 'PSO1', title: 'AI & ML Problem Solving', description: 'Ability to apply AI & ML techniques to solve real-world problems.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Intelligent Agents', description: 'Ability to design and implement intelligent agents.' }
+    ],
+    'computer-science-and-engineering-cyber-security': [
+        { id: 'PSO1', code: 'PSO1', title: 'Design & Automation', description: 'Exhibit design and programming skills to build and automate business solutions using cutting edge technologies.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Theoretical Foundation & Research', description: 'Strong theoretical foundation leading to excellence and excitement towards research, to provide elegant solutions to complex problems.' }
     ],
     'information-technology': [
-        { id: 'PSO1', code: 'PSO1', title: 'IT Infrastructure', description: 'Ability to design, deploy, and manage IT infrastructure and networks.' },
-        { id: 'PSO2', code: 'PSO2', title: 'Database Management', description: 'Ability to design and optimize database systems for efficient data management.' },
-        { id: 'PSO3', code: 'PSO3', title: 'IT Security', description: 'Ability to implement security measures and protocols to protect IT systems.' }
+        { id: 'PSO1', code: 'PSO1', title: 'Programming & Problem Solving', description: 'Have proficiency in programming skills to design, develop and apply appropriate techniques, to solve complex engineering problems.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Build & Manage IT Solutions', description: 'Have knowledge to build, automate and manage IT solutions using cutting-edge technologies.' },
+        { id: 'PSO3', code: 'PSO3', title: 'Research & Industry Innovation', description: 'Have the ability to research, create, and build new technology solutions that solve real-world problems and move the industry forward.' }
     ],
     'electronics-and-communication-engineering': [
-        { id: 'PSO1', code: 'PSO1', title: 'Circuit Design', description: 'Ability to design and analyze electronic circuits for various applications.' },
-        { id: 'PSO2', code: 'PSO2', title: 'Communication Systems', description: 'Ability to design and implement communication systems with focus on signal processing.' },
-        { id: 'PSO3', code: 'PSO3', title: 'Signal Processing', description: 'Ability to process and analyze signals for practical applications in communication and control.' }
+        { id: 'PSO1', code: 'PSO1', title: 'Electronic Systems Design', description: 'Apply electronic, mathematical, and engineering principles to design, develop, and analyse sophisticated electronic systems.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Communication Systems Optimization', description: 'Design, simulate, and optimize communication systems.' },
+        { id: 'PSO3', code: 'PSO3', title: 'Groundbreaking Solutions', description: 'Leverage latest advancements in electronics and communication to design and develop ground breaking solutions.' }
+    ],
+    'electrical-and-electronics-engineering': [
+        { id: 'PSO1', code: 'PSO1', title: 'Circuit Design & Problem Solving', description: 'Understand electrical and electronics devices / instruments and to design circuits and provide innovative methodologies to solve real time / industrial problems.' }
     ],
     'mechanical-engineering': [
-        { id: 'PSO1', code: 'PSO1', title: 'Mechanical Design', description: 'Ability to design mechanical systems and components for real-world applications.' },
-        { id: 'PSO2', code: 'PSO2', title: 'Manufacturing', description: 'Ability to understand and implement modern manufacturing processes and techniques.' },
-        { id: 'PSO3', code: 'PSO3', title: 'Thermal Systems', description: 'Ability to design and analyze thermal and power systems.' }
+        { id: 'PSO1', code: 'PSO1', title: 'Design & Manufacturing of Engineering Systems', description: 'Apply the knowledge gained in Mechanical Engineering for design and development and manufacture of engineering systems.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Research & Environmental Investigation', description: 'Apply the knowledge acquired to investigate research-oriented problems in mechanical engineering with due consideration for environmental and social impacts.' },
+        { id: 'PSO3', code: 'PSO3', title: 'Engineering Analysis & Multidisciplinary Management', description: 'Use the engineering analysis and data management tools for effective management of multidisciplinaryprojects.' }
+    ],
+    'agriculture-engineering': [
+        { id: 'PSO1', code: 'PSO1', title: 'Design & Problem Solving in Agriculture', description: 'To make expertise in design and engineering problem solving approach in agriculture with proper knowledge and skill.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Sustainable Agricultural Solutions', description: 'To enhance the ability of the students to formulate solutions to real-world problems pertaining to sustained agricultural productivity using modern technologies.' },
+        { id: 'PSO3', code: 'PSO3', title: 'Industry-Institution Entrepreneurship', description: 'To inculcate entrepreneurial skills through strong Industry-Institution linkage.' }
+    ],
+    'biomedical-engineering': [
+        { id: 'PSO1', code: 'PSO1', title: 'Ergonomic Medical Device Design', description: 'Graduates will be able to design ergonomic medical devices that support clinicians, reduce workload, and enhance patient care using biomedical engineering principles.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Cost-Effective Indigenous Healthcare Solutions', description: 'Graduates will be equipped to leverage software tools and emerging technologies to develop cost-effective, indigenous healthcare solutions addressing real-world clinical and societal needs.' }
+    ],
+    'manufacturing-engineering': [
+        { id: 'PSO1', code: 'PSO1', title: 'Manufacture of Engineering Systems', description: 'Apply the knowledge gained in Manufacturing Engineering for manufacture of engineering systems.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Research & Environmental Investigation', description: 'Apply the knowledge acquired to investigate research-oriented problems in Manufacturing engineering with due consideration for environmental and social impacts.' },
+        { id: 'PSO3', code: 'PSO3', title: 'Engineering Analysis & Multidisciplinary Management', description: 'Use the engineering analysis and data management tools for effective management of multidisciplinary projects.' }
+    ],
+    'master-of-business-administration': [
+        { id: 'PSO1', code: 'PSO1', title: 'Management Domains & Complex Problem Solving', description: 'To apply the fundamental knowledge of management domains to optimally solve the complex business problems.' },
+        { id: 'PSO2', code: 'PSO2', title: 'Multidisciplinary Case Analysis & Training', description: 'To inculcate the ability in students to gain multi-disciplinary knowledge through simulated problems, case analysis, projects and industrial training.' },
+        { id: 'PSO3', code: 'PSO3', title: 'Ethical, Societal & Ecological Management', description: 'To develop competent management professionals with strong ethical values with an understanding of societal and ecological issues relevant to professional managerial practice through life-long learning.' }
     ]
 };

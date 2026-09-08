@@ -45,6 +45,7 @@ const DepartmentPage = () => {
         { id: 'overview', label: 'Overview', icon: <FaUniversity /> },
         { id: 'vision-mission', label: 'Vision & Mission', icon: <FaGlobe /> },
         { id: 'peo-po-pso', label: 'PEO, PO & PSO', icon: <FaGraduationCap /> },
+        ...(department?.curriculum ? [{ id: 'curriculum', label: 'Curriculum & Courses', icon: <FaLaptopCode /> }] : []),
         ...(department?.courseOutcomes ? [{ id: 'course-outcomes', label: 'Course Outcomes', icon: <FaBook /> }] : []),
         ...(department?.documents ? [{ id: 'documents', label: 'Downloads & Syllabi', icon: <FaDownload /> }] : []),
         { id: 'labs', label: 'Laboratories', icon: <FaFlask /> },
@@ -83,53 +84,13 @@ const DepartmentPage = () => {
         const staticDept = getDepartment(id);
         if (staticDept) {
             setDepartment(staticDept);
+            if (staticDept.slug !== id) {
+                navigate(`/department/${staticDept.slug}`, { replace: true });
+            }
+        } else {
+            setDepartment(null);
         }
-
-        // Fetch live department data from backend
-        fetch(`${API_BASE_URL}/api/departments/${id}`)
-            .then(res => {
-                if (!res.ok) throw new Error("Backend response not ok");
-                return res.json();
-            })
-            .then(data => {
-                const currentStatic = getDepartment(id);
-                if (!currentStatic) {
-                    setDepartment(null);
-                    return;
-                }
-
-                // If the static dept's slug differs from the URL id, redirect
-                if (currentStatic.slug !== id) {
-                    navigate(`/department/${currentStatic.slug}`, { replace: true });
-                    return;
-                }
-
-                // Merge the live data with the static data
-                if (data && (data.mission?.length > 0 || data.vision?.length > 0 || data.peo?.length > 0 || data.pso?.length > 0 || data.po?.length > 0)) {
-                    setDepartment({
-                        ...currentStatic,
-                        mission: data.mission?.length > 0 ? data.mission : currentStatic.mission || [],
-                        vision: data.vision?.length > 0 ? data.vision : currentStatic.vision || [],
-                        peo: data.peo?.length > 0 ? data.peo : currentStatic.peo || [],
-                        pso: data.pso?.length > 0 ? data.pso : currentStatic.pso || [],
-                        po: data.po?.length > 0 ? data.po : currentStatic.po || []
-                    });
-                } else {
-                    setDepartment(currentStatic);
-                }
-            })
-            .catch(err => {
-                console.warn("Could not fetch live department data, using static fallback:", err);
-                const currentStatic = getDepartment(id);
-                if (currentStatic && currentStatic.slug !== id) {
-                    navigate(`/department/${currentStatic.slug}`, { replace: true });
-                    return;
-                }
-                setDepartment(currentStatic || null);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        setLoading(false);
     }, [id, navigate]);
 
     const renderVisionMission = () => (
@@ -249,29 +210,35 @@ const DepartmentPage = () => {
                             </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                            {department.mission?.map((item, idx) => (
-                                <div key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                                    <span style={{
-                                        minWidth: '28px',
-                                        height: '28px',
-                                        borderRadius: '8px',
-                                        background: 'rgba(230, 182, 39, 0.15)',
-                                        color: 'var(--secondary)',
-                                        fontSize: '0.8rem',
-                                        fontWeight: '900',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                        marginTop: '3px'
-                                    }}>
-                                        {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
-                                    </span>
-                                    <p style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.65' }}>
-                                        {item}
-                                    </p>
-                                </div>
-                            ))}
+                            {department.mission?.map((item, idx) => {
+                                const match = typeof item === 'string' ? item.match(/^(M\d+)\s*:\s*(.*)$/i) : null;
+                                const tag = match ? match[1].toUpperCase() : (idx + 1 < 10 ? `0${idx + 1}` : `${idx + 1}`);
+                                const text = match ? match[2] : item;
+                                return (
+                                    <div key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                                        <span style={{
+                                            minWidth: '38px',
+                                            height: '28px',
+                                            padding: '0 6px',
+                                            borderRadius: '8px',
+                                            background: 'rgba(230, 182, 39, 0.15)',
+                                            color: 'var(--secondary)',
+                                            fontSize: '0.8rem',
+                                            fontWeight: '900',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
+                                            marginTop: '3px'
+                                        }}>
+                                            {tag}
+                                        </span>
+                                        <p style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.65' }}>
+                                            {text}
+                                        </p>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                     <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary)', fontSize: '0.85rem', fontWeight: '800' }}>
@@ -299,8 +266,9 @@ const DepartmentPage = () => {
                     {[
                         { id: 'all', label: 'All Outcomes' },
                         { id: 'po', label: `POs (${department.po?.length || 0})` },
-                        { id: 'peo', label: `PEOs (${department.peo?.length || 0})` },
-                        { id: 'pso', label: `PSOs (${department.pso?.length || 0})` }
+                        ...(department.wk?.length ? [{ id: 'wk', label: `Knowledge Profile - WK (${department.wk.length})` }] : []),
+                        { id: 'pso', label: `PSOs (${department.pso?.length || 0})` },
+                        ...(department.peo?.length ? [{ id: 'peo', label: `PEOs (${department.peo.length})` }] : [])
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -385,67 +353,71 @@ const DepartmentPage = () => {
                 </div>
             )}
 
-            {/* 2. PROGRAM EDUCATIONAL OBJECTIVES (PEOs) */}
-            {department.peo && (peoActiveTab === 'all' || peoActiveTab === 'peo') && (
+            {/* KNOWLEDGE AND ATTITUDE PROFILE (WK) */}
+            {department.wk && (peoActiveTab === 'all' || peoActiveTab === 'wk') && (
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.8rem' }}>
                         <span style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(230, 182, 39, 0.15)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                            <FaAward />
+                            <FaBook />
                         </span>
                         <div>
                             <h3 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>
-                                Program Educational Objectives (PEOs)
+                                Knowledge and Attitude Profile (WK)
                             </h3>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Long-term career achievements & professional impact 3-5 years after graduation</span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Foundational scientific, mathematical, engineering, and ethical competencies</span>
                         </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                        {department.peo.map((peo, idx) => (
-                            <Tilt3DCard
-                                key={idx}
-                                maxTilt={5}
-                                glareOpacity={0.1}
-                                style={{
-                                    padding: '2.2rem',
-                                    background: 'var(--bg-card)',
-                                    border: '1px solid var(--glass-border)',
-                                    borderRadius: '22px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-between',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.04)'
-                                }}
-                            >
-                                <div>
-                                    <div style={{
-                                        width: '42px',
-                                        height: '42px',
-                                        borderRadius: '12px',
-                                        background: 'rgba(230, 182, 39, 0.12)',
-                                        color: 'var(--secondary)',
-                                        fontWeight: '900',
-                                        fontSize: '1rem',
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.3rem' }}>
+                        {department.wk.map((wk, idx) => {
+                            const hasColon = typeof wk === 'string' && wk.includes(':');
+                            const rawTitle = hasColon ? wk.split(':')[0] : (typeof wk === 'string' ? `WK ${idx + 1}` : wk.title || wk.code || `WK ${idx + 1}`);
+                            const description = hasColon ? wk.split(':').slice(1).join(':').trim() : (typeof wk === 'string' ? wk.trim() : wk.description);
+                            const tag = rawTitle.split(' ')[0];
+                            const subtitle = rawTitle.split(' ').slice(1).join(' ') || 'Knowledge Competency';
+
+                            return (
+                                <Tilt3DCard
+                                    key={idx}
+                                    maxTilt={4}
+                                    glareOpacity={0.08}
+                                    style={{
+                                        padding: '1.8rem 2rem',
+                                        background: 'var(--bg-card)',
+                                        border: '1px solid var(--glass-border)',
+                                        borderRadius: '20px',
                                         display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        marginBottom: '1.2rem'
-                                    }}>
-                                        {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                                        flexDirection: 'column',
+                                        gap: '0.8rem',
+                                        boxShadow: '0 8px 25px rgba(0,0,0,0.03)'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <span style={{
+                                            padding: '0.35rem 0.8rem',
+                                            borderRadius: '8px',
+                                            background: 'rgba(230, 182, 39, 0.15)',
+                                            color: 'var(--secondary)',
+                                            fontWeight: '900',
+                                            fontSize: '0.85rem',
+                                            border: '1px solid rgba(230, 182, 39, 0.3)'
+                                        }}>
+                                            {tag}
+                                        </span>
+                                        <h4 style={{ fontSize: '1.05rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>
+                                            {subtitle}
+                                        </h4>
                                     </div>
-                                    <h5 style={{ fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--secondary)', marginBottom: '0.6rem' }}>
-                                        Objective {idx + 1}
-                                    </h5>
-                                    <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.65', margin: 0 }}>
-                                        {peo}
+                                    <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>
+                                        {description}
                                     </p>
-                                </div>
-                            </Tilt3DCard>
-                        ))}
+                                </Tilt3DCard>
+                            );
+                        })}
                     </div>
                 </div>
             )}
 
-            {/* 3. PROGRAM SPECIFIC OUTCOMES (PSOs) */}
+            {/* 2. PROGRAM SPECIFIC OUTCOMES (PSOs) */}
             {department.pso && (peoActiveTab === 'all' || peoActiveTab === 'pso') && (
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.8rem' }}>
@@ -460,42 +432,115 @@ const DepartmentPage = () => {
                         </div>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                        {department.pso.map((pso, idx) => (
-                            <Tilt3DCard
-                                key={idx}
-                                maxTilt={5}
-                                glareOpacity={0.1}
-                                style={{
-                                    padding: '2.2rem',
-                                    background: 'linear-gradient(145deg, var(--bg-card) 0%, rgba(45, 44, 122, 0.1) 100%)',
-                                    border: '1px solid var(--glass-border)',
-                                    borderRadius: '22px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-between',
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.04)'
-                                }}
-                            >
-                                <div>
-                                    <div style={{
-                                        padding: '4px 12px',
-                                        borderRadius: '20px',
-                                        background: 'rgba(230, 182, 39, 0.15)',
-                                        color: 'var(--secondary)',
-                                        fontWeight: '900',
-                                        fontSize: '0.8rem',
-                                        display: 'inline-block',
-                                        marginBottom: '1.2rem',
-                                        border: '1px solid rgba(230, 182, 39, 0.3)'
-                                    }}>
-                                        PSO {idx + 1}
+                        {department.pso.map((pso, idx) => {
+                            const strPso = typeof pso === 'string' ? pso : (pso.description ? `${pso.code || `PSO${idx+1}`}: ${pso.description}` : pso.title);
+                            const match = strPso.match(/^(PSO\d+)\s*:\s*(.*)$/i);
+                            const tag = match ? match[1].toUpperCase() : `PSO ${idx + 1}`;
+                            const text = match ? match[2] : strPso;
+                            return (
+                                <Tilt3DCard
+                                    key={idx}
+                                    maxTilt={5}
+                                    glareOpacity={0.1}
+                                    style={{
+                                        padding: '2.2rem',
+                                        background: 'linear-gradient(145deg, var(--bg-card) 0%, rgba(45, 44, 122, 0.1) 100%)',
+                                        border: '1px solid var(--glass-border)',
+                                        borderRadius: '22px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.04)'
+                                    }}
+                                >
+                                    <div>
+                                        <div style={{
+                                            padding: '4px 12px',
+                                            borderRadius: '20px',
+                                            background: 'rgba(230, 182, 39, 0.15)',
+                                            color: 'var(--secondary)',
+                                            fontWeight: '900',
+                                            fontSize: '0.8rem',
+                                            display: 'inline-block',
+                                            marginBottom: '1.2rem',
+                                            border: '1px solid rgba(230, 182, 39, 0.3)'
+                                        }}>
+                                            {tag}
+                                        </div>
+                                        <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.65', margin: 0 }}>
+                                            {text}
+                                        </p>
                                     </div>
-                                    <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.65', margin: 0 }}>
-                                        {pso}
-                                    </p>
-                                </div>
-                            </Tilt3DCard>
-                        ))}
+                                </Tilt3DCard>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* 3. PROGRAM EDUCATIONAL OBJECTIVES (PEOs) */}
+            {department.peo && (peoActiveTab === 'all' || peoActiveTab === 'peo') && (
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.8rem' }}>
+                        <span style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(230, 182, 39, 0.15)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                            <FaAward />
+                        </span>
+                        <div>
+                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>
+                                Program Educational Objectives (PEOs)
+                            </h3>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Long-term career achievements & professional impact 3-5 years after graduation</span>
+                        </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        {department.peo.map((peo, idx) => {
+                            const strPeo = typeof peo === 'string' ? peo : (peo.description ? `${peo.code || `PEO${idx + 1}`}: ${peo.description}` : peo.title);
+                            const match = strPeo.match(/^(PEO\d+)[:.]?\s*(.*)$/i);
+                            const tag = match ? match[1].toUpperCase() : (idx + 1 < 10 ? `0${idx + 1}` : `${idx + 1}`);
+                            const text = match ? match[2] : strPeo;
+
+                            return (
+                                <Tilt3DCard
+                                    key={idx}
+                                    maxTilt={5}
+                                    glareOpacity={0.1}
+                                    style={{
+                                        padding: '2.2rem',
+                                        background: 'var(--bg-card)',
+                                        border: '1px solid var(--glass-border)',
+                                        borderRadius: '22px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.04)'
+                                    }}
+                                >
+                                    <div>
+                                        <div style={{
+                                            display: 'inline-flex',
+                                            padding: '0.4rem 0.9rem',
+                                            borderRadius: '12px',
+                                            background: 'rgba(230, 182, 39, 0.12)',
+                                            color: 'var(--secondary)',
+                                            fontWeight: '900',
+                                            fontSize: '0.9rem',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginBottom: '1.2rem',
+                                            border: '1px solid rgba(230, 182, 39, 0.3)'
+                                        }}>
+                                            {tag.startsWith('PEO') ? tag : `PEO ${tag}`}
+                                        </div>
+                                        <h5 style={{ fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--secondary)', marginBottom: '0.6rem' }}>
+                                            Objective {idx + 1}
+                                        </h5>
+                                        <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.65', margin: 0 }}>
+                                            {text}
+                                        </p>
+                                    </div>
+                                </Tilt3DCard>
+                            );
+                        })}
                     </div>
                 </div>
             )}
@@ -867,6 +912,100 @@ const DepartmentPage = () => {
                     </div>
                 ))
             )}
+        </div>
+    );
+
+    const renderCurriculum = () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            <div>
+                <h2 className="section-title" style={{ fontSize: '2.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>
+                    Curriculum & Course Structure
+                </h2>
+                <span style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '4px', display: 'block' }}>
+                    Active Semester Course Offerings, L-T-P Distribution & Credit Matrix
+                </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                {department.curriculum?.map((semBlock, bIdx) => (
+                    <div
+                        key={bIdx}
+                        style={{
+                            background: 'var(--bg-card)',
+                            borderRadius: '24px',
+                            padding: '2.5rem',
+                            border: '1px solid var(--glass-border)',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.03)'
+                        }}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.8rem', paddingBottom: '1.2rem', borderBottom: '1px solid var(--glass-border)' }}>
+                            <div>
+                                <span style={{
+                                    display: 'inline-block',
+                                    padding: '0.25rem 0.8rem',
+                                    borderRadius: '6px',
+                                    background: 'rgba(230, 182, 39, 0.15)',
+                                    color: 'var(--secondary)',
+                                    fontWeight: '900',
+                                    fontSize: '0.8rem',
+                                    marginBottom: '0.4rem',
+                                    border: '1px solid rgba(230, 182, 39, 0.3)'
+                                }}>
+                                    Regulation: {semBlock.regulation}
+                                </span>
+                                <h3 style={{ fontSize: '1.6rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>
+                                    {semBlock.year} • {semBlock.semester}
+                                </h3>
+                            </div>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '700' }}>
+                                Total Courses: {semBlock.courses?.length || 0}
+                            </span>
+                        </div>
+
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '650px' }}>
+                                <thead>
+                                    <tr style={{ background: 'var(--bg-section)', borderBottom: '2px solid var(--glass-border)' }}>
+                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem' }}>#</th>
+                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem' }}>Course Code</th>
+                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem' }}>Course Name</th>
+                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>Strength</th>
+                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>L</th>
+                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>T</th>
+                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>P</th>
+                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>Credits</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {semBlock.courses?.map((c, cIdx) => (
+                                        <tr key={cIdx} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.9rem' }}>{c.sl || cIdx + 1}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.95rem' }}>{c.code}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>{c.name}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontWeight: '700', fontSize: '0.9rem' }}>{c.strength}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>{c.l}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>{c.t}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>{c.p}</td>
+                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                <span style={{
+                                                    padding: '0.2rem 0.6rem',
+                                                    borderRadius: '6px',
+                                                    background: c.credits > 0 ? 'rgba(230, 182, 39, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+                                                    color: c.credits > 0 ? 'var(--secondary)' : 'var(--text-muted)',
+                                                    fontWeight: '900',
+                                                    fontSize: '0.85rem'
+                                                }}>
+                                                    {c.credits}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 

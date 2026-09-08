@@ -430,7 +430,7 @@ const SdgsPage = () => {
 
     const handlePartnerSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!partnerForm.orgName?.trim()) {
             showToast('Please enter your Organization / Institution Name', 'warning', 'Missing: Organization');
             return;
@@ -931,7 +931,7 @@ const SdgsPage = () => {
                                     <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: isDark ? 'rgba(56, 189, 248, 0.15)' : '#EFF6FF', color: accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <FaEnvelope />
                                     </div>
-                                    <span><strong>SDG Cell Email:</strong> sdg@easacollege.com</span>
+                                    <span><strong>SDG Cell Email:</strong> sdg@ecetonline.com</span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                                     <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ECFDF5', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

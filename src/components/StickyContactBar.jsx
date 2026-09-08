@@ -58,7 +58,7 @@ const StickyContactBar = () => {
                     </a>
 
                     {/* Email */}
-                    <a href="mailto:info@easacollege.ac.in" className="sidebar-link" aria-label="Send Email">
+                    <a href="mailto:info@ecetonline.ac.in" className="sidebar-link" aria-label="Send Email">
                         <span className="sidebar-label">Send Email</span>
                         <div className="sidebar-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
                             <FaEnvelope />
