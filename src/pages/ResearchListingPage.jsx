@@ -35,6 +35,13 @@ const ResearchListingPage = () => {
             .join(' ');
     };
 
+    const formatVal = (val) => {
+        if (!val) return null;
+        const s = String(val).trim();
+        if (s === '' || s.toLowerCase() === 'nil' || s.toLowerCase() === 'nill' || s.toLowerCase() === 'null' || s === '-') return null;
+        return val;
+    };
+
     useEffect(() => {
         setLoading(true);
         const endpoint = activeCategory === 'research'
@@ -44,7 +51,10 @@ const ResearchListingPage = () => {
         fetch(endpoint)
             .then(res => res.json())
             .then(data => {
-                setItems(data);
+                const validItems = Array.isArray(data)
+                    ? data.filter(item => item && item.title && !['nil', 'nill', 'null', '-', ''].includes(String(item.title).trim().toLowerCase()))
+                    : [];
+                setItems(validItems);
                 setLoading(false);
             })
             .catch(err => {
@@ -126,40 +136,42 @@ const ResearchListingPage = () => {
                                 )}
 
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                                    {item.type && (
+                                    {formatVal(item.type) && (
                                         <span style={{ padding: '0.25rem 0.65rem', background: 'var(--primary-glow, rgba(27,42,107,0.1))', color: 'var(--primary, #1B2A6B)', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '700' }}>
-                                            {item.type}
+                                            {formatVal(item.type)}
                                         </span>
                                     )}
-                                    {item.status && (
+                                    {formatVal(item.status) && (
                                         <span style={{ padding: '0.25rem 0.65rem', background: item.status === 'Completed' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: item.status === 'Completed' ? '#059669' : '#d97706', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '700' }}>
-                                            {item.status}
+                                            {formatVal(item.status)}
                                         </span>
                                     )}
-                                    {item.year && (
+                                    {formatVal(item.year) && (
                                         <span style={{ padding: '0.25rem 0.65rem', background: 'var(--glass-highlight, #f3f4f6)', color: 'var(--text-main, #333)', borderRadius: '50px', fontSize: '0.75rem', fontWeight: '600' }}>
-                                            {item.year}
+                                            {formatVal(item.year)}
                                         </span>
                                     )}
                                 </div>
 
                                 <h2 style={{ fontSize: '1.35rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-main)' }}>{item.title}</h2>
 
-                                {item.author && (
+                                {formatVal(item.author) && (
                                     <p style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--primary)', marginBottom: '0.4rem' }}>
-                                        👤 {item.author}
+                                        👤 {formatVal(item.author)}
                                     </p>
                                 )}
 
-                                {item.department && (
+                                {formatVal(item.department) && (
                                     <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                                        🏛️ {item.department}
+                                        🏛️ {formatVal(item.department)}
                                     </p>
                                 )}
 
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '1.25rem', flex: 1 }}>
-                                    {item.description}
-                                </p>
+                                {formatVal(item.description) && (
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '1.25rem', flex: 1 }}>
+                                        {formatVal(item.description)}
+                                    </p>
+                                )}
 
                                 {item.link && (
                                     <a

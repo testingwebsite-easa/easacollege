@@ -70,7 +70,7 @@ export const departmentPSO = {
     'mechanical-engineering': [
         { id: 'PSO1', code: 'PSO1', title: 'Design & Manufacturing of Engineering Systems', description: 'Apply the knowledge gained in Mechanical Engineering for design and development and manufacture of engineering systems.' },
         { id: 'PSO2', code: 'PSO2', title: 'Research & Environmental Investigation', description: 'Apply the knowledge acquired to investigate research-oriented problems in mechanical engineering with due consideration for environmental and social impacts.' },
-        { id: 'PSO3', code: 'PSO3', title: 'Engineering Analysis & Multidisciplinary Management', description: 'Use the engineering analysis and data management tools for effective management of multidisciplinaryprojects.' }
+        { id: 'PSO3', code: 'PSO3', title: 'Engineering Analysis & Multidisciplinary Management', description: 'Use the engineering analysis and data management tools for effective management of multidisciplinary projects.' }
     ],
     'agriculture-engineering': [
         { id: 'PSO1', code: 'PSO1', title: 'Design & Problem Solving in Agriculture', description: 'To make expertise in design and engineering problem solving approach in agriculture with proper knowledge and skill.' },

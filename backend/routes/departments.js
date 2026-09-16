@@ -84,9 +84,11 @@ const getDeptSlug = (userDeptName) => {
     if (lower === 'information-technology' || lower === 'information technology') return 'information-technology';
     if (lower === 'agriculture-engineering' || lower === 'agriculture engineering') return 'agriculture-engineering';
     if (lower === 'construction-engineering-and-management' || lower === 'construction engineering and management') return 'construction-engineering-and-management';
+    if (lower === 'communication-systems' || lower === 'communication systems') return 'communication-systems';
     if (lower === 'manufacturing-engineering' || lower === 'manufacturing engineering') return 'manufacturing-engineering';
     if (lower === 'power-electronics-and-drives' || lower === 'power electronics and drives') return 'power-electronics-and-drives';
     if (lower === 'structural-engineering' || lower === 'structural engineering') return 'structural-engineering';
+    if (lower === 'science-and-humanities' || lower === 'science and humanities' || lower === 'sciences and humanities' || lower === 'school of science and humanities' || lower === 's&h' || lower === 'sh') return 'science-and-humanities';
 
     // Abbreviations
     if (lower === 'cse') return 'computer-science-and-engineering';
@@ -97,11 +99,22 @@ const getDeptSlug = (userDeptName) => {
     if (lower === 'mech') return 'mechanical-engineering';
     if (lower === 'agri') return 'agriculture-engineering';
     if (lower === 'mba') return 'master-of-business-administration';
+    if (lower === 'sh' || lower === 's&h' || lower === 's and h') return 'science-and-humanities';
+    if (lower === 'ped') return 'power-electronics-and-drives';
+    if (lower === 'cem') return 'construction-engineering-and-management';
+    if (lower === 'mfg') return 'manufacturing-engineering';
 
     // Substring contains
+    if (lower.includes('science') && lower.includes('humanities')) return 'science-and-humanities';
+    if (lower.includes('humanities') || lower.includes('s&h') || lower === 'sh') return 'science-and-humanities';
     if (lower.includes('data science') || lower.includes('aids')) return 'artificial-intelligence-and-data-science';
     if (lower.includes('machine learning') || lower.includes('ai-ml')) return 'artificial-intelligence-and-machine-learning';
     if (lower.includes('cyber')) return 'computer-science-and-engineering-cyber-security';
+    if (lower.includes('construction')) return 'construction-engineering-and-management';
+    if (lower.includes('communication sys')) return 'communication-systems';
+    if (lower.includes('power electronics') || lower.includes('drives')) return 'power-electronics-and-drives';
+    if (lower.includes('manufacturing')) return 'manufacturing-engineering';
+    if (lower.includes('structural')) return 'structural-engineering';
     if (lower.includes('computer') || lower.includes('cse')) return 'computer-science-and-engineering';
     if (lower.includes('electrical') || lower.includes('eee')) return 'electrical-and-electronics-engineering';
     if (lower.includes('electronics') || lower.includes('ece')) return 'electronics-and-communication-engineering';
@@ -109,8 +122,9 @@ const getDeptSlug = (userDeptName) => {
     if (lower.includes('biomedical') || lower.includes('bme')) return 'biomedical-engineering';
     if (lower.includes('mechanical') || lower.includes('mech')) return 'mechanical-engineering';
     if (lower.includes('agriculture') || lower.includes('agri')) return 'agriculture-engineering';
+    if (lower.includes('management') || lower.includes('mba') || lower.includes('business')) return 'master-of-business-administration';
 
-    return '';
+    return lower;
 };
 
 // PUT / Update department data (Secured)
@@ -127,7 +141,9 @@ router.put('/:slug', verifyToken, async (req, res) => {
                 return res.status(401).json({ error: 'User not found' });
             }
             const allowedSlug = getDeptSlug(dbUser.department);
-            if (!allowedSlug || allowedSlug !== req.params.slug) {
+            const targetSlug = getDeptSlug(req
+                .params.slug);
+            if (!allowedSlug || (allowedSlug !== targetSlug && allowedSlug !== req.params.slug)) {
                 return res.status(403).json({ error: 'You are only authorized to manage your own department: ' + dbUser.department });
             }
         } else if (req.user.role !== 'admin') {

@@ -131,19 +131,31 @@ const FacultyResearchShowcase = ({ departmentFilter = null }) => {
         return matchesDept && matchesSearch;
     });
 
+    // Helper to format/sanitize Nil / empty values
+    const formatVal = (val, isNumber = false) => {
+        if (val === null || val === undefined) return isNumber ? 0 : '-';
+        const s = String(val).trim();
+        if (s === '' || s.toLowerCase() === 'nil' || s.toLowerCase() === 'nill' || s.toLowerCase() === 'null' || s === '-') {
+            return isNumber ? 0 : '-';
+        }
+        return val;
+    };
+
     // Calculate Summary Stats
     const totalFaculty = facultyList.length;
     const totalPhdScholars = phdList.length;
     const totalPubs = publicationsList.length + facultyList.reduce((acc, f) => acc + (parseInt(f.publicationsCount) || 0), 0);
     const totalPatentsCount = patentsList.length + facultyList.reduce((acc, f) => acc + (parseInt(f.patentsCount) || 0), 0);
 
-    const departments = ['ALL', ...Array.from(new Set([
-        'S&H', 'MBA', 'AGRI', 'CIVIL', 'EEE', 'CSE', 'ECE', 'MECH', 'BME',
-        ...facultyList.map(d => (d.department || '').toUpperCase()),
-        ...publicationsList.map(d => (d.department || '').toUpperCase()),
-        ...phdList.map(d => (d.department || '').toUpperCase()),
-        ...patentsList.map(d => (d.department || '').toUpperCase())
-    ]))];
+    const currentList = activeTab === 'publications'
+        ? publicationsList
+        : activeTab === 'patents'
+        ? patentsList
+        : activeTab === 'phd'
+        ? phdList
+        : facultyList;
+
+    const departments = ['ALL', ...Array.from(new Set(currentList.map(d => (d.department || '').toUpperCase()))).filter(Boolean)];
 
     return (
         <section style={{ padding: '2rem 0', width: '100%' }}>
@@ -458,8 +470,14 @@ const FacultyResearchShowcase = ({ departmentFilter = null }) => {
                         <tbody>
                             {filteredPublications.length === 0 ? (
                                 <tr>
-                                    <td colSpan="11" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                                        No publication records found matching your query.
+                                    <td colSpan="11" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
+                                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.12)', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                                                <FaBookOpen />
+                                            </div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>No Publication Records Found</div>
+                                            <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', maxWidth: '400px' }}>No research publications match the selected department filter or search criteria.</div>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
@@ -515,8 +533,14 @@ const FacultyResearchShowcase = ({ departmentFilter = null }) => {
                         <tbody>
                             {filteredPatents.length === 0 ? (
                                 <tr>
-                                    <td colSpan="9" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                                        No patent records found matching your query.
+                                    <td colSpan="9" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
+                                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.12)', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                                                <FaLightbulb />
+                                            </div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>No Patent Records Found</div>
+                                            <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', maxWidth: '400px' }}>No patent or IPR records found matching the active department filter or search query.</div>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
@@ -564,8 +588,14 @@ const FacultyResearchShowcase = ({ departmentFilter = null }) => {
                         <tbody>
                             {filteredPhd.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                                        No Ph.D. research program records found.
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
+                                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(27, 42, 107, 0.15)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                                                <FaUserGraduate />
+                                            </div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>No Ph.D. Research Records Found</div>
+                                            <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', maxWidth: '400px' }}>No Ph.D. scholar entries match your current search or department filter.</div>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
@@ -619,8 +649,14 @@ const FacultyResearchShowcase = ({ departmentFilter = null }) => {
                         <tbody>
                             {filteredFaculty.length === 0 ? (
                                 <tr>
-                                    <td colSpan="15" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                                        No faculty research records found.
+                                    <td colSpan="15" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.8rem' }}>
+                                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(124, 58, 237, 0.12)', color: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                                                <FaUsers />
+                                            </div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>No Faculty Research Records Found</div>
+                                            <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', maxWidth: '400px' }}>No faculty profiles match the selected department filter or search criteria.</div>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (

@@ -216,6 +216,8 @@ const AdminDashboard = () => {
     const [deptFaculty, setDeptFaculty] = useState([]);
     const [deptGallery, setDeptGallery] = useState({ events: [], images: [] });
     const [deptEvents, setDeptEvents] = useState([]);
+    const [deptLabs, setDeptLabs] = useState([]);
+    const [deptLabForm, setDeptLabForm] = useState({ name: '', image: '', description: '', equipment: '', order: 0, department: '' });
     const [resources, setResources] = useState([]); // Resource List
     const [years, setYears] = useState([]); // Years
 
@@ -472,6 +474,42 @@ const AdminDashboard = () => {
                 delete payload.password;
             }
 
+            if (endpoint === '/api/gallery-events') {
+                let photosArr = [];
+                if (typeof payload.photos === 'string') {
+                    try {
+                        photosArr = JSON.parse(payload.photos);
+                    } catch (e) {
+                        photosArr = [];
+                    }
+                } else if (Array.isArray(payload.photos)) {
+                    photosArr = payload.photos;
+                }
+
+                if (payload.image && (!photosArr || photosArr.length === 0)) {
+                    photosArr = [{ src: payload.image, caption: payload.eventName || '' }];
+                }
+
+                payload.photos = (Array.isArray(photosArr) ? photosArr : []).map(p => {
+                    if (typeof p === 'string') return { src: p, caption: '' };
+                    return {
+                        src: p.src || p.url || p.image || '',
+                        caption: p.caption || ''
+                    };
+                }).filter(p => p.src && p.src.toString().trim() !== '');
+
+                if (payload.image && !payload.photos.some(p => p.src === payload.image)) {
+                    payload.photos.unshift({ src: payload.image, caption: payload.eventName || '' });
+                }
+
+                if (!payload.eventName || payload.eventName.trim() === '') {
+                    payload.eventName = payload.department ? `${payload.department.toUpperCase()} Photo` : 'Gallery Photo';
+                }
+                if (!payload.date || payload.date === '') {
+                    payload.date = new Date().toISOString().split('T')[0];
+                }
+            }
+
             const res = await fetch(url, {
                 method,
                 headers,
@@ -615,10 +653,22 @@ const AdminDashboard = () => {
                 if (res.ok) setDeptFaculty(await res.json());
             } else if (tab === 'gallery') {
                 const res = await fetch(`${API_BASE_URL}/api/departments/${deptSlug}/gallery`);
-                if (res.ok) setDeptGallery(await res.json());
+                if (res.ok) {
+                    const data = await res.json();
+                    setDeptGallery({
+                        events: Array.isArray(data?.events) ? data.events : (Array.isArray(data) ? data : []),
+                        images: Array.isArray(data?.images) ? data.images : []
+                    });
+                }
             } else if (tab === 'events') {
                 const res = await fetch(`${API_BASE_URL}/api/departments/${deptSlug}/events`);
                 if (res.ok) setDeptEvents(await res.json());
+            } else if (tab === 'labs') {
+                const res = await fetch(`${API_BASE_URL}/api/departments/${deptSlug}/labs`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setDeptLabs(Array.isArray(data) ? data : []);
+                }
             }
         } catch (err) {
             console.error("Error fetching department data:", err);
@@ -905,8 +955,10 @@ const AdminDashboard = () => {
     // Gallery Event Handlers
     const startEditGalleryEvent = (item) => {
         setEditingItem(item);
+        const photoUrl = (item.photos && item.photos.length > 0) ? (item.photos[0].src || item.photos[0].url || '') : (item.image || '');
         setGalleryEventForm({
             ...item,
+            image: photoUrl,
             date: item.date ? item.date.split('T')[0] : '', // Format date for input
             shortDescription: item.shortDescription || '',
             photos: JSON.stringify(item.photos || [], null, 2)
@@ -917,37 +969,67 @@ const AdminDashboard = () => {
     const handleGalleryEventSubmit = async (e) => {
         e.preventDefault();
         try {
+            let photosArr = [];
+            if (typeof galleryEventForm.photos === 'string') {
+                try {
+                    photosArr = JSON.parse(galleryEventForm.photos || '[]');
+                } catch (e) {
+                    photosArr = [];
+                }
+            } else if (Array.isArray(galleryEventForm.photos)) {
+                photosArr = galleryEventForm.photos;
+            }
+
+            if (galleryEventForm.image && (!photosArr || photosArr.length === 0)) {
+                photosArr = [{ src: galleryEventForm.image, caption: galleryEventForm.eventName || '' }];
+            }
+
             const payload = {
                 ...galleryEventForm,
-                photos: JSON.parse(galleryEventForm.photos || '[]')
+                eventName: galleryEventForm.eventName?.trim() || 'Gallery Photo',
+                date: galleryEventForm.date || new Date().toISOString().split('T')[0],
+                photos: (Array.isArray(photosArr) ? photosArr : []).map(p => {
+                    if (typeof p === 'string') return { src: p, caption: '' };
+                    return { src: p.src || p.url || p.image || '', caption: p.caption || '' };
+                }).filter(p => p.src && p.src.trim() !== '')
             };
+
+            if (galleryEventForm.image && !payload.photos.some(p => p.src === galleryEventForm.image)) {
+                payload.photos.unshift({ src: galleryEventForm.image, caption: galleryEventForm.eventName || '' });
+            }
 
             const url = editingItem
                 ? `${API_BASE_URL}/api/gallery-events/${editingItem._id}`
                 : `${API_BASE_URL}/api/gallery-events`;
             const method = editingItem ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('admin_token') || localStorage.getItem('authToken') || localStorage.getItem('token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
             const res = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(payload)
             });
 
             if (res.ok) {
                 const saved = await res.json();
                 if (editingItem) {
-                    setGallery(prev => prev.map(item => item._id === editingItem._id ? saved : item));
+                    setGallery(prev => prev.map(item => item._id === editingItem._id ? (saved.data || saved) : item));
                 } else {
-                    setGallery(prev => [saved, ...prev]);
+                    setGallery(prev => [(saved.data || saved), ...prev]);
                 }
                 closeModal();
-                setGalleryEventForm({ eventName: '', date: '', photos: '[]', shortDescription: '' });
+                setGalleryEventForm({ eventName: '', date: '', photos: '[]', image: '', shortDescription: '' });
+                alert('Gallery photo saved successfully!');
             } else {
-                alert('Failed to save gallery event');
+                const errorData = await res.json().catch(() => ({}));
+                alert(`Failed to save gallery event: ${errorData.error || 'Unknown error'}`);
             }
         } catch (err) {
             console.error(err);
-            alert('Error: Check your JSON format for Photos.');
+            alert('Error saving gallery event');
         }
     };
 
@@ -1623,21 +1705,31 @@ const AdminDashboard = () => {
 
                             {activeTab === 'gallery' && (
                                 <form onSubmit={handleGalleryEventSubmit} style={{ display: 'grid', gap: '1rem' }}>
-                                    {renderInput('Fest Name', 'eventName', galleryEventForm.eventName, e => setGalleryEventForm({ ...galleryEventForm, eventName: e.target.value }))}
-                                    {renderInput('Short Content', 'shortDescription', galleryEventForm.shortDescription, e => setGalleryEventForm({ ...galleryEventForm, shortDescription: e.target.value }), 'text', false)}
-                                    {renderInput('Event Date', 'date', galleryEventForm.date, e => setGalleryEventForm({ ...galleryEventForm, date: e.target.value }), 'date')}
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>
+                                            Upload Photo <span style={{ color: '#FCCA26' }}>*</span>
+                                        </label>
+                                        <ImageUpload 
+                                            value={galleryEventForm.image || (() => {
+                                                try {
+                                                    const parsed = JSON.parse(galleryEventForm.photos || '[]');
+                                                    return Array.isArray(parsed) && parsed.length > 0 ? (parsed[0].src || parsed[0].url || parsed[0]) : '';
+                                                } catch(e) { return ''; }
+                                            })()} 
+                                            onUpload={(url) => {
+                                                setGalleryEventForm(prev => ({
+                                                    ...prev,
+                                                    image: url,
+                                                    photos: JSON.stringify([{ src: url, caption: prev.eventName || '' }])
+                                                }));
+                                            }} 
+                                        />
+                                    </div>
 
-                                    <DynamicJsonBuilder
-                                        label="Event Photos (Min 5-10 recommended)"
-                                        value={galleryEventForm.photos}
-                                        onChange={(val) => setGalleryEventForm({ ...galleryEventForm, photos: val })}
-                                        fields={[
-                                            { key: 'src', label: 'Photo', type: 'image' },
-                                            { key: 'caption', label: 'Caption' }
-                                        ]}
-                                    />
+                                    {renderInput('Title / Event Name (Optional)', 'eventName', galleryEventForm.eventName, e => setGalleryEventForm({ ...galleryEventForm, eventName: e.target.value }), 'text', false)}
+                                    {renderInput('Date (Optional)', 'date', galleryEventForm.date, e => setGalleryEventForm({ ...galleryEventForm, date: e.target.value }), 'date', false)}
 
-                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update' : 'Add'}</button>
+                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>{editingItem ? 'Update Photo' : 'Upload Photo'}</button>
                                 </form>
                             )}
 
@@ -1893,17 +1985,57 @@ const AdminDashboard = () => {
                                     )}
 
                                     {deptTab === 'gallery' && (
-                                        <form onSubmit={(e) => handleGenericSubmit(e, galleryEventForm, setGalleryEventForm, '/api/gallery-events', (data) => setDeptGallery(prev => ({ ...prev, events: data })), { eventName: '', date: '', photos: '[]', department: selectedDepartment?.slug })} style={{ display: 'grid', gap: '1rem' }}>
-                                            {renderInput('Event Name', 'eventName', galleryEventForm.eventName, e => setGalleryEventForm({ ...galleryEventForm, eventName: e.target.value }))}
-                                            {renderInput('Date', 'date', galleryEventForm.date, e => setGalleryEventForm({ ...galleryEventForm, date: e.target.value }), 'date')}
+                                        <form onSubmit={(e) => {
+                                            const formToSubmit = {
+                                                ...galleryEventForm,
+                                                department: selectedDepartment?.slug || ''
+                                            };
+                                            const deptGalleryEventsSetter = (updater) => {
+                                                setDeptGallery(prev => {
+                                                    const currentEvents = Array.isArray(prev?.events) ? prev.events : [];
+                                                    const nextEvents = typeof updater === 'function' ? updater(currentEvents) : (Array.isArray(updater) ? updater : currentEvents);
+                                                    return {
+                                                        ...prev,
+                                                        events: nextEvents
+                                                    };
+                                                });
+                                            };
+                                            handleGenericSubmit(
+                                                e, 
+                                                formToSubmit, 
+                                                setGalleryEventForm, 
+                                                '/api/gallery-events', 
+                                                deptGalleryEventsSetter, 
+                                                { eventName: '', date: '', image: '', photos: '[]', department: selectedDepartment?.slug }
+                                            );
+                                        }} style={{ display: 'grid', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>
+                                                    Upload Photo <span style={{ color: '#FCCA26' }}>*</span>
+                                                </label>
+                                                <ImageUpload 
+                                                    value={galleryEventForm.image || (() => {
+                                                        try {
+                                                            const parsed = JSON.parse(galleryEventForm.photos || '[]');
+                                                            return Array.isArray(parsed) && parsed.length > 0 ? (parsed[0].src || parsed[0].url || parsed[0]) : '';
+                                                        } catch(e) { return ''; }
+                                                    })()} 
+                                                    onUpload={(url) => {
+                                                        setGalleryEventForm(prev => ({
+                                                            ...prev,
+                                                            image: url,
+                                                            photos: JSON.stringify([{ src: url, caption: prev.eventName || '' }])
+                                                        }));
+                                                    }} 
+                                                />
+                                            </div>
 
-                                            <DynamicJsonBuilder
-                                                label="Event Photos"
-                                                value={galleryEventForm.photos}
-                                                onChange={(val) => setGalleryEventForm({ ...galleryEventForm, photos: val })}
-                                                fields={[{ key: 'url', label: 'Photo URL', type: 'image' }]}
-                                            />
-                                            <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update Event' : 'Add Event'}</button>
+                                            {renderInput('Photo Title / Name (Optional)', 'eventName', galleryEventForm.eventName, e => setGalleryEventForm({ ...galleryEventForm, eventName: e.target.value }), 'text', false)}
+                                            {renderInput('Date (Optional)', 'date', galleryEventForm.date, e => setGalleryEventForm({ ...galleryEventForm, date: e.target.value }), 'date', false)}
+
+                                            <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
+                                                {editingItem ? 'Update Photo' : 'Upload Photo'}
+                                            </button>
                                         </form>
                                     )}
 
@@ -1921,6 +2053,22 @@ const AdminDashboard = () => {
                                                 <ImageUpload value={newsForm.pdf_url} onUpload={(url) => setNewsForm({ ...newsForm, pdf_url: url })} accept="application/pdf" placeholder="Upload PDF" />
                                             </div>
                                             <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update Event' : 'Add Event'}</button>
+                                        </form>
+                                    )}
+
+                                    {deptTab === 'labs' && (
+                                        <form onSubmit={(e) => handleGenericSubmit(e, { ...deptLabForm, department: selectedDepartment?.slug || '' }, setDeptLabForm, '/api/department-labs', setDeptLabs, { name: '', image: '', description: '', equipment: '', order: 0, department: selectedDepartment?.slug })} style={{ display: 'grid', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>
+                                                    Laboratory Photo / Image <span style={{ color: '#FCCA26' }}>*</span>
+                                                </label>
+                                                <ImageUpload value={deptLabForm.image} onUpload={(url) => setDeptLabForm({ ...deptLabForm, image: url })} />
+                                            </div>
+                                            {renderInput('Laboratory Name', 'name', deptLabForm.name, e => setDeptLabForm({ ...deptLabForm, name: e.target.value }))}
+                                            {renderInput('Description / Facilities Overview', 'description', deptLabForm.description, e => setDeptLabForm({ ...deptLabForm, description: e.target.value }), 'textarea')}
+                                            {renderInput('Key Equipment (Optional)', 'equipment', deptLabForm.equipment, e => setDeptLabForm({ ...deptLabForm, equipment: e.target.value }), 'text', false)}
+                                            {renderInput('Display Order', 'order', deptLabForm.order, e => setDeptLabForm({ ...deptLabForm, order: e.target.value }), 'number')}
+                                            <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update Laboratory' : 'Add Laboratory'}</button>
                                         </form>
                                     )}
 
@@ -2222,8 +2370,8 @@ const AdminDashboard = () => {
                                             <h2 style={{ fontSize: '1.8rem', margin: 0, color: 'var(--text-main)' }}>{selectedDepartment.name}</h2>
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-                                            {['faculty', 'gallery', 'events'].map(tab => (
+                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                                            {['faculty', 'gallery', 'events', 'labs'].map(tab => (
                                                 <button
                                                     key={tab}
                                                     onClick={() => setDeptTab(tab)}
@@ -2234,7 +2382,7 @@ const AdminDashboard = () => {
                                                         border: 'none', cursor: 'pointer', fontWeight: 'bold', textTransform: 'capitalize'
                                                     }}
                                                 >
-                                                    {tab}
+                                                    {tab === 'labs' ? 'Laboratories (Labs)' : tab}
                                                 </button>
                                             ))}
                                         </div>
@@ -2271,23 +2419,36 @@ const AdminDashboard = () => {
                                             <div>
                                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
                                                     <button
-                                                        onClick={() => { setEditingItem(null); setGalleryEventForm({ eventName: '', date: '', photos: '[]', department: selectedDepartment.slug }); setShowModal(true); }}
+                                                        onClick={() => { setEditingItem(null); setGalleryEventForm({ eventName: '', date: '', image: '', photos: '[]', department: selectedDepartment.slug }); setShowModal(true); }}
                                                         className="btn btn-primary"
                                                     >
-                                                        + Add Gallery Event
+                                                        + Upload Photo
                                                     </button>
                                                 </div>
                                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                                    {deptGallery.events && deptGallery.events.map(event => (
-                                                        <div key={event._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
-                                                            <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{event.eventName}</h4>
-                                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{new Date(event.date).toLocaleDateString()}</div>
-                                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                                <button onClick={() => { setEditingItem(event); setGalleryEventForm({ ...event, photos: JSON.stringify(event.photos), department: selectedDepartment.slug }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
-                                                                <button onClick={() => handleGenericDelete(event._id, `/api/gallery-events`, (prev) => setDeptGallery({ ...deptGallery, events: deptGallery.events.filter(e => e._id !== event._id) }))} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                                    {Array.isArray(deptGallery?.events) && deptGallery.events.map(event => {
+                                                        const photoSrc = (event.photos && event.photos.length > 0) ? (event.photos[0].src || event.photos[0].url) : event.image;
+                                                        return (
+                                                            <div key={event._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                                {photoSrc && (
+                                                                    <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+                                                                        <img src={photoSrc} alt={event.eventName || 'Gallery'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                    </div>
+                                                                )}
+                                                                <h4 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-main)' }}>{event.eventName || 'Photo'}</h4>
+                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{event.date ? new Date(event.date).toLocaleDateString() : ''}</div>
+                                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                                                                    <button onClick={() => { setEditingItem(event); setGalleryEventForm({ ...event, image: photoSrc || '', photos: JSON.stringify(event.photos || []), department: selectedDepartment.slug }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
+                                                                    <button onClick={() => handleGenericDelete(event._id, `/api/gallery-events`, (updater) => setDeptGallery(prev => ({ ...prev, events: typeof updater === 'function' ? updater(Array.isArray(prev?.events) ? prev.events : []) : (Array.isArray(prev?.events) ? prev.events : []) })))} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                                                </div>
                                                             </div>
+                                                        );
+                                                    })}
+                                                    {(!Array.isArray(deptGallery?.events) || deptGallery.events.length === 0) && (
+                                                        <div style={{ gridColumn: '1 / -1', padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                                            No gallery photos uploaded yet for this department. Click "+ Upload Photo" above to add one!
                                                         </div>
-                                                    ))}
+                                                    )}
                                                 </div>
                                             </div>
                                         )}
@@ -2304,15 +2465,76 @@ const AdminDashboard = () => {
                                                 </div>
                                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
                                                     {deptEvents.map(evt => (
-                                                        <div key={evt._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
-                                                            <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{evt.title}</h4>
-                                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{new Date(evt.date).toLocaleDateString()}</div>
-                                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                                <button onClick={() => { setEditingItem(evt); setNewsForm(evt); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
+                                                        <div key={evt._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                            {evt.image && (
+                                                                <div style={{ width: '100%', height: '150px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+                                                                    <img src={evt.image} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                </div>
+                                                            )}
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                                                                <h4 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-main)', lineHeight: '1.3' }}>{evt.title}</h4>
+                                                                {evt.pdf_url && (
+                                                                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '6px', background: 'rgba(248, 113, 113, 0.15)', color: '#f87171', border: '1px solid rgba(248, 113, 113, 0.3)', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                                                                        PDF
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{evt.date ? new Date(evt.date).toLocaleDateString() : ''}</div>
+                                                            {evt.desc && (
+                                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                                    {evt.desc}
+                                                                </p>
+                                                            )}
+                                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)' }}>
+                                                                <button onClick={() => { setEditingItem(evt); setNewsForm({ image: evt.image || '', title: evt.title || '', date: evt.date || '', category: selectedDepartment.slug, desc: evt.desc || '', pdf_url: evt.pdf_url || '' }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
                                                                 <button onClick={() => handleGenericDelete(evt._id, `/api/news-events`, setDeptEvents)} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
                                                             </div>
                                                         </div>
                                                     ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {deptTab === 'labs' && (
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                                                    <button
+                                                        onClick={() => { setEditingItem(null); setDeptLabForm({ name: '', image: '', description: '', equipment: '', order: deptLabs.length + 1, department: selectedDepartment.slug }); setShowModal(true); }}
+                                                        className="btn btn-primary"
+                                                    >
+                                                        + Add Laboratory
+                                                    </button>
+                                                </div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                                    {deptLabs.map(lab => (
+                                                        <div key={lab._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                            {lab.image && (
+                                                                <div style={{ width: '100%', height: '160px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+                                                                    <img src={lab.image} alt={lab.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                </div>
+                                                            )}
+                                                            <h4 style={{ fontSize: '1.15rem', margin: 0, color: 'var(--text-main)', lineHeight: '1.3' }}>{lab.name}</h4>
+                                                            {lab.description && (
+                                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                                    {lab.description}
+                                                                </p>
+                                                            )}
+                                                            {lab.equipment && (
+                                                                <div style={{ fontSize: '0.8rem', color: 'var(--secondary)', fontWeight: '700' }}>
+                                                                    Key Equipment: <span style={{ color: 'var(--text-muted)', fontWeight: 'normal' }}>{lab.equipment}</span>
+                                                                </div>
+                                                            )}
+                                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)' }}>
+                                                                <button onClick={() => { setEditingItem(lab); setDeptLabForm({ name: lab.name || '', image: lab.image || '', description: lab.description || '', equipment: lab.equipment || '', order: lab.order || 0, department: selectedDepartment.slug }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
+                                                                <button onClick={() => handleGenericDelete(lab._id, `/api/department-labs`, setDeptLabs)} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {deptLabs.length === 0 && (
+                                                        <div style={{ gridColumn: '1 / -1', padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                                            No laboratories added yet for this department. Click "+ Add Laboratory" above to upload lab photos and equipment details!
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}

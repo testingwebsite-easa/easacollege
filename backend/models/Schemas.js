@@ -28,12 +28,13 @@ const HeroSlideSchema = new mongoose.Schema({
 });
 
 const GalleryEventSchema = new mongoose.Schema({
-    eventName: { type: String, required: true },
+    eventName: { type: String, default: 'Gallery Photo' },
     date: { type: Date, default: Date.now },
-    department: String,
-    shortDescription: String,
+    department: { type: String, default: '' },
+    shortDescription: { type: String, default: '' },
+    image: { type: String, default: '' },
     photos: [{
-        src: { type: String, required: true },
+        src: { type: String, default: '' },
         caption: { type: String, default: '' }
     }]
 });
@@ -212,9 +213,19 @@ const ProgramOutcomeSchema = new mongoose.Schema({
     createdBy: String, // User ID
     lastModifiedBy: String // User ID
 });
-ProgramOutcomeSchema.index({ department: 1, type: 1 });
+// DEPARTMENT LAB SCHEMA
+const DepartmentLabSchema = new mongoose.Schema({
+    department: { type: String, required: true, index: true }, // Department slug
+    name: { type: String, required: true },
+    image: { type: String, default: '' },
+    description: { type: String, default: '' },
+    equipment: { type: String, default: '' },
+    order: { type: Number, default: 0 }
+});
+DepartmentLabSchema.index({ department: 1 });
 
 module.exports = {
+    DepartmentLab: mongoose.model('DepartmentLab', DepartmentLabSchema),
     FacultyStat: mongoose.model('FacultyStat', FacultyStatSchema),
     NewsEvent: mongoose.model('NewsEvent', NewsEventSchema),
     HeroSlide: mongoose.model('HeroSlide', HeroSlideSchema),

@@ -127,9 +127,19 @@ function App() {
             <Route path="/mission-vision" element={<MissionPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/admin/login" element={<LoginPage />} />
+            <Route path="/syllabus/login" element={<LoginPage />} />
+            <Route path="/syllabus-login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
               path="/dashboard"
+              element={
+                <ProtectedRoute requiredRoles={['admin', 'hod', 'staff', 'student']}>
+                  <SyllabusDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/syllabus-dashboard"
               element={
                 <ProtectedRoute requiredRoles={['admin', 'hod', 'staff', 'student']}>
                   <SyllabusDashboard />
@@ -211,6 +221,8 @@ function App() {
             <Route path="/higher-education" element={<HigherEducationPage />} />
             <Route path="/page/entrepreneurship" element={<EntrepreneurshipPage />} />
             <Route path="/entrepreneurship" element={<EntrepreneurshipPage />} />
+            <Route path="/page/edc" element={<EntrepreneurshipPage />} />
+            <Route path="/edc" element={<EntrepreneurshipPage />} />
             <Route path="/ascend-center" element={<AscendCenterPage />} />
             <Route path="/page/ascend-center" element={<AscendCenterPage />} />
             <Route path="/ascend" element={<AscendCenterPage />} />

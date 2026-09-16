@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
+import MADClubDetail from '../components/MADClubDetail';
 import clubLogo from '../assets/club_logo_gen.webp';
 import clubsHeroImg from '../assets/clubs_hero_unique.webp';
 import useScrollAnimation from '../hooks/useScrollAnimation';
@@ -22,12 +24,19 @@ const clubs = [
     },
     {
         id: 2,
-        name: "Mobile App Development Club",
-        description: "A platform for tech enthusiasts to learn, build, and collaborate using modern technologies.",
+        key: "mad",
+        name: "Mobile App Development Club (MAD Club)",
+        badge: "Freshers' Induction 2026",
+        tagline: "IMAGINE • DESIGN • DEVELOP • DEPLOY",
+        description: "A student-led club training every branch, every skill level, to build real mobile apps — from your very first idea to a published launch.",
+        registrationLink: "https://docs.google.com/forms/u/4/d/e/1FAIpQLSea-CcfzHVk2gKZwvak-4JOHdetzzT8uEjlk0TYFLil4hdFWA/viewform?usp=header",
         activities: [
-            "Coding bootcamps",
-            "Hackathons",
-            "App and web development projects"
+            "Skills-First 3-Phase Roadmap (Aug 2026 - Apr 2027)",
+            "No-Code to MVP Series (FlutterFlow & Adalo)",
+            "Beginner Flutter & Kotlin Mentored Tracks",
+            "Campus Problem Ideathon & Hackathons (HACKASTORM)",
+            "AI-Powered Mobile Apps & Mobile Innovation Expo",
+            "Code & Coffee weekly peer sessions"
         ]
     },
     {
@@ -160,15 +169,30 @@ const clubEvents = [
 
 const CampusClubsPage = () => {
     useScrollAnimation();
+    const [searchParams] = useSearchParams();
     const [activeClubId, setActiveClubId] = useState('overview');
 
-    const activeClub = clubs.find(c => c.id === activeClubId);
+    useEffect(() => {
+        const clubParam = searchParams.get('club');
+        if (clubParam) {
+            if (clubParam === 'mad' || clubParam === '2') {
+                setActiveClubId(2);
+            } else {
+                const numericId = parseInt(clubParam, 10);
+                if (!isNaN(numericId)) {
+                    setActiveClubId(numericId);
+                }
+            }
+        }
+    }, [searchParams]);
+
+    const activeClub = clubs.find(c => c.id === activeClubId || c.key === activeClubId);
 
     return (
         <div className="page-wrapper">
             <SEO
-                title="Campus Clubs & Societies"
-                description="Discover, Engage, Lead, and Thrive with EASA College's vibrant clubs and societies."
+                title="Campus Clubs & Societies | EASA College"
+                description="Discover, Engage, Lead, and Thrive with EASA College's vibrant student clubs and technical societies."
             />
             <Navbar />
 
@@ -301,6 +325,18 @@ const CampusClubsPage = () => {
                                             ))}
                                         </div>
                                     </motion.div>
+                                ) : activeClubId === 2 || activeClubId === 'mad' ? (
+                                    <motion.div
+                                        key="mad-club-view"
+                                        initial={{ opacity: 0, scale: 0.96 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.96 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="glass-card club-details-card"
+                                        style={{ padding: '2rem 1.5rem' }}
+                                    >
+                                        <MADClubDetail />
+                                    </motion.div>
                                 ) : (
                                     <motion.div
                                         key={activeClubId}
@@ -322,7 +358,7 @@ const CampusClubsPage = () => {
                                         >
                                             <img
                                                 src={clubLogo}
-                                                alt={`${activeClub.name} Logo`}
+                                                alt={`${activeClub?.name || 'Club'} Logo`}
                                                 className="club-logo-img"
                                             />
                                         </motion.div>
@@ -335,39 +371,41 @@ const CampusClubsPage = () => {
                                             style={{ width: '100%', position: 'relative', zIndex: 1 }}
                                         >
                                             <h2 className="club-title">
-                                                {activeClub.name}
+                                                {activeClub?.name}
                                             </h2>
 
                                             <div className="club-divider"></div>
 
                                             <p className="club-description">
-                                                {activeClub.description}
+                                                {activeClub?.description}
                                             </p>
                                         </motion.div>
 
                                         {/* Activities */}
-                                        <motion.div
-                                            initial={{ y: 20, opacity: 0 }}
-                                            animate={{ y: 0, opacity: 1 }}
-                                            transition={{ delay: 0.3 }}
-                                            className="club-activities-box"
-                                        >
-                                            <h4 className="activities-title">
-                                                <span>Activities & Highlights</span>
-                                            </h4>
-                                            <div className="activities-grid">
-                                                {activeClub.activities.map((activity, idx) => (
-                                                    <div key={idx} className="activity-item group/item">
-                                                        <span className="activity-icon">
-                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                <path d="M5 12L9 16L19 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                                            </svg>
-                                                        </span>
-                                                        <span className="activity-text">{activity}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </motion.div>
+                                        {activeClub?.activities && (
+                                            <motion.div
+                                                initial={{ y: 20, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{ delay: 0.3 }}
+                                                className="club-activities-box"
+                                            >
+                                                <h4 className="activities-title">
+                                                    <span>Activities & Highlights</span>
+                                                </h4>
+                                                <div className="activities-grid">
+                                                    {activeClub.activities.map((activity, idx) => (
+                                                        <div key={idx} className="activity-item group/item">
+                                                            <span className="activity-icon">
+                                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M5 12L9 16L19 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                                                </svg>
+                                                            </span>
+                                                            <span className="activity-text">{activity}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
 
                                     </motion.div>
                                 )}

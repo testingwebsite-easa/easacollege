@@ -1,0 +1,827 @@
+/* MAD Club Detail Component Styles */
+
+.mad-club-container {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hero Header */
+.mad-hero-header {
+    background: radial-gradient(120% 120% at 50% 0%, rgba(252, 202, 38, 0.12) 0%, rgba(10, 15, 30, 0.4) 100%);
+    border: 1px solid rgba(252, 202, 38, 0.25);
+    border-radius: 1.25rem;
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.5);
+}
+
+.mad-hero-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #FCCA26, transparent);
+}
+
+.mad-induction-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(252, 202, 38, 0.15);
+    border: 1px solid rgba(252, 202, 38, 0.4);
+    color: #FCCA26;
+    padding: 0.35rem 0.9rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+}
+
+.badge-pulse {
+    width: 8px;
+    height: 8px;
+    background: #FCCA26;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #FCCA26;
+    animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.mad-main-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+    .mad-main-title {
+        font-size: 2.75rem;
+    }
+}
+
+.mad-motto {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #FCCA26;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.mad-lead-text {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 48rem;
+    line-height: 1.7;
+    margin-bottom: 1.75rem;
+}
+
+.mad-quick-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.mad-stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: #e2e8f0;
+    font-weight: 500;
+}
+
+/* Vision Card */
+.mad-vision-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    background: linear-gradient(135deg, rgba(252, 202, 38, 0.08) 0%, rgba(20, 25, 45, 0.6) 100%);
+    border: 1px solid rgba(252, 202, 38, 0.3);
+    border-radius: 1rem;
+    padding: 1.75rem;
+    backdrop-filter: blur(8px);
+}
+
+.mad-vision-icon {
+    background: rgba(252, 202, 38, 0.15);
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(252, 202, 38, 0.3);
+    flex-shrink: 0;
+}
+
+.mad-vision-heading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #FCCA26;
+    margin-bottom: 0.35rem;
+}
+
+.mad-vision-text {
+    font-size: 1.0625rem;
+    font-style: italic;
+    color: #f1f5f9;
+    line-height: 1.6;
+}
+
+/* Section Header */
+.mad-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.mad-section-header {
+    text-align: left;
+}
+
+.mad-section-kicker {
+    font-size: 0.8125rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: #FCCA26;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+.mad-section-title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.mad-quote {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #FCCA26;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.mad-section-desc {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 46rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.mad-section-divider {
+    width: 3.5rem;
+    height: 3px;
+    background: #FCCA26;
+    border-radius: 9999px;
+    margin-top: 0.5rem;
+}
+
+/* Team Grid */
+.mad-team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+}
+
+.mad-member-card {
+    background: rgba(18, 24, 38, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.mad-member-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(252, 202, 38, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(252, 202, 38, 0.15);
+}
+
+.mad-mentor-card {
+    background: linear-gradient(180deg, rgba(252, 202, 38, 0.1) 0%, rgba(18, 24, 38, 0.85) 100%);
+    border: 1px solid rgba(252, 202, 38, 0.4);
+}
+
+.mad-avatar-circle {
+    width: 3.75rem;
+    height: 3.75rem;
+    border-radius: 50%;
+    background: rgba(252, 202, 38, 0.15);
+    border: 2px solid rgba(252, 202, 38, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #FCCA26;
+    margin-bottom: 1rem;
+}
+
+.mad-member-role {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #FCCA26;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+}
+
+.mad-member-name {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+}
+
+.mad-member-dept {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.4;
+}
+
+.mad-faculty-badge {
+    margin-top: 0.75rem;
+    display: inline-block;
+    background: #FCCA26;
+    color: #000;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    letter-spacing: 0.05em;
+}
+
+/* 4 Core Pillars */
+.mad-pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+}
+
+.mad-pillar-card {
+    background: rgba(18, 24, 38, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.mad-pillar-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(252, 202, 38, 0.35);
+    background: rgba(25, 33, 52, 0.7);
+}
+
+.mad-pillar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.mad-pillar-number {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: rgba(252, 202, 38, 0.3);
+    font-family: monospace;
+}
+
+.mad-pillar-icon-box {
+    background: rgba(252, 202, 38, 0.1);
+    border: 1px solid rgba(252, 202, 38, 0.25);
+    padding: 0.5rem;
+    border-radius: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mad-pillar-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.mad-pillar-desc {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+}
+
+/* Rebuilt for 2026-27 */
+.mad-rebuild-rationale {
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid #FCCA26;
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 0.75rem 0.75rem 0;
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    margin-top: 0.5rem;
+}
+
+.mad-phase-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.mad-phase-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(18, 24, 38, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.875rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: #ffffff;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.mad-phase-tab-btn:hover {
+    background: rgba(28, 38, 60, 0.8);
+    border-color: rgba(252, 202, 38, 0.3);
+}
+
+.mad-phase-tab-btn.active {
+    background: linear-gradient(135deg, rgba(252, 202, 38, 0.15) 0%, rgba(20, 28, 48, 0.95) 100%);
+    border-color: #FCCA26;
+    box-shadow: 0 0 20px rgba(252, 202, 38, 0.15);
+}
+
+.mad-phase-tab-num {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #FCCA26;
+    background: rgba(252, 202, 38, 0.1);
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mad-phase-tab-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.mad-phase-tab-sub {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0.15rem;
+}
+
+.mad-phase-card {
+    background: rgba(18, 24, 38, 0.75);
+    border: 1px solid rgba(252, 202, 38, 0.25);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    backdrop-filter: blur(12px);
+}
+
+.mad-phase-header-bar {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mad-phase-tag {
+    display: inline-block;
+    background: rgba(252, 202, 38, 0.15);
+    border: 1px solid rgba(252, 202, 38, 0.35);
+    color: #FCCA26;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    margin-bottom: 0.75rem;
+}
+
+.mad-phase-current-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.mad-phase-goal {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+}
+
+.mad-events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+
+.mad-event-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 0.875rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.25s ease;
+}
+
+.mad-event-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(252, 202, 38, 0.3);
+    transform: translateY(-2px);
+}
+
+.mad-event-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.mad-event-badge {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: #FCCA26;
+    background: rgba(252, 202, 38, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.375rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.mad-event-icon-wrap {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.4rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mad-event-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.4rem;
+}
+
+.mad-event-desc {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.5;
+}
+
+/* Two Col Grid (Roadmap & Awards) */
+.mad-two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 900px) {
+    .mad-two-col-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.mad-section-card {
+    background: rgba(18, 24, 38, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.mad-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.mad-card-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.mad-card-intro {
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.mad-roadmap-list, .mad-awards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mad-roadmap-item, .mad-award-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    transition: all 0.2s ease;
+}
+
+.mad-roadmap-item:hover, .mad-award-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(252, 202, 38, 0.25);
+}
+
+.mad-roadmap-bullet, .mad-award-star {
+    background: rgba(252, 202, 38, 0.1);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
+.mad-roadmap-name, .mad-award-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+}
+
+.mad-roadmap-desc, .mad-award-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.5;
+}
+
+/* Join & Social Connect Banner */
+.mad-join-section {
+    background: linear-gradient(135deg, rgba(252, 202, 38, 0.12) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 1px solid rgba(252, 202, 38, 0.35);
+    border-radius: 1.25rem;
+    padding: 2.5rem 2rem;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+}
+
+.mad-join-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+}
+
+@media (min-width: 900px) {
+    .mad-join-wrapper {
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: center;
+    }
+}
+
+.mad-join-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 1.25rem;
+}
+
+.mad-join-criteria {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.875rem;
+    padding: 1.25rem;
+}
+
+.mad-social-box {
+    background: rgba(10, 15, 28, 0.7);
+    border: 1px solid rgba(252, 202, 38, 0.2);
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.mad-social-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+}
+
+.mad-social-sub {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 1.25rem;
+}
+
+.mad-social-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.mad-social-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.625rem;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.mad-social-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(252, 202, 38, 0.4);
+    transform: translateX(4px);
+}
+
+.mad-social-name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: block;
+}
+
+.mad-social-handle {
+    font-size: 0.78125rem;
+    color: rgba(255, 255, 255, 0.55);
+    display: block;
+}
+
+/* Hero CTA Button */
+.mad-hero-actions {
+    margin-top: 1.5rem;
+}
+
+.mad-hero-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: #FCCA26;
+    color: #000000;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    padding: 0.75rem 1.4rem;
+    border-radius: 0.625rem;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(252, 202, 38, 0.35);
+}
+
+.mad-hero-cta-btn:hover {
+    background: #ffd84d;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(252, 202, 38, 0.5);
+}
+
+/* Registration QR Card */
+.mad-qr-action-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(252, 202, 38, 0.25);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    backdrop-filter: blur(8px);
+}
+
+@media (min-width: 640px) {
+    .mad-qr-action-card {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+.mad-qr-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ffffff;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    flex-shrink: 0;
+    width: fit-content;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mad-qr-scan-label {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: #0a0f1d;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
+}
+
+.mad-qr-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+}
+
+.mad-reg-badge {
+    display: inline-block;
+    background: rgba(252, 202, 38, 0.15);
+    border: 1px solid rgba(252, 202, 38, 0.3);
+    color: #FCCA26;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    margin-bottom: 0.35rem;
+}
+
+.mad-qr-title {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+}
+
+.mad-qr-sub {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    margin-bottom: 0.85rem;
+}
+
+.mad-form-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #FCCA26;
+    color: #000000;
+    font-weight: 700;
+    font-size: 0.875rem;
+    padding: 0.6rem 1.1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(252, 202, 38, 0.3);
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .mad-form-cta-btn {
+        width: auto;
+    }
+}
+
+.mad-form-cta-btn:hover {
+    background: #ffe066;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(252, 202, 38, 0.45);
+}
+

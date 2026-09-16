@@ -164,6 +164,38 @@ const StudentCellsPage = () => {
                                         <div style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>
                                             {renderFormattedText(activeTabData?.body)}
                                         </div>
+
+                                        {activeTabData?.heading?.toLowerCase().includes('entrepreneurship') && (
+                                            <div style={{
+                                                marginTop: '2.5rem',
+                                                padding: '2rem',
+                                                borderRadius: '20px',
+                                                background: 'linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(245,158,11,0.15) 100%)',
+                                                border: '1px solid var(--glass-border)',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                flexWrap: 'wrap',
+                                                gap: '1.2rem'
+                                            }}>
+                                                <div>
+                                                    <h4 style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 0.3rem' }}>
+                                                        Explore Full EDC Portal & Pitch Incubator
+                                                    </h4>
+                                                    <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.95rem' }}>
+                                                        View complete event schedules, student startups, mentor advisory board, and submit your startup idea.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => navigate('/page/entrepreneurship')}
+                                                    className="btn btn-primary"
+                                                    style={{ padding: '0.8rem 1.6rem', borderRadius: '50px', fontWeight: '800', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                                                >
+                                                    <span>Open EDC Portal</span>
+                                                    <FaChevronRight size={12} />
+                                                </button>
+                                            </div>
+                                        )}
                                     </>
                                 )}
                             </div>

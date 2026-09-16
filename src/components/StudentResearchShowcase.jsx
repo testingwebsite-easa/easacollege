@@ -51,13 +51,23 @@ const StudentResearchShowcase = ({ departmentFilter = null }) => {
         return matchesDept && matchesSearch;
     });
 
+    // Helper to format/sanitize Nil / Not Available values
+    const formatVal = (val) => {
+        if (val === null || val === undefined) return '-';
+        const s = String(val).trim();
+        if (s === '' || s.toLowerCase() === 'nil' || s.toLowerCase() === 'nill' || s.toLowerCase() === 'null' || s.toLowerCase() === 'not available' || s === '-') {
+            return '-';
+        }
+        return val;
+    };
+
     // Calculate Summary Stats
     const totalStudents = studentResearchList.length;
     const uniqueProjects = new Set(studentResearchList.map(s => s.projectTitle)).size;
     const conferencePresentationsCount = studentResearchList.filter(s => s.conferencePresentations && s.conferencePresentations !== 'No' && s.conferencePresentations !== 'Not Available').length;
     const uniqueGuides = new Set(studentResearchList.map(s => s.facultyGuide)).size;
 
-    const departments = ['ALL', 'EEE', 'CSE', 'ECE', 'MECH', 'BME'];
+    const departments = ['ALL', ...Array.from(new Set(studentResearchList.map(s => (s.department || '').toUpperCase()))).filter(Boolean)];
 
     return (
         <section style={{ padding: '2rem 0', width: '100%' }}>
@@ -293,20 +303,20 @@ const StudentResearchShowcase = ({ departmentFilter = null }) => {
                             filteredResearch.map((item, index) => (
                                 <tr key={item.sNo || index} style={{ borderBottom: '1px solid var(--glass-border)', fontSize: '0.88rem', lineHeight: '1.5' }} className="table-row-hover">
                                     <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-muted)', verticalAlign: 'middle' }}>{index + 1}</td>
-                                    <td style={{ padding: '1rem 0.9rem', fontWeight: '800', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.studentName}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontFamily: 'monospace', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.registerNo}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '800', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.department}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.academicYear}</td>
-                                    <td style={{ padding: '1rem 1rem', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.projectTitle}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.finalYearProject}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.publications}</td>
-                                    <td style={{ padding: '1rem 1rem', color: 'var(--text-muted)', fontSize: '0.84rem', verticalAlign: 'middle' }}>{item.conferencePresentations}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.patentFiled}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.patentGranted}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', verticalAlign: 'middle' }}>{item.projectAwards}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', verticalAlign: 'middle' }}>{item.hackathons}</td>
-                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', verticalAlign: 'middle' }}>{item.startupActivities}</td>
-                                    <td style={{ padding: '1rem 0.9rem', fontWeight: '800', color: 'var(--text-main)', verticalAlign: 'middle' }}>{item.facultyGuide}</td>
+                                    <td style={{ padding: '1rem 0.9rem', fontWeight: '800', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.studentName)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontFamily: 'monospace', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.registerNo)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '800', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.department)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.academicYear)}</td>
+                                    <td style={{ padding: '1rem 1rem', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.projectTitle)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.finalYearProject)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.publications)}</td>
+                                    <td style={{ padding: '1rem 1rem', color: 'var(--text-muted)', fontSize: '0.84rem', verticalAlign: 'middle' }}>{formatVal(item.conferencePresentations)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.patentFiled)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.patentGranted)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', verticalAlign: 'middle' }}>{formatVal(item.projectAwards)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', verticalAlign: 'middle' }}>{formatVal(item.hackathons)}</td>
+                                    <td style={{ padding: '1rem 0.8rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', verticalAlign: 'middle' }}>{formatVal(item.startupActivities)}</td>
+                                    <td style={{ padding: '1rem 0.9rem', fontWeight: '800', color: 'var(--text-main)', verticalAlign: 'middle' }}>{formatVal(item.facultyGuide)}</td>
                                 </tr>
                             ))
                         )}

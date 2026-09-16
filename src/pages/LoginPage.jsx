@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 import API_BASE_URL from '../api';
@@ -7,12 +7,16 @@ import '../styles/LoginPage.css';
 
 const LoginPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useAuth();
     const [loginData, setLoginData] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const [showPassword, setShowPassword] = useState(false);
+
+    const isAdminPath = location.pathname.includes('/admin');
+    const isSyllabusPath = location.pathname.includes('syllabus');
 
     // Forgot Password States
     const [isForgotMode, setIsForgotMode] = useState(false);
@@ -28,10 +32,24 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            await login(loginData.username, loginData.password);
-            // Navigate based on role
+            const data = await login(loginData.username, loginData.password);
+            
+            // Set admin_token if admin role or on admin path
+            if (data?.token) {
+                if (data?.user?.role === 'admin' || isAdminPath) {
+                    localStorage.setItem('admin_token', data.token);
+                }
+            }
+
+            // Navigate based on role & path
             setTimeout(() => {
-                navigate('/dashboard');
+                if (isSyllabusPath) {
+                    navigate('/dashboard');
+                } else if (data?.user?.role === 'admin' || isAdminPath) {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
             }, 500);
         } catch (err) {
             setError(err.message);
@@ -80,7 +98,7 @@ const LoginPage = () => {
                 <div className="login-container">
                     <div className="login-header">
                         <h1>EASA College</h1>
-                        <p>Syllabus Management System</p>
+                        <p>{isAdminPath ? 'Central College Admin Portal' : 'Academic & Syllabus Portal'}</p>
                     </div>
 
                     <div className="auth-form">
@@ -132,7 +150,7 @@ const LoginPage = () => {
             <div className="login-container">
                 <div className="login-header">
                     <h1>EASA College</h1>
-                    <p>Syllabus Management System</p>
+                    <p>{isAdminPath ? 'Central College Admin Portal' : 'Academic & Syllabus Portal'}</p>
                 </div>
 
                 {error && <div className="alert alert-error">{error}</div>}

@@ -2736,11 +2736,15 @@ const DepartmentManager = () => {
                 </div>
             ) : (
                 <div className="department-sections-grid">
-                    {renderSection('Mission', 'mission')}
-                    {renderSection('Vision', 'vision')}
-                    {renderSection('Program Educational Objectives (PEO)', 'peo')}
-                    {renderSection('Program Specific Outcomes (PSO)', 'pso')}
-                    {renderSection('Program Outcomes (PO)', 'po')}
+                    {selectedDept !== 'science-and-humanities' && selectedDept !== 'sh' && (
+                        <>
+                            {renderSection('Mission', 'mission')}
+                            {renderSection('Vision', 'vision')}
+                            {renderSection('Program Educational Objectives (PEO)', 'peo')}
+                            {renderSection('Program Specific Outcomes (PSO)', 'pso')}
+                            {renderSection('Program Outcomes (PO)', 'po')}
+                        </>
+                    )}
 
                     {/* Subjects Section */}
                     <div className="dept-section-card" style={{ gridColumn: '1 / -1', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>

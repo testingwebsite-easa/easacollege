@@ -68,6 +68,26 @@ export const departments = [
         studentCount: "60+",
         facultyCount: "5+",
         labCount: "3+",
+        labs: [
+            {
+                name: "AI & Deep Learning Computing Lab",
+                image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+                description: "High-performance GPU computing cluster tailored for training deep neural networks, large vision transformers, generative models, and reinforcement learning pipelines.",
+                equipment: "NVIDIA RTX GPUs, PyTorch, TensorFlow 2.x, CUDA Workstations, Anaconda Enterprise, Keras, TensorBoard"
+            },
+            {
+                name: "Big Data Analytics & Cloud Intelligence Lab",
+                image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+                description: "State-of-the-art big data engineering environment for distributed cluster computations, ETL pipeline orchestration, and business intelligence.",
+                equipment: "Apache Hadoop, Apache Spark, MongoDB Enterprise, Apache Kafka, Tableau Desktop, AWS Cloud Cluster"
+            },
+            {
+                name: "Computer Vision & Natural Language Processing Lab",
+                image: "https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=1200&q=80",
+                description: "Research facility dedicated to multi-modal artificial intelligence, image segmentation, object detection, LLM prompt engineering, and conversational speech agents.",
+                equipment: "OpenCV, HuggingFace Transformers, SpaCy, High-Resolution Industrial Cameras, LiDAR Sensor Prototyping Kits"
+            }
+        ],
         coe: {
             code: "CoE-AIMAA",
             name: "Centre of Excellence in AI, ML & Advanced Analytics",
@@ -161,6 +181,26 @@ export const departments = [
         studentCount: "190+",
         facultyCount: "13+",
         labCount: "05",
+        labs: [
+            {
+                name: "Advanced Software Engineering & Full-Stack Lab",
+                image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
+                description: "Modern software development lab for building enterprise full-stack web applications, microservices, and continuous integration workflows.",
+                equipment: "Core i7 Workstations, VS Code Enterprise, Docker, Kubernetes, Node.js, React 19, Git/GitHub, Jenkins CI/CD"
+            },
+            {
+                name: "Database Systems & Cloud Computing Lab",
+                image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80",
+                description: "Specialized environment for relational and NoSQL database modeling, transaction management, query optimization, and enterprise cloud deployments.",
+                equipment: "Oracle 19c Enterprise, PostgreSQL, MySQL Workbench, MongoDB, AWS SDK, Microsoft Azure Dev Suite"
+            },
+            {
+                name: "Networks & Operating Systems Lab",
+                image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+                description: "Hands-on laboratory for socket programming, network protocol verification, kernel customization, and distributed OS experiments.",
+                equipment: "Cisco Layer 3 Managed Switches, Wireshark Protocol Analyzer, Ubuntu Linux, NS-3 Simulator, OPNET Modeleler"
+            }
+        ],
         mou: [
             { partner: "MAHAT LABS PRIVATE LIMITED", purpose: "Saas based low code application development platform", year: "2026", benefits: "App Development" },
         ]
@@ -207,6 +247,26 @@ export const departments = [
         studentCount: "60+",
         facultyCount: "5+",
         labCount: "3+",
+        labs: [
+            {
+                name: "Machine Learning & Predictive Modeling Lab",
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+                description: "Equipped for statistical learning algorithms, feature engineering, classification models, ensemble methods, and automated ML pipelines.",
+                equipment: "JupyterHub Server, Scikit-learn, XGBoost, LightGBM, RStudio Server, Pandas, NumPy, High-Speed Compute Nodes"
+            },
+            {
+                name: "Robotics & Autonomous Systems Lab",
+                image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80",
+                description: "Prototyping arena for autonomous robotic navigation, SLAM mapping, sensor fusion, and real-time computer vision guidance.",
+                equipment: "ROS (Robot Operating System), TurtleBot3 Prototyping Kits, Raspberry Pi 5 AI Kits, Ultrasonic & Depth Sensors, LiDAR"
+            },
+            {
+                name: "Neural Computing & Cognitive Intelligence Lab",
+                image: "https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=1200&q=80",
+                description: "Dedicated to neuromorphic computing, cognitive speech recognition, edge deep learning inference, and transformer fine-tuning.",
+                equipment: "NVIDIA Jetson Orin Nano, Google Coral Edge TPU, TensorRT, PyTorch, Whisper Speech Suite"
+            }
+        ],
         mou: [
             { partner: "Maxbite Technologies Pvt. Ltd", purpose: "Advanced Industrial Training & Research Collaboration", year: "2023", benefits: "IoT & Smart Manufacturing" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
@@ -254,6 +314,33 @@ export const departments = [
         studentCount: "60+",
         facultyCount: "4+",
         labCount: "2+",
+        labs: [
+            {
+                name: "Ethical Hacking & Cyber Range Lab",
+                image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80",
+                description: "Isolated sandbox environment designed for penetration testing, vulnerability discovery, simulated red-team attacks, and defensive countermeasures.",
+                equipment: "Kali Linux Workstations, Metasploit Pro, Burp Suite Enterprise, Wireshark, Snort IDS/IPS, Isolated Virtual Cyber Range"
+            },
+            {
+                name: "Digital Forensics & Malware Analysis Lab",
+                image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80",
+                description: "Specialized lab for digital evidence acquisition, hard drive bit-stream imaging, volatile memory forensics, and reverse-engineering obfuscated binaries.",
+                equipment: "Autopsy Forensics, FTK Imager, EnCase Certified Software, Volatility Memory Framework, Ghidra Decompiler, Sandbox VMs"
+            },
+            {
+                name: "Network Defense & Cryptography Lab",
+                image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+                description: "Hands-on implementation of cryptographic ciphers, public-key infrastructure (PKI), secure VPN tunneling, and next-generation firewall rules.",
+                equipment: "PFSense Hardware Firewalls, OpenSSL Cryptographic Suite, Cisco ASA Security Appliances, VPN Concentrators"
+            }
+        ],
+        coe: {
+            code: "Cyber Shield Hub",
+            name: "Cyber Shield Innovation Hub",
+            subname: "Centre of Excellence in Cyber Security & Digital Defence",
+            tagline: "Securing the Digital Future through Innovation, Intelligence, and Resilience.",
+            logo: "/images/coe-cyber-shield-logo.png"
+        },
         mou: [
             { partner: "Maxbite Technologies Pvt. Ltd", purpose: "Advanced Industrial Training & Research Collaboration", year: "2023", benefits: "IoT & Smart Manufacturing" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
@@ -300,6 +387,26 @@ export const departments = [
         studentCount: "120+",
         facultyCount: "9+",
         labCount: "18+",
+        labs: [
+            {
+                name: "Web Intelligence & Mobile App Development Lab",
+                image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80",
+                description: "Cutting-edge environment for crafting responsive web platforms, cross-platform Android/iOS applications, and cloud-backed REST APIs.",
+                equipment: "Android Studio Bumblebee, Flutter SDK, React Native, Node.js, Postman Pro, Firebase Cloud Suite, Apple Xcode Workstations"
+            },
+            {
+                name: "IoT & Smart Embedded Systems Lab",
+                image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+                description: "Hands-on laboratory for building smart city sensor nodes, industrial telemetry, edge computing gateways, and MQTT messaging fabrics.",
+                equipment: "ESP32 Wi-Fi/BLE Modules, Raspberry Pi 4 Model B, Zigbee Kits, Node-RED, Arduino Uno, Multi-Sensor Sensor Shields"
+            },
+            {
+                name: "Data Structures & Java Enterprise Computing Lab",
+                image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80",
+                description: "Dedicated to object-oriented programming, algorithmic efficiency analysis, Spring Boot microservices, and distributed computing.",
+                equipment: "High-Performance Workstations, Oracle JDK 21, IntelliJ IDEA Ultimate, Spring Framework, PostgreSQL, Git Version Control"
+            }
+        ],
         mou: [
             { partner: "Tamil Nadu Technology (iTNT) Hub", purpose: "Exposure to DeepTech innovations and emerging technologies", year: "2025", benefits: "Industry leaders and companies" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
@@ -349,6 +456,26 @@ export const departments = [
         studentCount: "190+",
         facultyCount: "11+",
         labCount: "5+",
+        labs: [
+            {
+                name: "VLSI Design & Embedded Systems Lab",
+                image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+                description: "Specialized for RTL design, ASIC layout synthesis, FPGA hardware prototyping, and ARM microcontroller embedded programming.",
+                equipment: "Cadence EDA Suite, Xilinx Vivado, Spartan-6 & Zynq-7000 FPGA Boards, ARM Cortex-M4 Kits, ModelSim Simulator"
+            },
+            {
+                name: "Microwave & Optical Fiber Communication Lab",
+                image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80",
+                description: "Hands-on measurement of microwave waveguides, horn antennas, optical fiber attenuation parameters, and laser diode characteristics.",
+                equipment: "X-Band Microwave Test Benches, 3 GHz RF Spectrum Analyzers, Optical Time-Domain Reflectometers (OTDR), Fiber Splicers"
+            },
+            {
+                name: "Digital Signal & Image Processing Lab",
+                image: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=1200&q=80",
+                description: "Enables digital filter design, FFT spectral analysis, image enhancement, voice recognition, and digital modulation experiments.",
+                equipment: "MATLAB & Simulink DSP Blockset, Texas Instruments TMS320C6713 DSP Starter Kits, Digital Storage Oscilloscopes (100 MHz)"
+            }
+        ],
         mou: [
             { partner: "Maxbite Technologies Pvt. Ltd", purpose: "Advanced Industrial Training & Research Collaboration", year: "2023", benefits: "IoT & Smart Manufacturing" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
@@ -396,6 +523,26 @@ export const departments = [
         studentCount: "65+",
         facultyCount: "7+",
         labCount: "4+",
+        labs: [
+            {
+                name: "Electrical Machines & Modern Drives Lab",
+                image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80",
+                description: "Heavy-duty machinery facility for testing torque-speed curves, regulation, and efficiency across AC/DC generators, synchronous motors, and transformers.",
+                equipment: "DC Shunt/Compound Motor-Generator Sets, 3-Phase Squirrel Cage & Slip Ring Induction Motors, Alternators, Auto-Transformers, Resistive/Inductive Load Banks"
+            },
+            {
+                name: "Power Electronics & Renewable Energy Lab",
+                image: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80",
+                description: "Hands-on development of modern power semiconductor switching circuits, solar PV inverters, MPPT trackers, and brushless DC motor speed controllers.",
+                equipment: "IGBT/MOSFET Inverter Trainer Modules, Solar PV Array Emulators, Dual Trace Digital Storage Oscilloscopes, DSP Power Controllers, High-Voltage Probes"
+            },
+            {
+                name: "Control Systems & PLC Automation Lab",
+                image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80",
+                description: "Industry-standard control systems testing facility for developing PID loop tuning, stepper/servo positioning, and PLC ladder logic automation.",
+                equipment: "Siemens S7-1200 Programmable Logic Controllers, SCADA Interface Terminals, Synchro Transmitter-Receiver Systems, AC/DC Servomotor Position Controllers"
+            }
+        ],
         mou: [
             { partner: "Maxbite Technologies Pvt. Ltd", purpose: "Advanced Industrial Training & Research Collaboration", year: "2023", benefits: "IoT & Smart Manufacturing" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
@@ -442,6 +589,20 @@ export const departments = [
         studentCount: "70+",
         facultyCount: "4+",
         labCount: "2+",
+        labs: [
+            {
+                name: "Biomedical Instrumentation & Biosensors Lab",
+                image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
+                description: "State-of-the-art facility for capturing physiological bio-potentials, calibrating patient monitors, and biosensor transducer experimentation.",
+                equipment: "12-Lead Diagnostic ECG Machines, Multi-Channel EMG & EEG Simulators, Pulse Oximeter Calibration Units, Biosensor Transducer Kits"
+            },
+            {
+                name: "Medical Imaging & Diagnostic Signal Processing Lab",
+                image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80",
+                description: "Advanced computational lab for DICOM medical image enhancement, MRI/CT 3D volume reconstruction, and AI-assisted disease classification.",
+                equipment: "DICOM Image Workstations, MATLAB Medical Imaging Toolbox, 3D Slicer, Ultrasound Pulse-Echo Phantoms, Biopac Signal Data Acquisition Systems"
+            }
+        ],
         mou: [
             { partner: "Maxbite Technologies Pvt. Ltd", purpose: "Advanced Industrial Training & Research Collaboration", year: "2023", benefits: "IoT & Smart Manufacturing" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
@@ -460,39 +621,135 @@ export const departments = [
         wk: COMMON_UG_WK,
         heroImage: "https://anandice.ac.in/wp-content/uploads/2025/07/human-hand-passing-gear-robotic-hand-scaled.jpg",
         overview: "The Department of Mechanical Engineering was established in the year of 2009 with an intake of 60 UG students. The Department has grown significantly and offers B.E. Mechanical Engineering with sanctioned intake increased to 180 during the year 2012-13. Post graduate M.E. Computer Aided Design in the year 2013-14 and Manufacturing Engineering in the year 2014-15 courses are introduced with an intake of 18 students. Department of Mechanical Engineering is recognized as approved Research Centre of Anna University, Chennai. The department has state of art equipment's in the laboratories to provide deep experimental knowledge to the students. The department has well-qualified, industry oriented and experienced team of faculty members with specialized in different fields of Mechanical Engineering committed to provide quality education. The department is also committed to provide industry oriented research/consultancy work by the experienced faculty members. The department is also having tie-up with Maxbite Technologies Pvt. Ltd, Rabwin industry, CADD centre, Thirumaarul machinist and Prakash Gears Coimbatore etc., for training and placements.",
-        vision: "To provide a comprehensive education and research environment that prepares students to design, develop and innovate mechanical systems and technologies that address real-world challenges, while promoting sustainability, safety, ethical and social responsibility.",
+        vision: "To be a centre of excellence in education, research, and innovation, fostering technically competent, ethically responsible, and industry-ready professionals who contribute to sustainable development and societal advancement.",
         mission: [
-            "M1: To provide a challenging and engaging learning experience that prepares students for careers in mechanical engineering and collaborate with industry partners for a relevant curriculum.",
-            "M2: To empower students with technical skills, critical thinking, and leadership qualities. Provide industry internships and professional experiences.",
-            "M3: To conduct interdisciplinary research on energy systems, robotics, biomedical engineering, materials science and sustainability Collaborate with industry partners for research solutions.",
-            "M4: To promote excellence in teaching, research, service and outreach. Connect students with industry partners and alumni for job placement support.",
-            "M5: To foster collaboration and diversity among faculty, students and stakeholders. Collaborate with industry partners for real-world projects and research experiences, while enhancing the department’s reputation."
+            "M1: Mastering strong foundational knowledge in Mechanical and Manufacturing Engineering through effective teaching, practical training, and continuous learning, ensuring technical competence.",
+            "M2: Encouraging innovation, research, and development in emerging areas of mechanical engineering, fostering innovation and problem-solving skills.",
+            "M3: Collaborating with industry to bridge the gap between academia and practice through internships, industry projects, consultancy, and skill-based training, creating industry-ready professionals.",
+            "M4: Harnessing ethical values, leadership qualities, social responsibility, and lifelong learning among students, promoting ethical responsibility, sustainable development, and societal advancement."
         ],
         peo: [
-            "PEO1: Effectuating success in careers by exploring with the design, digital and computational analysis of engineering systems, experimentation and testing, smart manufacturing, technical services, and research.",
-            "PEO2: Amalgamating effectively with stakeholders to update and improve their core competencies and abilities to ethically compete in the ever-changing multicultural global enterprise.",
-            "PEO3: To encourage multi-disciplinary research and development to foster advanced technology, and to nurture innovation and entrepreneurship in order to compete successfully in the global economy.",
-            "PEO4: To globally share and apply technical knowledge to create new opportunities that proactively advances our society through team efforts and to solve various challenging technical, environmental and societal problems.",
-            "PEO5: To create world class mechanical engineers capable of practice engineering ethically with a solid vision to become great leaders in academia, industries and society."
+            "PEO1: Apply their knowledge of design, digital and computational analysis, experimentation and testing, smart manufacturing, technical services, and research to solve real-world engineering problems.",
+            "PEO2: Collaborate with stakeholders, continuously enhance their competencies, and demonstrate ethical practices, teamwork, and leadership qualities to thrive in a multicultural global environment.",
+            "PEO3: Engage in multidisciplinary research, innovation, and entrepreneurial activities, and apply their technical knowledge to create sustainable solutions addressing engineering, environmental, and societal challenges."
         ],
         pso: [
             "PSO1: Apply the knowledge gained in Mechanical Engineering for design and development and manufacture of engineering systems.",
             "PSO2: Apply the knowledge acquired to investigate research-oriented problems in mechanical engineering with due consideration for environmental and social impacts.",
-            "PSO3: Use the engineering analysis and data management tools for effective management of multidisciplinaryprojects."
+            "PSO3: Use the engineering analysis and data management tools for effective management of multidisciplinary projects."
         ],
         milestones: [
             { year: "2008", desc: "Department Established" },
             { year: "2016", desc: "Research Center Status" }
         ],
         hod: {
-            name: "Dr.S.Rajesh Ruban",
-            image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/hod/mech-hod.jpeg",
-            designation: "Associate Professor & Head",
-            message: "Design, build, and create the future! Learn manufacturing, thermal engineering, and machine design. Gain hands-on skills through labs, projects, and workshops. Step into careers in automotive, production, and mechanical industries."
+            name: "Dr. S. Rajesh Ruban M.E., Ph.D.",
+            image: "/images/mech-hod.png",
+            designation: "Head of the Department",
+            message: "A hearty welcome to the Department of Mechanical Engineering at EASA College of Engineering and Technology. The department runs undergraduate program in Mechanical Engineering and PG program Manufacturing Engineering. Department also run research Centre leading to Ph.D. Program. The department vision is to be excellence in value based on Mechanical Engineering Education. The department has well qualified and dedicated faculty. The department strives to Impart knowledge and training of the highest standard. The objective of the department is to prepare students for a successful career in Industry, Research and Academics to meet the needs of growing technology. Our efforts are to develop the ability among students to synthesize data and technical concepts for application to product design. We provide an opportunity for students to work as members of a team on multidisciplinary projects. Mechanical engineering department provides students with a sound foundation in the mathematical, scientific and engineering fundamentals necessary to formulate, solve and analyze engineering problems and to prepare them for higher studies as well as research. We promote student awareness for life-long learning and to introduce them to professional ethics and codes."
         },
         studentCount: "125++",
         facultyCount: "12+",
         labCount: "6+",
+        labs: [
+            {
+                name: "CNC, Robotics & Advanced Manufacturing Lab",
+                image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80",
+                description: "Precision CNC production and industrial robotics cell designed for automated G-code part programming, milling, and automated pick-and-place cycles.",
+                equipment: "Production CNC Lathe, 3-Axis CNC Vertical Machining Center, 6-Axis Industrial Robotic Arm, Mastercam 2024, EdgeCAM"
+            },
+            {
+                name: "CAD / CAM & Rapid Prototyping Lab",
+                image: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=1200&q=80",
+                description: "Next-generation engineering design and finite element simulation workspace equipped for parametric solid modeling, CFD, and 3D additive printing.",
+                equipment: "SolidWorks Professional, Autodesk Fusion 360, ANSYS Workbench FEA/CFD, Industrial Dual-Extruder 3D Printers, 3D Laser Scanner"
+            },
+            {
+                name: "Thermal Engineering & IC Engines Research Lab",
+                image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80",
+                description: "Equipped with computerized dynamometer test benches for evaluating brake power, specific fuel consumption, heat balance, and emission standards.",
+                equipment: "Computerized Multi-Cylinder 4-Stroke Petrol/Diesel Engines, Eddy Current Dynamometers, Gas Analyzer, Bomb Calorimeter, Heat Exchanger Test Sets"
+            }
+        ],
+        faculty: [
+            {
+                name: "Dr. S. Rajesh Ruban",
+                designation: "Associate Professor and Head",
+                qualification: "M.E., Ph.D.",
+                subject: "Mechanical Engineering",
+                order: 1
+            },
+            {
+                name: "Dr. Robert Kennedy Z",
+                designation: "Principal & Professor",
+                qualification: "Ph.D.",
+                subject: "Mechanical Engineering",
+                order: 2
+            },
+            {
+                name: "Dr. Natarajan N",
+                designation: "Professor & Dean-Academics",
+                qualification: "Ph.D.",
+                subject: "Mechanical Engineering",
+                order: 3
+            },
+            {
+                name: "Dr. Santhosh S",
+                designation: "Professor & Dean-Mechanical Sciences",
+                qualification: "Ph.D.",
+                subject: "Mechanical Engineering",
+                order: 4
+            },
+            {
+                name: "Dr. Subhash S",
+                designation: "Assistant Professor & UG Coordinator",
+                qualification: "Ph.D.",
+                subject: "Mechanical Engineering",
+                order: 5
+            },
+            {
+                name: "Mr. Gunasekaran T",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Mechanical Engineering",
+                order: 6
+            },
+            {
+                name: "Mr. Santhosh Kumar V",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Mechanical Engineering",
+                order: 7
+            },
+            {
+                name: "Mr. Muthupandiaraja M",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Mechanical Engineering",
+                order: 8
+            },
+            {
+                name: "Mr. Nithyananth R",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Mechanical Engineering",
+                order: 9
+            },
+            {
+                name: "Mr. Jeevanantham R",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Mechanical Engineering",
+                order: 10
+            },
+            {
+                name: "Mr. Hari Baalaaji R A",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Mechanical Engineering",
+                order: 11
+            },
+        ],
         mou: [
             { partner: "Maxbite Technologies Pvt. Ltd", purpose: "Advanced Industrial Training & Research Collaboration", year: "2023", benefits: "IoT & Smart Manufacturing" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
@@ -543,7 +800,27 @@ export const departments = [
         },
         studentCount: "110+",
         facultyCount: "9+",
-        labCount: "4+"
+        labCount: "4+",
+        labs: [
+            {
+                name: "Farm Machinery & Power Engineering Lab",
+                image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
+                description: "Heavy agricultural machinery evaluation lab for tractor dynamometer load testing, tillage implement calibration, and harvester mechanism studies.",
+                equipment: "45 HP Agricultural Tractors, Power Tillers, Multi-Crop Seed Drills, Rotary Tillers, Mechanical Harvester Simulators, Tractive Dynamometer Test Units"
+            },
+            {
+                name: "Irrigation & Soil-Water Conservation Engineering Lab",
+                image: "https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&w=1200&q=80",
+                description: "Equipped for automated micro-irrigation system design, evaluating soil hydraulic permeability, runoff flumes, and watershed conservation modeling.",
+                equipment: "Automated Drip & Micro-Sprinkler Test Setup, Soil Moisture TDR Sensors, Hydraulic Flume, Pressure Plate Apparatus, Sieve Shakers"
+            },
+            {
+                name: "Post-Harvest & Food Processing Engineering Lab",
+                image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=1200&q=80",
+                description: "Hands-on processing of agricultural commodities, dehydration kinetics, oil extraction, and quality control grading systems.",
+                equipment: "Digital Grain Moisture Analyzers, Hot Air Industrial Tray Dryer, Cold-Press Oil Expeller, Grain Cleaner-Cum-Grader, Continuous Nitrogen Packaging Unit"
+            }
+        ]
     },
 
     //pg courses
@@ -554,35 +831,77 @@ export const departments = [
         name: "Computer Science and Engineering",
         slug: "me-computer-science-and-engineering",
         type: "PG",
+        degree: "M.E.",
         heroImage: "https://i.pinimg.com/736x/58/34/1b/58341b7bd2f64e45cb6726f4a3ad1991.jpg",
-        overview: "The M.E. Computer Science and Engineering program is designed to provide advanced knowledge and research skills in the field of computer science.",
-        vision: "To produce research-oriented postgraduates in Computer Science and Engineering.",
+        overview: "The M.E. in Computer Science and Engineering at EASA College is a premier postgraduate program engineered to develop master-level expertise in generative AI, cloud-native computing, intelligent distributed systems, and cutting-edge software research.",
+        vision: "To be a nationally recognized center of excellence in advanced computing, generative artificial intelligence, and innovative software research, nurturing high-caliber postgraduate technologists, researchers, and ethical leaders capable of steering global digital transformation.",
         mission: [
-            "To offer advanced courses in emerging areas of computer science.",
-            "To promote research and publication in high-impact journals.",
-            "To prepare students for academic and industrial research careers."
+            "M1: To deliver cutting-edge postgraduate education in emerging domains such as Generative AI, Cloud-Native Systems, High-Performance Computing, and Resilient Cybersecurity.",
+            "M2: To foster a vibrant research culture producing high-impact scholarly publications in Scopus/SCI-indexed journals, patents, and innovative technology transfers.",
+            "M3: To collaborate with leading global IT enterprises and research labs for translational live projects, specialized consultancy, and technology immersion.",
+            "M4: To cultivate professional integrity, entrepreneurial aptitude, and societal responsibility for sustainable technological advancement."
         ],
         peo: [
-            "Graduates will become experts in specialized areas of computer science.",
-            "Graduates will contribute to the advancement of knowledge through research.",
-            "Graduates will take up leadership roles in academia and industry."
+            "PEO1: Graduates will achieve mastery as advanced computing specialists, system architects, and researchers addressing multifaceted enterprise and societal challenges.",
+            "PEO2: Graduates will spearhead cutting-edge innovations through patents, Scopus-indexed research, and high-performance intelligent software systems.",
+            "PEO3: Graduates will demonstrate exemplary professional ethics, technical leadership, and continuous lifelong learning in modern computing disciplines."
         ],
         pso: [
-            "Ability to conduct independent research in computer science.",
-            "Ability to develop advanced software solutions for complex problems."
+            "PSO1: Ability to conceptualize, design, and architect resilient, high-performance distributed systems utilizing modern AI, Cloud, and Data Engineering frameworks.",
+            "PSO2: Ability to execute independent, high-impact scientific research and develop scalable solutions addressing complex real-world computing paradigms."
         ],
         milestones: [
             { year: "2014", desc: "PG Program Started" }
         ],
+        seoTitle: "M.E. Computer Science and Engineering | Best PG College in Coimbatore | EASA College",
+        seoDescription: "Pursue M.E. in Computer Science & Engineering at EASA College, Coimbatore. Specialized in Generative AI, Cloud Computing & Advanced Systems with 100% research & placement guidance.",
+        seoKeywords: "M.E Computer Science Coimbatore, ME CSE College, Best PG Engineering Colleges Tamil Nadu, Anna University ME Computer Science, Advanced AI PG Course, EASA College of Engineering and Technology, ME CSE syllabus, PG Placements Coimbatore",
         hod: {
-            name: "Dr. D. Wilson",
-            image: "https://randomuser.me/api/portraits/women/65.jpg",
+            name: "Dr. M.G Dinesh",
+            image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/hod/IMG-20251204-WA0010.jpg",
             designation: "Head of PG Studies",
-            message: "Our PG program is tailored to meet the research and development needs of the IT industry. we encourage innovation and critical thinking."
+            message: "Our PG program is tailored to meet the research and development needs of the IT industry. We encourage innovation, high-impact research, and critical thinking."
         },
+        faculty: [
+            {
+                name: "Mr. Abhijit V",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Computer Science and Engineering",
+                order: 1
+            },
+            {
+                name: "Mr. Karthikeyan",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Computer Science and Engineering",
+                order: 2
+            },
+            {
+                name: "Ms. Sangeetha Poorani",
+                designation: "Assistant Professor",
+                qualification: "M.E.",
+                subject: "Computer Science and Engineering",
+                order: 3
+            }
+        ],
         studentCount: "50+",
         facultyCount: "10+",
-        labCount: "5+"
+        labCount: "5+",
+        labs: [
+            {
+                name: "High-Performance AI & Cloud Systems Research Lab",
+                image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
+                description: "Post-graduate research computing facility dedicated to large language model fine-tuning, zero-trust cloud microservices, and high-performance distributed computing.",
+                equipment: "NVIDIA Multi-GPU Compute Server Node, OpenStack Private Cloud, PyTorch/TensorFlow Enterprise, Apache Kafka Streaming Cluster"
+            },
+            {
+                name: "Advanced Data Intelligence & Cryptographic Security Lab",
+                image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+                description: "Master-level research center for privacy-preserving federated machine learning, blockchain smart contracts, and malware decompilation analysis.",
+                equipment: "Cloudera Enterprise Big Data Sandbox, Ethereum/Hyperledger Testnet, Ghidra Reverse Engineering Suite, Deep Learning Defense Toolkits"
+            }
+        ]
     },
 
     //construction engineering and management
@@ -591,35 +910,54 @@ export const departments = [
         name: "Construction Engineering and Management",
         slug: "construction-engineering-and-management",
         type: "PG",
+        degree: "M.E.",
         heroImage: "https://i.pinimg.com/736x/b6/c7/42/b6c742669563327b00c4c7ba42278d09.jpg",
-        overview: "The PG program in Construction Engineering and Management focuses on the planning, design, and management of construction projects.",
-        vision: "To produce leaders in the construction industry.",
+        overview: "The M.E. in Construction Engineering and Management at EASA College is a cutting-edge postgraduate program delivering advanced competencies in smart infrastructure planning, BIM (Building Information Modeling), AI in construction automation, and sustainable green building technologies.",
+        vision: "To be a center of excellence in modern construction engineering, smart project analytics, and sustainable infrastructure management, developing visionary construction leaders and techno-managers for global infrastructure development.",
         mission: [
-            "To impart advanced knowledge in construction management.",
-            "To promote research in sustainable construction.",
-            "To develop managerial skills."
+            "M1: To deliver advanced education in digital project scheduling, BIM methodologies, construction economics, and smart contract management.",
+            "M2: To promote high-impact research in sustainable building materials, green construction practices, and AI-driven site safety automation.",
+            "M3: To cultivate strategic corporate partnerships with leading infrastructure developers, EPC enterprises, and project management consultancies.",
+            "M4: To instill managerial agility, ethical professional leadership, and life-cycle sustainability standards in complex construction ecosystems."
         ],
         peo: [
-            "Graduates will manage complex construction projects.",
-            "Graduates will ensure quality and safety in construction.",
-            "Graduates will lead construction organizations."
+            "PEO1: Graduates will lead and manage complex mega-infrastructure projects utilizing modern digital construction tools, BIM, and automated workflow techniques.",
+            "PEO2: Graduates will implement innovative, sustainable, and cost-effective construction technologies adhering to global green standards and safety protocols.",
+            "PEO3: Graduates will demonstrate entrepreneurial competence, ethical leadership, and continuous professional mastery in multinational construction enterprises."
         ],
         pso: [
-            "Ability to plan and schedule construction activities.",
-            "Ability to manage construction resources effectively."
+            "PSO1: Ability to formulate comprehensive project plans, risk models, BIM 4D/5D simulations, and financial structures for high-value infrastructure projects.",
+            "PSO2: Ability to deploy smart construction methodologies, lean techniques, and eco-friendly structural materials for sustainable urban development."
         ],
         milestones: [
             { year: "2015", desc: "PG Program Started" }
         ],
+        seoTitle: "M.E. Construction Engineering & Management | Best PG College in Coimbatore | EASA College",
+        seoDescription: "Join M.E. Construction Engineering & Management at EASA College Coimbatore. Master BIM, Smart Infrastructure, Lean Construction & Project Management with 100% placement support.",
+        seoKeywords: "M.E Construction Engineering Coimbatore, ME Construction Management College, Anna University ME CEM, BIM Certification PG, Smart Construction Courses Tamil Nadu, EASA College Construction PG",
         hod: {
-            name: "Dr. CM Head",
+            name: "Dr. SUNILAA GEORGE",
             image: "",
             designation: "Head of PG Studies",
-            message: "Building the nation's infrastructure."
+            message: "Building resilient and sustainable infrastructure through innovative engineering and strategic project management."
         },
         studentCount: "30+",
         facultyCount: "5+",
-        labCount: "2+"
+        labCount: "2+",
+        labs: [
+            {
+                name: "BIM & Smart Infrastructure Simulation Lab",
+                image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80",
+                description: "State-of-the-art facility for 4D/5D Building Information Modeling (BIM), clash detection, project schedule forecasting, and virtual construction site walkthroughs.",
+                equipment: "Autodesk Revit 2025 Enterprise, Primavera P6 Professional, Navisworks Manage, MS Project, VR Immersion Headsets, High-Performance BIM Modeling Workstations"
+            },
+            {
+                name: "Advanced Concrete Testing & NDT Materials Lab",
+                image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80",
+                description: "Postgraduate testing center for high-performance concrete mix design, non-destructive ultrasonic evaluation, self-healing bio-concrete, and durability index profiling.",
+                equipment: "Digital Compression Testing Machine (2000 kN), Ultrasonic Pulse Velocity (UPV) Meter, Concrete Rebound Hammer, Diamond Core Drilling Machine, Permeability Cell"
+            }
+        ]
     },
 
     //PG COMMUNICATION -SYSTEMS
@@ -628,35 +966,54 @@ export const departments = [
         name: "Communication Systems",
         slug: "communication-systems",
         type: "PG",
+        degree: "M.E.",
         heroImage: "https://i.pinimg.com/736x/79/bd/d7/79bdd7afb48cd18004d3cda295e9670a.jpg",
-        overview: "The PG program in Communication Systems offers advanced study in the field of telecommunications and networking.",
-        vision: "To be a center of research in communication technologies.",
+        overview: "The M.E. in Communication Systems at EASA College is an advanced postgraduate program designed to develop cutting-edge expertise in 5G/6G wireless networks, optical communication, IoT architectures, RF/Microwave engineering, and AI-driven signal processing.",
+        vision: "To emerge as a premier hub for research and advanced education in next-generation telecommunications, 5G/6G wireless ecosystems, and intelligent signal processing, empowering postgraduates to lead breakthroughs in global digital connectivity.",
         mission: [
-            "To provide in-depth knowledge of communication theory.",
-            "To foster research in wireless and optical communication.",
-            "To prepare students for R&D roles."
+            "M1: To impart advanced theoretical and practical knowledge in 5G/6G architectures, cognitive radio, smart antenna arrays, and high-speed photonics.",
+            "M2: To foster state-of-the-art research in wireless networks, satellite communications, and edge-AI telecommunication protocols resulting in patents and Scopus publications.",
+            "M3: To establish robust linkages with leading telecom conglomerates, semiconductor giants, and R&D institutions for applied industry projects.",
+            "M4: To nurture ethical, innovative, and socially conscious communication engineers capable of solving modern connectivity challenges."
         ],
         peo: [
-            "Graduates will design advanced communication systems.",
-            "Graduates will contribute to standardization bodies.",
-            "Graduates will pursue academic or industrial research."
+            "PEO1: Graduates will excel as telecommunication system architects, RF specialists, and researchers designing next-generation wireless and optical networks.",
+            "PEO2: Graduates will pioneer innovations in communication signal processing, cognitive networks, and IoT telematics through patenting and research.",
+            "PEO3: Graduates will exhibit professional leadership, global engineering ethics, and lifelong technical adaptability in multinational telecom enterprises."
         ],
         pso: [
-            "Ability to analyze specific communication problems.",
-            "Ability to simulate and test communication networks."
+            "PSO1: Ability to design, simulate, and optimize complex 5G/6G wireless transceivers, MIMO arrays, and high-frequency RF systems using industry-standard tools.",
+            "PSO2: Ability to conduct cutting-edge research in optical, satellite, and cyber-secure communication networks for industrial and defense applications."
         ],
         milestones: [
             { year: "2014", desc: "PG Program Started" }
         ],
+        seoTitle: "M.E. Communication Systems | Top 5G & Wireless PG College in Coimbatore | EASA College",
+        seoDescription: "Pursue M.E. in Communication Systems at EASA College Coimbatore. Advanced specialization in 5G/6G Networks, RF Design, Optical Systems & IoT with 100% placement assistance.",
+        seoKeywords: "M.E Communication Systems Coimbatore, ME Wireless Communication College Tamil Nadu, 5G Telecommunications PG Anna University, RF Engineering Masters, EASA College ECE PG",
         hod: {
             name: "Dr. CS Head",
             image: "",
             designation: "Head of PG Studies",
-            message: "Connecting people faster and better."
+            message: "Empowering seamless next-generation connectivity through cutting-edge telecommunications and intelligent signal networks."
         },
         studentCount: "25+",
         facultyCount: "4+",
-        labCount: "3+"
+        labCount: "3+",
+        labs: [
+            {
+                name: "5G Wireless & Software Defined Radio (SDR) Lab",
+                image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80",
+                description: "Research facility for prototyping 5G NR physical layer protocols, massive MIMO beamforming arrays, cognitive radio sensing, and wireless channel modeling.",
+                equipment: "National Instruments USRP-2901 SDR Transceivers, MATLAB 5G Toolbox, GNU Radio Workstations, Keysight RF Spectrum Analyzers (6 GHz), Planar Antenna Arrays"
+            },
+            {
+                name: "Advanced Photonics & Optical Networks Lab",
+                image: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=1200&q=80",
+                description: "Equipped for dense wavelength division multiplexing (DWDM) simulation, optical fiber dispersion compensation, and high-speed optical transceivers.",
+                equipment: "OptiSystem Optical Communication Simulator, Multi-Wavelength Laser Diode Modules, Optical Spectrum Analyzers, Precision Fiber Fusion Splicing Stations"
+            }
+        ]
     },
 
     //PG MANUFACTURING ENGINEERING
@@ -665,19 +1022,21 @@ export const departments = [
         name: "Manufacturing Engineering",
         slug: "manufacturing-engineering",
         type: "PG",
+        degree: "M.E.",
         heroImage: "https://i.pinimg.com/1200x/cf/1d/1a/cf1d1a92f456ed718d362b6a5b84e03d.jpg",
-        overview: "The PG program in Manufacturing Engineering focuses on modern manufacturing processes and systems.",
-        vision: "To excel in manufacturing education and research.",
+        overview: "The M.E. in Manufacturing Engineering program at EASA College equips postgraduates with advanced competencies in Industry 4.0, additive manufacturing (3D printing), robotics, digital twins, and smart sustainable production systems.",
+        vision: "To be a globally recognized center of excellence in advanced manufacturing, Industry 4.0 automation, and smart factory technologies, producing innovative manufacturing technocrats and industrial researchers.",
         mission: [
-            "M1: To teach advanced manufacturing technologies.",
-            "M2: To promote research in automation and robotics.",
-            "M3: To collaborate with manufacturing industries."
+            "M1: To impart high-level education in additive manufacturing, digital twin modeling, automated robotics, and precision machining.",
+            "M2: To foster impactful research in sustainable materials, micro-manufacturing, and AI-enabled quality control yielding patents and Scopus publications.",
+            "M3: To cultivate dynamic industrial partnerships with aerospace, automotive, and smart-manufacturing conglomerates for collaborative R&D.",
+            "M4: To instil entrepreneurial acumen, ethical management principles, and circular economy practices in industrial manufacturing."
         ],
         peo: [
-            "PEO1: To prepare students to know and utilize the modern manufacturing facility in order to improve productivity.",
-            "PEO2: To impart skills to use smart machines and apply latest technology in manufacturing field to innovate production process that will be useful to the Society.",
-            "PEO3: To imbibe skills for integrated problem-solving techniques to optimize the Manufacturing resources for sustainable development.",
-            "PEO4: To develop research attitude, new product, and process to solve problems in the field of manufacturing and to prepare the necessary reports."
+            "PEO1: To prepare students to know and utilize modern smart manufacturing facilities in order to enhance productivity and digital agility.",
+            "PEO2: To impart skills in smart machines, robotics, and cyber-physical production systems for societal and industrial progress.",
+            "PEO3: To develop integrated problem-solving techniques for optimizing manufacturing resources toward sustainable, zero-defect production.",
+            "PEO4: To cultivate research aptitude, new product development, and innovation to solve complex industrial manufacturing challenges."
         ],
         po: [
             "PO1: An ability to independently carry out research/investigation and development work to solve practical problems",
@@ -688,22 +1047,39 @@ export const departments = [
             "PO6: To pursue higher studies / pursue their career or entrepreneur in manufacturing and allied industries"
         ],
         pso: [
-            "PSO1: Apply the knowledge gained in Manufacturing Engineering for manufacture of engineering systems.",
+            "PSO1: Apply the knowledge gained in Manufacturing Engineering for manufacture of smart engineering systems.",
             "PSO2: Apply the knowledge acquired to investigate research-oriented problems in Manufacturing engineering with due consideration for environmental and social impacts.",
-            "PSO3: Use the engineering analysis and data management tools for effective management of multidisciplinary projects."
+            "PSO3: Use engineering analysis, additive manufacturing, and digital management tools for effective execution of multidisciplinary projects."
         ],
         milestones: [
             { year: "2016", desc: "PG Program Started" }
         ],
+        seoTitle: "M.E. Manufacturing Engineering | Industry 4.0 & Robotics PG in Coimbatore | EASA College",
+        seoDescription: "Enroll in M.E. Manufacturing Engineering at EASA College Coimbatore. Master Additive Manufacturing, Smart Automation & Digital Twins with top placements and live industry labs.",
+        seoKeywords: "M.E Manufacturing Engineering Coimbatore, Industry 4.0 PG Course Tamil Nadu, Additive Manufacturing Masters, Robotics and Automation College, Anna University ME Manufacturing, EASA College",
         hod: {
             name: "Dr. Mfg Head",
             image: "",
             designation: "Head of PG Studies",
-            message: "Making things better."
+            message: "Innovating modern manufacturing through automation, additive technology, and smart factory engineering."
         },
         studentCount: "20+",
         facultyCount: "4+",
-        labCount: "3+"
+        labCount: "3+",
+        labs: [
+            {
+                name: "Industry 4.0 & Smart Robotics Lab",
+                image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80",
+                description: "Postgraduate testbed for simulating cyber-physical production lines, digital twin development, industrial IoT sensorization, and cobot automation.",
+                equipment: "Industrial Collaborative Robot (Cobot), Siemens MindSphere IoT Gateway, Siemens Process Simulate, OPC-UA Telemetry Modules"
+            },
+            {
+                name: "Additive Manufacturing & Rapid Prototyping Research Lab",
+                image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80",
+                description: "Advanced research in functional 3D printed polymer/composite components, topology optimization, metamaterials, and precision surface metrology.",
+                equipment: "Industrial Stereolithography (SLA) 3D Printer, High-Temperature FDM 3D Printer, Materialise Magics Software, Non-Contact Optical 3D Scanner"
+            }
+        ]
     },
 
     //PG POWER ELECTRONICS AND DRIVES
@@ -712,6 +1088,7 @@ export const departments = [
         name: "Power Electronics and Drives",
         slug: "power-electronics-and-drives",
         type: "PG",
+        degree: "M.E.",
         po: [
             "PO1: An ability to independently carry out research/investigation and development work to solve practical problems",
             "PO2: An ability to write and present a substantial technical report/document.",
@@ -721,34 +1098,52 @@ export const departments = [
             "PO6: Implement cost effective and cutting edge technologies in power electronics and drives system."
         ],
         heroImage: "https://i.pinimg.com/736x/d1/71/92/d17192262b72c69cddb76efdc68bba6d.jpg",
-        overview: "The PG program in Power Electronics and Drives covers the design and control of power electronic converters and electric drives.",
-        vision: "To be a leader in power electronics research.",
+        overview: "The M.E. in Power Electronics and Drives at EASA College provides specialized master-level expertise in Electric Vehicle (EV) powertrains, smart grid integration, wide-bandgap semiconductors, and renewable energy conversion systems.",
+        vision: "To be a leader in power electronics education and clean-energy research, producing world-class power engineers and innovators committed to global decarbonization and smart energy revolutions.",
         mission: [
-            "To provide specialized knowledge in power electronics.",
-            "To encourage research in renewable energy integration.",
-            "To develop efficient power conversion systems."
+            "M1: To provide advanced education in modern power converters, EV motor drives, battery management systems, and smart grid automation.",
+            "M2: To drive high-impact research in renewable energy integration, high-efficiency power topologies, and wide-bandgap semiconductor applications.",
+            "M3: To establish active research collaborations with EV manufacturers, clean-tech industries, and power utilities for cutting-edge consultancy.",
+            "M4: To foster ethical engineering leadership, sustainable energy stewardship, and lifelong technical mastery."
         ],
         peo: [
-            "Graduates will design efficient power electronic systems.",
-            "Graduates will contribute to energy conservation.",
-            "Graduates will work in electric vehicle industry."
+            "PEO1: Graduates will design advanced, high-efficiency power electronic converter systems and EV powertrains for clean-tech industries.",
+            "PEO2: Graduates will spearhead breakthroughs in renewable energy integration, battery management, and smart microgrids.",
+            "PEO3: Graduates will serve in executive technical roles in electric mobility, power management, and industrial automation sectors."
         ],
         pso: [
-            "Ability to model and simulate power electronic circuits.",
-            "Ability to design control algorithms for drives."
+            "PSO1: Ability to model, simulate, and hardware-prototype advanced power electronic circuits, inverters, and digital drive control algorithms.",
+            "PSO2: Ability to engineer intelligent energy conversion and power conditioning solutions for electric vehicles and renewable microgrids."
         ],
         milestones: [
             { year: "2015", desc: "PG Program Started" }
         ],
+        seoTitle: "M.E. Power Electronics and Drives | EV & Smart Grid PG in Coimbatore | EASA College",
+        seoDescription: "Pursue M.E. Power Electronics & Drives at EASA College Coimbatore. Specialized in Electric Vehicles (EV), Smart Power Grids & Renewable Energy with 100% placement support.",
+        seoKeywords: "M.E Power Electronics Coimbatore, EV Powertrain PG Course, Smart Grid Masters Tamil Nadu, Anna University ME PED, Clean Energy Engineering PG, EASA College EEE PG",
         hod: {
             name: "Dr. PED Head",
             image: "",
             designation: "Head of PG Studies",
-            message: "Powering the future efficiently."
+            message: "Driving the global clean-energy and electric mobility revolution through high-efficiency power electronic innovations."
         },
         studentCount: "25+",
         facultyCount: "4+",
-        labCount: "3+"
+        labCount: "3+",
+        labs: [
+            {
+                name: "Electric Vehicle & Smart Powertrain Lab",
+                image: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80",
+                description: "Postgraduate electric mobility research center for testing permanent magnet synchronous motor (PMSM) drives, bidirectional DC-DC converters, and BMS state-of-charge algorithms.",
+                equipment: "EV Powertrain Dynamometer Testbed, PMSM & BLDC High-Torque Drives, Battery Management System (BMS) Hardware Simulator, dSPACE MicroLabBox Controller"
+            },
+            {
+                name: "Smart Microgrid & Digital Control Lab",
+                image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80",
+                description: "Real-time digital simulation of grid-tied multi-level inverters, active power filters, GaN/SiC wide-bandgap converter topologies, and harmonic compensation.",
+                equipment: "OPAL-RT Real-Time Grid Simulator, Multi-Level Grid-Tied Inverter, Hardware-in-the-Loop (HIL) Platform, Fluke 435 Series II Power Quality Analyzer"
+            }
+        ]
     },
 
     //PG STRUCTURAL ENGINEERING
@@ -757,35 +1152,54 @@ export const departments = [
         name: "Structural Engineering",
         slug: "structural-engineering",
         type: "PG",
+        degree: "M.E.",
         heroImage: "https://i.pinimg.com/736x/ca/6d/d6/ca6dd63f1ea5fc871ec8e36d510516d6.jpg",
-        overview: "The PG program in Structural Engineering deals with the analysis and design of structures like buildings, bridges, and towers.",
-        vision: "To produce world-class structural engineers.",
+        overview: "The M.E. in Structural Engineering program at EASA College delivers advanced master-level training in seismic-resilient design, tall building aerodynamics, advanced composite materials, finite element modeling, and structural health monitoring.",
+        vision: "To achieve national distinction in advanced structural engineering, disaster-resilient infrastructure design, and sustainable materials research, producing globally competitive structural designers and researchers.",
         mission: [
-            "To impart advanced concepts in structural analysis.",
-            "To promote research in earthquake engineering.",
-            "To ensure safety and durability of structures."
+            "M1: To deliver high-level pedagogical rigor in computational structural mechanics, earthquake engineering, dynamic blast analysis, and forensic engineering.",
+            "M2: To foster cutting-edge research in smart sensor-based structural health monitoring, high-performance concrete, and sustainable composite matrices.",
+            "M3: To establish active corporate synergy with premier structural design firms, infrastructure consultants, and research laboratories.",
+            "M4: To instill unwavering ethical responsibility, safety-first professional leadership, and resilient engineering principles."
         ],
         peo: [
-            "Graduates will design safe and resilient structures.",
-            "Graduates will solve complex structural problems.",
-            "Graduates will adopt new materials and technologies."
+            "PEO1: Graduates will engineer safe, resilient, and aesthetically distinguished structures withstanding extreme seismic and dynamic environmental loads.",
+            "PEO2: Graduates will solve complex structural challenges utilizing advanced computational finite element tools and modern composite materials.",
+            "PEO3: Graduates will lead premier structural design consultancies and research bodies with exemplary professional ethics."
         ],
         pso: [
-            "Ability to analyze structures under various loads.",
-            "Ability to design steel and concrete structures."
+            "PSO1: Ability to analyze and design complex high-rise, long-span, and specialized structures under seismic, wind, and dynamic loading conditions.",
+            "PSO2: Ability to deploy non-destructive testing, structural health monitoring, and retrofit methodologies for heritage and modern infrastructure."
         ],
         milestones: [
             { year: "2013", desc: "PG Program Started" }
         ],
+        seoTitle: "M.E. Structural Engineering | Best PG Civil College in Coimbatore | EASA College",
+        seoDescription: "Enroll in M.E. Structural Engineering at EASA College Coimbatore. Master Earthquake Engineering, Tall Structures, FEA & Smart Materials with 100% placement assistance.",
+        seoKeywords: "M.E Structural Engineering Coimbatore, Earthquake Engineering Masters Tamil Nadu, Anna University ME Structural, Tall Buildings Design PG, EASA College Civil PG",
         hod: {
             name: "Dr. Structural Head",
             image: "",
             designation: "Head of PG Studies",
-            message: "Building strong foundations."
+            message: "Building safe, disaster-resilient, and future-ready structures that stand the test of time and nature."
         },
         studentCount: "40+",
         facultyCount: "6+",
-        labCount: "3+"
+        labCount: "3+",
+        labs: [
+            {
+                name: "Computational Structural Mechanics & FEA Lab",
+                image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80",
+                description: "Advanced simulation environment for non-linear push-over analysis, wind dynamic response of high-rise skyscrapers, and spatial bridge modeling.",
+                equipment: "ETABS Ultimate 2024, SAP2000 Advanced, ANSYS Structural Mechanics, STAAD.Pro Advanced, High-Performance Multi-Core FEA Workstations"
+            },
+            {
+                name: "Structural Dynamics & Experimental Mechanics Lab",
+                image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80",
+                description: "Equipped for real-time seismic vibration testing of scaled model frames, base isolation damper efficiency, and strain gauge telemetry.",
+                equipment: "Single-Axis Electro-Dynamic Shake Table, Multi-Channel Dynamic Strain Amplifiers, Piezoelectric Accelerometers, 1000 kN Universal Testing Machine"
+            }
+        ]
     },
 
 
@@ -795,36 +1209,162 @@ export const departments = [
         name: "Science and Humanities",
         slug: "science-and-humanities",
         type: "UG",
-        po: COMMON_UG_PO,
         heroImage: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
         overview: "The Department of Science and Humanities plays a vital role in laying the strongest foundation for engineering students. It comprises of Mathematics, Physics, Chemistry and English. The department provides a comprehensive education in basic sciences and humanities to engineering students.",
-        vision: "To be a centre of excellence in teaching and research in basic sciences and humanities, and to provide a strong foundation for engineering education.",
-        mission: [
-            "To provide high quality education in Mathematics, Physics, Chemistry and English.",
-            "To encourage students to apply the knowledge of basic sciences in engineering discipline.",
-            "To develop communication and soft skills among students."
-        ],
-        peo: [
-            "Graduates will apply the knowledge of basic sciences to solve engineering problems.",
-            "Graduates will demonstrate effective communication skills.",
-            "Graduates will practice professional ethics."
-        ],
-        pso: [
-            "Ability to apply mathematical and scientific principles to engineering problems.",
-            "Ability to communicate effectively in a professional environment."
-        ],
         milestones: [
             { year: "2008", desc: "Department Established" }
         ],
         hod: {
-            name: "Dr. S&H Head",
-            image: "",
-            designation: "Head of Department",
-            message: "Building the foundation for future engineers."
+            title: "Dean",
+            name: "Dr. RATHINAM S",
+            image: "/images/dean-sh.jpg",
+            designation: "Professor & Dean, School of Science & Humanities",
+            message: "Welcome to the School of Sciences and Humanities at EASA College of Engineering and Technology. As the intellectual heart of our institution, our school brings together the analytical rigor of the sciences and the deep reflection of the humanities to foster both technical discovery and human understanding. Whether you are uncovering the fundamental laws of nature or exploring complex cultural and ethical questions, you will find here a collaborative community, dedicated faculty, and endless opportunities to think critically and innovate. Be curious, embrace new challenges, and make the most of your journey with us."
         },
         studentCount: "300+",
-        facultyCount: "20+",
-        labCount: "4+"
+        facultyCount: "17+",
+        labCount: "4+",
+        labs: [
+            {
+                name: "Engineering Physics & Optics Lab",
+                image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1200&q=80",
+                description: "Hands-on verification of wave optics, laser diffraction phenomena, ultrasonic velocity propagation in liquids, and Hall effect semiconductor physics.",
+                equipment: "He-Ne Gas Lasers, Digital Ultrasonic Interferometers, Optical Spectrometers with Gratings, Hall Effect Probes, Traveling Microscopes"
+            },
+            {
+                name: "Engineering Chemistry & Materials Lab",
+                image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1200&q=80",
+                description: "Analytical water quality determination, alloy electro-chemistry, polymer viscosity profiling, and spectrophotometric colorimetric analysis.",
+                equipment: "Digital Flame Photometers, UV-Visible Spectrophotometers, Digital pH Meters, Conductivity Meters, Redwood Viscometers, COD/BOD Incubators"
+            },
+            {
+                name: "Digital Language & Professional Communication Lab",
+                image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80",
+                description: "Multimedia interactive lab dedicated to phonetics training, vocabulary enhancement, group discussion practice, and presentation confidence.",
+                equipment: "Interactive Hi-Class Language Software, HD Audio Headsets with Noise Cancellation, Multi-Client Audio Console, Video Recording Booths"
+            }
+        ],
+        faculty: [
+            {
+                name: "Dr. SIVAKUMAR M",
+                designation: "Professor & Dean R & D",
+                qualification: "",
+                subject: "Physics",
+                order: 1
+            },
+            {
+                name: "Dr. SHIAMA J",
+                designation: "Professor",
+                qualification: "M.Sc., PGDCA., M.Phil., Ph.D",
+                subject: "Mathematics",
+                order: 2
+            },
+            {
+                name: "Dr. MANICKASUNDARAM S",
+                designation: "Associate Professor",
+                qualification: "M.Sc., Ph.D",
+                subject: "Chemistry",
+                order: 3
+            },
+            {
+                name: "Dr. Ethina V",
+                designation: "Associate Professor",
+                qualification: "M.Sc., Ph.D",
+                subject: "English",
+                order: 4
+            },
+            {
+                name: "Ms. BHAGYA SHREE R",
+                designation: "Assistant Professor",
+                qualification: "M.Sc., M.Phil",
+                subject: "Physics",
+                order: 5
+            },
+            {
+                name: "Dr. DHIVYA P",
+                designation: "Assistant Professor",
+                qualification: "M.Sc., M.Phil., Ph.D",
+                subject: "Physics",
+                order: 6
+            },
+            {
+                name: "Dr. HARSHINI M",
+                designation: "Assistant Professor",
+                qualification: "M.Sc., Ph.D",
+                subject: "Chemistry",
+                order: 7
+            },
+            {
+                name: "Dr. SUNITHA M",
+                designation: "Assistant Professor",
+                qualification: "M.Sc., Ph.D",
+                subject: "Chemistry",
+                order: 8
+            },
+            {
+                name: "Ms. DHAVAMANI P",
+                designation: "Assistant Professor",
+                qualification: "M.Sc., B.Ed",
+                subject: "Mathematics",
+                order: 9
+            },
+            {
+                name: "Ms. ELCY A",
+                designation: "Assistant Professor",
+                qualification: "M.Sc., M.Phil",
+                subject: "Mathematics",
+                order: 10
+            },
+            {
+                name: "Ms. SUJITHRA N",
+                designation: "Assistant Professor",
+                qualification: "M.Sc., M.Phil",
+                subject: "Mathematics",
+                order: 11
+            },
+            {
+                name: "Dr. JANNATH BEGAM P",
+                designation: "Assistant Professor",
+                qualification: "M.Sc., PGDCA., M.Phil., Ph.D",
+                subject: "Mathematics",
+                order: 12
+            },
+            {
+                name: "Dr. SANTHIYA S",
+                designation: "Assistant Professor",
+                qualification: "M.Phil., Ph.D",
+                subject: "Mathematics",
+                order: 13
+            },
+            {
+                name: "Ms. JAYANTHI V B",
+                designation: "Assistant Professor",
+                qualification: "M.A., M.Phil., B.Ed",
+                subject: "English",
+                order: 14
+            },
+            {
+                name: "Dr. SUDHA N",
+                designation: "Assistant Professor",
+                qualification: "M.A., B.Ed., M.Phil., Ph.D",
+                subject: "Tamil",
+                order: 15
+            },
+            {
+                name: "Mr. RACSAGAN",
+                designation: "Assistant Professor",
+                qualification: "M.A., M.Ed., NET",
+                subject: "Tamil",
+                order: 16
+            },
+            {
+                name: "Dr. SATHIYASEELAN T",
+                designation: "Assistant Professor",
+                qualification: "M.A., PGDPRM., Ph.D",
+                subject: "Tamil",
+                order: 17
+            }
+        ]
     },
 
     // MBA - Master of Business Administration
@@ -882,6 +1422,20 @@ export const departments = [
         studentCount: "120+",
         facultyCount: "15+",
         labCount: "3+",
+        labs: [
+            {
+                name: "FinTech & Financial Markets Trading Lab",
+                image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80",
+                description: "Simulated stock exchange trading environment for portfolio optimization, algorithmic risk modeling, technical equity charting, and derivatives valuation.",
+                equipment: "Real-Time Market Data Terminals, NSE/BSE Trading Simulation Platform, IBM SPSS Statistics, Python for Finance Analytics, Advanced Corporate Financial Modeling Suite"
+            },
+            {
+                name: "Business Analytics & Executive Decision Intelligence Lab",
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+                description: "Executive decision-making workspace for consumer analytics, supply chain predictive modeling, dynamic KPI dashboarding, and ERP simulations.",
+                equipment: "Tableau Desktop Pro, Microsoft Power BI Premium, SAP ERP Simulation Suites, Google Analytics 4, IBM SPSS Modeler Enterprise"
+            }
+        ],
         specializations: [
             { title: "Financial Management & FinTech", desc: "Corporate valuation, algorithmic trading, risk analytics, derivatives & investment banking.", icon: "FaChartLine", tag: "High Demand" },
             { title: "Human Resource Management", desc: "Strategic HR, talent acquisition, people analytics, industrial relations & organizational design.", icon: "FaUsers", tag: "Core Track" },

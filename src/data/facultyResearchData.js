@@ -1413,7 +1413,7 @@ export const departmentResearchData = [
         interests: "Artificial Intelligence, Machine Learning, Cyber Security, Deep Learning, IoT, IoMT, Cloud Computing, Network Security, NLP, Embedded Systems",
         ongoingProjects: "AI-enabled Cyber Security Systems; Smart Healthcare using IoMT; Intelligent Transportation; Secure Cloud Computing",
         completedProjects: "Research in AI, Cyber Security, IoT, Smart Healthcare, Energy Optimization and Intelligent Systems completed by faculty members",
-        sponsoredProjects: "Nil",
+        sponsoredProjects: 0,
         publications: 4,
         patents: 9,
         books: 2,
@@ -1431,11 +1431,11 @@ export const departmentResearchData = [
         publications: 5,
         patents: 1,
         books: 0,
-        laboratories: "Nil"
+        laboratories: "Management & Business Analytics Lab"
     },
     {
         sNo: 5,
-        department: "CSE",
+        department: "IT",
         overview: "Research in the Department of Information Technology spans a wide range of contemporary areas, with a strong focus on Artificial Intelligence, Machine Learning, and Data Science, which are applied to fields like healthcare, computer vision, and cloud computing.",
         domains: "Cloud Computing, Intelligent Automation, Web Technologies",
         interests: "Deep learning, Artificial Intelligence and Machine learning",
@@ -1445,7 +1445,7 @@ export const departmentResearchData = [
         publications: 4,
         patents: 0,
         books: 5,
-        laboratories: "Department as CSE"
+        laboratories: "Information Technology Research Lab"
     }
 ];
 

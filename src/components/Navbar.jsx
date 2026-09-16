@@ -62,9 +62,6 @@ const NAV_ITEMS = [
                     { title: 'Student Research', href: '/student-research' },
                     { title: 'Faculty Research', href: '/faculty-research' },
                     { title: 'Industrial Research', href: '/industrial-research' },
-                    { title: 'IPR Cell', href: '/ipr-cell' },
-                    { title: 'R&D Projects', href: '/rd-projects' },
-                    { title: 'Patents', href: '/patents' }
                 ]
             }
         ]

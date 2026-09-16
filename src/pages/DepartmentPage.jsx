@@ -5,7 +5,7 @@ import {
     FaGraduationCap, FaBook, FaChalkboardTeacher, FaTrophy,
     FaCalendarAlt, FaDownload, FaArrowRight, FaUniversity, FaUsers, FaLightbulb, FaRocket, FaGlobe, FaChevronRight,
     FaBalanceScale, FaLaptopCode, FaStar, FaHandHoldingHeart, FaGlobeAsia, FaImages, FaFlask, FaHandshake, FaFileSignature,
-    FaChartLine, FaBriefcase, FaBullseye, FaCheckCircle, FaAward, FaBoxes
+    FaChartLine, FaBriefcase, FaBullseye, FaCheckCircle, FaAward, FaBoxes, FaFilePdf, FaEye, FaTimes, FaExternalLinkAlt
 } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -38,18 +38,24 @@ const DepartmentPage = () => {
     const [facultyList, setFacultyList] = useState([]);
     const [galleryData, setGalleryData] = useState({ events: [], images: [] });
     const [deptEvents, setDeptEvents] = useState([]);
+    const [deptLabsList, setDeptLabsList] = useState([]);
     const [peoActiveTab, setPeoActiveTab] = useState('all');
+    const [facultyFilter, setFacultyFilter] = useState('All');
+    const [selectedPoster, setSelectedPoster] = useState(null);
+    const [selectedPdf, setSelectedPdf] = useState(null);
+
+    const isSH = department?.slug === 'science-and-humanities' || department?.id === 'science-and-humanities' || id === 'science-and-humanities' || id === 'sh';
 
     // Navigation sections list
     const sections = [
         { id: 'overview', label: 'Overview', icon: <FaUniversity /> },
-        { id: 'vision-mission', label: 'Vision & Mission', icon: <FaGlobe /> },
-        { id: 'peo-po-pso', label: 'PEO, PO & PSO', icon: <FaGraduationCap /> },
+        ...(!isSH ? [{ id: 'vision-mission', label: 'Vision & Mission', icon: <FaGlobe /> }] : []),
+        ...(!isSH ? [{ id: 'peo-po-pso', label: 'PEO, PO & PSO', icon: <FaGraduationCap /> }] : []),
         ...(department?.curriculum ? [{ id: 'curriculum', label: 'Curriculum & Courses', icon: <FaLaptopCode /> }] : []),
         ...(department?.courseOutcomes ? [{ id: 'course-outcomes', label: 'Course Outcomes', icon: <FaBook /> }] : []),
         ...(department?.documents ? [{ id: 'documents', label: 'Downloads & Syllabi', icon: <FaDownload /> }] : []),
         { id: 'labs', label: 'Laboratories', icon: <FaFlask /> },
-        { id: 'hod', label: 'HOD Desk', icon: <FaChalkboardTeacher /> },
+        { id: 'hod', label: isSH ? 'Dean Desk' : 'HOD Desk', icon: <FaChalkboardTeacher /> },
         { id: 'faculty', label: 'Faculty Members', icon: <FaUsers /> },
         { id: 'mou', label: 'Industry Collaborations', icon: <FaHandshake /> },
         { id: 'gallery', label: 'Campus Gallery', icon: <FaImages /> },
@@ -76,6 +82,12 @@ const DepartmentPage = () => {
                 .then(res => res.json())
                 .then(data => setDeptEvents(data))
                 .catch(err => console.error("Error fetching events:", err));
+        }
+        if (activeSection === 'labs' && id) {
+            fetch(`${API_BASE_URL}/api/departments/${id}/labs`)
+                .then(res => res.json())
+                .then(data => { if (Array.isArray(data)) setDeptLabsList(data); })
+                .catch(err => console.error("Error fetching labs:", err));
         }
     }, [activeSection, id]);
 
@@ -128,124 +140,126 @@ const DepartmentPage = () => {
                 )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                {/* Vision 3D Card */}
-                <Tilt3DCard
-                    maxTilt={5}
-                    glareOpacity={0.12}
-                    style={{
-                        background: 'linear-gradient(145deg, var(--bg-card) 0%, rgba(45, 44, 122, 0.15) 100%)',
-                        borderRadius: '28px',
-                        padding: '3rem 2.5rem',
-                        border: '1px solid var(--glass-border)',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        boxShadow: '0 20px 50px rgba(0,0,0,0.06)'
-                    }}
-                >
-                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '9rem', color: 'var(--secondary)', opacity: 0.04, pointerEvents: 'none' }}>
-                        <FaGlobe />
-                    </div>
-                    <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
-                            <span style={{ width: '48px', height: '48px', background: 'rgba(230, 182, 39, 0.15)', border: '1px solid rgba(230, 182, 39, 0.3)', borderRadius: '14px', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
-                                <FaGlobe />
-                            </span>
-                            <div>
-                                <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--secondary)' }}>Our Destination</span>
-                                <h3 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>Department Vision</h3>
-                            </div>
+            {(!isSH && (department.vision || department.mission?.length > 0)) && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                    {/* Vision 3D Card */}
+                    <Tilt3DCard
+                        maxTilt={5}
+                        glareOpacity={0.12}
+                        style={{
+                            background: 'linear-gradient(145deg, var(--bg-card) 0%, rgba(45, 44, 122, 0.15) 100%)',
+                            borderRadius: '28px',
+                            padding: '3rem 2.5rem',
+                            border: '1px solid var(--glass-border)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.06)'
+                        }}
+                    >
+                        <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '9rem', color: 'var(--secondary)', opacity: 0.04, pointerEvents: 'none' }}>
+                            <FaGlobe />
                         </div>
-                        {Array.isArray(department.vision) ? (
-                            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1.2rem', margin: 0 }}>
-                                {department.vision.map((item, idx) => (
-                                    <li key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', fontSize: '1.15rem', color: 'var(--text-muted)', lineHeight: '1.7' }}>
-                                        <span style={{ minWidth: '8px', height: '8px', background: 'var(--secondary)', borderRadius: '50%', marginTop: '10px' }} />
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p style={{ fontSize: '1.2rem', lineHeight: '1.85', color: 'var(--text-muted)', margin: 0 }}>
-                                {department.vision}
-                            </p>
-                        )}
-                    </div>
-                    <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary)', fontSize: '0.85rem', fontWeight: '800' }}>
-                        <FaAward /> Global Excellence & Ethical Leadership
-                    </div>
-                </Tilt3DCard>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
+                                <span style={{ width: '48px', height: '48px', background: 'rgba(230, 182, 39, 0.15)', border: '1px solid rgba(230, 182, 39, 0.3)', borderRadius: '14px', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                                    <FaGlobe />
+                                </span>
+                                <div>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--secondary)' }}>Our Destination</span>
+                                    <h3 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>Department Vision</h3>
+                                </div>
+                            </div>
+                            {Array.isArray(department.vision) ? (
+                                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1.2rem', margin: 0 }}>
+                                    {department.vision.map((item, idx) => (
+                                        <li key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', fontSize: '1.15rem', color: 'var(--text-muted)', lineHeight: '1.7' }}>
+                                            <span style={{ minWidth: '8px', height: '8px', background: 'var(--secondary)', borderRadius: '50%', marginTop: '10px' }} />
+                                            <span>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p style={{ fontSize: '1.2rem', lineHeight: '1.85', color: 'var(--text-muted)', margin: 0 }}>
+                                    {department.vision}
+                                </p>
+                            )}
+                        </div>
+                        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary)', fontSize: '0.85rem', fontWeight: '800' }}>
+                            <FaAward /> Global Excellence & Ethical Leadership
+                        </div>
+                    </Tilt3DCard>
 
-                {/* Mission 3D Card */}
-                <Tilt3DCard
-                    maxTilt={5}
-                    glareOpacity={0.12}
-                    style={{
-                        background: 'linear-gradient(145deg, var(--bg-card) 0%, rgba(230, 182, 39, 0.08) 100%)',
-                        borderRadius: '28px',
-                        padding: '3rem 2.5rem',
-                        border: '1px solid var(--glass-border)',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        boxShadow: '0 20px 50px rgba(0,0,0,0.06)'
-                    }}
-                >
-                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '9rem', color: 'var(--secondary)', opacity: 0.04, pointerEvents: 'none' }}>
-                        <FaRocket />
-                    </div>
-                    <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
-                            <span style={{ width: '48px', height: '48px', background: 'rgba(230, 182, 39, 0.15)', border: '1px solid rgba(230, 182, 39, 0.3)', borderRadius: '14px', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
-                                <FaRocket />
-                            </span>
-                            <div>
-                                <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--secondary)' }}>Our Strategic Path</span>
-                                <h3 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>Department Mission</h3>
+                    {/* Mission 3D Card */}
+                    <Tilt3DCard
+                        maxTilt={5}
+                        glareOpacity={0.12}
+                        style={{
+                            background: 'linear-gradient(145deg, var(--bg-card) 0%, rgba(230, 182, 39, 0.08) 100%)',
+                            borderRadius: '28px',
+                            padding: '3rem 2.5rem',
+                            border: '1px solid var(--glass-border)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.06)'
+                        }}
+                    >
+                        <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '9rem', color: 'var(--secondary)', opacity: 0.04, pointerEvents: 'none' }}>
+                            <FaRocket />
+                        </div>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
+                                <span style={{ width: '48px', height: '48px', background: 'rgba(230, 182, 39, 0.15)', border: '1px solid rgba(230, 182, 39, 0.3)', borderRadius: '14px', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                                    <FaRocket />
+                                </span>
+                                <div>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--secondary)' }}>Our Strategic Path</span>
+                                    <h3 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>Department Mission</h3>
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                {department.mission?.map((item, idx) => {
+                                    const match = typeof item === 'string' ? item.match(/^(M\d+)\s*:\s*(.*)$/i) : null;
+                                    const tag = match ? match[1].toUpperCase() : (idx + 1 < 10 ? `0${idx + 1}` : `${idx + 1}`);
+                                    const text = match ? match[2] : item;
+                                    return (
+                                        <div key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                                            <span style={{
+                                                minWidth: '38px',
+                                                height: '28px',
+                                                padding: '0 6px',
+                                                borderRadius: '8px',
+                                                background: 'rgba(230, 182, 39, 0.15)',
+                                                color: 'var(--secondary)',
+                                                fontSize: '0.8rem',
+                                                fontWeight: '900',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0,
+                                                marginTop: '3px'
+                                            }}>
+                                                {tag}
+                                            </span>
+                                            <p style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.65' }}>
+                                                {text}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                            {department.mission?.map((item, idx) => {
-                                const match = typeof item === 'string' ? item.match(/^(M\d+)\s*:\s*(.*)$/i) : null;
-                                const tag = match ? match[1].toUpperCase() : (idx + 1 < 10 ? `0${idx + 1}` : `${idx + 1}`);
-                                const text = match ? match[2] : item;
-                                return (
-                                    <div key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                                        <span style={{
-                                            minWidth: '38px',
-                                            height: '28px',
-                                            padding: '0 6px',
-                                            borderRadius: '8px',
-                                            background: 'rgba(230, 182, 39, 0.15)',
-                                            color: 'var(--secondary)',
-                                            fontSize: '0.8rem',
-                                            fontWeight: '900',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            flexShrink: 0,
-                                            marginTop: '3px'
-                                        }}>
-                                            {tag}
-                                        </span>
-                                        <p style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.65' }}>
-                                            {text}
-                                        </p>
-                                    </div>
-                                );
-                            })}
+                        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary)', fontSize: '0.85rem', fontWeight: '800' }}>
+                            <FaCheckCircle /> Academic-Industry Bridge & Innovation
                         </div>
-                    </div>
-                    <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--secondary)', fontSize: '0.85rem', fontWeight: '800' }}>
-                        <FaCheckCircle /> Academic-Industry Bridge & Innovation
-                    </div>
-                </Tilt3DCard>
-            </div>
+                    </Tilt3DCard>
+                </div>
+            )}
         </div>
     );
 
@@ -564,151 +578,822 @@ const DepartmentPage = () => {
         </div>
     );
 
-    const renderHOD = () => (
-        department.hod && (
-            <div className="hod-section" style={{ background: 'var(--bg-card)', borderRadius: '32px', padding: '4rem', border: '1px solid var(--glass-border)', display: 'grid', gridTemplateColumns: 'minmax(300px, auto) 1fr', gap: '4rem', alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                    <div style={{ position: 'relative', marginBottom: '2rem' }}>
-                        <div className="hod-image-container" style={{ width: '250px', height: '250px', borderRadius: '50%', overflow: 'hidden', border: '6px solid var(--glass-border)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-                            <img src={department.hod.image} alt={department.hod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    const renderHOD = () => {
+        if (!department.hod) return null;
+        return (
+            <div
+                className="hod-section"
+                style={{
+                    background: 'var(--bg-card)',
+                    borderRadius: '32px',
+                    padding: 'clamp(2rem, 3.5vw, 3.5rem)',
+                    border: '1px solid var(--glass-border)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2.5rem',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.06)'
+                }}
+            >
+                {/* Top Row: Photo next to Role / Name */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '2rem',
+                    flexWrap: 'wrap',
+                    paddingBottom: '2rem',
+                    borderBottom: '1px solid var(--glass-border)'
+                }}>
+                    {/* Photo Container */}
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <div
+                            className="hod-image-container"
+                            style={{
+                                width: '150px',
+                                height: '150px',
+                                borderRadius: '50%',
+                                overflow: 'hidden',
+                                border: '4px solid rgba(230, 182, 39, 0.5)',
+                                boxShadow: '0 12px 28px rgba(0,0,0,0.25)',
+                                background: 'linear-gradient(135deg, rgba(45, 44, 122, 0.2), rgba(230, 182, 39, 0.15))',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            {department.hod.image ? (
+                                <img
+                                    src={department.hod.image}
+                                    alt={department.hod.name}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                                />
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)' }}>
+                                    <FaChalkboardTeacher size={55} />
+                                </div>
+                            )}
                         </div>
-                        <div style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'var(--secondary)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-dark)', fontSize: '1.5rem', border: '4px solid var(--bg-card)' }}>
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '2px',
+                            right: '2px',
+                            background: 'var(--secondary)',
+                            width: '42px',
+                            height: '42px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'var(--bg-dark)',
+                            fontSize: '1.1rem',
+                            border: '3px solid var(--bg-card)',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                        }}>
                             <FaChalkboardTeacher />
                         </div>
                     </div>
-                    <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-main)', marginBottom: '0.5rem' }}>{department.hod.name}</h3>
-                    <div style={{ fontSize: '1rem', color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px' }}>{department.hod.designation}</div>
-                </div>
-                <div style={{ paddingTop: '2.5rem' }}>
-                    <div style={{ position: 'relative' }}>
-                        <span style={{ fontSize: '5rem', color: 'var(--secondary)', opacity: 0.1, position: 'absolute', top: '-40px', left: '-20px', fontFamily: 'serif' }}>"</span>
-                        <p style={{ fontSize: '1.25rem', lineHeight: '1.8', color: 'var(--text-muted)', fontStyle: 'italic', position: 'relative', zIndex: 1, textAlign: 'justify' }}>{department.hod.message}</p>
-                        <span style={{ fontSize: '5rem', color: 'var(--secondary)', opacity: 0.1, position: 'absolute', bottom: '-60px', right: '0', fontFamily: 'serif' }}>"</span>
+
+                    {/* Next to Photo: Name and Role */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1, minWidth: '240px' }}>
+                        <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '0.35rem 0.9rem',
+                            borderRadius: '20px',
+                            background: 'rgba(230, 182, 39, 0.12)',
+                            border: '1px solid rgba(230, 182, 39, 0.3)',
+                            color: 'var(--secondary)',
+                            fontSize: '0.78rem',
+                            fontWeight: '800',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            width: 'fit-content',
+                            marginBottom: '4px'
+                        }}>
+                            <FaAward /> {isSH ? 'Dean Desk' : 'HOD Desk'}
+                        </div>
+                        <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-main)', margin: 0, lineHeight: '1.2' }}>
+                            {department.hod.name}
+                        </h3>
+                        <div style={{ fontSize: '1.05rem', color: 'var(--secondary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.8px', marginTop: '2px' }}>
+                            {department.hod.designation}
+                        </div>
                     </div>
                 </div>
-            </div>
-        )
-    );
 
-    const renderFaculty = () => (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-            {facultyList.length === 0 ? <p className="text-muted">Faculty list is being updated.</p> : facultyList.map((fac, idx) => (
-                <div key={idx} style={{ background: 'var(--bg-card)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                    <h4 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '0.4rem', color: 'var(--text-main)' }}>{fac.name}</h4>
-                    <div style={{ fontSize: '0.95rem', color: 'var(--secondary)', fontWeight: '600', textTransform: 'uppercase' }}>{fac.designation}</div>
-                </div>
-            ))}
-        </div>
-    );
-
-    const renderGallery = () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-            {galleryData.events.length === 0 && galleryData.images.length === 0 && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="gallery-empty-state"
-                    style={{
-                        textAlign: 'center',
-                        padding: '6rem 2rem',
-                        background: 'var(--bg-card)',
-                        borderRadius: '32px',
-                        border: '1px solid var(--glass-border)',
+                {/* Below: Full Message Box */}
+                <div style={{
+                    background: 'linear-gradient(145deg, rgba(45, 44, 122, 0.12) 0%, rgba(230, 182, 39, 0.04) 100%)',
+                    borderRadius: '24px',
+                    padding: '2.5rem',
+                    border: '1px solid var(--glass-border)',
+                    position: 'relative'
+                }}>
+                    <span style={{ fontSize: '5rem', color: 'var(--secondary)', opacity: 0.18, position: 'absolute', top: '-20px', left: '15px', fontFamily: 'serif', lineHeight: 1, pointerEvents: 'none' }}>“</span>
+                    <p style={{
+                        fontSize: '1.18rem',
+                        lineHeight: '1.9',
+                        color: 'var(--text-muted)',
                         position: 'relative',
-                        overflow: 'hidden',
+                        zIndex: 1,
+                        textAlign: 'justify',
+                        margin: 0
+                    }}>
+                        {department.hod.message}
+                    </p>
+                    <span style={{ fontSize: '5rem', color: 'var(--secondary)', opacity: 0.18, position: 'absolute', bottom: '-45px', right: '20px', fontFamily: 'serif', lineHeight: 1, pointerEvents: 'none' }}>”</span>
+                </div>
+            </div>
+        );
+    };
+
+    const renderFaculty = () => {
+        const displayFaculty = facultyList.length > 0 ? facultyList : (department?.faculty || []);
+        const subjects = ['All', ...new Set(displayFaculty.map(f => f.subject || f.researchArea).filter(Boolean))];
+        const filteredFaculty = facultyFilter === 'All' 
+            ? displayFaculty 
+            : displayFaculty.filter(f => (f.subject || f.researchArea) === facultyFilter);
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
+                    <div>
+                        <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '0.45rem 1.1rem',
+                            borderRadius: '30px',
+                            background: 'rgba(230, 182, 39, 0.12)',
+                            border: '1px solid rgba(230, 182, 39, 0.3)',
+                            color: 'var(--secondary)',
+                            fontSize: '0.85rem',
+                            fontWeight: '800',
+                            marginBottom: '0.8rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                        }}>
+                            <FaUniversity /> Department of {department?.name}
+                        </div>
+                        <h2 className="section-title" style={{ fontSize: '2.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>
+                            Faculty Members
+                        </h2>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '6px', display: 'block' }}>
+                            Distinguished Faculty & Mentors • Department of {department?.name}
+                        </span>
+                    </div>
+
+                    {/* Department Discipline Filters */}
+                    {subjects.length > 2 && (
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            {subjects.map((sub, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setFacultyFilter(sub)}
+                                    style={{
+                                        padding: '0.5rem 1.2rem',
+                                        borderRadius: '25px',
+                                        border: facultyFilter === sub ? '1px solid var(--secondary)' : '1px solid var(--glass-border)',
+                                        background: facultyFilter === sub ? 'var(--secondary)' : 'var(--bg-card)',
+                                        color: facultyFilter === sub ? 'var(--bg-dark)' : 'var(--text-muted)',
+                                        fontWeight: '800',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    {sub}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {displayFaculty.length === 0 ? (
+                    <div style={{
+                        background: 'linear-gradient(145deg, var(--bg-card) 0%, rgba(45, 44, 122, 0.12) 100%)',
+                        borderRadius: '28px',
+                        padding: 'clamp(2.5rem, 5vw, 4rem)',
+                        border: '1px solid var(--glass-border)',
+                        boxShadow: '0 20px 50px rgba(0,0,0,0.06)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2.5rem',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
+                        {/* Background subtle watermark icon */}
+                        <div style={{
+                            position: 'absolute',
+                            right: '-20px',
+                            bottom: '-20px',
+                            fontSize: '12rem',
+                            color: 'var(--secondary)',
+                            opacity: 0.03,
+                            pointerEvents: 'none'
+                        }}>
+                            <FaChalkboardTeacher />
+                        </div>
+
+                        {/* Top Section */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.8rem', flexWrap: 'wrap' }}>
+                            <div style={{
+                                width: '70px',
+                                height: '70px',
+                                borderRadius: '20px',
+                                background: 'linear-gradient(135deg, rgba(230, 182, 39, 0.2), rgba(45, 44, 122, 0.3))',
+                                border: '1px solid rgba(230, 182, 39, 0.4)',
+                                color: 'var(--secondary)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '2rem',
+                                flexShrink: 0,
+                                boxShadow: '0 8px 25px rgba(230, 182, 39, 0.15)'
+                            }}>
+                                <FaUsers />
+                            </div>
+
+                            <div style={{ flex: 1, minWidth: '280px' }}>
+                                <div style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    padding: '0.3rem 0.85rem',
+                                    borderRadius: '20px',
+                                    background: 'rgba(230, 182, 39, 0.12)',
+                                    border: '1px solid rgba(230, 182, 39, 0.3)',
+                                    color: 'var(--secondary)',
+                                    fontSize: '0.78rem',
+                                    fontWeight: '800',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    marginBottom: '0.8rem'
+                                }}>
+                                    <FaAward /> Academic Faculty Directory
+                                </div>
+                                <h3 style={{ fontSize: '1.9rem', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 0.8rem 0' }}>
+                                    Faculty Profiles Updating for Current Session
+                                </h3>
+                                <p style={{ fontSize: '1.08rem', color: 'var(--text-muted)', lineHeight: '1.75', margin: 0, maxWidth: '850px' }}>
+                                    The comprehensive faculty directory and research portfolio for the <strong>Department of {department?.name}</strong> is actively being updated. Our department features experienced academicians, doctorates, and industry veterans committed to student mentorship and research excellence.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Metric Highlights Grid */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                            gap: '1.2rem',
+                            marginTop: '0.5rem'
+                        }}>
+                            <div style={{
+                                background: 'var(--bg-section)',
+                                padding: '1.4rem',
+                                borderRadius: '18px',
+                                border: '1px solid var(--glass-border)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem'
+                            }}>
+                                <span style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(230, 182, 39, 0.12)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                                    <FaUsers />
+                                </span>
+                                <div>
+                                    <div style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-main)' }}>{department?.facultyCount || 'Experienced'}</div>
+                                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: '600' }}>Faculty Mentors</div>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                background: 'var(--bg-section)',
+                                padding: '1.4rem',
+                                borderRadius: '18px',
+                                border: '1px solid var(--glass-border)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem'
+                            }}>
+                                <span style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(230, 182, 39, 0.12)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                                    <FaGraduationCap />
+                                </span>
+                                <div>
+                                    <div style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-main)' }}>{department?.studentCount || 'Enrolled'}</div>
+                                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: '600' }}>Student Scholars</div>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                background: 'var(--bg-section)',
+                                padding: '1.4rem',
+                                borderRadius: '18px',
+                                border: '1px solid var(--glass-border)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem'
+                            }}>
+                                <span style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(230, 182, 39, 0.12)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                                    <FaFlask />
+                                </span>
+                                <div>
+                                    <div style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-main)' }}>{department?.labCount || '2+'}</div>
+                                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: '600' }}>Labs & Research Facilities</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Department Head Spotlight Card */}
+                        {department?.hod && (
+                            <div style={{
+                                background: 'linear-gradient(135deg, rgba(230, 182, 39, 0.08) 0%, rgba(45, 44, 122, 0.08) 100%)',
+                                borderRadius: '20px',
+                                padding: '1.8rem 2rem',
+                                border: '1px solid rgba(230, 182, 39, 0.25)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                flexWrap: 'wrap',
+                                gap: '1.5rem'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1.4rem', flexWrap: 'wrap' }}>
+                                    <div style={{
+                                        width: '64px',
+                                        height: '64px',
+                                        borderRadius: '50%',
+                                        overflow: 'hidden',
+                                        border: '2px solid var(--secondary)',
+                                        background: 'var(--bg-dark)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'var(--secondary)',
+                                        fontSize: '1.6rem',
+                                        flexShrink: 0
+                                    }}>
+                                        {department.hod.image ? (
+                                            <img src={department.hod.image} alt={department.hod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <FaChalkboardTeacher />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                            Department Leadership
+                                        </div>
+                                        <h4 style={{ fontSize: '1.3rem', fontWeight: '900', color: 'var(--text-main)', margin: '0.2rem 0' }}>
+                                            {department.hod.name}
+                                        </h4>
+                                        <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                                            {department.hod.designation} • Department of {department.name}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => setActiveSection('hod')}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '0.75rem 1.4rem',
+                                        borderRadius: '25px',
+                                        background: 'var(--secondary)',
+                                        color: 'var(--bg-dark)',
+                                        fontWeight: '800',
+                                        fontSize: '0.88rem',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    View {isSH ? 'Dean' : 'HOD'} Desk <FaArrowRight />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Quick Action Links */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', paddingTop: '0.5rem' }}>
+                            {department?.hod && (
+                                <button
+                                    onClick={() => setActiveSection('hod')}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '0.75rem 1.5rem',
+                                        borderRadius: '30px',
+                                        background: 'rgba(230, 182, 39, 0.15)',
+                                        border: '1px solid rgba(230, 182, 39, 0.35)',
+                                        color: 'var(--secondary)',
+                                        fontWeight: '800',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <FaChalkboardTeacher /> {isSH ? 'Dean Desk' : 'HOD Desk'}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setActiveSection('overview')}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '0.75rem 1.5rem',
+                                    borderRadius: '30px',
+                                    background: 'var(--bg-section)',
+                                    border: '1px solid var(--glass-border)',
+                                    color: 'var(--text-main)',
+                                    fontWeight: '800',
+                                    fontSize: '0.9rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <FaUniversity /> Program Overview
+                            </button>
+                            <button
+                                onClick={() => setShowAdmissionForm(true)}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '0.75rem 1.5rem',
+                                    borderRadius: '30px',
+                                    background: 'var(--primary)',
+                                    border: 'none',
+                                    color: '#ffffff',
+                                    fontWeight: '800',
+                                    fontSize: '0.9rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <FaGraduationCap /> Academic Inquiries
+                            </button>
+                        </div>
+                    </div>
+                ) : filteredFaculty.length === 0 ? (
+                    <div style={{
+                        background: 'var(--bg-card)',
+                        borderRadius: '20px',
+                        padding: '3rem 2rem',
+                        border: '1px solid var(--glass-border)',
+                        textAlign: 'center',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: '1.5rem'
-                    }}
-                >
-                    {/* Background Glow */}
-                    <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '300px',
-                        height: '300px',
-                        background: 'radial-gradient(circle, var(--secondary) 0%, transparent 70%)',
-                        opacity: 0.1,
-                        pointerEvents: 'none',
-                        filter: 'blur(40px)'
-                    }} />
-
-                    <motion.div
-                        animate={{
-                            y: [0, -10, 0],
-                            rotate: [0, 5, -5, 0]
-                        }}
-                        transition={{
-                            duration: 5,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                        style={{
-                            background: 'var(--glass-highlight)',
-                            padding: '1.5rem',
+                        gap: '1rem'
+                    }}>
+                        <div style={{
+                            width: '56px',
+                            height: '56px',
                             borderRadius: '50%',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        <FaImages size={50} color="var(--secondary)" />
-                    </motion.div>
-
-                    <h3 style={{
-                        fontSize: '2.5rem',
-                        fontWeight: '900',
-                        background: 'linear-gradient(135deg, var(--text-main) 0%, var(--secondary) 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        margin: 0,
-                        lineHeight: 1.2
-                    }}>
-                        Visual Experience Arriving Soon
-                    </h3>
-
-                    <p style={{
-                        fontSize: '1.2rem',
-                        color: 'var(--text-muted)',
-                        maxWidth: '600px',
-                        lineHeight: '1.8'
-                    }}>
-                        We are crafting an immersive gallery to showcase our department's vibrant life, events, and achievements.
-                        A stunning new interface is on its way!
-                    </p>
-                </motion.div>
-            )}
-
-            {/* Gallery Events */}
-            {galleryData.events.map((event, idx) => (
-                <div key={idx} style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '1.5rem', color: 'var(--text-main)' }}>{event.eventName}</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                        {event.photos.map((photo, pIdx) => (
-                            <div key={pIdx} style={{ borderRadius: '12px', overflow: 'hidden', height: '150px' }}>
-                                <img src={photo.src} alt={photo.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            background: 'rgba(230, 182, 39, 0.12)',
+                            color: 'var(--secondary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.5rem'
+                        }}>
+                            <FaUsers />
+                        </div>
+                        <h4 style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                            No faculty profiles found for "{facultyFilter}"
+                        </h4>
+                        <p style={{ color: 'var(--text-muted)', margin: 0, maxWidth: '500px', fontSize: '0.95rem' }}>
+                            Try selecting another discipline filter or view all faculty members in this department.
+                        </p>
+                        <button
+                            onClick={() => setFacultyFilter('All')}
+                            style={{
+                                marginTop: '0.5rem',
+                                padding: '0.6rem 1.4rem',
+                                borderRadius: '25px',
+                                background: 'var(--secondary)',
+                                color: 'var(--bg-dark)',
+                                fontWeight: '800',
+                                fontSize: '0.85rem',
+                                border: 'none',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Show All Faculty
+                        </button>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.8rem' }}>
+                        {filteredFaculty.map((fac, idx) => (
+                            <div
+                                key={idx}
+                                style={{
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '20px',
+                                    padding: '1.6rem 1.8rem',
+                                    border: '1px solid var(--glass-border)',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: '1.2rem',
+                                    transition: 'all 0.3s ease',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        width: '46px',
+                                        height: '46px',
+                                        borderRadius: '14px',
+                                        background: 'rgba(230, 182, 39, 0.12)',
+                                        border: '1px solid rgba(230, 182, 39, 0.3)',
+                                        color: 'var(--secondary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '1.2rem',
+                                        fontWeight: '800',
+                                        flexShrink: 0,
+                                        marginTop: '2px'
+                                    }}
+                                >
+                                    <FaChalkboardTeacher />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
+                                    {/* Line 1: Name */}
+                                    <h4 style={{ fontSize: '1.18rem', fontWeight: '800', margin: 0, color: 'var(--text-main)', lineHeight: '1.3' }}>
+                                        {fac.name}
+                                    </h4>
+                                    {/* Line 2: Designation */}
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--secondary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        {fac.designation}
+                                    </div>
+                                    {/* Line 3: Department / Subject */}
+                                    {(fac.subject || fac.researchArea) && (
+                                        <div style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                                            <FaFlask style={{ color: 'var(--secondary)', fontSize: '0.82rem' }} />
+                                            <span>{fac.subject || fac.researchArea}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
-                </div>
-            ))}
+                )}
+            </div>
+        );
+    };
 
-            {/* Loose Images */}
-            {galleryData.images.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                    {galleryData.images.map((img, idx) => (
-                        <div key={idx} style={{ borderRadius: '16px', overflow: 'hidden', height: '200px', border: '1px solid var(--glass-border)' }}>
-                            <img src={img.src} alt={img.caption || 'Gallery'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
-                    ))}
+    const renderGallery = () => {
+        // Consolidate all photos into a single list for unified grid display
+        const allPhotos = [];
+
+        if (Array.isArray(galleryData?.events)) {
+            galleryData.events.forEach(event => {
+                if (Array.isArray(event.photos) && event.photos.length > 0) {
+                    event.photos.forEach(photo => {
+                        const src = typeof photo === 'string' ? photo : (photo.src || photo.url || photo.image);
+                        if (src) {
+                            allPhotos.push({
+                                src,
+                                title: photo.caption || event.eventName || 'Department Photo',
+                                date: event.date
+                            });
+                        }
+                    });
+                } else if (event.image) {
+                    allPhotos.push({
+                        src: event.image,
+                        title: event.eventName || 'Department Photo',
+                        date: event.date
+                    });
+                }
+            });
+        }
+
+        if (Array.isArray(galleryData?.images)) {
+            galleryData.images.forEach(img => {
+                const src = typeof img === 'string' ? img : (img.src || img.url || img.image);
+                if (src) {
+                    allPhotos.push({
+                        src,
+                        title: img.caption || 'Department Photo'
+                    });
+                }
+            });
+        }
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                        <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <FaImages style={{ color: 'var(--secondary)' }} /> Campus & Department Gallery
+                        </h3>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                            Smart classrooms, laboratories, campus life, workshops, and facilities
+                        </span>
+                    </div>
+                    {allPhotos.length > 0 && (
+                        <span style={{
+                            padding: '6px 16px',
+                            borderRadius: '20px',
+                            background: 'rgba(230, 182, 39, 0.12)',
+                            color: 'var(--secondary)',
+                            fontSize: '0.85rem',
+                            fontWeight: '800',
+                            border: '1px solid rgba(230, 182, 39, 0.25)'
+                        }}>
+                            {allPhotos.length} {allPhotos.length === 1 ? 'Photo' : 'Photos'}
+                        </span>
+                    )}
                 </div>
-            )}
-        </div>
-    );
+
+                {allPhotos.length === 0 ? (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="gallery-empty-state"
+                        style={{
+                            textAlign: 'center',
+                            padding: '6rem 2rem',
+                            background: 'var(--bg-card)',
+                            borderRadius: '32px',
+                            border: '1px solid var(--glass-border)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '1.5rem'
+                        }}
+                    >
+                        <div style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '300px',
+                            height: '300px',
+                            background: 'radial-gradient(circle, var(--secondary) 0%, transparent 70%)',
+                            opacity: 0.1,
+                            pointerEvents: 'none',
+                            filter: 'blur(40px)'
+                        }} />
+
+                        <motion.div
+                            animate={{
+                                y: [0, -10, 0],
+                                rotate: [0, 5, -5, 0]
+                            }}
+                            transition={{
+                                duration: 5,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                            style={{
+                                background: 'var(--glass-highlight)',
+                                padding: '1.5rem',
+                                borderRadius: '50%',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                            }}
+                        >
+                            <FaImages size={50} color="var(--secondary)" />
+                        </motion.div>
+
+                        <h3 style={{
+                            fontSize: '2.5rem',
+                            fontWeight: '900',
+                            background: 'linear-gradient(135deg, var(--text-main) 0%, var(--secondary) 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            margin: 0,
+                            lineHeight: 1.2
+                        }}>
+                            Visual Experience Arriving Soon
+                        </h3>
+
+                        <p style={{
+                            fontSize: '1.2rem',
+                            color: 'var(--text-muted)',
+                            maxWidth: '600px',
+                            lineHeight: '1.8'
+                        }}>
+                            We are crafting an immersive gallery to showcase our department's vibrant life, events, and achievements.
+                            A stunning new interface is on its way!
+                        </p>
+                    </motion.div>
+                ) : (
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                        gap: '1.5rem'
+                    }}>
+                        {allPhotos.map((photo, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.35, delay: Math.min(idx * 0.04, 0.4) }}
+                                whileHover={{ y: -6, scale: 1.02 }}
+                                onClick={() => setSelectedPoster({ url: photo.src, title: photo.title })}
+                                style={{
+                                    borderRadius: '20px',
+                                    overflow: 'hidden',
+                                    position: 'relative',
+                                    height: '240px',
+                                    background: 'var(--bg-card)',
+                                    border: '1px solid var(--glass-border)',
+                                    boxShadow: '0 10px 25px rgba(0,0,0,0.06)',
+                                    cursor: 'pointer'
+                                }}
+                                className="gallery-photo-card"
+                            >
+                                <img
+                                    src={photo.src}
+                                    alt={photo.title || 'Department Gallery'}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        transition: 'transform 0.5s ease'
+                                    }}
+                                    className="gallery-photo-img"
+                                />
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        background: 'linear-gradient(to top, rgba(5, 10, 24, 0.88) 0%, rgba(5, 10, 24, 0.15) 60%, transparent 100%)',
+                                        opacity: 0,
+                                        transition: 'opacity 0.3s ease',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                        padding: '1.2rem'
+                                    }}
+                                    className="gallery-photo-overlay"
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                        <div style={{
+                                            width: '38px',
+                                            height: '38px',
+                                            borderRadius: '50%',
+                                            background: 'rgba(230, 182, 39, 0.95)',
+                                            color: 'var(--bg-dark)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '0.9rem',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+                                        }}>
+                                            <FaEye />
+                                        </div>
+                                    </div>
+                                    {photo.title && !photo.title.toUpperCase().includes('PHOTO') && (
+                                        <span style={{
+                                            color: '#ffffff',
+                                            fontSize: '0.95rem',
+                                            fontWeight: '800',
+                                            textShadow: '0 2px 8px rgba(0,0,0,0.6)'
+                                        }}>
+                                            {photo.title}
+                                        </span>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     const renderEvents = () => (
-        <div style={{ display: 'grid', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                    <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <FaCalendarAlt style={{ color: 'var(--secondary)' }} /> Department Events & Highlights
+                    </h3>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                        Workshops, technical symposiums, guest lectures, and student initiatives
+                    </span>
+                </div>
+                {deptEvents.length > 0 && (
+                    <span style={{
+                        padding: '6px 16px',
+                        borderRadius: '20px',
+                        background: 'rgba(230, 182, 39, 0.12)',
+                        color: 'var(--secondary)',
+                        fontSize: '0.85rem',
+                        fontWeight: '800',
+                        border: '1px solid rgba(230, 182, 39, 0.25)'
+                    }}>
+                        {deptEvents.length} {deptEvents.length === 1 ? 'Event' : 'Events'} Available
+                    </span>
+                )}
+            </div>
+
             {deptEvents.length === 0 ? (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -783,46 +1468,357 @@ const DepartmentPage = () => {
                         The updated schedule with impressive new opportunities will be available soon!
                     </p>
                 </motion.div>
-            ) : deptEvents.map((event, idx) => (
-                <div key={idx} className="event-card" style={{ display: 'flex', gap: '2rem', background: 'var(--bg-card)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--glass-border)', alignItems: 'center' }}>
-                    <div style={{ width: '80px', height: '80px', background: 'var(--glass-highlight)', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)', flexShrink: 0 }}>
-                        <span style={{ fontSize: '1.8rem', fontWeight: '900' }}>{new Date(event.date || Date.now()).getDate()}</span>
-                        <span style={{ fontSize: '0.9rem', fontWeight: '700', textTransform: 'uppercase' }}>{new Date(event.date || Date.now()).toLocaleString('default', { month: 'short' })}</span>
-                    </div>
-                    <div>
-                        <h4 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{event.title}</h4>
-                        <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>{event.desc}</p>
-                    </div>
+            ) : (
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                    gap: '2rem'
+                }}>
+                    {deptEvents.map((event, idx) => {
+                        const eventDate = event.date ? new Date(event.date) : new Date();
+                        const day = !isNaN(eventDate.getTime()) ? eventDate.getDate() : '--';
+                        const month = !isNaN(eventDate.getTime()) ? eventDate.toLocaleString('default', { month: 'short' }).toUpperCase() : 'DATE';
+                        const year = !isNaN(eventDate.getTime()) ? eventDate.getFullYear() : '';
+                        const hasPdf = Boolean(event.pdf_url || event.pdfUrl || event.brochure || event.fileUrl);
+                        const pdfLink = event.pdf_url || event.pdfUrl || event.brochure || event.fileUrl;
+                        const posterImage = event.image || event.poster;
+
+                        return (
+                            <motion.div
+                                key={event._id || idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                                whileHover={{ y: -6 }}
+                                style={{
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '24px',
+                                    border: '1px solid var(--glass-border)',
+                                    overflow: 'hidden',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    boxShadow: '0 12px 35px rgba(0,0,0,0.06)',
+                                    position: 'relative'
+                                }}
+                            >
+                                {/* Event Poster / Banner Header */}
+                                <div
+                                    style={{
+                                        height: '220px',
+                                        width: '100%',
+                                        position: 'relative',
+                                        background: 'linear-gradient(135deg, rgba(27, 42, 107, 0.45) 0%, rgba(15, 23, 42, 0.85) 100%)',
+                                        overflow: 'hidden',
+                                        cursor: posterImage ? 'pointer' : 'default'
+                                    }}
+                                    onClick={() => posterImage && setSelectedPoster({ url: posterImage, title: event.title })}
+                                >
+                                    {posterImage ? (
+                                        <>
+                                            <img
+                                                src={posterImage}
+                                                alt={event.title || 'Event Poster'}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover',
+                                                    transition: 'transform 0.5s ease'
+                                                }}
+                                                className="event-poster-img"
+                                            />
+                                            {/* Hover overlay hint */}
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: 12,
+                                                right: 12,
+                                                padding: '6px 12px',
+                                                borderRadius: '20px',
+                                                background: 'rgba(0,0,0,0.7)',
+                                                backdropFilter: 'blur(8px)',
+                                                color: '#ffffff',
+                                                fontSize: '0.75rem',
+                                                fontWeight: '700',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                border: '1px solid rgba(255,255,255,0.2)',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                                            }}>
+                                                <FaEye size={12} /> View Poster
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'var(--secondary)',
+                                            gap: '8px'
+                                        }}>
+                                            <FaCalendarAlt size={48} style={{ opacity: 0.6 }} />
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '700' }}>Academic Event</span>
+                                        </div>
+                                    )}
+
+                                    {/* Date Floating Badge */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: 12,
+                                        left: 14,
+                                        background: 'rgba(15, 23, 42, 0.9)',
+                                        backdropFilter: 'blur(12px)',
+                                        border: '1px solid rgba(230, 182, 39, 0.4)',
+                                        borderRadius: '14px',
+                                        padding: '6px 14px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        color: '#ffffff',
+                                        boxShadow: '0 8px 20px rgba(0,0,0,0.35)'
+                                    }}>
+                                        <span style={{ fontSize: '1.4rem', fontWeight: '900', color: 'var(--secondary)', lineHeight: 1 }}>{day}</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>{month}</span>
+                                            {year && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1 }}>{year}</span>}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Event Body */}
+                                <div style={{ padding: '1.6rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', gap: '1.2rem' }}>
+                                    <div>
+                                        <h4 style={{
+                                            fontSize: '1.25rem',
+                                            fontWeight: '900',
+                                            color: 'var(--text-main)',
+                                            margin: '0 0 0.6rem 0',
+                                            lineHeight: '1.4'
+                                        }}>
+                                            {event.title}
+                                        </h4>
+                                        {event.desc && (
+                                            <p style={{
+                                                fontSize: '0.92rem',
+                                                color: 'var(--text-muted)',
+                                                lineHeight: '1.6',
+                                                margin: 0,
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 3,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden'
+                                            }}>
+                                                {event.desc}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Action Buttons: PDF View & Download */}
+                                    {hasPdf && (
+                                        <div style={{
+                                            display: 'flex',
+                                            gap: '10px',
+                                            paddingTop: '1rem',
+                                            borderTop: '1px solid var(--glass-border)',
+                                            flexWrap: 'wrap'
+                                        }}>
+                                            {/* View PDF */}
+                                            <button
+                                                onClick={() => setSelectedPdf({ url: pdfLink, title: event.title })}
+                                                style={{
+                                                    flex: 1,
+                                                    minWidth: '120px',
+                                                    padding: '0.65rem 1rem',
+                                                    borderRadius: '12px',
+                                                    background: 'rgba(230, 182, 39, 0.12)',
+                                                    border: '1px solid rgba(230, 182, 39, 0.35)',
+                                                    color: 'var(--secondary)',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '800',
+                                                    cursor: 'pointer',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '6px',
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                            >
+                                                <FaEye size={14} /> View PDF
+                                            </button>
+
+                                            {/* Download PDF */}
+                                            <a
+                                                href={pdfLink}
+                                                download
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    flex: 1,
+                                                    minWidth: '120px',
+                                                    padding: '0.65rem 1rem',
+                                                    borderRadius: '12px',
+                                                    background: 'var(--secondary)',
+                                                    border: 'none',
+                                                    color: 'var(--bg-dark)',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '900',
+                                                    textDecoration: 'none',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '6px',
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                            >
+                                                <FaDownload size={13} /> Download PDF
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
-            ))}
+            )}
         </div>
     );
 
-    const renderLabs = () => (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
-            {department.labs ? department.labs.map((lab, idx) => (
-                <div key={idx} style={{ background: 'var(--bg-card)', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                    <div style={{ height: '220px', background: 'var(--glass-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary)' }}>
-                        {lab.image ? (
-                            <img src={lab.image} alt={lab.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                            <FaFlask size={50} />
-                        )}
+    const renderLabs = () => {
+        const displayLabs = deptLabsList.length > 0 ? deptLabsList : (department?.labs || []);
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                        <h3 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <FaFlask style={{ color: 'var(--secondary)' }} /> Department Laboratories & Facilities
+                        </h3>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                            Equipped with industry-standard hardware, cutting-edge software suites, and research apparatus
+                        </span>
                     </div>
-                    <div style={{ padding: '2rem' }}>
-                        <h4 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '1rem', color: 'var(--text-main)' }}>{lab.name}</h4>
-                        <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>{lab.description}</p>
-                        {lab.equipment && (
-                            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
-                                <div style={{ fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--secondary)', marginBottom: '0.5rem' }}>Key Equipment</div>
-                                <div style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{lab.equipment}</div>
-                            </div>
-                        )}
-                    </div>
+                    {displayLabs.length > 0 && (
+                        <span style={{
+                            padding: '6px 16px',
+                            borderRadius: '20px',
+                            background: 'rgba(230, 182, 39, 0.12)',
+                            color: 'var(--secondary)',
+                            fontSize: '0.85rem',
+                            fontWeight: '800',
+                            border: '1px solid rgba(230, 182, 39, 0.25)'
+                        }}>
+                            {displayLabs.length} {displayLabs.length === 1 ? 'Lab' : 'Labs'} Configured
+                        </span>
+                    )}
                 </div>
-            )) : <p className="text-muted">Laboratories information coming soon.</p>}
-        </div>
-    );
+
+                {displayLabs.length === 0 ? (
+                    <div style={{
+                        textAlign: 'center',
+                        padding: '5rem 2rem',
+                        background: 'var(--bg-card)',
+                        borderRadius: '28px',
+                        border: '1px solid var(--glass-border)',
+                        color: 'var(--text-muted)'
+                    }}>
+                        <FaFlask size={45} style={{ color: 'var(--secondary)', opacity: 0.5, marginBottom: '1rem' }} />
+                        <h4 style={{ fontSize: '1.4rem', color: 'var(--text-main)', margin: '0 0 0.5rem 0' }}>Laboratories Information Updating</h4>
+                        <p style={{ margin: 0, fontSize: '0.95rem' }}>High-tech laboratory details and photos will be displayed here soon.</p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+                        {displayLabs.map((lab, idx) => (
+                            <motion.div
+                                key={lab._id || idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, delay: idx * 0.05 }}
+                                whileHover={{ y: -6 }}
+                                style={{
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '24px',
+                                    overflow: 'hidden',
+                                    border: '1px solid var(--glass-border)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.06)'
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        height: '220px',
+                                        background: 'linear-gradient(135deg, rgba(27, 42, 107, 0.3) 0%, rgba(15, 23, 42, 0.7) 100%)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        cursor: lab.image ? 'pointer' : 'default'
+                                    }}
+                                    onClick={() => lab.image && setSelectedPoster({ url: lab.image, title: `${lab.name} - Laboratory Photo`, hideDownload: true })}
+                                >
+                                    {lab.image ? (
+                                        <>
+                                            <img
+                                                src={lab.image}
+                                                alt={lab.name}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
+                                                className="event-poster-img"
+                                            />
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: 12,
+                                                right: 12,
+                                                padding: '4px 10px',
+                                                borderRadius: '20px',
+                                                background: 'rgba(0,0,0,0.7)',
+                                                backdropFilter: 'blur(8px)',
+                                                color: '#ffffff',
+                                                fontSize: '0.75rem',
+                                                fontWeight: '700',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '5px',
+                                                border: '1px solid rgba(255,255,255,0.2)'
+                                            }}>
+                                                <FaEye size={12} /> View Photo
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <FaFlask size={50} style={{ color: 'var(--secondary)', opacity: 0.6 }} />
+                                    )}
+                                </div>
+                                <div style={{ padding: '1.8rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', gap: '1rem' }}>
+                                    <div>
+                                        <h4 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.6rem', color: 'var(--text-main)', lineHeight: '1.3' }}>
+                                            {lab.name}
+                                        </h4>
+                                        {lab.description && (
+                                            <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>
+                                                {lab.description}
+                                            </p>
+                                        )}
+                                    </div>
+                                    {lab.equipment && (
+                                        <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--glass-border)' }}>
+                                            <div style={{ fontSize: '0.78rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--secondary)', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>
+                                                Key Equipment / Software:
+                                            </div>
+                                            <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5' }}>
+                                                {lab.equipment}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     const renderMOU = () => (
         <div style={{ display: 'grid', gap: '2rem' }}>
@@ -1610,6 +2606,93 @@ const DepartmentPage = () => {
                 </div>
             )}
 
+            {/* CENTER OF EXCELLENCE SPOTLIGHT (IF APPLICABLE) */}
+            {department.coe && (
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)',
+                    borderRadius: '28px',
+                    padding: 'clamp(2rem, 3.5vw, 3rem)',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                            {department.coe.logo && (
+                                <div style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    borderRadius: '50%',
+                                    padding: '4px',
+                                    background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                    boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)'
+                                }}>
+                                    <img
+                                        src={department.coe.logo}
+                                        alt={department.coe.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%', background: '#0a0f1d' }}
+                                    />
+                                </div>
+                            )}
+                            <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+                                    <span style={{
+                                        fontSize: '0.75rem',
+                                        fontWeight: '900',
+                                        color: '#34d399',
+                                        textTransform: 'uppercase',
+                                        background: 'rgba(16, 185, 129, 0.15)',
+                                        padding: '0.2rem 0.7rem',
+                                        borderRadius: '12px',
+                                        border: '1px solid rgba(16, 185, 129, 0.3)'
+                                    }}>
+                                        {department.coe.code || 'Center of Excellence'}
+                                    </span>
+                                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Institutional Innovation Hub</span>
+                                </div>
+                                <h3 style={{ fontSize: '1.6rem', fontWeight: '900', color: '#ffffff', margin: 0 }}>
+                                    {department.coe.name}
+                                </h3>
+                                {department.coe.subname && (
+                                    <div style={{ fontSize: '0.95rem', color: '#94a3b8', marginTop: '0.2rem', fontWeight: '600' }}>
+                                        {department.coe.subname}
+                                    </div>
+                                )}
+                                {department.coe.tagline && (
+                                    <p style={{ fontStyle: 'italic', fontSize: '0.92rem', color: '#38bdf8', margin: '0.4rem 0 0 0' }}>
+                                        “{department.coe.tagline}”
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <Link
+                            to={`/coe?center=${department.slug.includes('cyber') ? 'cyber-shield' : 'coe-aimaa'}`}
+                            style={{
+                                padding: '0.8rem 1.8rem',
+                                borderRadius: '14px',
+                                background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+                                color: '#ffffff',
+                                fontWeight: '800',
+                                fontSize: '0.9rem',
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)'
+                            }}
+                        >
+                            Explore Center of Excellence <FaArrowRight size={12} />
+                        </Link>
+                    </div>
+                </div>
+            )}
+
             {/* 6. PILLARS OF EXCELLENCE */}
             {department.programFeatures && (
                 <div style={{
@@ -1763,15 +2846,51 @@ const DepartmentPage = () => {
         );
     }
 
+    const degreePrefix = department.degree || (department.type === 'PG' ? 'M.E.' : 'B.E. / B.Tech');
+    const pageTitle = department.seoTitle || `Best ${degreePrefix} in ${department.name} in Coimbatore`;
+    const pageDesc = department.seoDescription || `Pursue ${degreePrefix} in ${department.name} at EASA College Coimbatore. Future-proof curriculum, high-impact research, expert faculty, and 100% placement support. Check eligibility & admissions.`;
+    const pageKeywords = department.seoKeywords || `${department.name}, ${degreePrefix} ${department.name}, Best Engineering College in Coimbatore, Anna University Affiliated, Engineering Placements Coimbatore, EASA College, Vision Mission ${department.name}`;
+
+    const departmentSchema = {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": `${degreePrefix} in ${department.name}`,
+        "description": department.overview || pageDesc,
+        "provider": {
+            "@type": "CollegeOrUniversity",
+            "name": "EASA College of Engineering and Technology",
+            "url": "https://easacollege.ac.in",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "NH-47, Palakkad Main Road, Navakkarai",
+                "addressLocality": "Coimbatore",
+                "addressRegion": "Tamil Nadu",
+                "postalCode": "641105",
+                "addressCountry": "IN"
+            }
+        },
+        "educationalCredentialAwarded": degreePrefix,
+        "hasCourseInstance": {
+            "@type": "CourseInstance",
+            "courseMode": "Full-Time",
+            "courseWorkload": department.type === 'PG' ? "2 Years" : "4 Years"
+        }
+    };
+
     return (
         <div style={{ background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)', position: 'relative' }}>
             <SEO
-                title={`Best ${department.type === 'PG' ? 'Master' : 'B.Tech'} in ${department.name} in Coimbatore`}
-                description={`Apply for the ${department.name} program at EASA College. Ranked among the top programs, we offer a future-proof curriculum, expert faculty, and 100% placement assistance. Check eligibility, fees, and curriculum.`}
+                title={pageTitle}
+                description={pageDesc}
+                keywords={pageKeywords}
+                image={department.heroImage}
+                url={`https://easacollege.ac.in/department/${department.slug}`}
+                schema={departmentSchema}
             />
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
 
             <GlobalHero
+                title={department.name}
                 defaultTitle={department.name}
                 defaultSubtitle="Excellence in Engineering, Management and Professional Leadership"
                 defaultImage={department.heroImage}
@@ -1780,7 +2899,32 @@ const DepartmentPage = () => {
             <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '6rem 2rem', display: 'grid', gridTemplateColumns: '320px 1fr', gap: '5rem' }}>
                 <aside style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
                     <div style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--glass-border)', padding: '1.5rem', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1.5rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)' }}>Menu Navigation</div>
+                        {/* Department Name in Sidebar */}
+                        <div style={{ marginBottom: '1.2rem', paddingBottom: '1.2rem', borderBottom: '1px solid var(--glass-border)' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', fontWeight: '800', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '6px' }}>
+                                <FaUniversity /> Academic Department
+                            </div>
+                            <h3 style={{ fontSize: '1.2rem', fontWeight: '900', color: 'var(--text-main)', margin: 0, lineHeight: '1.3' }}>
+                                {department.name}
+                            </h3>
+                            {department.type && (
+                                <span style={{
+                                    display: 'inline-block',
+                                    marginTop: '8px',
+                                    padding: '0.2rem 0.6rem',
+                                    borderRadius: '6px',
+                                    background: 'rgba(230, 182, 39, 0.12)',
+                                    color: 'var(--secondary)',
+                                    fontSize: '0.75rem',
+                                    fontWeight: '800',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {department.type} Program
+                                </span>
+                            )}
+                        </div>
+
+                        <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Menu Navigation</div>
                         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                             {sections.map((section) => (
                                 <button
@@ -1823,7 +2967,9 @@ const DepartmentPage = () => {
                             {activeSection === 'labs' && renderLabs()}
                             {activeSection === 'hod' && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-                                    <h2 className="section-title" style={{ fontSize: '3rem', fontWeight: '900', color: 'var(--text-main)' }}>HOD MESSAGE</h2>
+                                    <h2 className="section-title" style={{ fontSize: '3rem', fontWeight: '900', color: 'var(--text-main)' }}>
+                                        {isSH ? "DEAN'S MESSAGE" : "HOD MESSAGE"}
+                                    </h2>
                                     {renderHOD()}
                                 </div>
                             )}
@@ -1921,9 +3067,274 @@ const DepartmentPage = () => {
                     /* General Padding Reduction */
                     .overview-card, .vision-mission-card { padding: 1.5rem !important; }
                 }
+
+                .gallery-photo-card:hover .gallery-photo-overlay {
+                    opacity: 1 !important;
+                }
+                .gallery-photo-card:hover .gallery-photo-img {
+                    transform: scale(1.08) !important;
+                }
             `}</style>
 
             <AdmissionForm isOpen={showAdmissionForm} onClose={() => setShowAdmissionForm(false)} />
+
+            {/* Poster Lightbox Modal */}
+            {selectedPoster && (
+                <div
+                    onClick={() => setSelectedPoster(null)}
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 9999,
+                        background: 'rgba(5, 10, 24, 0.88)',
+                        backdropFilter: 'blur(12px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '1.5rem'
+                    }}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            position: 'relative',
+                            maxWidth: '850px',
+                            width: '100%',
+                            maxHeight: '90vh',
+                            background: 'var(--bg-card)',
+                            borderRadius: '24px',
+                            border: '1px solid var(--glass-border)',
+                            overflow: 'hidden',
+                            boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}
+                    >
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '1.2rem 1.8rem',
+                            borderBottom: '1px solid var(--glass-border)',
+                            background: 'var(--bg-section)'
+                        }}>
+                            <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-main)' }}>
+                                {selectedPoster.title || 'Event Poster'}
+                            </h4>
+                            <button
+                                onClick={() => setSelectedPoster(null)}
+                                style={{
+                                    background: 'rgba(255,255,255,0.1)',
+                                    border: 'none',
+                                    color: 'var(--text-main)',
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    fontSize: '1rem'
+                                }}
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'auto', background: '#0a0f1d' }}>
+                            <img
+                                src={selectedPoster.url}
+                                alt={selectedPoster.title || 'Poster'}
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '70vh',
+                                    objectFit: 'contain',
+                                    borderRadius: '12px'
+                                }}
+                            />
+                        </div>
+                        <div style={{ padding: '1rem 1.8rem', display: 'flex', justifyContent: 'flex-end', gap: '10px', background: 'var(--bg-section)', borderTop: '1px solid var(--glass-border)' }}>
+                            <a
+                                href={selectedPoster.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    borderRadius: '10px',
+                                    background: 'rgba(230, 182, 39, 0.15)',
+                                    color: 'var(--secondary)',
+                                    fontWeight: '800',
+                                    fontSize: '0.85rem',
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                <FaExternalLinkAlt size={12} /> Open Full Image
+                            </a>
+                            {selectedPoster.hideDownload ? (
+                                <button
+                                    onClick={() => setSelectedPoster(null)}
+                                    style={{
+                                        padding: '0.6rem 1.4rem',
+                                        borderRadius: '10px',
+                                        background: 'var(--secondary)',
+                                        color: 'var(--bg-dark)',
+                                        fontWeight: '900',
+                                        fontSize: '0.85rem',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <FaTimes size={12} /> Close View
+                                </button>
+                            ) : (
+                                <a
+                                    href={selectedPoster.url}
+                                    download
+                                    style={{
+                                        padding: '0.6rem 1.2rem',
+                                        borderRadius: '10px',
+                                        background: 'var(--secondary)',
+                                        color: 'var(--bg-dark)',
+                                        fontWeight: '900',
+                                        fontSize: '0.85rem',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <FaDownload size={12} /> Download Poster
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PDF Viewer Modal */}
+            {selectedPdf && (
+                <div
+                    onClick={() => setSelectedPdf(null)}
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 9999,
+                        background: 'rgba(5, 10, 24, 0.88)',
+                        backdropFilter: 'blur(12px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '1.5rem'
+                    }}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            position: 'relative',
+                            maxWidth: '950px',
+                            width: '100%',
+                            height: '88vh',
+                            background: 'var(--bg-card)',
+                            borderRadius: '24px',
+                            border: '1px solid var(--glass-border)',
+                            overflow: 'hidden',
+                            boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}
+                    >
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '1.2rem 1.8rem',
+                            borderBottom: '1px solid var(--glass-border)',
+                            background: 'var(--bg-section)',
+                            flexWrap: 'wrap',
+                            gap: '0.8rem'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <FaFilePdf size={20} color="#f87171" />
+                                <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-main)' }}>
+                                    {selectedPdf.title ? `${selectedPdf.title} - Document` : 'Brochure / Document'}
+                                </h4>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <a
+                                    href={selectedPdf.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        borderRadius: '8px',
+                                        background: 'rgba(230, 182, 39, 0.15)',
+                                        color: 'var(--secondary)',
+                                        fontWeight: '800',
+                                        fontSize: '0.8rem',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <FaExternalLinkAlt size={12} /> Open in Tab
+                                </a>
+                                <a
+                                    href={selectedPdf.url}
+                                    download
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        borderRadius: '8px',
+                                        background: 'var(--secondary)',
+                                        color: 'var(--bg-dark)',
+                                        fontWeight: '900',
+                                        fontSize: '0.8rem',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <FaDownload size={12} /> Download
+                                </a>
+                                <button
+                                    onClick={() => setSelectedPdf(null)}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.1)',
+                                        border: 'none',
+                                        color: 'var(--text-main)',
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        fontSize: '1rem',
+                                        marginLeft: '4px'
+                                    }}
+                                >
+                                    <FaTimes />
+                                </button>
+                            </div>
+                        </div>
+                        <div style={{ flex: 1, width: '100%', height: '100%', background: '#1e293b' }}>
+                            <iframe
+                                src={selectedPdf.url}
+                                title={selectedPdf.title || "Document Viewer"}
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
             <Footer />
         </div>
     );

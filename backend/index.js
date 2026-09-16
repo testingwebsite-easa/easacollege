@@ -23,7 +23,7 @@ const {
     Enquiry, TickerAlert, LibraryData, Scholarship, PopupAlert, PlacementPage,
     VideoGallery, Grievance, VirtualTour, PageHero, Sport, Moment, Advice,
     FestPage, User, ProgramOutcome, Counseling, StartupPitch, PacFeedback,
-    PartnerConnect, NewsletterSubscriber
+    PartnerConnect, NewsletterSubscriber, DepartmentLab
 } = require('./models/Schemas');
 console.log("FestPage Check:", FestPage);
 
@@ -1111,6 +1111,64 @@ app.delete('/api/gallery-images/:id', async (req, res) => {
 });
 
 // --- Gallery Events Routes ---
+const normalizeGalleryEvent = (body) => {
+    const data = { ...body };
+    
+    // Default eventName if empty
+    if (!data.eventName || !data.eventName.toString().trim()) {
+        data.eventName = data.department ? `${data.department.toUpperCase()} Photo` : 'Gallery Photo';
+    }
+
+    // Fix date
+    if (!data.date || data.date === '' || isNaN(new Date(data.date).getTime())) {
+        data.date = new Date();
+    } else {
+        data.date = new Date(data.date);
+    }
+
+    // Parse photos if it's a JSON string, array, or single image
+    let photosArr = [];
+    if (typeof data.photos === 'string') {
+        try {
+            const parsed = JSON.parse(data.photos);
+            if (Array.isArray(parsed)) photosArr = parsed;
+            else if (typeof parsed === 'string' && parsed.trim()) photosArr = [{ src: parsed.trim() }];
+        } catch (e) {
+            if (data.photos.trim().startsWith('http') || data.photos.trim().startsWith('/') || data.photos.trim().startsWith('data:')) {
+                photosArr = [{ src: data.photos.trim() }];
+            }
+        }
+    } else if (Array.isArray(data.photos)) {
+        photosArr = data.photos;
+    }
+
+    // If single image was sent via data.image or data.src or data.imageUrl or data.url
+    const directUrl = data.image || data.src || data.imageUrl || data.url;
+    if (directUrl && (!photosArr || photosArr.length === 0)) {
+        photosArr = [{ src: directUrl, caption: data.caption || data.eventName || '' }];
+    }
+
+    // Normalize each photo item to { src, caption }
+    data.photos = (Array.isArray(photosArr) ? photosArr : []).map(p => {
+        if (typeof p === 'string') return { src: p, caption: '' };
+        return {
+            src: p.src || p.url || p.image || p.imageUrl || '',
+            caption: p.caption || ''
+        };
+    }).filter(p => p.src && p.src.toString().trim() !== '');
+
+    // If direct image exists and not yet in photos, ensure it's added
+    if (directUrl && !data.photos.some(p => p.src === directUrl)) {
+        data.photos.unshift({ src: directUrl, caption: data.caption || data.eventName || '' });
+    }
+
+    if (data.photos.length > 0 && !data.image) {
+        data.image = data.photos[0].src;
+    }
+
+    return data;
+};
+
 app.get('/api/gallery-events', async (req, res) => {
     try {
         const events = await GalleryEvent.find().sort({ date: -1 });
@@ -1124,31 +1182,40 @@ app.get('/api/gallery-events', async (req, res) => {
 app.post('/api/gallery-events', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
-        const item = new GalleryEvent(req.body);
+        const normalized = normalizeGalleryEvent(req.body);
+        const item = new GalleryEvent(normalized);
         await item.save();
+        clearCache('gallery-events');
         res.status(201).json(item);
     } catch (err) {
-        res.status(500).json({ error: "Failed to create event" });
+        console.error("Error creating gallery event:", err);
+        res.status(500).json({ error: "Failed to create event", details: err.message });
     }
 });
 
 app.put('/api/gallery-events/:id', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
-        const item = await GalleryEvent.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const normalized = normalizeGalleryEvent(req.body);
+        const item = await GalleryEvent.findByIdAndUpdate(req.params.id, normalized, { new: true });
+        clearCache('gallery-events');
         res.json(item);
     } catch (err) {
-        res.status(500).json({ error: "Failed to update event" });
+        console.error("Error updating gallery event:", err);
+        res.status(500).json({ error: "Failed to update event", details: err.message });
     }
 });
 
 app.patch('/api/gallery-events/:id', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
-        const item = await GalleryEvent.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+        const normalized = normalizeGalleryEvent(req.body);
+        const item = await GalleryEvent.findByIdAndUpdate(req.params.id, { $set: normalized }, { new: true });
+        clearCache('gallery-events');
         res.json(item);
     } catch (err) {
-        res.status(500).json({ error: "Failed to update event" });
+        console.error("Error patching gallery event:", err);
+        res.status(500).json({ error: "Failed to update event", details: err.message });
     }
 });
 
@@ -1156,6 +1223,7 @@ app.delete('/api/gallery-events/:id', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         await GalleryEvent.findByIdAndDelete(req.params.id);
+        clearCache('gallery-events');
         res.json({ message: "Deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: "Failed to delete event" });
@@ -1857,7 +1925,7 @@ app.get('/api/faculty', async (req, res) => {
     try {
         const { department } = req.query;
         const query = department ? { department } : {};
-        const faculty = await Faculty.find(query).select('name designation order department').sort({ order: 1 });
+        const faculty = await Faculty.find(query).sort({ order: 1 });
         res.json(faculty);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch faculty" });
@@ -1932,6 +2000,57 @@ app.get('/api/departments/:slug/events', async (req, res) => {
         res.json(events);
     } catch (err) {
         res.json([]);
+    }
+});
+
+// ==================== DEPARTMENT LABORATORIES ====================
+app.get('/api/departments/:slug/labs', async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const labs = await DepartmentLab.find({ department: slug }).sort({ order: 1, _id: 1 });
+        res.json(labs);
+    } catch (err) {
+        res.json([]);
+    }
+});
+
+app.get('/api/department-labs', async (req, res) => {
+    try {
+        const { department } = req.query;
+        const query = department ? { department } : {};
+        const labs = await DepartmentLab.find(query).sort({ order: 1, _id: 1 });
+        res.json(labs);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch department labs" });
+    }
+});
+
+app.post('/api/department-labs', async (req, res) => {
+    try {
+        const lab = new DepartmentLab(req.body);
+        await lab.save();
+        res.json(lab);
+    } catch (err) {
+        console.error("Error creating department lab:", err);
+        res.status(500).json({ error: "Failed to create department lab: " + err.message });
+    }
+});
+
+app.put('/api/department-labs/:id', async (req, res) => {
+    try {
+        const lab = await DepartmentLab.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(lab);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update department lab" });
+    }
+});
+
+app.delete('/api/department-labs/:id', async (req, res) => {
+    try {
+        await DepartmentLab.findByIdAndDelete(req.params.id);
+        res.json({ message: "Lab deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete department lab" });
     }
 });
 

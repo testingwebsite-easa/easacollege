@@ -1419,20 +1419,16 @@ a {
    ========================================================================== */
 
 .perspective-container {
-  perspective: 1200px;
-  perspective-origin: center center;
+  /* Clean standard layout */
 }
 
 .card-3d-subtle {
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s ease;
-  transform-style: preserve-3d;
-  will-change: transform;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .card-3d-subtle:hover {
-  transform: perspective(1000px) translateY(-8px) rotateX(3deg) rotateY(-2deg) scale(1.015);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 25px rgba(230, 182, 39, 0.15);
-  border-color: rgba(230, 182, 39, 0.35) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.35);
 }
 
 /* 3D Floating 20% Scholarship & Early Bird Offer Badge */

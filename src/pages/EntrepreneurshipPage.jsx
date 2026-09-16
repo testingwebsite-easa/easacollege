@@ -7,7 +7,8 @@ import {
     FaChevronRight, FaPhone, FaEnvelope, FaMapMarkerAlt,
     FaFileAlt, FaGlobe, FaCertificate, FaCoins,
     FaCompass, FaShieldAlt, FaNetworkWired, FaBriefcase,
-    FaComments, FaIndustry, FaUserTie, FaCheckDouble
+    FaComments, FaIndustry, FaUserTie, FaUserGraduate,
+    FaCalendarAlt, FaInstagram, FaExternalLinkAlt, FaClock
 } from 'react-icons/fa';
 import { useTheme } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
@@ -19,69 +20,153 @@ import GlobalHero from '../components/GlobalHero';
 import API_BASE_URL from '../api';
 
 const entrepreneurshipData = {
-    name: "Center for Innovation, Incubation & Entrepreneurship (EDC)",
+    name: "Entrepreneurship Development Cell (EDC)",
+    shortName: "ECET EDC",
     heroImage: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&q=80&w=2070&ixlib=rb-4.0.3",
-    vision: "To cultivate a vibrant, innovation-driven entrepreneurial ecosystem that inspires students and faculty to transform disruptive technological concepts into commercially viable, high-impact startup enterprises.",
-    mission: [
-        "To provide end-to-end incubation support including modern co-working infrastructure, state-of-the-art prototyping laboratories, and seed capital assistance.",
-        "To deliver intensive mentoring in business modeling, market research, design thinking, intellectual property rights (IPR), and company incorporation.",
-        "To connect early-stage student founders with angel investor networks, venture capitalists, government funding agencies (MSME, EDII, DST), and industry mentors.",
-        "To champion a culture of risk-taking, ethical leadership, and sustainable wealth creation that addresses pressing industrial and societal challenges."
-    ],
+    overview: "The ECET EDC functioning in our college to cultivate entrepreneurial culture among our students. It provides budding innovators with the training, mentorship, and resources needed to transform raw ideas into viable, market-ready startups.",
     overviewParagraphs: [
-        "The Center for Innovation, Incubation & Entrepreneurship (CIIE / EDC) at EASA College of Engineering and Technology serves as the central springboard for student entrepreneurs, innovators, and creative problem-solvers.",
-        "Equipped with the AICTE IDEA Lab, dedicated maker spaces, advanced rapid-prototyping machinery, and high-speed collaboration zones, the Center bridges the crucial gap between academic innovation and commercial startup reality.",
-        "From pre-incubation ideation hackathons to venture registration, seed funding, patent drafting, and investor pitch sessions, we empower young innovators to build scalable businesses and become creators of employment."
+        "The ECET EDC functioning in our college to cultivate entrepreneurial culture among our students. It provides budding innovators with the training, mentorship, and resources needed to transform raw ideas into viable, market-ready startups.",
+        "Equipped with advanced prototyping spaces, maker labs, and collaboration zones, the Cell bridges the crucial gap between academic engineering creativity and real-world commercial startup ventures.",
+        "From pre-incubation ideation workshops and CEO interaction sessions to company registration, patent drafting, and seed funding facilitation, ECET EDC empowers students to become ethical, visionary business leaders and employment generators."
     ],
+    vision: "To create an entrepreneurial ecosystem that transforms innovative minds into ethical, responsible and successful business leaders and job creators.",
+    mission: [
+        "Foster creativity, innovation, and an entrepreneurial mindset across all engineering disciplines.",
+        "Conduct structured mentorship programmes, practical hands-on workshops, and industry networking events.",
+        "Provide step-by-step guidance to transform student concepts from ideation stage to incubation readiness.",
+        "Collaborate actively with industry leaders, startup founders, and government incubation bodies to deliver impactful, real-world solutions."
+    ],
+    committee: {
+        faculty: [
+            {
+                name: "Mr. T Gunasekaran",
+                role: "Faculty Coordinator",
+                designation: "Assistant Professor / Mechanical Engineering",
+                department: "Department of Mechanical Engineering",
+                email: "edc@ecetonline.com",
+                phone: "86673 05824",
+                icon: <FaUserTie />
+            }
+        ],
+        students: [
+            {
+                name: "Mr. Sharukesavan",
+                role: "Student Secretary",
+                yearAndDept: "Final Year Agricultural Engineering",
+                department: "Agricultural Engineering",
+                icon: <FaUserGraduate />
+            },
+            {
+                name: "Ms. Metha",
+                role: "Joint Secretary",
+                yearAndDept: "Final Year Agricultural Engineering",
+                department: "Agricultural Engineering",
+                icon: <FaUserGraduate />
+            }
+        ]
+    },
+    majorEvents: [
+        {
+            sno: 1,
+            title: "World Entrepreneurship Day",
+            date: "21-08-2025",
+            tag: "Flagship Celebration",
+            desc: "Annual campus celebration fostering entrepreneurial awareness, keynote addresses by prominent startup founders, and student innovation displays."
+        },
+        {
+            sno: 2,
+            title: "Design Thinking",
+            date: "01-09-2025",
+            tag: "Innovation Bootcamp",
+            desc: "Intensive methodology session focusing on empathy mapping, problem statement validation, and iterative prototyping techniques."
+        },
+        {
+            sno: 3,
+            title: "Sustainable Engineering in Core Industry",
+            date: "22-09-2025",
+            tag: "Industry Conclave",
+            desc: "Expert panel and seminar examining green manufacturing, renewable integration, and sustainable business models in core sectors."
+        },
+        {
+            sno: 4,
+            title: "Meet the CEO",
+            date: "19-11-2025",
+            tag: "Executive Interactive Series",
+            desc: "Direct fireside chat with successful tech entrepreneurs sharing founder journeys, funding strategies, and scaling lessons."
+        },
+        {
+            sno: 5,
+            title: "Research Publication and Patents",
+            date: "09-08-2025",
+            tag: "IPR & Patent Workshop",
+            desc: "Comprehensive guidance on prior-art search, patent drafting, provisional filing, and commercializing academic research innovations."
+        },
+        {
+            sno: 6,
+            title: "Workshop on Design Thinking",
+            date: "01-09-2025",
+            tag: "Hands-on Workshop",
+            desc: "Practical group workshops building rapid paper & digital MVPs and testing product-market assumptions with real users."
+        },
+        {
+            sno: 7,
+            title: "DISRUPT e-leader Workshop",
+            date: "30-10-2025",
+            tag: "Leadership Summit",
+            desc: "Specialized leadership training for student leaders to spearhead innovation cells, build startup teams, and organize campus hackathons."
+        },
+        {
+            sno: 8,
+            title: "Quality Concepts for Life Skills",
+            date: "03-03-2026",
+            tag: "Professional Development",
+            desc: "Holistic masterclass on Total Quality Management (TQM), ethical decision-making, and critical life skills for future entrepreneurs."
+        }
+    ],
+    contact: {
+        coordinator: "Mr. T Gunasekaran",
+        title: "Coordinator, ECET EDC",
+        email: "edc@ecetonline.com",
+        phone: "86673 05824",
+        instagram: "https://instagram.com/edcecet",
+        instagramHandle: "Instagram.com/edcecet",
+        address: "EASA College of Engineering and Technology, NH-47, Palakkad Main Road, Navakkarai, Coimbatore - 641 105"
+    },
     stats: [
         { label: "Startups Incubated", value: "28+", icon: <FaRocket /> },
-        { label: "Seed Grants & Funding", value: "₹85L+", icon: <FaCoins /> },
+        { label: "Major Events & Workshops", value: "8+", icon: <FaCalendarAlt /> },
         { label: "Patents & Innovations", value: "45+", icon: <FaShieldAlt /> },
-        { label: "Industry & VC Mentors", value: "35+", icon: <FaUsers /> },
-        { label: "Prototype Success Rate", value: "95%", icon: <FaCheckCircle /> }
+        { label: "Seed Grants Facilitated", value: "₹85L+", icon: <FaCoins /> },
+        { label: "Mentors & Industry Network", value: "35+", icon: <FaUsers /> }
     ],
     programs: [
         {
             title: "Pre-Incubation & Ideation Bootcamps",
             badge: "Ideation Stage",
-            desc: "Structured 6-week experiential workshops covering Design Thinking, Lean Canvas modeling, Problem-Solution fit, and Customer Discovery.",
+            desc: "Structured experiential workshops covering Design Thinking, Lean Canvas modeling, Problem-Solution fit, and Customer Discovery.",
             icon: <FaLightbulb />,
             deliverables: ["Idea Validation", "Lean Business Model", "Problem Discovery Pitch", "Faculty Mentorship"]
         },
         {
-            title: "AICTE IDEA Lab & Rapid Prototyping",
+            title: "Rapid Prototyping & Maker Space",
             badge: "Prototyping Stage",
-            desc: "24/7 access to industrial 3D printers, laser cutters, CNC milling machines, IoT testbeds, and PCB fabrication units for physical hardware prototypes.",
+            desc: "Direct access to 3D printers, IoT testbeds, laser cutting, CNC equipment, and hardware fabrication tools for early-stage physical MVPs.",
             icon: <FaMicrochip />,
             deliverables: ["Hardware & IoT Prototyping", "CAD/CAM Testing", "PCB Fabrication", "BOM Optimization"]
         },
         {
-            title: "EASA Seed Capital & Grant Facilitation",
+            title: "Seed Capital & Grant Facilitation",
             badge: "Seed Funding",
-            desc: "Direct institutional seed grants up to ₹2.5 Lakhs per startup, plus facilitation for MSME Innovation Grants (up to ₹15 Lakhs) and EDII Tamil Nadu Vouchers.",
+            desc: "Direct institutional seed grants alongside facilitation for MSME Innovation Grants, EDII Tamil Nadu Innovation Vouchers, and angel pitch entries.",
             icon: <FaCoins />,
-            deliverables: ["POC Proof Grant", "MSME Incubation Grant", "EDII Voucher A & B", "Zero-Equity Angel Grants"]
+            deliverables: ["POC Proof Grant", "MSME Incubation Grant", "EDII Voucher A & B", "Angel Investor Access"]
         },
         {
             title: "IPR Filing, Legal & Incorporation Desk",
             badge: "Legal & IP",
-            desc: "Comprehensive support for Private Limited company incorporation, GST registration, trademark filings, and patent drafting with 100% institutional subsidy.",
+            desc: "Comprehensive support for Private Limited company incorporation, GST registration, trademark filings, and patent drafting support.",
             icon: <FaShieldAlt />,
             deliverables: ["Pvt Ltd / LLP Registration", "Patent Drafting Support", "Trademark & Copyright", "Founder Agreement Drafting"]
-        },
-        {
-            title: "Investor Pitch Days & Demo Day (E-Summit)",
-            badge: "Venture Scaling",
-            desc: "Bi-annual flagship startup showcase connecting incubated ventures with Coimbatore Innovation Network, angel syndicates, and seed-stage VC funds.",
-            icon: <FaChartLine />,
-            deliverables: ["Live Pitch to Angels", "Term Sheet Review", "Market Go-To-Market Strategy", "Media & Press Coverage"]
-        },
-        {
-            title: "Student Entrepreneur-in-Residence (EIR) Policy",
-            badge: "Academic Support",
-            desc: "Special institutional provisions offering academic credits for startup milestones, attendance flexibility for investor meetings, and semester gap year options.",
-            icon: <FaBriefcase />,
-            deliverables: ["Academic Credit Swap", "Attendance Relaxation", "Hostel Co-Living for Founders", "Deferred Placement Support"]
         }
     ],
     startups: [
@@ -98,7 +183,7 @@ const entrepreneurshipData = {
             name: "Vitalsense IoT Devices",
             founder: "Deepika S. & Team (BME '25)",
             sector: "HealthTech & Wearables",
-            desc: "Continuous non-invasive multi-parameter vital signs monitor with cloud telemedicine telemetry for rural primary health centers.",
+            desc: "Continuous non-invasive multi-parameter vital signs monitor with cloud telemedicine telemetry for rural health centers.",
             funding: "₹3.5 Lakhs (MSME Scheme)",
             stage: "Clinical Trial Validation",
             icon: <FaLaptopCode />
@@ -116,86 +201,28 @@ const entrepreneurshipData = {
             name: "QuantLogix AI Solutions",
             founder: "Praveen M. (CSE '24)",
             sector: "Enterprise AI & Workflow",
-            desc: "Automated optical inspection software using edge computer vision for defect detection in automotive manufacturing lines.",
+            desc: "Automated optical inspection software using edge computer vision for defect detection in manufacturing lines.",
             funding: "₹6.5 Lakhs (Angel Syndicate)",
             stage: "Active Commercial Deployments",
             icon: <FaNetworkWired />
         }
     ],
-    incubationRoadmap: [
-        {
-            step: "01",
-            phase: "Ideation & Problem Identification",
-            duration: "Months 1 - 2",
-            desc: "Campus hackathons, problem discovery workshops, customer interviews, and initial feasibility screening."
-        },
-        {
-            step: "02",
-            phase: "Proof-of-Concept & Prototyping",
-            duration: "Months 3 - 4",
-            desc: "AICTE IDEA Lab fabrication, breadboard to PCB transition, functional MVP development, and seed grant sanction."
-        },
-        {
-            step: "03",
-            phase: "Legal Setup & Patent Filing",
-            duration: "Months 5 - 6",
-            desc: "Provisional patent filing, MCA company registration, trademark protection, and advisory board onboarding."
-        },
-        {
-            step: "04",
-            phase: "Pilot Testing & Market Validation",
-            duration: "Months 7 - 9",
-            desc: "Field deployment with initial pilot customers, customer feedback iterations, and revenue model refinement."
-        },
-        {
-            step: "05",
-            phase: "Demo Day & Scaling",
-            duration: "Months 10 - 12",
-            desc: "Pitching at the Annual E-Summit, securing seed VC funding, team expansion, and market launch."
-        }
-    ],
-    mentors: [
-        {
-            name: "Dr. K. Arulmurugan",
-            role: "Director - Incubation & Innovation Cell",
-            specialization: "Technology Commercialization & Grant Management"
-        },
-        {
-            name: "Mr. R. Vigneshwaran",
-            role: "Chief Startup Mentor & Angel Investor",
-            specialization: "Go-to-Market Strategy & Venture Scaling"
-        },
-        {
-            name: "Prof. S. Santhiya",
-            role: "Coordinator - IPR & Patent Cell",
-            specialization: "Patent Drafting, Copyright & Prior Art Search"
-        },
-        {
-            name: "Mr. G. Arvind",
-            role: "Industry Liaison & Legal Advisor",
-            specialization: "Company Law, Founder Agreements & Term Sheets"
-        }
-    ],
     faqs: [
         {
-            q: "Who is eligible to apply for incubation at EASA CIIE?",
-            a: "All current undergraduate and postgraduate students, alumni (up to 3 years from graduation), and faculty members across any engineering department are eligible to apply with an innovative concept."
+            q: "Who can join the ECET Entrepreneurship Development Cell (EDC)?",
+            a: "All undergraduate and postgraduate students from any branch of engineering, along with alumni and faculty members of EASA College, can participate in EDC activities, workshops, and apply for incubation."
         },
         {
-            q: "Do I need to already have a working prototype to apply?",
-            a: "No! We support innovators from the earliest ideation stage. Our pre-incubation program and AICTE IDEA Lab facilities will assist you in building your first functional prototype."
+            q: "How can I register my startup idea with ECET EDC?",
+            a: "You can click on the 'Pitch Your Startup Idea' button on this page, or contact Faculty Coordinator Mr. T Gunasekaran (86673 05824 / edc@ecetonline.com) to submit your concept note."
         },
         {
-            q: "What financial assistance does the college offer to student startups?",
-            a: "EASA provides direct seed funding of up to ₹2.5 Lakhs per vetted project, alongside end-to-end assistance to apply for government grants including MSME Innovation Grants (up to ₹15 Lakhs) and EDII Tamil Nadu Innovation Vouchers."
+            q: "Do I need a fully finished product to apply?",
+            a: "No! ECET EDC supports students from the ideation stage onwards through Design Thinking workshops, mentoring, prototyping facilities, and proof-of-concept grants."
         },
         {
-            q: "How does the Student Entrepreneur-in-Residence (EIR) policy work?",
-            a: "Recognized student founders receive up to 10% attendance relaxation for startup-related events and investor meetings, academic credits for startup milestones in place of open electives, and access to 24/7 incubator facilities."
-        },
-        {
-            q: "Does EASA assist with patent filing and legal company incorporation?",
-            a: "Yes. Our in-house IPR cell manages patent prior art searches, patent drafting, filing fees, and company incorporation (Pvt Ltd / LLP) with 100% subsidized institutional assistance."
+            q: "Does the EDC help with patent filings and company registration?",
+            a: "Yes. Our IPR and Legal guidance desk assists student founders with patent prior-art searches, provisional drafting, trademark protection, and official company incorporation (Pvt Ltd / LLP)."
         }
     ]
 };
@@ -225,12 +252,13 @@ const EntrepreneurshipPage = () => {
     }, []);
 
     const sections = [
-        { id: 'overview', label: 'Overview & Vision', icon: <FaBuilding /> },
-        { id: 'statistics', label: 'Key Highlights', icon: <FaChartLine /> },
+        { id: 'overview', label: 'Overview, Vision & Mission', icon: <FaBuilding /> },
+        { id: 'committee', label: 'EC Committee', icon: <FaUsers /> },
+        { id: 'events', label: 'Major Events Calendar', icon: <FaCalendarAlt /> },
+        { id: 'contact', label: 'Contact & Connect', icon: <FaPhone /> },
         { id: 'programs', label: 'Incubation Programs', icon: <FaRocket /> },
         { id: 'startups', label: 'Incubated Startups', icon: <FaIndustry /> },
-        { id: 'roadmap', label: '5-Stage Roadmap', icon: <FaCompass /> },
-        { id: 'mentors', label: 'Mentors & Advisory', icon: <FaUsers /> },
+        { id: 'statistics', label: 'Key Highlights', icon: <FaChartLine /> },
         { id: 'faqs', label: 'FAQs & Policies', icon: <FaLightbulb /> }
     ];
 
@@ -244,7 +272,7 @@ const EntrepreneurshipPage = () => {
 
     const handlePitchSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!pitchForm.founderName?.trim()) {
             showToast('Please enter the Founder / Student Name', 'warning', 'Missing: Founder Name');
             return;
@@ -275,9 +303,9 @@ const EntrepreneurshipPage = () => {
                 body: JSON.stringify({ ...pitchForm, phone: cleanPhone })
             });
             if (res.ok) {
-                showToast('Congratulations! Your Startup Pitch has been submitted to EASA Incubation Cell. Our team will review your proposal.', 'success', 'Pitch Submitted');
+                showToast('Congratulations! Your Startup Pitch has been submitted to ECET EDC. Our committee will review your proposal.', 'success', 'Pitch Submitted');
             } else {
-                showToast('Your proposal has been received. Our incubation team will contact you soon.', 'success', 'Proposal Received');
+                showToast('Your proposal has been received. Our EDC team will contact you soon.', 'success', 'Proposal Received');
             }
         } catch (err) {
             console.error('Pitch submit error:', err);
@@ -302,19 +330,78 @@ const EntrepreneurshipPage = () => {
     return (
         <div className="entrepreneurship-page" style={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-main)' }}>
             <SEO
-                title="Innovation & Entrepreneurship Cell (EDC / Incubation) | EASA College"
-                description="Center for Innovation, Incubation & Entrepreneurship at EASA College - Seed funding, AICTE IDEA Lab prototyping, startup incubation, patent filing, and investor pitch sessions."
-                keywords="EASA Entrepreneurship Cell, Startup Incubation, AICTE IDEA Lab, Seed Capital, MSME Grant, Student Startups, Coimbatore Incubator"
+                title="Entrepreneurship Development Cell (EDC) | EASA College of Engineering and Technology"
+                description="ECET EDC at EASA College - Cultivating entrepreneurial culture, providing training, mentorship, seed grants, and incubation to transform raw ideas into viable startups."
+                keywords="ECET EDC, Entrepreneurship Development Cell, EASA College, Startup Incubation, World Entrepreneurship Day, Design Thinking, Gunasekaran, Coimbatore E-Cell"
             />
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
 
             {/* HERO BANNER */}
             <GlobalHero
                 pageKey="entrepreneurship"
-                defaultTitle="Center for Innovation, Incubation & Entrepreneurship"
-                defaultSubtitle="Igniting the entrepreneurial mindset, incubating cutting-edge technology startups, providing seed capital, and turning engineering innovations into viable commercial ventures."
+                defaultTitle="ENTREPRENEURSHIP DEVELOPMENT CELL (EDC)"
+                defaultSubtitle="Cultivating an entrepreneurial culture among our students — providing budding innovators with the training, mentorship, and resources needed to transform raw ideas into viable, market-ready startups."
                 defaultImage={entrepreneurshipData.heroImage}
             />
+
+            {/* QUICK CONTACT / HIGHLIGHT BANNER */}
+            <div style={{ background: isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(239, 246, 255, 0.9)', borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(219, 234, 254, 0.8)', padding: '1rem 0' }}>
+                <div className="container" style={{ maxWidth: '1350px', margin: '0 auto', padding: '0 1.5rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', flexWrap: 'wrap' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: '700', color: primaryTextColor }}>
+                            <FaUserTie style={{ color: accentColor }} />
+                            <span><strong>Coordinator:</strong> Mr. T Gunasekaran (Asst. Prof / Mech)</span>
+                        </span>
+                        <a href={`tel:${entrepreneurshipData.contact.phone.replace(/\s+/g, '')}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: '700', color: accentColor, textDecoration: 'none' }}>
+                            <FaPhone /> {entrepreneurshipData.contact.phone}
+                        </a>
+                        <a href={`mailto:${entrepreneurshipData.contact.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: '700', color: accentColor, textDecoration: 'none' }}>
+                            <FaEnvelope /> {entrepreneurshipData.contact.email}
+                        </a>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                        <a
+                            href={entrepreneurshipData.contact.instagram.startsWith('http') ? entrepreneurshipData.contact.instagram : `https://${entrepreneurshipData.contact.instagram}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.45rem 1rem',
+                                borderRadius: '50px',
+                                background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                                color: '#ffffff',
+                                fontSize: '0.85rem',
+                                fontWeight: '800',
+                                textDecoration: 'none',
+                                boxShadow: '0 4px 12px rgba(220, 39, 67, 0.3)'
+                            }}
+                        >
+                            <FaInstagram /> @edcecet
+                        </a>
+                        <button
+                            onClick={() => setPitchModal(true)}
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                padding: '0.45rem 1.1rem',
+                                borderRadius: '50px',
+                                background: '#F59E0B',
+                                color: '#000000',
+                                fontSize: '0.85rem',
+                                fontWeight: '900',
+                                border: 'none',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 12px rgba(245,158,11,0.3)'
+                            }}
+                        >
+                            <FaRocket /> Pitch Idea
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             {/* MAIN CONTENT WRAPPER */}
             <div className="container" style={{ maxWidth: '1350px', margin: '0 auto', padding: '3.5rem 1.5rem' }}>
@@ -334,10 +421,10 @@ const EntrepreneurshipPage = () => {
                         }}>
                             <div style={{ padding: '0.5rem 0.8rem 1.2rem', borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(226, 232, 240, 0.9)' }}>
                                 <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', color: accentColor, marginBottom: '0.3rem' }}>
-                                    ASCEND Ecosystem
+                                    ECET Ecosystem
                                 </div>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: '900', color: primaryTextColor, margin: 0 }}>
-                                    Incubation & E-Cell Hub
+                                    EDC Navigation
                                 </h3>
                             </div>
 
@@ -354,7 +441,7 @@ const EntrepreneurshipPage = () => {
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'space-between',
-                                            padding: '0.9rem 1.2rem',
+                                            padding: '0.85rem 1.1rem',
                                             borderRadius: '16px',
                                             border: isActive ? `1px solid ${accentColor}` : '1px solid transparent',
                                             background: isActive
@@ -362,15 +449,15 @@ const EntrepreneurshipPage = () => {
                                                 : 'transparent',
                                             color: isActive ? (isDark ? '#38BDF8' : '#2563EB') : secondaryTextColor,
                                             fontWeight: isActive ? '800' : '600',
-                                            fontSize: '0.95rem',
+                                            fontSize: '0.92rem',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s ease',
                                             textAlign: 'left'
                                         }}
                                         className="sidebar-tab-btn"
                                     >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
-                                            <span style={{ fontSize: '1.15rem' }}>{sec.icon}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                                            <span style={{ fontSize: '1.1rem' }}>{sec.icon}</span>
                                             <span>{sec.label}</span>
                                         </div>
                                         <FaChevronRight size={12} style={{ opacity: isActive ? 1 : 0.4 }} />
@@ -380,29 +467,29 @@ const EntrepreneurshipPage = () => {
 
                             {/* PITCH IDEA CTA CARD */}
                             <div style={{
-                                marginTop: '1.5rem',
-                                padding: '1.5rem',
+                                marginTop: '1.2rem',
+                                padding: '1.4rem',
                                 borderRadius: '18px',
                                 background: 'linear-gradient(135deg, #1B2A6B 0%, #2563EB 100%)',
                                 color: '#ffffff',
                                 textAlign: 'center',
                                 boxShadow: '0 10px 25px rgba(37,99,235,0.3)'
                             }}>
-                                <div style={{ fontSize: '2rem', marginBottom: '0.6rem' }}><FaRocket /></div>
-                                <h4 style={{ fontSize: '1.1rem', fontWeight: '900', marginBottom: '0.4rem' }}>Have a Startup Idea?</h4>
-                                <p style={{ fontSize: '0.82rem', opacity: 0.9, lineHeight: '1.4', marginBottom: '1.2rem' }}>
-                                    Submit your concept for seed funding, prototyping lab access & mentorship.
+                                <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}><FaRocket /></div>
+                                <h4 style={{ fontSize: '1.05rem', fontWeight: '900', marginBottom: '0.3rem' }}>Have a Startup Idea?</h4>
+                                <p style={{ fontSize: '0.8rem', opacity: 0.9, lineHeight: '1.4', marginBottom: '1rem' }}>
+                                    Submit your concept for seed grants, prototyping lab access & mentorship.
                                 </p>
                                 <button
                                     onClick={() => setPitchModal(true)}
                                     style={{
                                         width: '100%',
-                                        padding: '0.75rem',
+                                        padding: '0.7rem',
                                         borderRadius: '50px',
                                         background: '#F59E0B',
                                         color: '#000000',
                                         fontWeight: '900',
-                                        fontSize: '0.88rem',
+                                        fontSize: '0.85rem',
                                         border: 'none',
                                         cursor: 'pointer',
                                         boxShadow: '0 4px 12px rgba(245,158,11,0.4)',
@@ -411,6 +498,32 @@ const EntrepreneurshipPage = () => {
                                 >
                                     Pitch Your Startup Idea
                                 </button>
+                            </div>
+
+                            {/* CONTACT QUICK CARD */}
+                            <div style={{
+                                marginTop: '0.8rem',
+                                padding: '1.2rem',
+                                borderRadius: '18px',
+                                background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC',
+                                border: cardBorder,
+                                fontSize: '0.82rem'
+                            }}>
+                                <div style={{ fontWeight: '800', color: primaryTextColor, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <FaPhone style={{ color: accentColor }} /> Direct Inquiries
+                                </div>
+                                <div style={{ color: secondaryTextColor, marginBottom: '0.3rem' }}>
+                                    <strong>{entrepreneurshipData.contact.coordinator}</strong>
+                                </div>
+                                <div style={{ color: secondaryTextColor, marginBottom: '0.4rem' }}>
+                                    {entrepreneurshipData.contact.title}
+                                </div>
+                                <a href={`tel:${entrepreneurshipData.contact.phone.replace(/\s+/g, '')}`} style={{ color: accentColor, fontWeight: '700', textDecoration: 'none', display: 'block', marginBottom: '0.3rem' }}>
+                                    📞 {entrepreneurshipData.contact.phone}
+                                </a>
+                                <a href={`mailto:${entrepreneurshipData.contact.email}`} style={{ color: accentColor, fontWeight: '700', textDecoration: 'none', display: 'block' }}>
+                                    ✉️ {entrepreneurshipData.contact.email}
+                                </a>
                             </div>
                         </div>
                     </aside>
@@ -425,28 +538,31 @@ const EntrepreneurshipPage = () => {
                                 exit={{ opacity: 0, y: -15 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                {/* 1. OVERVIEW & VISION */}
+                                {/* 1. OVERVIEW & VISION & MISSION */}
                                 {activeSection === 'overview' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                         <div>
                                             <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                                Ecosystem Overview
+                                                Overview & Introduction
                                             </span>
-                                            <h2 style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
-                                                Nurturing Builders, Innovators & Job Creators
+                                            <h2 style={{ fontSize: '2.3rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
+                                                Entrepreneurship Development Cell (EDC)
                                             </h2>
+                                            <p style={{ fontSize: '1.15rem', lineHeight: '1.8', color: primaryTextColor, fontWeight: '600', marginTop: '0.8rem', background: isDark ? 'rgba(56, 189, 248, 0.08)' : 'rgba(37, 99, 235, 0.05)', padding: '1.2rem 1.5rem', borderRadius: '16px', borderLeft: `4px solid ${accentColor}` }}>
+                                                {entrepreneurshipData.overview}
+                                            </p>
                                         </div>
 
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                                            {entrepreneurshipData.overviewParagraphs.map((para, idx) => (
-                                                <p key={idx} style={{ fontSize: '1.05rem', lineHeight: '1.8', color: secondaryTextColor, margin: 0 }}>
+                                            {entrepreneurshipData.overviewParagraphs.slice(1).map((para, idx) => (
+                                                <p key={idx} style={{ fontSize: '1.02rem', lineHeight: '1.8', color: secondaryTextColor, margin: 0 }}>
                                                     {para}
                                                 </p>
                                             ))}
                                         </div>
 
                                         {/* VISION & MISSION DUAL CARDS */}
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', marginTop: '1rem' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
                                             {/* VISION */}
                                             <div style={{
                                                 background: cardBg,
@@ -472,9 +588,9 @@ const EntrepreneurshipPage = () => {
                                                     <FaLightbulb />
                                                 </div>
                                                 <h3 style={{ fontSize: '1.5rem', fontWeight: '900', color: isDark ? '#38BDF8' : '#1E40AF', marginBottom: '1rem' }}>
-                                                    Our Vision
+                                                    Vision
                                                 </h3>
-                                                <p style={{ fontSize: '1rem', lineHeight: '1.7', color: primaryTextColor, fontWeight: '500', margin: 0 }}>
+                                                <p style={{ fontSize: '1.02rem', lineHeight: '1.75', color: primaryTextColor, fontWeight: '500', margin: 0 }}>
                                                     {entrepreneurshipData.vision}
                                                 </p>
                                             </div>
@@ -504,7 +620,7 @@ const EntrepreneurshipPage = () => {
                                                     <FaRocket />
                                                 </div>
                                                 <h3 style={{ fontSize: '1.5rem', fontWeight: '900', color: isDark ? '#FBBF24' : '#B45309', marginBottom: '1rem' }}>
-                                                    Our Mission
+                                                    Mission
                                                 </h3>
                                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
                                                     {entrepreneurshipData.mission.map((item, idx) => (
@@ -518,76 +634,452 @@ const EntrepreneurshipPage = () => {
                                                 </ul>
                                             </div>
                                         </div>
+
+                                        {/* COMMITTEE SNAPSHOT BANNER */}
+                                        <div style={{
+                                            background: isDark ? 'linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(124,58,237,0.15) 100%)' : 'linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 100%)',
+                                            borderRadius: '24px',
+                                            border: isDark ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(191,219,254,1)',
+                                            padding: '2rem 2.5rem',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            flexWrap: 'wrap',
+                                            gap: '1.5rem'
+                                        }}>
+                                            <div>
+                                                <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', color: accentColor }}>Leadership & Committee</span>
+                                                <h3 style={{ fontSize: '1.4rem', fontWeight: '900', color: primaryTextColor, margin: '0.3rem 0 0.5rem' }}>
+                                                    Meet the EC Committee & Office Bearers
+                                                </h3>
+                                                <p style={{ color: secondaryTextColor, margin: 0, fontSize: '0.95rem' }}>
+                                                    Led by Faculty Coordinator Mr. T Gunasekaran with dedicated Student Office Bearers.
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => setActiveSection('committee')}
+                                                style={{
+                                                    padding: '0.75rem 1.6rem',
+                                                    borderRadius: '50px',
+                                                    background: accentColor,
+                                                    color: '#ffffff',
+                                                    fontWeight: '800',
+                                                    fontSize: '0.9rem',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 4px 14px rgba(37,99,235,0.3)'
+                                                }}
+                                            >
+                                                View Committee
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 
-                                {/* 2. KEY HIGHLIGHTS & METRICS */}
-                                {activeSection === 'statistics' && (
+                                {/* 2. EC COMMITTEE */}
+                                {activeSection === 'committee' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                         <div>
                                             <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                                Ecosystem Metrics
+                                                Leadership Team
                                             </span>
-                                            <h2 style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
-                                                Key Highlights & Impact
+                                            <h2 style={{ fontSize: '2.3rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
+                                                EC Committee
                                             </h2>
                                             <p style={{ color: secondaryTextColor, fontSize: '1.05rem', margin: '0.5rem 0 0' }}>
-                                                Measurable outcomes from our incubation ecosystem, seed grants, and patent portfolio.
+                                                The dedicated faculty leaders and student office bearers driving the entrepreneurship ecosystem at ECET.
                                             </p>
                                         </div>
 
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
-                                            {entrepreneurshipData.stats.map((stat, idx) => (
+                                        {/* FACULTY COORDINATOR FEATURE CARD */}
+                                        <div>
+                                            <h3 style={{ fontSize: '1.3rem', fontWeight: '900', color: primaryTextColor, marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                <FaUserTie style={{ color: accentColor }} /> Faculty Coordinator
+                                            </h3>
+
+                                            <div style={{
+                                                background: cardBg,
+                                                borderRadius: '24px',
+                                                border: cardBorder,
+                                                padding: '2.5rem',
+                                                boxShadow: cardShadow,
+                                                display: 'grid',
+                                                gridTemplateColumns: '120px 1fr',
+                                                gap: '2rem',
+                                                alignItems: 'center'
+                                            }} className="roadmap-card-grid">
+                                                <div style={{
+                                                    width: '110px',
+                                                    height: '110px',
+                                                    borderRadius: '24px',
+                                                    background: 'linear-gradient(135deg, #1B2A6B 0%, #2563EB 100%)',
+                                                    color: '#ffffff',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '3rem',
+                                                    boxShadow: '0 10px 25px rgba(37,99,235,0.35)'
+                                                }}>
+                                                    <FaUserTie />
+                                                </div>
+                                                <div>
+                                                    <span style={{
+                                                        padding: '0.35rem 0.9rem',
+                                                        borderRadius: '50px',
+                                                        background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)',
+                                                        color: accentColor,
+                                                        fontSize: '0.78rem',
+                                                        fontWeight: '800',
+                                                        textTransform: 'uppercase',
+                                                        display: 'inline-block',
+                                                        marginBottom: '0.5rem'
+                                                    }}>
+                                                        Faculty Coordinator
+                                                    </span>
+                                                    <h3 style={{ fontSize: '1.6rem', fontWeight: '900', color: primaryTextColor, margin: '0 0 0.4rem' }}>
+                                                        {entrepreneurshipData.committee.faculty[0].name}
+                                                    </h3>
+                                                    <p style={{ fontSize: '1rem', color: isDark ? '#FBBF24' : '#D97706', fontWeight: '700', margin: '0 0 0.8rem' }}>
+                                                        {entrepreneurshipData.committee.faculty[0].designation}
+                                                    </p>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.2rem', fontSize: '0.9rem' }}>
+                                                        <a href={`mailto:${entrepreneurshipData.contact.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: primaryTextColor, textDecoration: 'none', fontWeight: '600' }}>
+                                                            <FaEnvelope style={{ color: accentColor }} /> {entrepreneurshipData.contact.email}
+                                                        </a>
+                                                        <a href={`tel:${entrepreneurshipData.contact.phone.replace(/\s+/g, '')}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: primaryTextColor, textDecoration: 'none', fontWeight: '600' }}>
+                                                            <FaPhone style={{ color: accentColor }} /> +91 {entrepreneurshipData.contact.phone}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* STUDENT OFFICE BEARERS */}
+                                        <div>
+                                            <h3 style={{ fontSize: '1.3rem', fontWeight: '900', color: primaryTextColor, marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                <FaUserGraduate style={{ color: '#10B981' }} /> Student Office Bearers
+                                            </h3>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.8rem' }}>
+                                                {entrepreneurshipData.committee.students.map((student, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        style={{
+                                                            background: cardBg,
+                                                            borderRadius: '24px',
+                                                            border: cardBorder,
+                                                            padding: '2.2rem 2rem',
+                                                            boxShadow: cardShadow,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '1.5rem'
+                                                        }}
+                                                    >
+                                                        <div style={{
+                                                            width: '72px',
+                                                            height: '72px',
+                                                            borderRadius: '20px',
+                                                            background: idx === 0 ? 'linear-gradient(135deg, #059669 0%, #10B981 100%)' : 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%)',
+                                                            color: '#ffffff',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            fontSize: '2rem',
+                                                            flexShrink: 0,
+                                                            boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
+                                                        }}>
+                                                            {student.icon}
+                                                        </div>
+                                                        <div>
+                                                            <span style={{
+                                                                padding: '0.25rem 0.75rem',
+                                                                borderRadius: '50px',
+                                                                background: isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9',
+                                                                color: isDark ? '#F59E0B' : '#D97706',
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: '800',
+                                                                textTransform: 'uppercase',
+                                                                display: 'inline-block',
+                                                                marginBottom: '0.3rem'
+                                                            }}>
+                                                                {student.role}
+                                                            </span>
+                                                            <h4 style={{ fontSize: '1.25rem', fontWeight: '900', color: primaryTextColor, margin: '0 0 0.3rem' }}>
+                                                                {student.name}
+                                                            </h4>
+                                                            <p style={{ fontSize: '0.9rem', color: secondaryTextColor, margin: 0, fontWeight: '600' }}>
+                                                                {student.yearAndDept}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* 3. MAJOR EVENTS CALENDAR */}
+                                {activeSection === 'events' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                        <div>
+                                            <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                                Event Calendar
+                                            </span>
+                                            <h2 style={{ fontSize: '2.3rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
+                                                Major Events & Workshops
+                                            </h2>
+                                            <p style={{ color: secondaryTextColor, fontSize: '1.05rem', margin: '0.5rem 0 0' }}>
+                                                Comprehensive schedule of workshops, leadership summits, CEO interactions, and patent bootcamps conducted by ECET EDC.
+                                            </p>
+                                        </div>
+
+                                        {/* EVENTS TABLE / CARD LIST */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                            {entrepreneurshipData.majorEvents.map((evt) => (
                                                 <div
-                                                    key={idx}
+                                                    key={evt.sno}
                                                     style={{
                                                         background: cardBg,
                                                         borderRadius: '20px',
                                                         border: cardBorder,
-                                                        padding: '2.2rem 1.5rem',
-                                                        textAlign: 'center',
-                                                        boxShadow: cardShadow
+                                                        padding: '1.8rem 2rem',
+                                                        boxShadow: cardShadow,
+                                                        display: 'grid',
+                                                        gridTemplateColumns: '80px 180px 1fr',
+                                                        gap: '1.5rem',
+                                                        alignItems: 'center'
                                                     }}
+                                                    className="roadmap-card-grid"
                                                 >
-                                                    <div style={{ fontSize: '2.4rem', color: accentColor, marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-                                                        {stat.icon}
+                                                    <div style={{
+                                                        width: '56px',
+                                                        height: '56px',
+                                                        borderRadius: '16px',
+                                                        background: 'linear-gradient(135deg, #1B2A6B 0%, #2563EB 100%)',
+                                                        color: '#ffffff',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '1.2rem',
+                                                        fontWeight: '900',
+                                                        boxShadow: '0 6px 16px rgba(37,99,235,0.25)'
+                                                    }}>
+                                                        #{evt.sno}
                                                     </div>
-                                                    <div style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginBottom: '0.3rem' }}>
-                                                        {stat.value}
+
+                                                    <div>
+                                                        <span style={{
+                                                            padding: '0.3rem 0.8rem',
+                                                            borderRadius: '50px',
+                                                            background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)',
+                                                            color: accentColor,
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: '800',
+                                                            textTransform: 'uppercase',
+                                                            display: 'inline-block',
+                                                            marginBottom: '0.4rem'
+                                                        }}>
+                                                            {evt.tag}
+                                                        </span>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.95rem', fontWeight: '800', color: isDark ? '#FBBF24' : '#D97706' }}>
+                                                            <FaCalendarAlt size={13} /> {evt.date}
+                                                        </div>
                                                     </div>
-                                                    <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: secondaryTextColor, fontWeight: '700' }}>
-                                                        {stat.label}
+
+                                                    <div>
+                                                        <h3 style={{ fontSize: '1.25rem', fontWeight: '900', color: primaryTextColor, margin: '0 0 0.4rem' }}>
+                                                            {evt.title}
+                                                        </h3>
+                                                        <p style={{ fontSize: '0.92rem', color: secondaryTextColor, margin: 0, lineHeight: '1.6' }}>
+                                                            {evt.desc}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        {/* INCUBATOR FACILITIES HIGHLIGHT */}
+                                        {/* EVENT PROPOSAL CTA */}
                                         <div style={{
-                                            background: isDark ? 'linear-gradient(135deg, rgba(37,99,235,0.2) 0%, rgba(124,58,237,0.2) 100%)' : 'linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 100%)',
-                                            borderRadius: '24px',
-                                            border: isDark ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(191,219,254,1)',
-                                            padding: '2.5rem',
-                                            marginTop: '1rem'
+                                            background: isDark ? 'rgba(255,255,255,0.03)' : '#F8FAFC',
+                                            borderRadius: '20px',
+                                            border: cardBorder,
+                                            padding: '2rem',
+                                            textAlign: 'center'
                                         }}>
-                                            <h3 style={{ fontSize: '1.4rem', fontWeight: '900', color: primaryTextColor, marginBottom: '1rem' }}>
-                                                World-Class Prototyping & Incubation Facilities
-                                            </h3>
-                                            <p style={{ color: secondaryTextColor, lineHeight: '1.7', margin: 0, fontSize: '1rem' }}>
-                                                Spanning over 10,000+ sq. ft. of dedicated incubation space, EASA CIIE provides 24/7 access to high-speed internet, dedicated founder desks, conference rooms, advanced 3D printing & CNC fabrication machinery at the AICTE IDEA Lab, legal documentation support, and direct mentor office hours.
+                                            <h4 style={{ fontSize: '1.2rem', fontWeight: '900', color: primaryTextColor, marginBottom: '0.4rem' }}>
+                                                Want to Propose a Workshop or Invite a Speaker?
+                                            </h4>
+                                            <p style={{ color: secondaryTextColor, fontSize: '0.95rem', marginBottom: '1.2rem' }}>
+                                                Contact EDC Coordinator Mr. T Gunasekaran at <a href={`mailto:${entrepreneurshipData.contact.email}`} style={{ color: accentColor, fontWeight: '700' }}>{entrepreneurshipData.contact.email}</a>.
                                             </p>
+                                            <button
+                                                onClick={() => setPitchModal(true)}
+                                                style={{
+                                                    padding: '0.7rem 1.8rem',
+                                                    borderRadius: '50px',
+                                                    background: 'linear-gradient(135deg, #1B2A6B 0%, #2563EB 100%)',
+                                                    color: '#ffffff',
+                                                    fontWeight: '800',
+                                                    fontSize: '0.9rem',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 6px 16px rgba(37,99,235,0.3)'
+                                                }}
+                                            >
+                                                Submit Proposal / Pitch
+                                            </button>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* 3. INCUBATION PROGRAMS */}
+                                {/* 4. CONTACT & CONNECT */}
+                                {activeSection === 'contact' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                        <div>
+                                            <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                                Get in Touch
+                                            </span>
+                                            <h2 style={{ fontSize: '2.3rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
+                                                Contact ECET EDC
+                                            </h2>
+                                            <p style={{ color: secondaryTextColor, fontSize: '1.05rem', margin: '0.5rem 0 0' }}>
+                                                Connect directly with our coordinator, student secretaries, or follow our official social channel for live updates.
+                                            </p>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                                            {/* COORDINATOR CARD */}
+                                            <div style={{
+                                                background: cardBg,
+                                                borderRadius: '24px',
+                                                border: cardBorder,
+                                                padding: '2.5rem',
+                                                boxShadow: cardShadow
+                                            }}>
+                                                <div style={{
+                                                    width: '60px',
+                                                    height: '60px',
+                                                    borderRadius: '16px',
+                                                    background: 'linear-gradient(135deg, #1B2A6B 0%, #2563EB 100%)',
+                                                    color: '#ffffff',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '1.8rem',
+                                                    marginBottom: '1.5rem',
+                                                    boxShadow: '0 8px 20px rgba(37,99,235,0.3)'
+                                                }}>
+                                                    <FaUserTie />
+                                                </div>
+                                                <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', color: accentColor }}>
+                                                    EDC Cell Office
+                                                </span>
+                                                <h3 style={{ fontSize: '1.4rem', fontWeight: '900', color: primaryTextColor, margin: '0.4rem 0 0.2rem' }}>
+                                                    {entrepreneurshipData.contact.coordinator}
+                                                </h3>
+                                                <p style={{ fontSize: '0.95rem', color: isDark ? '#FBBF24' : '#D97706', fontWeight: '700', marginBottom: '1.5rem' }}>
+                                                    {entrepreneurshipData.contact.title}
+                                                </p>
+
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.95rem' }}>
+                                                    <a href={`tel:${entrepreneurshipData.contact.phone.replace(/\s+/g, '')}`} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: primaryTextColor, textDecoration: 'none', fontWeight: '600' }}>
+                                                        <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: isDark ? 'rgba(56, 189, 248, 0.15)' : '#EFF6FF', color: accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <FaPhone />
+                                                        </div>
+                                                        <span>{entrepreneurshipData.contact.phone}</span>
+                                                    </a>
+
+                                                    <a href={`mailto:${entrepreneurshipData.contact.email}`} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: primaryTextColor, textDecoration: 'none', fontWeight: '600' }}>
+                                                        <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: isDark ? 'rgba(56, 189, 248, 0.15)' : '#EFF6FF', color: accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <FaEnvelope />
+                                                        </div>
+                                                        <span>{entrepreneurshipData.contact.email}</span>
+                                                    </a>
+
+                                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.8rem', color: secondaryTextColor, lineHeight: '1.5' }}>
+                                                        <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: isDark ? 'rgba(255, 255, 255, 0.05)' : '#F1F5F9', color: primaryTextColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '0.2rem' }}>
+                                                            <FaMapMarkerAlt />
+                                                        </div>
+                                                        <span>{entrepreneurshipData.contact.address}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* INSTAGRAM & SOCIAL CONNECT */}
+                                            <div style={{
+                                                background: cardBg,
+                                                borderRadius: '24px',
+                                                border: cardBorder,
+                                                padding: '2.5rem',
+                                                boxShadow: cardShadow,
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'space-between'
+                                            }}>
+                                                <div>
+                                                    <div style={{
+                                                        width: '60px',
+                                                        height: '60px',
+                                                        borderRadius: '16px',
+                                                        background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                                                        color: '#ffffff',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '2rem',
+                                                        marginBottom: '1.5rem',
+                                                        boxShadow: '0 8px 20px rgba(220, 39, 67, 0.3)'
+                                                    }}>
+                                                        <FaInstagram />
+                                                    </div>
+                                                    <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800', color: '#E1306C' }}>
+                                                        Official Social Handle
+                                                    </span>
+                                                    <h3 style={{ fontSize: '1.4rem', fontWeight: '900', color: primaryTextColor, margin: '0.4rem 0 0.8rem' }}>
+                                                        Follow @edcecet on Instagram
+                                                    </h3>
+                                                    <p style={{ color: secondaryTextColor, fontSize: '0.95rem', lineHeight: '1.7', margin: 0 }}>
+                                                        Stay updated with latest announcements, live event coverage, workshop registrations, hackathon dates, and student entrepreneur spotlights.
+                                                    </p>
+                                                </div>
+
+                                                <div style={{ marginTop: '2rem' }}>
+                                                    <a
+                                                        href={entrepreneurshipData.contact.instagram.startsWith('http') ? entrepreneurshipData.contact.instagram : `https://${entrepreneurshipData.contact.instagram}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            gap: '0.6rem',
+                                                            width: '100%',
+                                                            padding: '0.9rem',
+                                                            borderRadius: '50px',
+                                                            background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                                                            color: '#ffffff',
+                                                            fontWeight: '900',
+                                                            fontSize: '0.95rem',
+                                                            textDecoration: 'none',
+                                                            boxShadow: '0 8px 20px rgba(220, 39, 67, 0.35)'
+                                                        }}
+                                                    >
+                                                        <FaInstagram size={20} /> Open Instagram Profile <FaExternalLinkAlt size={12} />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* 5. INCUBATION PROGRAMS */}
                                 {activeSection === 'programs' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                         <div>
                                             <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                                 Structured Support
                                             </span>
-                                            <h2 style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
+                                            <h2 style={{ fontSize: '2.3rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
                                                 Incubation & Entrepreneurship Programs
                                             </h2>
                                             <p style={{ color: secondaryTextColor, fontSize: '1.05rem', margin: '0.5rem 0 0' }}>
@@ -677,18 +1169,18 @@ const EntrepreneurshipPage = () => {
                                     </div>
                                 )}
 
-                                {/* 4. INCUBATED STARTUPS */}
+                                {/* 6. INCUBATED STARTUPS */}
                                 {activeSection === 'startups' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                         <div>
                                             <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                                 Success Stories
                                             </span>
-                                            <h2 style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
+                                            <h2 style={{ fontSize: '2.3rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
                                                 Featured Student Startups & Ventures
                                             </h2>
                                             <p style={{ color: secondaryTextColor, fontSize: '1.05rem', margin: '0.5rem 0 0' }}>
-                                                Spotlight on student-led enterprises born and nurtured at EASA Incubation Center.
+                                                Spotlight on student-led enterprises born and nurtured at ECET EDC incubation ecosystem.
                                             </p>
                                         </div>
 
@@ -754,127 +1246,42 @@ const EntrepreneurshipPage = () => {
                                     </div>
                                 )}
 
-                                {/* 5. 5-STAGE ROADMAP */}
-                                {activeSection === 'roadmap' && (
+                                {/* 7. KEY HIGHLIGHTS & METRICS */}
+                                {activeSection === 'statistics' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                         <div>
                                             <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                                Idea to Market
+                                                Ecosystem Metrics
                                             </span>
-                                            <h2 style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
-                                                5-Stage Startup Incubation Roadmap
+                                            <h2 style={{ fontSize: '2.3rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
+                                                Key Highlights & Impact
                                             </h2>
                                             <p style={{ color: secondaryTextColor, fontSize: '1.05rem', margin: '0.5rem 0 0' }}>
-                                                Structured roadmap transforming early concept notes into investment-ready, revenue-generating businesses.
+                                                Measurable outcomes from our incubation ecosystem, seed grants, major events, and patent portfolio.
                                             </p>
                                         </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            {entrepreneurshipData.incubationRoadmap.map((stage, idx) => (
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+                                            {entrepreneurshipData.stats.map((stat, idx) => (
                                                 <div
                                                     key={idx}
                                                     style={{
                                                         background: cardBg,
-                                                        borderRadius: '24px',
+                                                        borderRadius: '20px',
                                                         border: cardBorder,
-                                                        padding: '2.2rem 2rem',
-                                                        boxShadow: cardShadow,
-                                                        display: 'grid',
-                                                        gridTemplateColumns: '220px 1fr',
-                                                        gap: '2rem',
-                                                        alignItems: 'center'
-                                                    }}
-                                                    className="roadmap-card-grid"
-                                                >
-                                                    <div style={{ borderRight: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(226, 232, 240, 0.8)', paddingRight: '1rem' }}>
-                                                        <span style={{
-                                                            padding: '0.35rem 0.9rem',
-                                                            borderRadius: '50px',
-                                                            background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                                                            color: '#000000',
-                                                            fontWeight: '900',
-                                                            fontSize: '0.78rem',
-                                                            textTransform: 'uppercase',
-                                                            display: 'inline-block',
-                                                            marginBottom: '0.8rem'
-                                                        }}>
-                                                            Stage {stage.step}
-                                                        </span>
-                                                        <h4 style={{ fontSize: '1.15rem', fontWeight: '900', color: primaryTextColor, margin: '0 0 0.3rem' }}>
-                                                            {stage.phase}
-                                                        </h4>
-                                                        <div style={{ fontSize: '0.85rem', fontWeight: '700', color: accentColor }}>
-                                                            {stage.duration}
-                                                        </div>
-                                                    </div>
-
-                                                    <p style={{ fontSize: '1rem', color: secondaryTextColor, lineHeight: '1.65', margin: 0 }}>
-                                                        {stage.desc}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* 6. MENTORS & ADVISORY */}
-                                {activeSection === 'mentors' && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                                        <div>
-                                            <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                                Expert Guidance
-                                            </span>
-                                            <h2 style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
-                                                Incubation Advisory Board & Mentors
-                                            </h2>
-                                            <p style={{ color: secondaryTextColor, fontSize: '1.05rem', margin: '0.5rem 0 0' }}>
-                                                Seasoned angel investors, technology leaders, and IP attorneys mentoring EASA founders.
-                                            </p>
-                                        </div>
-
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.8rem' }}>
-                                            {entrepreneurshipData.mentors.map((mentor, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    style={{
-                                                        background: cardBg,
-                                                        borderRadius: '24px',
-                                                        border: cardBorder,
-                                                        padding: '2.5rem 1.8rem',
+                                                        padding: '2.2rem 1.5rem',
                                                         textAlign: 'center',
                                                         boxShadow: cardShadow
                                                     }}
                                                 >
-                                                    <div style={{
-                                                        width: '72px',
-                                                        height: '72px',
-                                                        borderRadius: '50%',
-                                                        background: 'linear-gradient(135deg, #1B2A6B 0%, #2563EB 100%)',
-                                                        color: '#ffffff',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        fontSize: '2rem',
-                                                        margin: '0 auto 1.2rem',
-                                                        boxShadow: '0 8px 20px rgba(37,99,235,0.3)'
-                                                    }}>
-                                                        <FaUserTie />
+                                                    <div style={{ fontSize: '2.4rem', color: accentColor, marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+                                                        {stat.icon}
                                                     </div>
-                                                    <h3 style={{ fontSize: '1.25rem', fontWeight: '900', color: primaryTextColor, margin: '0 0 0.3rem' }}>
-                                                        {mentor.name}
-                                                    </h3>
-                                                    <div style={{ fontSize: '0.9rem', fontWeight: '800', color: isDark ? '#FBBF24' : '#D97706', marginBottom: '0.8rem' }}>
-                                                        {mentor.role}
+                                                    <div style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginBottom: '0.3rem' }}>
+                                                        {stat.value}
                                                     </div>
-                                                    <div style={{
-                                                        padding: '0.6rem 0.8rem',
-                                                        borderRadius: '12px',
-                                                        background: isDark ? 'rgba(56, 189, 248, 0.1)' : '#F1F5F9',
-                                                        fontSize: '0.82rem',
-                                                        color: primaryTextColor,
-                                                        fontWeight: '600'
-                                                    }}>
-                                                        {mentor.specialization}
+                                                    <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: secondaryTextColor, fontWeight: '700' }}>
+                                                        {stat.label}
                                                     </div>
                                                 </div>
                                             ))}
@@ -882,14 +1289,14 @@ const EntrepreneurshipPage = () => {
                                     </div>
                                 )}
 
-                                {/* 7. FAQS */}
+                                {/* 8. FAQS */}
                                 {activeSection === 'faqs' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                         <div>
                                             <span style={{ padding: '0.4rem 1.2rem', background: isDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.1)', color: accentColor, borderRadius: '50px', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                                 Got Questions?
                                             </span>
-                                            <h2 style={{ fontSize: '2.4rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
+                                            <h2 style={{ fontSize: '2.3rem', fontWeight: '900', color: primaryTextColor, marginTop: '0.8rem' }}>
                                                 Frequently Asked Questions & Policies
                                             </h2>
                                         </div>
@@ -1004,21 +1411,21 @@ const EntrepreneurshipPage = () => {
                             </button>
 
                             <h3 style={{ fontSize: '1.5rem', fontWeight: '900', color: primaryTextColor, marginBottom: '0.4rem' }}>
-                                Apply for Startup Incubation & Seed Grants
+                                Pitch Your Startup Idea to ECET EDC
                             </h3>
                             <p style={{ fontSize: '0.9rem', color: secondaryTextColor, marginBottom: '1.5rem' }}>
-                                Pitch your innovation to EASA CIIE to access prototyping labs, seed grants, and mentor networks.
+                                Submit your innovation to ECET EDC to access mentoring, workshop training, and incubation support.
                             </p>
 
                             <form onSubmit={handlePitchSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <div>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '700', color: primaryTextColor, display: 'block', marginBottom: '0.3rem' }}>Lead Founder Name *</label>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: '700', color: primaryTextColor, display: 'block', marginBottom: '0.3rem' }}>Lead Founder / Student Name *</label>
                                     <input
                                         type="text"
                                         required
                                         value={pitchForm.founderName}
                                         onChange={(e) => setPitchForm({ ...pitchForm, founderName: e.target.value })}
-                                        placeholder="e.g. Karthik R."
+                                        placeholder="e.g. Sharukesavan"
                                         style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
                                     />
                                 </div>
@@ -1031,7 +1438,7 @@ const EntrepreneurshipPage = () => {
                                             required
                                             value={pitchForm.email}
                                             onChange={(e) => setPitchForm({ ...pitchForm, email: e.target.value })}
-                                            placeholder="founder@email.com"
+                                            placeholder="student@ecetonline.com"
                                             style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
                                         />
                                     </div>
@@ -1061,57 +1468,26 @@ const EntrepreneurshipPage = () => {
                                             style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
                                         >
                                             <option value="">Select Department</option>
+                                            <option value="Agricultural Engg">Agricultural Engineering</option>
+                                            <option value="MECH">Mechanical Engineering</option>
                                             <option value="CSE">Computer Science & Engineering</option>
                                             <option value="AI&DS">AI & Data Science</option>
-                                            <option value="MECH">Mechanical Engineering</option>
                                             <option value="ECE">Electronics & Communication</option>
                                             <option value="EEE">Electrical & Electronics</option>
                                             <option value="BME">Biomedical Engineering</option>
-                                            <option value="Agri">Agriculture Engineering</option>
                                             <option value="IT">Information Technology</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '700', color: primaryTextColor, display: 'block', marginBottom: '0.3rem' }}>Proposed Startup / Project Name *</label>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: '700', color: primaryTextColor, display: 'block', marginBottom: '0.3rem' }}>Proposed Project / Startup *</label>
                                         <input
                                             type="text"
                                             required
                                             value={pitchForm.startupName}
                                             onChange={(e) => setPitchForm({ ...pitchForm, startupName: e.target.value })}
-                                            placeholder="e.g. EcoPower Tech"
+                                            placeholder="e.g. Smart Agri Sensor"
                                             style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
                                         />
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '700', color: primaryTextColor, display: 'block', marginBottom: '0.3rem' }}>Technology Sector *</label>
-                                        <select
-                                            value={pitchForm.sector}
-                                            onChange={(e) => setPitchForm({ ...pitchForm, sector: e.target.value })}
-                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
-                                        >
-                                            <option value="AgriTech & Robotics">AgriTech & Robotics</option>
-                                            <option value="HealthTech & Wearables">HealthTech & Wearables</option>
-                                            <option value="Renewable Energy & EV">Renewable Energy & CleanTech</option>
-                                            <option value="Software & AI">Software, AI & IoT</option>
-                                            <option value="FinTech & EdTech">FinTech & EdTech</option>
-                                            <option value="Defense & Aerospace">Defense & Advanced Tech</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '700', color: primaryTextColor, display: 'block', marginBottom: '0.3rem' }}>Current Stage *</label>
-                                        <select
-                                            value={pitchForm.currentStage}
-                                            onChange={(e) => setPitchForm({ ...pitchForm, currentStage: e.target.value })}
-                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none' }}
-                                        >
-                                            <option value="Concept / Ideation">Concept / Ideation</option>
-                                            <option value="Prototype Ready">Prototype / MVP Ready</option>
-                                            <option value="Pilot Testing">Pilot Testing</option>
-                                            <option value="Registered Startup">Registered Company (Revenue)</option>
-                                        </select>
                                     </div>
                                 </div>
 
@@ -1122,7 +1498,7 @@ const EntrepreneurshipPage = () => {
                                         rows={3}
                                         value={pitchForm.ideaSummary}
                                         onChange={(e) => setPitchForm({ ...pitchForm, ideaSummary: e.target.value })}
-                                        placeholder="Describe the problem, your proposed solution, target customers, and technology used..."
+                                        placeholder="Describe the problem, your proposed solution, target beneficiaries, and technology..."
                                         style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: cardBorder, background: isDark ? 'var(--bg-section)' : '#F8FAFC', color: primaryTextColor, outline: 'none', resize: 'vertical' }}
                                     />
                                 </div>
@@ -1144,7 +1520,7 @@ const EntrepreneurshipPage = () => {
                                         transition: 'all 0.2s ease'
                                     }}
                                 >
-                                    {pitchSubmitted ? 'Submitting Pitch...' : 'Submit Pitch for Incubation'}
+                                    {pitchSubmitted ? 'Submitting Pitch...' : 'Submit Pitch to ECET EDC'}
                                 </button>
                             </form>
                         </motion.div>
