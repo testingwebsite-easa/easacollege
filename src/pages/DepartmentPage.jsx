@@ -5,13 +5,16 @@ import {
     FaGraduationCap, FaBook, FaChalkboardTeacher, FaTrophy,
     FaCalendarAlt, FaDownload, FaArrowRight, FaUniversity, FaUsers, FaLightbulb, FaRocket, FaGlobe, FaChevronRight,
     FaBalanceScale, FaLaptopCode, FaStar, FaHandHoldingHeart, FaGlobeAsia, FaImages, FaFlask, FaHandshake, FaFileSignature,
-    FaChartLine, FaBriefcase, FaBullseye, FaCheckCircle, FaAward, FaBoxes, FaFilePdf, FaEye, FaTimes, FaExternalLinkAlt
+    FaChartLine, FaBriefcase, FaBullseye, FaCheckCircle, FaAward, FaBoxes, FaFilePdf, FaEye, FaTimes, FaExternalLinkAlt,
+    FaSearch, FaEdit, FaLayerGroup, FaShieldAlt
 } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import API_BASE_URL from '../api';
 import { getDepartment } from '../data/departmentsData';
+import { SYLLABUS_DATA, GENERIC_FIRST_YEAR, getDetailedSyllabusForSubject } from '../data/syllabusData';
+import { useAuth } from '../context/AuthContext';
 import AdmissionForm from '../components/AdmissionForm';
 import GlobalHero from '../components/GlobalHero';
 import Tilt3DCard from '../components/Tilt3DCard';
@@ -31,7 +34,12 @@ const getIcon = (iconName) => {
 const DepartmentPage = () => {
     const { id } = useParams();
     const navigate = useNavigate(); // Hook for navigation
+    const { user } = useAuth();
     const [department, setDepartment] = useState(() => getDepartment(id) || null);
+    const [deptSyllabusData, setDeptSyllabusData] = useState(null);
+    const [selectedCurriculumSem, setSelectedCurriculumSem] = useState('1');
+    const [selectedSubjectModal, setSelectedSubjectModal] = useState(null);
+    const [curriculumSearch, setCurriculumSearch] = useState('');
     const [loading, setLoading] = useState(!department);
     const [activeSection, setActiveSection] = useState('overview');
     const [showAdmissionForm, setShowAdmissionForm] = useState(false);
@@ -51,7 +59,7 @@ const DepartmentPage = () => {
         { id: 'overview', label: 'Overview', icon: <FaUniversity /> },
         ...(!isSH ? [{ id: 'vision-mission', label: 'Vision & Mission', icon: <FaGlobe /> }] : []),
         ...(!isSH ? [{ id: 'peo-po-pso', label: 'PEO, PO & PSO', icon: <FaGraduationCap /> }] : []),
-        ...(department?.curriculum ? [{ id: 'curriculum', label: 'Curriculum & Courses', icon: <FaLaptopCode /> }] : []),
+        { id: 'curriculum', label: 'Curriculum & Detailed Syllabus', icon: <FaLaptopCode /> },
         ...(department?.courseOutcomes ? [{ id: 'course-outcomes', label: 'Course Outcomes', icon: <FaBook /> }] : []),
         ...(department?.documents ? [{ id: 'documents', label: 'Downloads & Syllabi', icon: <FaDownload /> }] : []),
         { id: 'labs', label: 'Laboratories', icon: <FaFlask /> },
@@ -103,6 +111,19 @@ const DepartmentPage = () => {
             setDepartment(null);
         }
         setLoading(false);
+
+        // Fetch dynamic syllabus & curriculum from database
+        const targetSlug = staticDept?.slug || id;
+        if (targetSlug) {
+            fetch(`${API_BASE_URL}/api/departments/${targetSlug}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && (data.subjects || data.vision || data.mission)) {
+                        setDeptSyllabusData(data);
+                    }
+                })
+                .catch(err => console.error("Error fetching department syllabus:", err));
+        }
     }, [id, navigate]);
 
     const renderVisionMission = () => (
@@ -1911,88 +1932,520 @@ const DepartmentPage = () => {
         </div>
     );
 
-    const renderCurriculum = () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-            <div>
-                <h2 className="section-title" style={{ fontSize: '2.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>
-                    Curriculum & Course Structure
-                </h2>
-                <span style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '4px', display: 'block' }}>
-                    Active Semester Course Offerings, L-T-P Distribution & Credit Matrix
-                </span>
-            </div>
+    const renderCurriculum = () => {
+        const categoryColors = {
+            'HUM': { bg: 'rgba(99, 102, 241, 0.15)', text: '#818cf8', border: 'rgba(99, 102, 241, 0.3)', label: 'Humanities & Management (HUM)' },
+            'BSC': { bg: 'rgba(59, 130, 246, 0.15)', text: '#60a5fa', border: 'rgba(59, 130, 246, 0.3)', label: 'Basic Sciences (BSC)' },
+            'ESC': { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399', border: 'rgba(16, 185, 129, 0.3)', label: 'Engineering Sciences (ESC)' },
+            'PCC': { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.3)', label: 'Professional Core (PCC)' },
+            'PEC': { bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.3)', label: 'Professional Electives (PEC)' },
+            'OEC': { bg: 'rgba(139, 92, 246, 0.15)', text: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)', label: 'Open Electives (OEC)' },
+            'EEC': { bg: 'rgba(6, 182, 212, 0.15)', text: '#22d3ee', border: 'rgba(6, 182, 212, 0.3)', label: 'Employability Enhancement (EEC)' },
+            'MC':  { bg: 'rgba(244, 63, 94, 0.15)',  text: '#fb7185', border: 'rgba(244, 63, 94, 0.3)',  label: 'Mandatory Non-Credit (MC)' },
+        };
 
+        const getCategoryBadge = (cat) => {
+            const key = (cat || 'PCC').toUpperCase().trim();
+            const config = categoryColors[key] || { bg: 'rgba(255, 255, 255, 0.1)', text: '#e2e8f0', border: 'rgba(255, 255, 255, 0.2)', label: key };
+            return (
+                <span style={{
+                    display: 'inline-block',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '6px',
+                    background: config.bg,
+                    color: config.text,
+                    border: `1px solid ${config.border}`,
+                    fontSize: '0.75rem',
+                    fontWeight: '800',
+                    letterSpacing: '0.5px'
+                }}>
+                    {key}
+                </span>
+            );
+        };
+
+        const getRbtBadge = (rbtLevel) => {
+            const level = (rbtLevel || 'Apply').toLowerCase();
+            let label = rbtLevel || 'Apply';
+            let bg = 'rgba(230, 182, 39, 0.15)';
+            let color = 'var(--secondary)';
+
+            if (level.includes('rem') || level === 'k1') { label = 'K1 • Remember'; bg = 'rgba(56, 189, 248, 0.15)'; color = '#38bdf8'; }
+            else if (level.includes('und') || level === 'k2') { label = 'K2 • Understand'; bg = 'rgba(74, 222, 128, 0.15)'; color = '#4ade80'; }
+            else if (level.includes('app') || level === 'k3') { label = 'K3 • Apply'; bg = 'rgba(230, 182, 39, 0.15)'; color = 'var(--secondary)'; }
+            else if (level.includes('ana') || level === 'k4') { label = 'K4 • Analyze'; bg = 'rgba(192, 132, 252, 0.15)'; color = '#c084fc'; }
+            else if (level.includes('eval') || level === 'k5') { label = 'K5 • Evaluate'; bg = 'rgba(244, 63, 94, 0.15)'; color = '#f43f5e'; }
+            else if (level.includes('cre') || level === 'k6') { label = 'K6 • Create'; bg = 'rgba(236, 72, 153, 0.15)'; color = '#ec4899'; }
+
+            return (
+                <span style={{
+                    display: 'inline-block',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '6px',
+                    background: bg,
+                    color: color,
+                    fontSize: '0.75rem',
+                    fontWeight: '800'
+                }}>
+                    {label}
+                </span>
+            );
+        };
+
+        // Gather all subjects from dynamic data or static fallbacks
+        const dynamicSubjects = (deptSyllabusData && deptSyllabusData.subjects && deptSyllabusData.subjects.length > 0)
+            ? deptSyllabusData.subjects
+            : [];
+
+        // Build all semester courses list
+        let allCourses = [];
+        if (dynamicSubjects.length > 0) {
+            allCourses = dynamicSubjects.map(s => ({
+                id: s._id || s.code,
+                semester: s.semester ? Number(s.semester) : (s.vertical ? 'PE' : 1),
+                vertical: s.vertical || '',
+                verticalName: s.verticalName || '',
+                code: s.code || '',
+                title: s.title || '',
+                name: s.title || '',
+                category: s.category || 'THEORY',
+                categoryType: s.categoryType || 'PCC',
+                l: s.l !== undefined ? s.l : 3,
+                t: s.t !== undefined ? s.t : 0,
+                p: s.p !== undefined ? s.p : 0,
+                credits: s.credits !== undefined ? s.credits : 3,
+                contactPeriods: s.contactPeriods || ((s.l || 0) + (s.t || 0) + (s.p || 0)),
+                cia: s.cia || 40,
+                ese: s.ese || 60,
+                total: s.total || 100,
+                isOpenElective: !!s.isOpenElective,
+                courseObjectives: s.courseObjectives || [],
+                units: s.units || [],
+                courseOutcomes: s.courseOutcomes || [],
+                textBooks: s.textBooks || [],
+                referenceBooks: s.referenceBooks || [],
+                webReferences: s.webReferences || []
+            }));
+        } else if (department.curriculum && department.curriculum.length > 0) {
+            department.curriculum.forEach((semBlock, bIdx) => {
+                const semNum = semBlock.semester ? Number(String(semBlock.semester).replace(/\D/g, '')) || (bIdx + 1) : (bIdx + 1);
+                (semBlock.courses || []).forEach(c => {
+                    allCourses.push({
+                        ...c,
+                        semester: semNum,
+                        categoryType: c.categoryType || (c.credits > 2 ? 'PCC' : 'ESC'),
+                        contactPeriods: (c.l || 3) + (c.t || 0) + (c.p || 0),
+                        cia: 40,
+                        ese: 60,
+                        total: 100
+                    });
+                });
+            });
+        } else {
+            const staticSyllabus = SYLLABUS_DATA["R-2023"]?.["UG"]?.[department?.slug] || [];
+            staticSyllabus.forEach(semBlock => {
+                (semBlock.courses || []).forEach(c => {
+                    allCourses.push({
+                        ...c,
+                        name: c.title,
+                        semester: semBlock.semester,
+                        categoryType: c.category?.includes('Humanities') ? 'HUM' : c.category?.includes('Basic') ? 'BSC' : c.category?.includes('Core') ? 'PCC' : 'ESC',
+                        l: 3, t: 0, p: 0, credits: 3, contactPeriods: 3, cia: 40, ese: 60, total: 100
+                    });
+                });
+            });
+        }
+
+        // Available semester tabs
+        const totalSems = department?.type === 'PG' ? 4 : 8;
+        const semTabs = [];
+        for (let i = 1; i <= totalSems; i++) {
+            semTabs.push({ id: String(i), label: `Semester ${i}` });
+        }
+        semTabs.push({ id: 'PE', label: 'Professional Electives' });
+        semTabs.push({ id: 'OE', label: 'Open Electives' });
+        semTabs.push({ id: 'all', label: 'All Courses (1-8)' });
+
+        // Filter courses by semester & search
+        const filteredCourses = allCourses.filter(course => {
+            const matchesSearch = !curriculumSearch ||
+                (course.code || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
+                (course.title || course.name || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
+                (course.categoryType || '').toLowerCase().includes(curriculumSearch.toLowerCase());
+
+            if (!matchesSearch) return false;
+
+            if (selectedCurriculumSem === 'all') return true;
+            if (selectedCurriculumSem === 'PE') return course.vertical || course.categoryType === 'PEC';
+            if (selectedCurriculumSem === 'OE') return course.isOpenElective || course.categoryType === 'OEC';
+            return String(course.semester) === selectedCurriculumSem;
+        });
+
+        // Semester statistics
+        const semTotalCredits = filteredCourses.reduce((sum, c) => sum + (Number(c.credits) || 0), 0);
+        const semTotalCourses = filteredCourses.length;
+        const semTotalContactHours = filteredCourses.reduce((sum, c) => sum + (Number(c.contactPeriods) || (Number(c.l) || 0) + (Number(c.t) || 0) + (Number(c.p) || 0)), 0);
+
+        // Compute Credit Breakdown for All Courses
+        const categoryTotals = {};
+        let grandTotalCredits = 0;
+        allCourses.forEach(c => {
+            const cat = (c.categoryType || 'PCC').toUpperCase();
+            const cr = Number(c.credits) || 0;
+            categoryTotals[cat] = (categoryTotals[cat] || 0) + cr;
+            if (cat !== 'MC') grandTotalCredits += cr;
+        });
+
+        const regulationBadge = deptSyllabusData?.regulation || "R-2023 Autonomous Scheme";
+        const bosDate = deptSyllabusData?.bosMeetingDate || "29.10.2024";
+        const acDate = deptSyllabusData?.acMeetingDate || "25.11.2024";
+
+        return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-                {department.curriculum?.map((semBlock, bIdx) => (
-                    <div
-                        key={bIdx}
-                        style={{
-                            background: 'var(--bg-card)',
-                            borderRadius: '24px',
-                            padding: '2.5rem',
-                            border: '1px solid var(--glass-border)',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.03)'
-                        }}
-                    >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.8rem', paddingBottom: '1.2rem', borderBottom: '1px solid var(--glass-border)' }}>
-                            <div>
+                {/* Header Banner */}
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.95), rgba(15, 23, 42, 0.98))',
+                    borderRadius: '24px',
+                    padding: '2.5rem',
+                    border: '1px solid rgba(99, 102, 241, 0.25)',
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
                                 <span style={{
-                                    display: 'inline-block',
-                                    padding: '0.25rem 0.8rem',
-                                    borderRadius: '6px',
                                     background: 'rgba(230, 182, 39, 0.15)',
                                     color: 'var(--secondary)',
-                                    fontWeight: '900',
+                                    padding: '0.35rem 0.9rem',
+                                    borderRadius: '30px',
+                                    fontWeight: '800',
                                     fontSize: '0.8rem',
-                                    marginBottom: '0.4rem',
-                                    border: '1px solid rgba(230, 182, 39, 0.3)'
+                                    border: '1px solid rgba(230, 182, 39, 0.3)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
                                 }}>
-                                    Regulation: {semBlock.regulation}
+                                    <FaGraduationCap /> {regulationBadge}
                                 </span>
-                                <h3 style={{ fontSize: '1.6rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>
-                                    {semBlock.year} • {semBlock.semester}
-                                </h3>
+                                <span style={{
+                                    background: 'rgba(99, 102, 241, 0.15)',
+                                    color: '#a5b4fc',
+                                    padding: '0.35rem 0.9rem',
+                                    borderRadius: '30px',
+                                    fontWeight: '700',
+                                    fontSize: '0.8rem',
+                                    border: '1px solid rgba(99, 102, 241, 0.3)'
+                                }}>
+                                    BOS Approved: {bosDate}
+                                </span>
+                                <span style={{
+                                    background: 'rgba(16, 185, 129, 0.15)',
+                                    color: '#6ee7b7',
+                                    padding: '0.35rem 0.9rem',
+                                    borderRadius: '30px',
+                                    fontWeight: '700',
+                                    fontSize: '0.8rem',
+                                    border: '1px solid rgba(16, 185, 129, 0.3)'
+                                }}>
+                                    Academic Council Approved: {acDate}
+                                </span>
                             </div>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '700' }}>
-                                Total Courses: {semBlock.courses?.length || 0}
-                            </span>
+
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#f8fafc', margin: '0 0 0.5rem 0' }}>
+                                Curriculum & Detailed Syllabi
+                            </h2>
+                            <p style={{ color: '#94a3b8', fontSize: '1rem', margin: 0, maxWidth: '800px', lineHeight: '1.6' }}>
+                                Choice Based Credit System (CBCS) & Outcome-Based Education (OBE) course structures, complete with L-T-P credit matrices, detailed unit outlines, course objectives & cognitive outcomes.
+                            </p>
                         </div>
 
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+                            <Link
+                                to="/resources/syllabus-curriculum"
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '0.75rem 1.4rem',
+                                    borderRadius: '12px',
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                    color: '#f8fafc',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '700',
+                                    textDecoration: 'none',
+                                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <FaBook /> View Full College Syllabi
+                            </Link>
+
+                            <Link
+                                to={`/admin/syllabus`}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '0.75rem 1.4rem',
+                                    borderRadius: '12px',
+                                    background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                                    color: 'white',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '800',
+                                    textDecoration: 'none',
+                                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <FaShieldAlt /> Admin: Manage Syllabus & PDF
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Semester KPIs */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                        gap: '1rem',
+                        marginTop: '0.5rem',
+                        paddingTop: '1.5rem',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}>
+                        <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '1rem 1.25rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Active Selection</span>
+                            <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--secondary)', marginTop: '4px' }}>
+                                {selectedCurriculumSem === 'all' ? 'All Semesters' : selectedCurriculumSem === 'PE' ? 'Electives' : selectedCurriculumSem === 'OE' ? 'Open Electives' : `Semester ${selectedCurriculumSem}`}
+                            </div>
+                        </div>
+
+                        <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '1rem 1.25rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Courses Count</span>
+                            <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#f8fafc', marginTop: '4px' }}>
+                                {semTotalCourses} Courses
+                            </div>
+                        </div>
+
+                        <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '1rem 1.25rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Semester Credits</span>
+                            <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#38bdf8', marginTop: '4px' }}>
+                                {semTotalCredits} Credits
+                            </div>
+                        </div>
+
+                        <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '1rem 1.25rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Contact Periods/Wk</span>
+                            <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#4ade80', marginTop: '4px' }}>
+                                {semTotalContactHours} Hours
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Interactive Controls Bar: Semester Navigation & Search */}
+                <div style={{
+                    background: 'var(--bg-card)',
+                    padding: '1.5rem',
+                    borderRadius: '20px',
+                    border: '1px solid var(--glass-border)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.25rem'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                        {/* Semester Tabs */}
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
+                            {semTabs.map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setSelectedCurriculumSem(tab.id)}
+                                    style={{
+                                        padding: '0.6rem 1.2rem',
+                                        borderRadius: '12px',
+                                        border: selectedCurriculumSem === tab.id ? '1px solid var(--secondary)' : '1px solid var(--glass-border)',
+                                        background: selectedCurriculumSem === tab.id ? 'var(--secondary)' : 'var(--bg-section)',
+                                        color: selectedCurriculumSem === tab.id ? 'var(--bg-dark)' : 'var(--text-main)',
+                                        fontWeight: '800',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        boxShadow: selectedCurriculumSem === tab.id ? '0 4px 12px rgba(230, 182, 39, 0.25)' : 'none'
+                                    }}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Search Input */}
+                        <div style={{ position: 'relative', minWidth: '260px' }}>
+                            <FaSearch style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                            <input
+                                type="text"
+                                placeholder="Search course code or title..."
+                                value={curriculumSearch}
+                                onChange={(e) => setCurriculumSearch(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.6rem 1rem 0.6rem 2.5rem',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--glass-border)',
+                                    background: 'var(--bg-section)',
+                                    color: 'var(--text-main)',
+                                    fontSize: '0.85rem',
+                                    outline: 'none'
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Category Legend Pill Badges */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.6rem',
+                        flexWrap: 'wrap',
+                        paddingTop: '0.8rem',
+                        borderTop: '1px solid var(--glass-border)',
+                        fontSize: '0.8rem',
+                        color: 'var(--text-muted)'
+                    }}>
+                        <span style={{ fontWeight: '700', marginRight: '4px' }}>Categories:</span>
+                        {Object.entries(categoryColors).map(([catKey, conf]) => (
+                            <span
+                                key={catKey}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '0.2rem 0.55rem',
+                                    borderRadius: '6px',
+                                    background: conf.bg,
+                                    color: conf.text,
+                                    border: `1px solid ${conf.border}`,
+                                    fontSize: '0.75rem',
+                                    fontWeight: '700'
+                                }}
+                            >
+                                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: conf.text }} />
+                                {catKey}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Courses Table / Cards */}
+                {filteredCourses.length === 0 ? (
+                    <div style={{
+                        background: 'var(--bg-card)',
+                        borderRadius: '20px',
+                        padding: '4rem 2rem',
+                        textAlign: 'center',
+                        border: '1px solid var(--glass-border)',
+                        color: 'var(--text-muted)'
+                    }}>
+                        <FaBook style={{ fontSize: '3rem', color: 'var(--secondary)', opacity: 0.6, marginBottom: '1rem' }} />
+                        <h3 style={{ fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '0.5rem' }}>No Courses Found</h3>
+                        <p style={{ maxWidth: '500px', margin: '0 auto', fontSize: '0.9rem' }}>
+                            No courses match the current filters. Please select another semester or clear your search term.
+                        </p>
+                    </div>
+                ) : (
+                    <div style={{
+                        background: 'var(--bg-card)',
+                        borderRadius: '24px',
+                        overflow: 'hidden',
+                        border: '1px solid var(--glass-border)',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.04)'
+                    }}>
                         <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '650px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '850px' }}>
                                 <thead>
                                     <tr style={{ background: 'var(--bg-section)', borderBottom: '2px solid var(--glass-border)' }}>
-                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem' }}>#</th>
-                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem' }}>Course Code</th>
-                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem' }}>Course Name</th>
-                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>Strength</th>
-                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>L</th>
-                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>T</th>
-                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>P</th>
-                                        <th style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center' }}>Credits</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', width: '50px' }}>#</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', width: '90px' }}>Cat</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', width: '120px' }}>Course Code</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem' }}>Course Title</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center', width: '60px' }}>L</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center', width: '60px' }}>T</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center', width: '60px' }}>P</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center', width: '70px' }}>Periods</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center', width: '70px' }}>Credits</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center', width: '110px' }}>Marks (C/E)</th>
+                                        <th style={{ padding: '1.2rem 1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.85rem', textAlign: 'center', width: '130px' }}>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {semBlock.courses?.map((c, cIdx) => (
-                                        <tr key={cIdx} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.9rem' }}>{c.sl || cIdx + 1}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.95rem' }}>{c.code}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>{c.name}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontWeight: '700', fontSize: '0.9rem' }}>{c.strength}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>{c.l}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>{c.t}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>{c.p}</td>
+                                    {filteredCourses.map((course, idx) => (
+                                        <tr
+                                            key={course.id || idx}
+                                            style={{
+                                                borderBottom: '1px solid var(--glass-border)',
+                                                transition: 'background 0.2s',
+                                                cursor: 'pointer'
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                            onClick={() => setSelectedSubjectModal(course)}
+                                        >
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.85rem' }}>{idx + 1}</td>
+                                            <td style={{ padding: '1rem' }}>{getCategoryBadge(course.categoryType)}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.95rem' }}>{course.code}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <span>{course.title || course.name}</span>
+                                                    {course.verticalName && (
+                                                        <span style={{ fontSize: '0.75rem', color: '#c084fc' }}>• {course.verticalName}</span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.l !== undefined ? course.l : 3}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.t !== undefined ? course.t : 0}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.p !== undefined ? course.p : 0}</td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '700' }}>{course.contactPeriods || (Number(course.l || 0) + Number(course.t || 0) + Number(course.p || 0))}</td>
                                             <td style={{ padding: '1rem', textAlign: 'center' }}>
                                                 <span style={{
-                                                    padding: '0.2rem 0.6rem',
-                                                    borderRadius: '6px',
-                                                    background: c.credits > 0 ? 'rgba(230, 182, 39, 0.15)' : 'rgba(148, 163, 184, 0.15)',
-                                                    color: c.credits > 0 ? 'var(--secondary)' : 'var(--text-muted)',
+                                                    display: 'inline-block',
+                                                    padding: '0.25rem 0.7rem',
+                                                    borderRadius: '8px',
+                                                    background: Number(course.credits) > 0 ? 'rgba(230, 182, 39, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+                                                    color: Number(course.credits) > 0 ? 'var(--secondary)' : 'var(--text-muted)',
                                                     fontWeight: '900',
                                                     fontSize: '0.85rem'
                                                 }}>
-                                                    {c.credits}
+                                                    {course.credits}
                                                 </span>
+                                            </td>
+                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                {course.cia || 40} / {course.ese || 60}
+                                            </td>
+                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedSubjectModal(course);
+                                                    }}
+                                                    style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        padding: '0.45rem 0.9rem',
+                                                        borderRadius: '8px',
+                                                        background: 'rgba(99, 102, 241, 0.15)',
+                                                        color: '#818cf8',
+                                                        border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: '800',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    <FaEye size={11} /> Syllabus
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -2000,10 +2453,317 @@ const DepartmentPage = () => {
                             </table>
                         </div>
                     </div>
-                ))}
+                )}
+
+                {/* Credit Distribution Summary Matrix */}
+                {grandTotalCredits > 0 && (
+                    <div style={{
+                        background: 'var(--bg-card)',
+                        borderRadius: '24px',
+                        padding: '2.5rem',
+                        border: '1px solid var(--glass-border)',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.04)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.8rem' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.6rem', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 0.3rem 0' }}>
+                                    Credit Distribution by Course Category
+                                </h3>
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                    AICTE & Autonomous R-2023 Credit Allocation Framework
+                                </span>
+                            </div>
+                            <span style={{
+                                padding: '0.4rem 1rem',
+                                borderRadius: '30px',
+                                background: 'rgba(230, 182, 39, 0.15)',
+                                color: 'var(--secondary)',
+                                fontWeight: '800',
+                                fontSize: '0.9rem',
+                                border: '1px solid rgba(230, 182, 39, 0.3)'
+                            }}>
+                                Total Minimum Credits: {grandTotalCredits}
+                            </span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                            {Object.entries(categoryColors).map(([catKey, conf]) => {
+                                const catCredits = categoryTotals[catKey] || 0;
+                                const percentage = grandTotalCredits > 0 ? ((catCredits / grandTotalCredits) * 100).toFixed(1) : 0;
+                                return (
+                                    <div
+                                        key={catKey}
+                                        style={{
+                                            background: 'var(--bg-section)',
+                                            padding: '1.25rem',
+                                            borderRadius: '16px',
+                                            border: `1px solid ${conf.border}`,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '0.5rem'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{
+                                                padding: '0.2rem 0.5rem',
+                                                borderRadius: '6px',
+                                                background: conf.bg,
+                                                color: conf.text,
+                                                fontSize: '0.75rem',
+                                                fontWeight: '800'
+                                            }}>
+                                                {catKey}
+                                            </span>
+                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '700' }}>
+                                                {percentage}%
+                                            </span>
+                                        </div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', minHeight: '32px' }}>
+                                            {conf.label}
+                                        </div>
+                                        <div style={{ fontSize: '1.4rem', fontWeight: '800', color: conf.text, marginTop: 'auto' }}>
+                                            {catCredits} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Credits</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Detailed Subject Syllabus Modal */}
+                {selectedSubjectModal && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(0, 0, 0, 0.8)',
+                            backdropFilter: 'blur(8px)',
+                            zIndex: 1000,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: '1.5rem'
+                        }}
+                        onClick={() => setSelectedSubjectModal(null)}
+                    >
+                        <div
+                            style={{
+                                background: 'var(--bg-card, #0f172a)',
+                                borderRadius: '24px',
+                                maxWidth: '900px',
+                                width: '100%',
+                                maxHeight: '90vh',
+                                overflowY: 'auto',
+                                border: '1px solid var(--glass-border)',
+                                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6)',
+                                padding: '2.5rem'
+                            }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* Modal Header */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+                                        {getCategoryBadge(selectedSubjectModal.categoryType)}
+                                        <span style={{ color: 'var(--secondary)', fontWeight: '900', fontSize: '1.1rem' }}>
+                                            {selectedSubjectModal.code}
+                                        </span>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                            • L-T-P-C: {selectedSubjectModal.l || 3}-{selectedSubjectModal.t || 0}-{selectedSubjectModal.p || 0}-{selectedSubjectModal.credits || 3}
+                                        </span>
+                                    </div>
+                                    <h3 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--text-main)', margin: 0 }}>
+                                        {selectedSubjectModal.title || selectedSubjectModal.name}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedSubjectModal(null)}
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.1)',
+                                        border: 'none',
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        color: '#fff',
+                                        fontSize: '1.2rem',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            {/* Course Objectives */}
+                            {selectedSubjectModal.courseObjectives && selectedSubjectModal.courseObjectives.length > 0 && (
+                                <div style={{ marginBottom: '2rem' }}>
+                                    <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.75rem' }}>
+                                        Course Objectives:
+                                    </h4>
+                                    <ul style={{ paddingLeft: '1.2rem', margin: 0, color: 'var(--text-main)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                                        {selectedSubjectModal.courseObjectives.map((obj, oIdx) => (
+                                            <li key={oIdx} style={{ marginBottom: '0.4rem' }}>{obj}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Units Outline */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '1rem' }}>
+                                    Detailed Units Syllabus:
+                                </h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {(selectedSubjectModal.units && selectedSubjectModal.units.length > 0
+                                        ? selectedSubjectModal.units
+                                        : getDetailedSyllabusForSubject(selectedSubjectModal.code, selectedSubjectModal.title || selectedSubjectModal.name)
+                                    ).map((unit, uIdx) => (
+                                        <div
+                                            key={uIdx}
+                                            style={{
+                                                background: 'var(--bg-section)',
+                                                borderRadius: '14px',
+                                                padding: '1.25rem',
+                                                border: '1px solid var(--glass-border)'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontWeight: '800', color: '#818cf8', fontSize: '0.95rem' }}>
+                                                    {unit.unitNo || unit.unit || `UNIT ${uIdx + 1}`}: {unit.unitTitle || unit.title}
+                                                </span>
+                                                {unit.hours && (
+                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '700' }}>
+                                                        {unit.hours} Hours
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: '1.6' }}>
+                                                {Array.isArray(unit.topics) ? unit.topics.join(' • ') : unit.topics || unit.content}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Course Outcomes (COs) */}
+                            {selectedSubjectModal.courseOutcomes && selectedSubjectModal.courseOutcomes.length > 0 && (
+                                <div style={{ marginBottom: '2rem' }}>
+                                    <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.75rem' }}>
+                                        Course Outcomes (COs) & Cognitive Domains:
+                                    </h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        {selectedSubjectModal.courseOutcomes.map((co, coIdx) => (
+                                            <div
+                                                key={coIdx}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    padding: '0.75rem 1rem',
+                                                    background: 'var(--bg-section)',
+                                                    borderRadius: '10px',
+                                                    border: '1px solid var(--glass-border)',
+                                                    gap: '1rem'
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    <span style={{ fontWeight: '900', color: 'var(--secondary)', fontSize: '0.85rem' }}>
+                                                        {co.coNo || `CO${coIdx + 1}`}
+                                                    </span>
+                                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                                                        {co.outcome || co.text}
+                                                    </span>
+                                                </div>
+                                                {getRbtBadge(co.rbtLevel || co.level)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Textbooks & References */}
+                            {((selectedSubjectModal.textBooks && selectedSubjectModal.textBooks.length > 0) ||
+                              (selectedSubjectModal.referenceBooks && selectedSubjectModal.referenceBooks.length > 0)) && (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                    {selectedSubjectModal.textBooks && selectedSubjectModal.textBooks.length > 0 && (
+                                        <div>
+                                            <h4 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.5rem' }}>
+                                                Text Books:
+                                            </h4>
+                                            <ul style={{ paddingLeft: '1.2rem', margin: 0, fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: '1.5' }}>
+                                                {selectedSubjectModal.textBooks.map((tb, tbIdx) => (
+                                                    <li key={tbIdx} style={{ marginBottom: '0.3rem' }}>
+                                                        <strong>{tb.author}</strong>, "{tb.title}", {tb.publisher} {tb.year ? `(${tb.year})` : ''}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {selectedSubjectModal.referenceBooks && selectedSubjectModal.referenceBooks.length > 0 && (
+                                        <div>
+                                            <h4 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.5rem' }}>
+                                                References:
+                                            </h4>
+                                            <ul style={{ paddingLeft: '1.2rem', margin: 0, fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: '1.5' }}>
+                                                {selectedSubjectModal.referenceBooks.map((rb, rbIdx) => (
+                                                    <li key={rbIdx} style={{ marginBottom: '0.3rem' }}>
+                                                        <strong>{rb.author}</strong>, "{rb.title}", {rb.publisher} {rb.year ? `(${rb.year})` : ''}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Modal Actions */}
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
+                                <button
+                                    onClick={() => setSelectedSubjectModal(null)}
+                                    style={{
+                                        padding: '0.7rem 1.4rem',
+                                        borderRadius: '10px',
+                                        background: 'var(--bg-section)',
+                                        color: 'var(--text-muted)',
+                                        border: '1px solid var(--glass-border)',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '700',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Close
+                                </button>
+                                <Link
+                                    to="/admin/syllabus"
+                                    style={{
+                                        padding: '0.7rem 1.4rem',
+                                        borderRadius: '10px',
+                                        background: 'var(--primary)',
+                                        color: '#fff',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '800',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <FaEdit size={12} /> Edit in Admin Panel
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
-        </div>
-    );
+        );
+    };
 
     const renderCourseOutcomes = () => {
         const [selectedSemester, setSelectedSemester] = useState('all');
@@ -2795,23 +3555,21 @@ const DepartmentPage = () => {
                     >
                         Apply for MBA <FaArrowRight size={12} />
                     </button>
-                    {department.courseOutcomes && (
-                        <button
-                            onClick={() => setActiveSection('course-outcomes')}
-                            style={{
-                                padding: '0.9rem 1.8rem',
-                                borderRadius: '50px',
-                                background: 'rgba(255,255,255,0.08)',
-                                color: 'white',
-                                fontWeight: '800',
-                                fontSize: '0.95rem',
-                                border: '1px solid rgba(255,255,255,0.2)',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            View Curriculum & COs
-                        </button>
-                    )}
+                    <button
+                        onClick={() => setActiveSection('curriculum')}
+                        style={{
+                            padding: '0.9rem 1.8rem',
+                            borderRadius: '50px',
+                            background: 'rgba(255,255,255,0.08)',
+                            color: 'white',
+                            fontWeight: '800',
+                            fontSize: '0.95rem',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        View Curriculum & Syllabus
+                    </button>
                 </div>
             </div>
         </div>
@@ -2962,6 +3720,7 @@ const DepartmentPage = () => {
 
                             {activeSection === 'vision-mission' && renderVisionMission()}
                             {activeSection === 'peo-po-pso' && renderPEO()}
+                            {activeSection === 'curriculum' && renderCurriculum()}
                             {activeSection === 'course-outcomes' && renderCourseOutcomes()}
                             {activeSection === 'documents' && renderDocuments()}
                             {activeSection === 'labs' && renderLabs()}

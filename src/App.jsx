@@ -9,6 +9,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const SyllabusDashboard = lazy(() => import('./pages/SyllabusDashboard'));
+const AdminSyllabusPage = lazy(() => import('./pages/AdminSyllabusPage'));
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -148,8 +149,9 @@ function App() {
             />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="//admin" element={<AdminDashboard />} />
-            <Route path="//admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/syllabus" element={<AdminSyllabusPage />} />
+            <Route path="/admin/curriculum" element={<AdminSyllabusPage />} />
+            <Route path="/admin-syllabus" element={<AdminSyllabusPage />} />
             <Route path="/core-beliefs" element={<CoreBeliefsPage />} />
             <Route path="/institution" element={<InstitutionPage />} />
             <Route path="/management" element={<ManagementPage />} />

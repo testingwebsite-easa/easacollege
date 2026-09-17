@@ -53,6 +53,42 @@ router.post('/scan-syllabus-excel', upload.single('file'), async (req, res) => {
     }
 });
 
+// GET /api/departments/all/master-courses - Aggregated shared course bank across all departments
+router.get('/all/master-courses', async (req, res) => {
+    try {
+        const allDeptData = await DepartmentData.find({}, 'departmentSlug subjects');
+        const courseMap = new Map();
+
+        allDeptData.forEach(dept => {
+            if (Array.isArray(dept.subjects)) {
+                dept.subjects.forEach(subj => {
+                    if (subj && subj.code) {
+                        const codeKey = String(subj.code).trim().toUpperCase();
+                        if (codeKey) {
+                            const subjObj = subj.toObject ? subj.toObject() : subj;
+                            const existing = courseMap.get(codeKey);
+                            // If not existing or existing has fewer details (e.g. no units), store or update
+                            if (!existing || (!existing.units?.length && subjObj.units?.length)) {
+                                courseMap.set(codeKey, {
+                                    ...subjObj,
+                                    sourceDept: dept.departmentSlug,
+                                    sourceDeptName: dept.departmentSlug?.replace(/-/g, ' ').toUpperCase()
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        const courses = Array.from(courseMap.values()).sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        res.json(courses);
+    } catch (err) {
+        console.error('Error fetching master courses:', err);
+        res.status(500).json({ error: 'Failed to fetch master courses: ' + err.message });
+    }
+});
+
 // GET department data by slug
 router.get('/:slug', async (req, res) => {
     try {

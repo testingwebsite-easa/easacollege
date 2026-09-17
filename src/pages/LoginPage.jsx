@@ -34,23 +34,42 @@ const LoginPage = () => {
         try {
             const data = await login(loginData.username, loginData.password);
             
-            // Set admin_token if admin role or on admin path
+            // Set both tokens for seamless full control across CMS & Syllabus
             if (data?.token) {
-                if (data?.user?.role === 'admin' || isAdminPath) {
+                localStorage.setItem('authToken', data.token);
+                if (data?.user?.role === 'admin' || isAdminPath || data?.user?.role === 'hod') {
                     localStorage.setItem('admin_token', data.token);
                 }
             }
 
-            // Navigate based on role & path
+            // Check if redirect query param exists
+            const queryParams = new URLSearchParams(location.search);
+            const redirectUrl = queryParams.get('redirect');
+
+            // Navigate based on role & destination
             setTimeout(() => {
-                if (isSyllabusPath) {
-                    navigate('/dashboard');
-                } else if (data?.user?.role === 'admin' || isAdminPath) {
-                    navigate('/admin');
+                if (redirectUrl) {
+                    navigate(redirectUrl);
+                } else if (location.pathname === '/admin/syllabus' || isSyllabusPath || location.pathname === '/login' || location.pathname === '/syllabus-login' || location.pathname === '/syllabus/login') {
+                    if (data?.user?.role === 'admin' || data?.user?.role === 'superadmin') {
+                        navigate('/admin/syllabus');
+                    } else if (data?.user?.role === 'hod' || data?.user?.role === 'staff' || data?.user?.role === 'student') {
+                        navigate('/dashboard');
+                    } else {
+                        navigate('/admin/syllabus');
+                    }
+                } else if (location.pathname === '/admin/login' || location.pathname === '/admin') {
+                    if (data?.user?.role === 'admin' || data?.user?.role === 'superadmin') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/dashboard');
+                    }
+                } else if (data?.user?.role === 'admin' || data?.user?.role === 'superadmin') {
+                    navigate('/admin/syllabus');
                 } else {
                     navigate('/dashboard');
                 }
-            }, 500);
+            }, 300);
         } catch (err) {
             setError(err.message);
         } finally {

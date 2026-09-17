@@ -526,8 +526,19 @@ const AdminDashboard = () => {
                         className={`admin-tab-btn ${activeTab === 'departments' ? 'active' : ''}`}
                         onClick={() => { setActiveTab('departments'); setSidebarOpen(false); }}
                     >
-                        <FaBookOpen /> Manage Departments
+                        <FaBookOpen /> Syllabus & Departments
                     </button>
+
+                    <div style={{ margin: '1rem 0 0.5rem 0', borderTop: '1px solid #e2e8f0', paddingTop: '0.8rem' }}>
+                        <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#94a3b8', fontWeight: 'bold', padding: '0 0.5rem' }}>Admin Portals</span>
+                    </div>
+                    <a
+                        href="/admin/syllabus"
+                        className="admin-tab-btn"
+                        style={{ color: '#4f46e5', background: 'rgba(99, 102, 241, 0.08)', textDecoration: 'none', fontWeight: '600' }}
+                    >
+                        📖 Syllabus Admin (/admin/syllabus)
+                    </a>
                 </div>
             </div>
 
@@ -537,9 +548,26 @@ const AdminDashboard = () => {
                     <h2 style={{ fontSize: '2rem', margin: 0 }} className="text-gradient">
                         {activeTab === 'pending' && 'Pending User Approvals'}
                         {activeTab === 'users' && 'User Account Directory'}
-                        {activeTab === 'departments' && 'Department Data Manager'}
+                        {activeTab === 'departments' && 'Curriculum & Department Data Manager'}
                     </h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <a
+                            href="/admin/syllabus"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                                color: 'white',
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                textDecoration: 'none',
+                                fontSize: '0.85rem',
+                                fontWeight: '700'
+                            }}
+                        >
+                            📖 Syllabus Portal
+                        </a>
                         <span className="user-info" style={{ color: '#333', background: '#eef2f6' }}>{user?.username}</span>
                         <button
                             onClick={handleLogout}

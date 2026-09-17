@@ -14,7 +14,8 @@
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-highlight: rgba(255, 255, 255, 0.05);
 
-  --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-main: 'Outfit', 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-tamil: 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
   --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
 
   /* Missing Variables */
@@ -104,6 +105,10 @@ body {
   width: 100%;
   position: relative;
   transition: background-color 0.5s var(--ease-apple), color 0.5s var(--ease-apple);
+}
+
+input, textarea, select, button {
+  font-family: inherit;
 }
 
 select option {

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import API_BASE_URL from '../api';
 import { departments as staticDepartments } from '../data/departmentsData';
 import ImageUpload from '../components/ImageUpload';
+import DepartmentManager from '../components/DepartmentManager';
 
 
 // Helper Component for Dynamic JSON Lists
@@ -384,7 +385,7 @@ const AdminDashboard = () => {
                 }
 
                 const res = await fetch(`${API_BASE_URL}${endpoint}`, { headers });
-                
+
                 // Check for token expiry
                 if (handleTokenExpiry(res.status)) {
                     return;
@@ -1341,6 +1342,7 @@ const AdminDashboard = () => {
 
                 {renderGroup('academics', 'Academics', (
                     <>
+                        {renderTabButton('syllabus', '📖 Curriculum & Syllabus (Full Control)')}
                         {renderTabButton('departments', 'Departments')}
                         {renderTabButton('programs', 'Programs')}
                         {renderTabButton('research-courses', 'Research Courses')}
@@ -1356,10 +1358,11 @@ const AdminDashboard = () => {
             </div>
 
             <div className="admin-main">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h2 style={{ fontSize: '2rem' }} className="text-gradient">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                    <h2 style={{ fontSize: '2rem', margin: 0 }} className="text-gradient">
                         {(() => {
                             const titles = {
+                                'syllabus': 'Autonomous Curriculum & Syllabus Manager (Full Control)',
                                 'enquiries': 'General Enquiries',
                                 'grievances': 'Grievances / Feedback',
                                 'admissions': 'Admissions',
@@ -1411,15 +1414,36 @@ const AdminDashboard = () => {
                             return titles[activeTab] || 'Gallery';
                         })()}
                     </h2>
-                    <button
-                        onClick={() => {
-                            localStorage.removeItem('admin_token');
-                            navigate('/login');
-                        }}
-                        style={{ background: 'transparent', color: 'var(--text-highlight)', border: '1px solid var(--text-highlight)', padding: '0.5rem 1rem', borderRadius: '5px', cursor: 'pointer' }}
-                    >
-                        Logout
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+                        <Link
+                            to="/admin/syllabus"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                                color: 'white',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                fontSize: '0.85rem',
+                                fontWeight: '700',
+                                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                            }}
+                        >
+                            📖 Open Syllabus Admin Portal
+                        </Link>
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem('admin_token');
+                                localStorage.removeItem('authToken');
+                                navigate('/login');
+                            }}
+                            style={{ background: 'transparent', color: 'var(--text-highlight)', border: '1px solid var(--text-highlight)', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
 
                 {/* Modal Overlay */}
@@ -1451,7 +1475,7 @@ const AdminDashboard = () => {
                                     </div>
                                     {renderInput('Title', 'title', heroForm.title, e => setHeroForm({ ...heroForm, title: e.target.value }))}
                                     {renderInput('Subtitle', 'subtitle', heroForm.subtitle, e => setHeroForm({ ...heroForm, subtitle: e.target.value }))}
-                                    
+
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                         {renderInput('Title Text Color', 'titleColor', heroForm.titleColor || '#ffffff', e => setHeroForm({ ...heroForm, titleColor: e.target.value }), 'color')}
                                         {renderInput('Subtitle Text Color', 'subtitleColor', heroForm.subtitleColor || '#ffffff', e => setHeroForm({ ...heroForm, subtitleColor: e.target.value }), 'color')}
@@ -1709,20 +1733,20 @@ const AdminDashboard = () => {
                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>
                                             Upload Photo <span style={{ color: '#FCCA26' }}>*</span>
                                         </label>
-                                        <ImageUpload 
+                                        <ImageUpload
                                             value={galleryEventForm.image || (() => {
                                                 try {
                                                     const parsed = JSON.parse(galleryEventForm.photos || '[]');
                                                     return Array.isArray(parsed) && parsed.length > 0 ? (parsed[0].src || parsed[0].url || parsed[0]) : '';
-                                                } catch(e) { return ''; }
-                                            })()} 
+                                                } catch (e) { return ''; }
+                                            })()}
                                             onUpload={(url) => {
                                                 setGalleryEventForm(prev => ({
                                                     ...prev,
                                                     image: url,
                                                     photos: JSON.stringify([{ src: url, caption: prev.eventName || '' }])
                                                 }));
-                                            }} 
+                                            }}
                                         />
                                     </div>
 
@@ -2001,11 +2025,11 @@ const AdminDashboard = () => {
                                                 });
                                             };
                                             handleGenericSubmit(
-                                                e, 
-                                                formToSubmit, 
-                                                setGalleryEventForm, 
-                                                '/api/gallery-events', 
-                                                deptGalleryEventsSetter, 
+                                                e,
+                                                formToSubmit,
+                                                setGalleryEventForm,
+                                                '/api/gallery-events',
+                                                deptGalleryEventsSetter,
                                                 { eventName: '', date: '', image: '', photos: '[]', department: selectedDepartment?.slug }
                                             );
                                         }} style={{ display: 'grid', gap: '1rem' }}>
@@ -2013,20 +2037,20 @@ const AdminDashboard = () => {
                                                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>
                                                     Upload Photo <span style={{ color: '#FCCA26' }}>*</span>
                                                 </label>
-                                                <ImageUpload 
+                                                <ImageUpload
                                                     value={galleryEventForm.image || (() => {
                                                         try {
                                                             const parsed = JSON.parse(galleryEventForm.photos || '[]');
                                                             return Array.isArray(parsed) && parsed.length > 0 ? (parsed[0].src || parsed[0].url || parsed[0]) : '';
-                                                        } catch(e) { return ''; }
-                                                    })()} 
+                                                        } catch (e) { return ''; }
+                                                    })()}
                                                     onUpload={(url) => {
                                                         setGalleryEventForm(prev => ({
                                                             ...prev,
                                                             image: url,
                                                             photos: JSON.stringify([{ src: url, caption: prev.eventName || '' }])
                                                         }));
-                                                    }} 
+                                                    }}
                                                 />
                                             </div>
 
@@ -2277,7 +2301,7 @@ const AdminDashboard = () => {
                             {activeTab === 'users' && (
                                 <form onSubmit={(e) => handleGenericSubmit(e, userForm, setUserForm, '/api/users', setUsers, { username: '', password: '', role: 'admin' })} style={{ display: 'grid', gap: '1rem' }}>
                                     {renderInput('Username', 'username', userForm.username, e => setUserForm({ ...userForm, username: e.target.value }))}
-                                    
+
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                                             {editingItem ? 'Password (leave blank to keep current)' : 'Password'}
@@ -2328,2413 +2352,2427 @@ const AdminDashboard = () => {
 
                 {!loading && !error && (
                     <div style={{
-                        background: 'var(--bg-card)',
-                        padding: '2rem',
-                        borderRadius: '16px',
-                        border: '1px solid var(--glass-border)',
-                        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
-                    }}>
+                    background: 'var(--bg-card)',
+                    padding: '2rem',
+                    borderRadius: '16px',
+                    border: '1px solid var(--glass-border)',
+                    boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+                }}>
 
-                        {/* DEPARTMENTS TAB - Main UI */}
-                        {activeTab === 'departments' && (
-                            <>
-                                {!selectedDepartment ? (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                        {staticDepartments.map((dept) => (
-                                            <div
-                                                key={dept.id}
-                                                onClick={() => setSelectedDepartment(dept)}
-                                                style={{
-                                                    background: 'var(--bg-card)', padding: '2rem', borderRadius: '16px',
-                                                    border: '1px solid var(--glass-border)', cursor: 'pointer', transition: 'all 0.3s',
-                                                    display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1rem'
-                                                }}
-                                                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'}
-                                                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-                                            >
-                                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--glass-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--secondary)' }}>
-                                                    {dept.slug.substring(0, 2).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{dept.name}</h3>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{dept.type} Program</div>
-                                                </div>
-                                                <button style={{ marginTop: 'auto', padding: '0.6rem 1.2rem', borderRadius: '50px', background: 'var(--primary)', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Manage</button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--glass-border)' }}>
-                                            <button onClick={() => setSelectedDepartment(null)} style={{ background: 'var(--glass-highlight)', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>←</button>
-                                            <h2 style={{ fontSize: '1.8rem', margin: 0, color: 'var(--text-main)' }}>{selectedDepartment.name}</h2>
-                                        </div>
+                    {/* SYLLABUS & CURRICULUM TAB - Full Control DepartmentManager */}
+                    {activeTab === 'syllabus' && (
+                        <div style={{ width: '100%' }}>
+                            <DepartmentManager />
+                        </div>
+                    )}
 
-                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-                                            {['faculty', 'gallery', 'events', 'labs'].map(tab => (
-                                                <button
-                                                    key={tab}
-                                                    onClick={() => setDeptTab(tab)}
-                                                    style={{
-                                                        padding: '0.8rem 1.5rem', borderRadius: '12px',
-                                                        background: deptTab === tab ? 'var(--primary)' : 'var(--glass-highlight)',
-                                                        color: deptTab === tab ? 'white' : 'var(--text-muted)',
-                                                        border: 'none', cursor: 'pointer', fontWeight: 'bold', textTransform: 'capitalize'
-                                                    }}
-                                                >
-                                                    {tab === 'labs' ? 'Laboratories (Labs)' : tab}
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        {/* Sub-Tab Content */}
-                                        {deptTab === 'faculty' && (
-                                            <div>
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-                                                    <button
-                                                        onClick={() => { setEditingItem(null); setFacultyForm({ name: '', designation: '', department: selectedDepartment.slug, order: 0 }); setShowModal(true); }}
-                                                        className="btn btn-primary"
-                                                    >
-                                                        + Add Faculty
-                                                    </button>
-                                                </div>
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                                    {deptFaculty.map(fac => (
-                                                        <div key={fac._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                            <div style={{ flex: 1 }}>
-                                                                <h4 style={{ fontSize: '1.1rem', margin: '0 0 0.3rem 0', color: 'var(--text-main)' }}>{fac.name}</h4>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{fac.designation}</div>
-                                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.8rem' }}>
-                                                                    <button onClick={() => startEditFaculty(fac)} style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', borderRadius: '4px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer', color: 'var(--primary)' }}>Edit</button>
-                                                                    <button onClick={() => deleteFaculty(fac._id)} style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', borderRadius: '4px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer', color: 'red' }}>Delete</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {deptTab === 'gallery' && (
-                                            <div>
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-                                                    <button
-                                                        onClick={() => { setEditingItem(null); setGalleryEventForm({ eventName: '', date: '', image: '', photos: '[]', department: selectedDepartment.slug }); setShowModal(true); }}
-                                                        className="btn btn-primary"
-                                                    >
-                                                        + Upload Photo
-                                                    </button>
-                                                </div>
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                                    {Array.isArray(deptGallery?.events) && deptGallery.events.map(event => {
-                                                        const photoSrc = (event.photos && event.photos.length > 0) ? (event.photos[0].src || event.photos[0].url) : event.image;
-                                                        return (
-                                                            <div key={event._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                                                {photoSrc && (
-                                                                    <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
-                                                                        <img src={photoSrc} alt={event.eventName || 'Gallery'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                                    </div>
-                                                                )}
-                                                                <h4 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-main)' }}>{event.eventName || 'Photo'}</h4>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{event.date ? new Date(event.date).toLocaleDateString() : ''}</div>
-                                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-                                                                    <button onClick={() => { setEditingItem(event); setGalleryEventForm({ ...event, image: photoSrc || '', photos: JSON.stringify(event.photos || []), department: selectedDepartment.slug }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
-                                                                    <button onClick={() => handleGenericDelete(event._id, `/api/gallery-events`, (updater) => setDeptGallery(prev => ({ ...prev, events: typeof updater === 'function' ? updater(Array.isArray(prev?.events) ? prev.events : []) : (Array.isArray(prev?.events) ? prev.events : []) })))} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                    {(!Array.isArray(deptGallery?.events) || deptGallery.events.length === 0) && (
-                                                        <div style={{ gridColumn: '1 / -1', padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                                            No gallery photos uploaded yet for this department. Click "+ Upload Photo" above to add one!
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {deptTab === 'events' && (
-                                            <div>
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-                                                    <button
-                                                        onClick={() => { setEditingItem(null); setNewsForm({ title: '', date: '', desc: '', image: '', pdf_url: '', category: selectedDepartment.slug }); setShowModal(true); }}
-                                                        className="btn btn-primary"
-                                                    >
-                                                        + Add Department Event
-                                                    </button>
-                                                </div>
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                                    {deptEvents.map(evt => (
-                                                        <div key={evt._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                                            {evt.image && (
-                                                                <div style={{ width: '100%', height: '150px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
-                                                                    <img src={evt.image} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                                </div>
-                                                            )}
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                                                                <h4 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-main)', lineHeight: '1.3' }}>{evt.title}</h4>
-                                                                {evt.pdf_url && (
-                                                                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '6px', background: 'rgba(248, 113, 113, 0.15)', color: '#f87171', border: '1px solid rgba(248, 113, 113, 0.3)', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                                                                        PDF
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{evt.date ? new Date(evt.date).toLocaleDateString() : ''}</div>
-                                                            {evt.desc && (
-                                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                                                    {evt.desc}
-                                                                </p>
-                                                            )}
-                                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)' }}>
-                                                                <button onClick={() => { setEditingItem(evt); setNewsForm({ image: evt.image || '', title: evt.title || '', date: evt.date || '', category: selectedDepartment.slug, desc: evt.desc || '', pdf_url: evt.pdf_url || '' }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
-                                                                <button onClick={() => handleGenericDelete(evt._id, `/api/news-events`, setDeptEvents)} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {deptTab === 'labs' && (
-                                            <div>
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-                                                    <button
-                                                        onClick={() => { setEditingItem(null); setDeptLabForm({ name: '', image: '', description: '', equipment: '', order: deptLabs.length + 1, department: selectedDepartment.slug }); setShowModal(true); }}
-                                                        className="btn btn-primary"
-                                                    >
-                                                        + Add Laboratory
-                                                    </button>
-                                                </div>
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                                    {deptLabs.map(lab => (
-                                                        <div key={lab._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                                            {lab.image && (
-                                                                <div style={{ width: '100%', height: '160px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
-                                                                    <img src={lab.image} alt={lab.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                                </div>
-                                                            )}
-                                                            <h4 style={{ fontSize: '1.15rem', margin: 0, color: 'var(--text-main)', lineHeight: '1.3' }}>{lab.name}</h4>
-                                                            {lab.description && (
-                                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                                                    {lab.description}
-                                                                </p>
-                                                            )}
-                                                            {lab.equipment && (
-                                                                <div style={{ fontSize: '0.8rem', color: 'var(--secondary)', fontWeight: '700' }}>
-                                                                    Key Equipment: <span style={{ color: 'var(--text-muted)', fontWeight: 'normal' }}>{lab.equipment}</span>
-                                                                </div>
-                                                            )}
-                                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)' }}>
-                                                                <button onClick={() => { setEditingItem(lab); setDeptLabForm({ name: lab.name || '', image: lab.image || '', description: lab.description || '', equipment: lab.equipment || '', order: lab.order || 0, department: selectedDepartment.slug }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
-                                                                <button onClick={() => handleGenericDelete(lab._id, `/api/department-labs`, setDeptLabs)} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {deptLabs.length === 0 && (
-                                                        <div style={{ gridColumn: '1 / -1', padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                                            No laboratories added yet for this department. Click "+ Add Laboratory" above to upload lab photos and equipment details!
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </>
-                        )}
-
-                        {/* MISSION & VISION TAB */}
-                        {activeTab === 'mission' && (
-                            <div style={{ display: 'grid', gap: '2rem' }}>
-                                <div>
-                                    <h2 style={{ marginBottom: '1rem' }}>Vision Statement</h2>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <textarea
-                                            value={missionVision.vision}
-                                            onChange={(e) => setMissionVision({ ...missionVision, vision: e.target.value })}
-                                            style={{ width: '100%', padding: '1rem', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '100px' }}
-                                        />
-                                        <button
-                                            onClick={() => handleUpdateMissionVision(missionVision)}
-                                            className="btn btn-primary"
-                                            style={{ height: 'fit-content' }}
+                    {/* DEPARTMENTS TAB - Main UI */}
+                    {activeTab === 'departments' && (
+                        <>
+                            {!selectedDepartment ? (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                    {staticDepartments.map((dept) => (
+                                        <div
+                                            key={dept.id}
+                                            onClick={() => setSelectedDepartment(dept)}
+                                            style={{
+                                                background: 'var(--bg-card)', padding: '2rem', borderRadius: '16px',
+                                                border: '1px solid var(--glass-border)', cursor: 'pointer', transition: 'all 0.3s',
+                                                display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1rem'
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                                         >
-                                            Save
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h2 style={{ marginBottom: '1rem' }}>Mission Points</h2>
-                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                                        <input
-                                            type="text"
-                                            value={missionForm.point}
-                                            onChange={(e) => setMissionForm({ point: e.target.value })}
-                                            placeholder="Add new mission point..."
-                                            style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}
-                                            onKeyDown={(e) => e.key === 'Enter' && addMissionPoint()}
-                                        />
-                                        <button onClick={addMissionPoint} className="btn btn-primary">Add</button>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                        {missionVision.mission.map((m, i) => (
-                                            <div key={i} style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span>{m}</span>
-                                                <button onClick={() => deleteMissionPoint(i)} style={{ color: '#ff4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>×</button>
+                                            <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--glass-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--secondary)' }}>
+                                                {dept.slug.substring(0, 2).toUpperCase()}
                                             </div>
+                                            <div>
+                                                <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{dept.name}</h3>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{dept.type} Program</div>
+                                            </div>
+                                            <button style={{ marginTop: 'auto', padding: '0.6rem 1.2rem', borderRadius: '50px', background: 'var(--primary)', color: 'white', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Manage</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--glass-border)' }}>
+                                        <button onClick={() => setSelectedDepartment(null)} style={{ background: 'var(--glass-highlight)', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>←</button>
+                                        <h2 style={{ fontSize: '1.8rem', margin: 0, color: 'var(--text-main)' }}>{selectedDepartment.name}</h2>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                                        {['faculty', 'gallery', 'events', 'labs', 'syllabus'].map(tab => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setDeptTab(tab)}
+                                                style={{
+                                                    padding: '0.8rem 1.5rem', borderRadius: '12px',
+                                                    background: deptTab === tab ? 'var(--primary)' : 'var(--glass-highlight)',
+                                                    color: deptTab === tab ? 'white' : 'var(--text-muted)',
+                                                    border: 'none', cursor: 'pointer', fontWeight: 'bold', textTransform: 'capitalize'
+                                                }}
+                                            >
+                                                {tab === 'labs' ? 'Laboratories (Labs)' : tab === 'syllabus' ? '📖 Syllabus & Curriculum' : tab}
+                                            </button>
                                         ))}
                                     </div>
-                                </div>
-                            </div>
-                        )}
 
-                        {/* LIBRARY MANAGEMENT TAB */}
-                        {activeTab === 'library' && (
-                            <div>
-                                {renderSingletonForm(libraryData, setLibraryData, '/api/library', [
-                                    { type: 'header', label: 'Overview Section' },
-                                    { key: 'overview.title', label: 'Main Title', type: 'text' }, // Note: renderSingletonForm needs to support nested keys or we need a wrapper. 
-                                    // Actually renderSingletonForm is too simple for this nested structure. I will render a custom form here.
-                                ])}
-                                {/* Custom Form for Library because generic one is too simple */}
-                                <div style={{ display: 'grid', gap: '2rem' }}>
-                                    <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--secondary)' }}>Overview</h3>
-                                        {renderInput('Title', 'title', libraryData?.overview?.title || '', e => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, title: e.target.value } }))}
-                                        {renderInput('Subtitle', 'subtitle', libraryData?.overview?.subtitle || '', e => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, subtitle: e.target.value } }))}
-                                        <div style={{ margin: '1rem 0' }}>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
-                                            <textarea
-                                                value={libraryData?.overview?.description || ''}
-                                                onChange={e => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, description: e.target.value } })}
-                                                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '120px' }}
-                                            />
-                                        </div>
-                                        <div style={{ marginBottom: '1rem' }}>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Hero Image</label>
-                                            <ImageUpload value={libraryData?.overview?.image || ''} onUpload={(url) => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, image: url } })} />
-                                        </div>
-                                    </div>
-
-                                    <DynamicJsonBuilder
-                                        label="Stats (e.g. Books: 35000+)"
-                                        value={JSON.stringify(libraryData?.overview?.stats || [])}
-                                        onChange={(val) => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, stats: JSON.parse(val) } })}
-                                        fields={[{ key: 'label', label: 'Label' }, { key: 'value', label: 'Value' }]}
-                                    />
-
-                                    <DynamicJsonBuilder
-                                        label="E-Resources"
-                                        value={JSON.stringify(libraryData?.eResources || [])}
-                                        onChange={(val) => setLibraryData({ ...libraryData, eResources: JSON.parse(val) })}
-                                        fields={[{ key: 'name', label: 'Name' }, { key: 'desc', label: 'Description' }, { key: 'link', label: 'Link' }, { key: 'logo', label: 'Logo', type: 'image' }]}
-                                    />
-
-                                    <DynamicJsonBuilder
-                                        label="Open Access Resources"
-                                        value={JSON.stringify(libraryData?.openAccess || [])}
-                                        onChange={(val) => setLibraryData({ ...libraryData, openAccess: JSON.parse(val) })}
-                                        fields={[{ key: 'name', label: 'Name' }, { key: 'url', label: 'URL' }, { key: 'logo', label: 'Logo', type: 'image' }]}
-                                    />
-
-                                    <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: 'var(--secondary)' }}>NDLI Club</h3>
-                                        <div style={{ margin: '1rem 0' }}>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
-                                            <textarea
-                                                value={libraryData?.ndli?.description || ''}
-                                                onChange={e => setLibraryData({ ...libraryData, ndli: { ...libraryData.ndli, description: e.target.value } })}
-                                                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '80px' }}
-                                            />
-                                        </div>
-                                        {/* Simple List for Benefits */}
-                                        <DynamicJsonBuilder
-                                            label="Benefits"
-                                            value={JSON.stringify((libraryData?.ndli?.benefits || []).map(b => ({ text: b })))}
-                                            onChange={(val) => setLibraryData({ ...libraryData, ndli: { ...libraryData.ndli, benefits: JSON.parse(val).map(x => x.text) } })}
-                                            fields={[{ key: 'text', label: 'Benefit Point' }]}
-                                        />
-                                    </div>
-
-                                    <DynamicJsonBuilder
-                                        label="Rules & Regulations"
-                                        value={JSON.stringify((libraryData?.rules || []).map(r => ({ text: r })))}
-                                        onChange={(val) => setLibraryData({ ...libraryData, rules: JSON.parse(val).map(x => x.text) })}
-                                        fields={[{ key: 'text', label: 'Rule' }]}
-                                    />
-
-                                    <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: '#2196F3' }}>Web OPAC</h3>
-                                        <div style={{ margin: '1rem 0' }}>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
-                                            <textarea
-                                                value={libraryData?.opac?.description || ''}
-                                                onChange={e => setLibraryData({ ...libraryData, opac: { ...libraryData.opac, description: e.target.value } })}
-                                                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '80px' }}
-                                            />
-                                        </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                            {renderInput('CTA Button Text', 'cta', libraryData?.opac?.cta || '', e => setLibraryData({ ...libraryData, opac: { ...libraryData.opac, cta: e.target.value } }))}
-                                            {renderInput('Link URL', 'link', libraryData?.opac?.link || '', e => setLibraryData({ ...libraryData, opac: { ...libraryData.opac, link: e.target.value } }))}
-                                        </div>
-                                    </div>
-
-                                    <DynamicJsonBuilder
-                                        label="Staff"
-                                        value={JSON.stringify(libraryData?.staff || [])}
-                                        onChange={(val) => setLibraryData({ ...libraryData, staff: JSON.parse(val) })}
-                                        fields={[{ key: 'name', label: 'Name' }, { key: 'role', label: 'Role' }, { key: 'image', label: 'Photo', type: 'image' }]}
-                                    />
-
-                                    <DynamicJsonBuilder
-                                        label="Gallery Images"
-                                        value={JSON.stringify((libraryData?.gallery || []).map(r => ({ url: r })))}
-                                        onChange={(val) => setLibraryData({ ...libraryData, gallery: JSON.parse(val).map(x => x.url) })}
-                                        fields={[{ key: 'url', label: 'Image', type: 'image' }]}
-                                    />
-
-                                    <button
-                                        onClick={async () => {
-                                            try {
-                                                const res = await fetch(`${API_BASE_URL}/api/library`, {
-                                                    method: 'PUT',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify(libraryData)
-                                                });
-                                                if (res.ok) alert('Library Updated!');
-                                                else alert('Failed to update');
-                                            } catch (e) { alert('Error updating'); }
-                                        }}
-                                        className="btn btn-primary"
-                                    >
-                                        Save All Library Changes
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-
-
-                        {/* FEST PAGE TAB */}
-                        {activeTab === 'fest' && (
-                            <div>
-                                {festPageData ? (
-                                    <form onSubmit={handleFestPageSubmit} style={{ display: 'grid', gap: '1rem', background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                                        <h2 style={{ marginBottom: '1.5rem' }}>Configure Fest Page</h2>
-                                        {renderInput('Fest Title', 'title', festPageData.title, e => setFestPageData({ ...festPageData, title: e.target.value }))}
-                                        {renderInput('Subtitle', 'subtitle', festPageData.subtitle, e => setFestPageData({ ...festPageData, subtitle: e.target.value }))}
-
-                                        <DynamicJsonBuilder
-                                            label="Fest Events"
-                                            value={JSON.stringify(festPageData.events || [])}
-                                            onChange={(val) => setFestPageData({ ...festPageData, events: JSON.parse(val) })}
-                                            fields={[
-                                                { key: 'title', label: 'Event Title' },
-                                                { key: 'date', label: 'Date', type: 'date' },
-                                                { key: 'description', label: 'Short Description', type: 'textarea' },
-                                                { key: 'image', label: 'Main Image', type: 'image' },
-                                                { key: 'images', label: 'Gallery Images', type: 'image-list' }
-                                            ]}
-                                        />
+                                    {/* Sub-Tab Content */}
+                                    {deptTab === 'faculty' && (
                                         <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Hero Image</label>
-                                            <ImageUpload value={festPageData.heroImage} onUpload={(url) => setFestPageData({ ...festPageData, heroImage: url })} />
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                                                <button
+                                                    onClick={() => { setEditingItem(null); setFacultyForm({ name: '', designation: '', department: selectedDepartment.slug, order: 0 }); setShowModal(true); }}
+                                                    className="btn btn-primary"
+                                                >
+                                                    + Add Faculty
+                                                </button>
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                                {deptFaculty.map(fac => (
+                                                    <div key={fac._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <h4 style={{ fontSize: '1.1rem', margin: '0 0 0.3rem 0', color: 'var(--text-main)' }}>{fac.name}</h4>
+                                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{fac.designation}</div>
+                                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.8rem' }}>
+                                                                <button onClick={() => startEditFaculty(fac)} style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', borderRadius: '4px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer', color: 'var(--primary)' }}>Edit</button>
+                                                                <button onClick={() => deleteFaculty(fac._id)} style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', borderRadius: '4px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer', color: 'red' }}>Delete</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Update Fest Page</button>
-                                    </form>
-                                ) : (
-                                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading Fest Data...</div>
-                                )}
-                            </div>
-                        )}
+                                    )}
 
-                        {/* CORE BELIEFS TAB */}
-                        {
-                            activeTab === 'beliefs' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Core Beliefs</h2>
-                                        <button onClick={() => { setEditingItem(null); setBeliefForm({ icon: 'FaStar', title: '', description: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Belief</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {coreBeliefs.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                                                <div style={{ marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.5rem' }}>
-                                                    {/* Display icon name just as text for admin, or simple representation */}
-                                                    <span style={{ fontFamily: 'monospace', background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.9rem' }}>{item.icon}</span>
-                                                </div>
-                                                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{item.title}</h3>
-                                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.description}</p>
-                                                <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setBeliefForm)}</div>
+                                    {deptTab === 'gallery' && (
+                                        <div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                                                <button
+                                                    onClick={() => { setEditingItem(null); setGalleryEventForm({ eventName: '', date: '', image: '', photos: '[]', department: selectedDepartment.slug }); setShowModal(true); }}
+                                                    className="btn btn-primary"
+                                                >
+                                                    + Upload Photo
+                                                </button>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* UG & PG COURSES REMOVED */}
-
-                        {/* RESEARCH COURSES TAB */}
-                        {
-                            activeTab === 'research-courses' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Research Courses</h2>
-                                        <button onClick={() => { setEditingItem(null); setUgCourseForm({ title: '', description: '', duration: '', eligibility: '', image: '', fees: '', category: 'Research' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Research Course</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {researchCourses.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                <img src={item.image} alt={item.title} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '1rem' }}>
-                                                    <span style={{ fontSize: '0.75rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', float: 'right' }}>{item.category || 'Research'}</span>
-                                                    <h3 style={{ fontSize: '1.2rem' }}>{item.title}</h3>
-                                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.5rem 0' }}>
-                                                        <p><strong>Duration:</strong> {item.duration}</p>
-                                                        <p><strong>Fees:</strong> {item.fees}</p>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                                {Array.isArray(deptGallery?.events) && deptGallery.events.map(event => {
+                                                    const photoSrc = (event.photos && event.photos.length > 0) ? (event.photos[0].src || event.photos[0].url) : event.image;
+                                                    return (
+                                                        <div key={event._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                            {photoSrc && (
+                                                                <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+                                                                    <img src={photoSrc} alt={event.eventName || 'Gallery'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                </div>
+                                                            )}
+                                                            <h4 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-main)' }}>{event.eventName || 'Photo'}</h4>
+                                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{event.date ? new Date(event.date).toLocaleDateString() : ''}</div>
+                                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                                                                <button onClick={() => { setEditingItem(event); setGalleryEventForm({ ...event, image: photoSrc || '', photos: JSON.stringify(event.photos || []), department: selectedDepartment.slug }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
+                                                                <button onClick={() => handleGenericDelete(event._id, `/api/gallery-events`, (updater) => setDeptGallery(prev => ({ ...prev, events: typeof updater === 'function' ? updater(Array.isArray(prev?.events) ? prev.events : []) : (Array.isArray(prev?.events) ? prev.events : []) })))} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                                {(!Array.isArray(deptGallery?.events) || deptGallery.events.length === 0) && (
+                                                    <div style={{ gridColumn: '1 / -1', padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                                        No gallery photos uploaded yet for this department. Click "+ Upload Photo" above to add one!
                                                     </div>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.description}</p>
-                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setUgCourseForm)}</div>
-                                                </div>
+                                                )}
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
+                                        </div>
+                                    )}
 
-                        {/* MANAGEMENT SUB-CATEGORIES TABS - REUSABLE COMPONENT LOGIC */}
-                        {
-                            ['leadership', 'administration', 'governance', 'chairperson', 'secretary', 'correspondent', 'principal', 'deans', 'founder', 'management'].includes(activeTab) && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Team</h2>
-                                        <button onClick={() => {
-                                            setEditingItem(null);
-                                            // Default category based on activeTab
-                                            let defaultCat = 'management';
-                                            if (['chairperson', 'secretary', 'correspondent', 'principal', 'dean', 'founder'].includes(activeTab)) defaultCat = activeTab;
-                                            if (activeTab === 'deans') defaultCat = 'dean';
-                                            if (activeTab === 'administration') defaultCat = 'administration';
-                                            if (activeTab === 'governance') defaultCat = 'governance';
-                                            if (activeTab === 'leadership') defaultCat = 'management'; // Leadership usually general management?
-
-                                            setMgmtForm({ name: '', designation: '', image_url: '', message: '', category: defaultCat, social: { facebook: '', instagram: '', x: '' } });
-                                            setShowModal(true);
-                                        }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Member</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                                        {managementMembers.filter(item => {
-                                            if (activeTab === 'management') return true; // Show all if generic tab (hidden now but logical fallback)
-                                            if (activeTab === 'leadership') return item.category === 'management';
-                                            if (activeTab === 'deans') return item.category === 'dean';
-                                            return item.category === activeTab;
-                                        }).map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid #FFD700' }}>
-                                                <img src={item.image_url} alt={item.name} style={{ width: '100%', height: '250px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '1rem' }}>
-                                                    <h3 style={{ fontSize: '1.2rem' }}>{item.name}</h3>
-                                                    <p style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>{item.designation}</p>
-                                                    <div style={{ marginBottom: '0.5rem' }}>
-                                                        <span style={{ fontSize: '0.8rem', background: 'var(--glass-border)', padding: '2px 6px', borderRadius: '4px' }}>{item.category}</span>
+                                    {deptTab === 'events' && (
+                                        <div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                                                <button
+                                                    onClick={() => { setEditingItem(null); setNewsForm({ title: '', date: '', desc: '', image: '', pdf_url: '', category: selectedDepartment.slug }); setShowModal(true); }}
+                                                    className="btn btn-primary"
+                                                >
+                                                    + Add Department Event
+                                                </button>
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                                {deptEvents.map(evt => (
+                                                    <div key={evt._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                        {evt.image && (
+                                                            <div style={{ width: '100%', height: '150px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+                                                                <img src={evt.image} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            </div>
+                                                        )}
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                                                            <h4 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-main)', lineHeight: '1.3' }}>{evt.title}</h4>
+                                                            {evt.pdf_url && (
+                                                                <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '6px', background: 'rgba(248, 113, 113, 0.15)', color: '#f87171', border: '1px solid rgba(248, 113, 113, 0.3)', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                                                                    PDF
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{evt.date ? new Date(evt.date).toLocaleDateString() : ''}</div>
+                                                        {evt.desc && (
+                                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                                {evt.desc}
+                                                            </p>
+                                                        )}
+                                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)' }}>
+                                                            <button onClick={() => { setEditingItem(evt); setNewsForm({ image: evt.image || '', title: evt.title || '', date: evt.date || '', category: selectedDepartment.slug, desc: evt.desc || '', pdf_url: evt.pdf_url || '' }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
+                                                            <button onClick={() => handleGenericDelete(evt._id, `/api/news-events`, setDeptEvents)} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                                        </div>
                                                     </div>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '1rem' }}>{item.message}</p>
-                                                    <div>{renderActionButtons(item, setMgmtForm)}</div>
-                                                </div>
+                                                ))}
                                             </div>
-                                        ))}
+                                        </div>
+                                    )}
+
+                                    {deptTab === 'labs' && (
+                                        <div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                                                <button
+                                                    onClick={() => { setEditingItem(null); setDeptLabForm({ name: '', image: '', description: '', equipment: '', order: deptLabs.length + 1, department: selectedDepartment.slug }); setShowModal(true); }}
+                                                    className="btn btn-primary"
+                                                >
+                                                    + Add Laboratory
+                                                </button>
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                                {deptLabs.map(lab => (
+                                                    <div key={lab._id} style={{ background: 'var(--bg-section)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                        {lab.image && (
+                                                            <div style={{ width: '100%', height: '160px', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+                                                                <img src={lab.image} alt={lab.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            </div>
+                                                        )}
+                                                        <h4 style={{ fontSize: '1.15rem', margin: 0, color: 'var(--text-main)', lineHeight: '1.3' }}>{lab.name}</h4>
+                                                        {lab.description && (
+                                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                                {lab.description}
+                                                            </p>
+                                                        )}
+                                                        {lab.equipment && (
+                                                            <div style={{ fontSize: '0.8rem', color: 'var(--secondary)', fontWeight: '700' }}>
+                                                                Key Equipment: <span style={{ color: 'var(--text-muted)', fontWeight: 'normal' }}>{lab.equipment}</span>
+                                                            </div>
+                                                        )}
+                                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)' }}>
+                                                            <button onClick={() => { setEditingItem(lab); setDeptLabForm({ name: lab.name || '', image: lab.image || '', description: lab.description || '', equipment: lab.equipment || '', order: lab.order || 0, department: selectedDepartment.slug }); setShowModal(true); }} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--glass-highlight)', border: 'none', cursor: 'pointer' }}>Edit</button>
+                                                            <button onClick={() => handleGenericDelete(lab._id, `/api/department-labs`, setDeptLabs)} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'rgba(255,0,0,0.1)', color: 'red', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {deptLabs.length === 0 && (
+                                                    <div style={{ gridColumn: '1 / -1', padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                                        No laboratories added yet for this department. Click "+ Add Laboratory" above to upload lab photos and equipment details!
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                            {deptTab === 'syllabus' && (
+                                                <div style={{ width: '100%', marginTop: '1rem' }}>
+                                                    <DepartmentManager />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {/* MISSION & VISION TAB */}
+                            {activeTab === 'mission' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div>
+                                        <h2 style={{ marginBottom: '1rem' }}>Vision Statement</h2>
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <textarea
+                                                value={missionVision.vision}
+                                                onChange={(e) => setMissionVision({ ...missionVision, vision: e.target.value })}
+                                                style={{ width: '100%', padding: '1rem', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '100px' }}
+                                            />
+                                            <button
+                                                onClick={() => handleUpdateMissionVision(missionVision)}
+                                                className="btn btn-primary"
+                                                style={{ height: 'fit-content' }}
+                                            >
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h2 style={{ marginBottom: '1rem' }}>Mission Points</h2>
+                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                            <input
+                                                type="text"
+                                                value={missionForm.point}
+                                                onChange={(e) => setMissionForm({ point: e.target.value })}
+                                                placeholder="Add new mission point..."
+                                                style={{ flex: 1, padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}
+                                                onKeyDown={(e) => e.key === 'Enter' && addMissionPoint()}
+                                            />
+                                            <button onClick={addMissionPoint} className="btn btn-primary">Add</button>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            {missionVision.mission.map((m, i) => (
+                                                <div key={i} style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span>{m}</span>
+                                                    <button onClick={() => deleteMissionPoint(i)} style={{ color: '#ff4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>×</button>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            )
-                        }
+                            )}
 
-                        {/* ADMISSIONS TAB */}
-                        {
-                            activeTab === 'admissions' && (
-                                <div style={{ overflowX: 'auto' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2 style={{ margin: 0 }}>Admissions</h2>
+                            {/* LIBRARY MANAGEMENT TAB */}
+                            {activeTab === 'library' && (
+                                <div>
+                                    {renderSingletonForm(libraryData, setLibraryData, '/api/library', [
+                                        { type: 'header', label: 'Overview Section' },
+                                        { key: 'overview.title', label: 'Main Title', type: 'text' }, // Note: renderSingletonForm needs to support nested keys or we need a wrapper. 
+                                        // Actually renderSingletonForm is too simple for this nested structure. I will render a custom form here.
+                                    ])}
+                                    {/* Custom Form for Library because generic one is too simple */}
+                                    <div style={{ display: 'grid', gap: '2rem' }}>
+                                        <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px' }}>
+                                            <h3 style={{ marginBottom: '1rem', color: 'var(--secondary)' }}>Overview</h3>
+                                            {renderInput('Title', 'title', libraryData?.overview?.title || '', e => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, title: e.target.value } }))}
+                                            {renderInput('Subtitle', 'subtitle', libraryData?.overview?.subtitle || '', e => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, subtitle: e.target.value } }))}
+                                            <div style={{ margin: '1rem 0' }}>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
+                                                <textarea
+                                                    value={libraryData?.overview?.description || ''}
+                                                    onChange={e => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, description: e.target.value } })}
+                                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '120px' }}
+                                                />
+                                            </div>
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Hero Image</label>
+                                                <ImageUpload value={libraryData?.overview?.image || ''} onUpload={(url) => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, image: url } })} />
+                                            </div>
+                                        </div>
+
+                                        <DynamicJsonBuilder
+                                            label="Stats (e.g. Books: 35000+)"
+                                            value={JSON.stringify(libraryData?.overview?.stats || [])}
+                                            onChange={(val) => setLibraryData({ ...libraryData, overview: { ...libraryData.overview, stats: JSON.parse(val) } })}
+                                            fields={[{ key: 'label', label: 'Label' }, { key: 'value', label: 'Value' }]}
+                                        />
+
+                                        <DynamicJsonBuilder
+                                            label="E-Resources"
+                                            value={JSON.stringify(libraryData?.eResources || [])}
+                                            onChange={(val) => setLibraryData({ ...libraryData, eResources: JSON.parse(val) })}
+                                            fields={[{ key: 'name', label: 'Name' }, { key: 'desc', label: 'Description' }, { key: 'link', label: 'Link' }, { key: 'logo', label: 'Logo', type: 'image' }]}
+                                        />
+
+                                        <DynamicJsonBuilder
+                                            label="Open Access Resources"
+                                            value={JSON.stringify(libraryData?.openAccess || [])}
+                                            onChange={(val) => setLibraryData({ ...libraryData, openAccess: JSON.parse(val) })}
+                                            fields={[{ key: 'name', label: 'Name' }, { key: 'url', label: 'URL' }, { key: 'logo', label: 'Logo', type: 'image' }]}
+                                        />
+
+                                        <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px' }}>
+                                            <h3 style={{ marginBottom: '1rem', color: 'var(--secondary)' }}>NDLI Club</h3>
+                                            <div style={{ margin: '1rem 0' }}>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
+                                                <textarea
+                                                    value={libraryData?.ndli?.description || ''}
+                                                    onChange={e => setLibraryData({ ...libraryData, ndli: { ...libraryData.ndli, description: e.target.value } })}
+                                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '80px' }}
+                                                />
+                                            </div>
+                                            {/* Simple List for Benefits */}
+                                            <DynamicJsonBuilder
+                                                label="Benefits"
+                                                value={JSON.stringify((libraryData?.ndli?.benefits || []).map(b => ({ text: b })))}
+                                                onChange={(val) => setLibraryData({ ...libraryData, ndli: { ...libraryData.ndli, benefits: JSON.parse(val).map(x => x.text) } })}
+                                                fields={[{ key: 'text', label: 'Benefit Point' }]}
+                                            />
+                                        </div>
+
+                                        <DynamicJsonBuilder
+                                            label="Rules & Regulations"
+                                            value={JSON.stringify((libraryData?.rules || []).map(r => ({ text: r })))}
+                                            onChange={(val) => setLibraryData({ ...libraryData, rules: JSON.parse(val).map(x => x.text) })}
+                                            fields={[{ key: 'text', label: 'Rule' }]}
+                                        />
+
+                                        <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px' }}>
+                                            <h3 style={{ marginBottom: '1rem', color: '#2196F3' }}>Web OPAC</h3>
+                                            <div style={{ margin: '1rem 0' }}>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
+                                                <textarea
+                                                    value={libraryData?.opac?.description || ''}
+                                                    onChange={e => setLibraryData({ ...libraryData, opac: { ...libraryData.opac, description: e.target.value } })}
+                                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '80px' }}
+                                                />
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                {renderInput('CTA Button Text', 'cta', libraryData?.opac?.cta || '', e => setLibraryData({ ...libraryData, opac: { ...libraryData.opac, cta: e.target.value } }))}
+                                                {renderInput('Link URL', 'link', libraryData?.opac?.link || '', e => setLibraryData({ ...libraryData, opac: { ...libraryData.opac, link: e.target.value } }))}
+                                            </div>
+                                        </div>
+
+                                        <DynamicJsonBuilder
+                                            label="Staff"
+                                            value={JSON.stringify(libraryData?.staff || [])}
+                                            onChange={(val) => setLibraryData({ ...libraryData, staff: JSON.parse(val) })}
+                                            fields={[{ key: 'name', label: 'Name' }, { key: 'role', label: 'Role' }, { key: 'image', label: 'Photo', type: 'image' }]}
+                                        />
+
+                                        <DynamicJsonBuilder
+                                            label="Gallery Images"
+                                            value={JSON.stringify((libraryData?.gallery || []).map(r => ({ url: r })))}
+                                            onChange={(val) => setLibraryData({ ...libraryData, gallery: JSON.parse(val).map(x => x.url) })}
+                                            fields={[{ key: 'url', label: 'Image', type: 'image' }]}
+                                        />
+
                                         <button
-                                            onClick={handleExportAdmissions}
+                                            onClick={async () => {
+                                                try {
+                                                    const res = await fetch(`${API_BASE_URL}/api/library`, {
+                                                        method: 'PUT',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify(libraryData)
+                                                    });
+                                                    if (res.ok) alert('Library Updated!');
+                                                    else alert('Failed to update');
+                                                } catch (e) { alert('Error updating'); }
+                                            }}
                                             className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                            Download CSV ⬇
+                                        >
+                                            Save All Library Changes
                                         </button>
                                     </div>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
-                                        <thead>
-                                            <tr style={{ background: 'rgba(0,0,0,0.2)', textAlign: 'left' }}>
-                                                <th style={{ padding: '1rem' }}>Name</th>
-                                                <th style={{ padding: '1rem' }}>Email</th>
-                                                <th style={{ padding: '1rem' }}>Phone</th>
-                                                <th style={{ padding: '1rem' }}>Course</th>
-                                                <th style={{ padding: '1rem' }}>Community</th>
-                                                <th style={{ padding: '1rem' }}>District</th>
-                                                <th style={{ padding: '1rem' }}>Status</th>
-                                                <th style={{ padding: '1rem' }}>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {admissions.map(admission => (
-                                                <tr key={admission._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                    <td style={{ padding: '1rem' }}>{admission.name}</td>
-                                                    <td style={{ padding: '1rem' }}>{admission.email}</td>
-                                                    <td style={{ padding: '1rem' }}>{admission.phone}</td>
-                                                    <td style={{ padding: '1rem' }}>{admission.course}</td>
-                                                    <td style={{ padding: '1rem' }}>{admission.community}</td>
-                                                    <td style={{ padding: '1rem' }}>{admission.district}</td>
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <select
-                                                            value={admission.status || 'Pending'}
-                                                            onChange={(e) => handleUpdateAdmissionStatus(admission._id, e.target.value)}
-                                                            className="custom-select"
-                                                        >
-                                                            <option value="Pending">Pending</option>
-                                                            <option value="Reviewed">Reviewed</option>
-                                                            <option value="Accepted">Accepted</option>
-                                                            <option value="Rejected">Rejected</option>
-                                                        </select>
-                                                    </td>
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <button onClick={() => handleGenericDelete(admission._id, '/api/admissions', setAdmissions)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
                                 </div>
-                            )
-                        }
+                            )}
 
-                        {/* SCHOLARSHIPS TAB */}
-                        {
-                            activeTab === 'scholarships' && (
+
+
+                            {/* FEST PAGE TAB */}
+                            {activeTab === 'fest' && (
                                 <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Scholarships</h2>
-                                        <button onClick={() => { setEditingItem(null); setScholarshipForm({ name: '', provider: '', amount: '', eligibility: '', deadline: '', link: '', description: '', category: 'Merit' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Scholarship</button>
+                                    {festPageData ? (
+                                        <form onSubmit={handleFestPageSubmit} style={{ display: 'grid', gap: '1rem', background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                                            <h2 style={{ marginBottom: '1.5rem' }}>Configure Fest Page</h2>
+                                            {renderInput('Fest Title', 'title', festPageData.title, e => setFestPageData({ ...festPageData, title: e.target.value }))}
+                                            {renderInput('Subtitle', 'subtitle', festPageData.subtitle, e => setFestPageData({ ...festPageData, subtitle: e.target.value }))}
+
+                                            <DynamicJsonBuilder
+                                                label="Fest Events"
+                                                value={JSON.stringify(festPageData.events || [])}
+                                                onChange={(val) => setFestPageData({ ...festPageData, events: JSON.parse(val) })}
+                                                fields={[
+                                                    { key: 'title', label: 'Event Title' },
+                                                    { key: 'date', label: 'Date', type: 'date' },
+                                                    { key: 'description', label: 'Short Description', type: 'textarea' },
+                                                    { key: 'image', label: 'Main Image', type: 'image' },
+                                                    { key: 'images', label: 'Gallery Images', type: 'image-list' }
+                                                ]}
+                                            />
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Hero Image</label>
+                                                <ImageUpload value={festPageData.heroImage} onUpload={(url) => setFestPageData({ ...festPageData, heroImage: url })} />
+                                            </div>
+                                            <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Update Fest Page</button>
+                                        </form>
+                                    ) : (
+                                        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading Fest Data...</div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* CORE BELIEFS TAB */}
+                            {
+                                activeTab === 'beliefs' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Core Beliefs</h2>
+                                            <button onClick={() => { setEditingItem(null); setBeliefForm({ icon: 'FaStar', title: '', description: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Belief</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {coreBeliefs.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ marginBottom: '1rem', color: 'var(--primary)', fontSize: '1.5rem' }}>
+                                                        {/* Display icon name just as text for admin, or simple representation */}
+                                                        <span style={{ fontFamily: 'monospace', background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.9rem' }}>{item.icon}</span>
+                                                    </div>
+                                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{item.title}</h3>
+                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.description}</p>
+                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setBeliefForm)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {scholarships.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                                                    <div>
-                                                        <span style={{ fontSize: '0.75rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', marginBottom: '0.5rem', display: 'inline-block' }}>{item.category}</span>
-                                                        <h3 style={{ fontSize: '1.2rem', margin: 0 }}>{item.name}</h3>
-                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-highlight)' }}>{item.provider}</p>
+                                )
+                            }
+
+                            {/* UG & PG COURSES REMOVED */}
+
+                            {/* RESEARCH COURSES TAB */}
+                            {
+                                activeTab === 'research-courses' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Research Courses</h2>
+                                            <button onClick={() => { setEditingItem(null); setUgCourseForm({ title: '', description: '', duration: '', eligibility: '', image: '', fees: '', category: 'Research' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Research Course</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {researchCourses.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    <img src={item.image} alt={item.title} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <span style={{ fontSize: '0.75rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', float: 'right' }}>{item.category || 'Research'}</span>
+                                                        <h3 style={{ fontSize: '1.2rem' }}>{item.title}</h3>
+                                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.5rem 0' }}>
+                                                            <p><strong>Duration:</strong> {item.duration}</p>
+                                                            <p><strong>Fees:</strong> {item.fees}</p>
+                                                        </div>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.description}</p>
+                                                        <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setUgCourseForm)}</div>
                                                     </div>
                                                 </div>
-                                                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                                                    <div><strong>Amount:</strong> {item.amount}</div>
-                                                    <div><strong>Eligibility:</strong> {item.eligibility}</div>
-                                                    <div><strong>Deadline:</strong> {item.deadline}</div>
-                                                </div>
-                                                <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setScholarshipForm)}</div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )
-                        }
+                                )
+                            }
 
-                        {/* SESSIONS TAB */}
-                        {
-                            activeTab === 'sessions' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Sessions List</h2>
-                                        <button onClick={() => { setEditingItem(null); setSessionForm({ title: '', startDate: '', endDate: '', status: 'Upcoming', description: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Session</button>
+                            {/* MANAGEMENT SUB-CATEGORIES TABS - REUSABLE COMPONENT LOGIC */}
+                            {
+                                ['leadership', 'administration', 'governance', 'chairperson', 'secretary', 'correspondent', 'principal', 'deans', 'founder', 'management'].includes(activeTab) && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Team</h2>
+                                            <button onClick={() => {
+                                                setEditingItem(null);
+                                                // Default category based on activeTab
+                                                let defaultCat = 'management';
+                                                if (['chairperson', 'secretary', 'correspondent', 'principal', 'dean', 'founder'].includes(activeTab)) defaultCat = activeTab;
+                                                if (activeTab === 'deans') defaultCat = 'dean';
+                                                if (activeTab === 'administration') defaultCat = 'administration';
+                                                if (activeTab === 'governance') defaultCat = 'governance';
+                                                if (activeTab === 'leadership') defaultCat = 'management'; // Leadership usually general management?
+
+                                                setMgmtForm({ name: '', designation: '', image_url: '', message: '', category: defaultCat, social: { facebook: '', instagram: '', x: '' } });
+                                                setShowModal(true);
+                                            }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Member</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                                            {managementMembers.filter(item => {
+                                                if (activeTab === 'management') return true; // Show all if generic tab (hidden now but logical fallback)
+                                                if (activeTab === 'leadership') return item.category === 'management';
+                                                if (activeTab === 'deans') return item.category === 'dean';
+                                                return item.category === activeTab;
+                                            }).map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid #FFD700' }}>
+                                                    <img src={item.image_url} alt={item.name} style={{ width: '100%', height: '250px', objectFit: 'cover' }} />
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <h3 style={{ fontSize: '1.2rem' }}>{item.name}</h3>
+                                                        <p style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>{item.designation}</p>
+                                                        <div style={{ marginBottom: '0.5rem' }}>
+                                                            <span style={{ fontSize: '0.8rem', background: 'var(--glass-border)', padding: '2px 6px', borderRadius: '4px' }}>{item.category}</span>
+                                                        </div>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '1rem' }}>{item.message}</p>
+                                                        <div>{renderActionButtons(item, setMgmtForm)}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
+                                )
+                            }
+
+                            {/* ADMISSIONS TAB */}
+                            {
+                                activeTab === 'admissions' && (
                                     <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                            <thead><tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}><th style={{ padding: '1rem' }}>Title</th><th style={{ padding: '1rem' }}>Dates</th><th style={{ padding: '1rem' }}>Status</th><th style={{ padding: '1rem' }}>Actions</th></tr></thead>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2 style={{ margin: 0 }}>Admissions</h2>
+                                            <button
+                                                onClick={handleExportAdmissions}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                                Download CSV ⬇
+                                            </button>
+                                        </div>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+                                            <thead>
+                                                <tr style={{ background: 'rgba(0,0,0,0.2)', textAlign: 'left' }}>
+                                                    <th style={{ padding: '1rem' }}>Name</th>
+                                                    <th style={{ padding: '1rem' }}>Email</th>
+                                                    <th style={{ padding: '1rem' }}>Phone</th>
+                                                    <th style={{ padding: '1rem' }}>Course</th>
+                                                    <th style={{ padding: '1rem' }}>Community</th>
+                                                    <th style={{ padding: '1rem' }}>District</th>
+                                                    <th style={{ padding: '1rem' }}>Status</th>
+                                                    <th style={{ padding: '1rem' }}>Actions</th>
+                                                </tr>
+                                            </thead>
                                             <tbody>
-                                                {sessions.map(item => (
-                                                    <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <td style={{ padding: '1rem' }}>{item.title}</td>
-                                                        <td style={{ padding: '1rem' }}>{new Date(item.startDate).toLocaleDateString()} - {new Date(item.endDate).toLocaleDateString()}</td>
-                                                        <td style={{ padding: '1rem' }}>{item.status}</td>
-                                                        <td style={{ padding: '1rem' }}>{renderActionButtons(item, setSessionForm)}</td>
+                                                {admissions.map(admission => (
+                                                    <tr key={admission._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                        <td style={{ padding: '1rem' }}>{admission.name}</td>
+                                                        <td style={{ padding: '1rem' }}>{admission.email}</td>
+                                                        <td style={{ padding: '1rem' }}>{admission.phone}</td>
+                                                        <td style={{ padding: '1rem' }}>{admission.course}</td>
+                                                        <td style={{ padding: '1rem' }}>{admission.community}</td>
+                                                        <td style={{ padding: '1rem' }}>{admission.district}</td>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <select
+                                                                value={admission.status || 'Pending'}
+                                                                onChange={(e) => handleUpdateAdmissionStatus(admission._id, e.target.value)}
+                                                                className="custom-select"
+                                                            >
+                                                                <option value="Pending">Pending</option>
+                                                                <option value="Reviewed">Reviewed</option>
+                                                                <option value="Accepted">Accepted</option>
+                                                                <option value="Rejected">Rejected</option>
+                                                            </select>
+                                                        </td>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <button onClick={() => handleGenericDelete(admission._id, '/api/admissions', setAdmissions)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-                            )
-                        }
+                                )
+                            }
 
-                        {/* HERO TAB */}
-                        {
-                            activeTab === 'hero' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Hero Slides</h2>
-                                        <button onClick={() => { setEditingItem(null); setHeroForm({ image: '', title: '', subtitle: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Slide</button>
+                            {/* SCHOLARSHIPS TAB */}
+                            {
+                                activeTab === 'scholarships' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Scholarships</h2>
+                                            <button onClick={() => { setEditingItem(null); setScholarshipForm({ name: '', provider: '', amount: '', eligibility: '', deadline: '', link: '', description: '', category: 'Merit' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Scholarship</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {scholarships.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                                                        <div>
+                                                            <span style={{ fontSize: '0.75rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px', marginBottom: '0.5rem', display: 'inline-block' }}>{item.category}</span>
+                                                            <h3 style={{ fontSize: '1.2rem', margin: 0 }}>{item.name}</h3>
+                                                            <p style={{ fontSize: '0.9rem', color: 'var(--text-highlight)' }}>{item.provider}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                                        <div><strong>Amount:</strong> {item.amount}</div>
+                                                        <div><strong>Eligibility:</strong> {item.eligibility}</div>
+                                                        <div><strong>Deadline:</strong> {item.deadline}</div>
+                                                    </div>
+                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setScholarshipForm)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                                        {heroSlides.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                <img src={item.image} alt={item.title} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '1rem' }}>
-                                                    <h3 style={{ fontSize: '1.1rem' }}>{item.title}</h3>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.subtitle}</p>
-                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setHeroForm)}</div>
+                                )
+                            }
+
+                            {/* SESSIONS TAB */}
+                            {
+                                activeTab === 'sessions' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Sessions List</h2>
+                                            <button onClick={() => { setEditingItem(null); setSessionForm({ title: '', startDate: '', endDate: '', status: 'Upcoming', description: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Session</button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead><tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}><th style={{ padding: '1rem' }}>Title</th><th style={{ padding: '1rem' }}>Dates</th><th style={{ padding: '1rem' }}>Status</th><th style={{ padding: '1rem' }}>Actions</th></tr></thead>
+                                                <tbody>
+                                                    {sessions.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem' }}>{item.title}</td>
+                                                            <td style={{ padding: '1rem' }}>{new Date(item.startDate).toLocaleDateString()} - {new Date(item.endDate).toLocaleDateString()}</td>
+                                                            <td style={{ padding: '1rem' }}>{item.status}</td>
+                                                            <td style={{ padding: '1rem' }}>{renderActionButtons(item, setSessionForm)}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* HERO TAB */}
+                            {
+                                activeTab === 'hero' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Hero Slides</h2>
+                                            <button onClick={() => { setEditingItem(null); setHeroForm({ image: '', title: '', subtitle: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Slide</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                                            {heroSlides.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    <img src={item.image} alt={item.title} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <h3 style={{ fontSize: '1.1rem' }}>{item.title}</h3>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.subtitle}</p>
+                                                        <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setHeroForm)}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* PAGE HEROES MANAGER TAB */}
+                            {activeTab === 'pageHeroes' && (
+                                <div>
+                                    <h2 style={{ marginBottom: '1.5rem' }}>Manage Page Hero Images</h2>
+                                    <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
+                                        Update the top banner image for all dynamic pages, departments, and the library.
+                                        (These images appear at the top of the respective pages)
+                                    </p>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                        {pageHeroes.map(hero => (
+                                            <div key={hero.id} style={{ background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--glass-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                                <div style={{ height: '180px', background: '#000', position: 'relative' }}>
+                                                    {hero.image ? (
+                                                        <img src={hero.image} alt={hero.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+                                                    ) : (
+                                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>No Image</div>
+                                                    )}
+                                                    <div style={{ position: 'absolute', inset: 0, padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
+                                                        <div style={{ color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '0.2rem' }}>{hero.type} | /{hero.slug}</div>
+                                                        <div style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{hero.title || 'Untitled Page'}</div>
+                                                        <div style={{ color: '#ccc', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{hero.subtitle || 'No subtitle set'}</div>
+                                                    </div>
+                                                </div>
+                                                <div style={{ padding: '1.2rem', display: 'grid', gap: '0.8rem' }}>
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>Page Title</label>
+                                                        <input
+                                                            type="text"
+                                                            value={hero.title || ''}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                setPageHeroes(prev => prev.map(h => h.id === hero.id ? { ...h, title: val } : h));
+                                                            }}
+                                                            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white', fontSize: '0.9rem' }}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>Subtitle / Description</label>
+                                                        <input
+                                                            type="text"
+                                                            value={hero.subtitle || ''}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                setPageHeroes(prev => prev.map(h => h.id === hero.id ? { ...h, subtitle: val } : h));
+                                                            }}
+                                                            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white', fontSize: '0.9rem' }}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>Hero Image</label>
+                                                        <ImageUpload
+                                                            value={hero.image}
+                                                            onUpload={(url) => {
+                                                                setPageHeroes(prev => prev.map(h => h.id === hero.id ? { ...h, image: url } : h));
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        onClick={async () => {
+                                                            try {
+                                                                const res = await fetch(`${API_BASE_URL}/api/update-hero`, {
+                                                                    method: 'PUT',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({
+                                                                        type: hero.type,
+                                                                        id: hero.id,
+                                                                        slug: hero.slug,
+                                                                        image: hero.image,
+                                                                        title: hero.title,
+                                                                        subtitle: hero.subtitle
+                                                                    })
+                                                                });
+                                                                if (res.ok) {
+                                                                    alert(`Successfully updated hero for ${hero.slug}`);
+                                                                } else {
+                                                                    alert('Failed to save to server');
+                                                                }
+                                                            } catch (e) {
+                                                                alert('Error updating hero');
+                                                            }
+                                                        }}
+                                                        style={{ marginTop: '0.5rem', background: 'var(--primary)', color: 'var(--bg-dark)', border: 'none', padding: '0.6rem', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                    >
+                                                        Save Hero Settings
+                                                    </button>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                            )
-                        }
+                            )}
 
-                        {/* PAGE HEROES MANAGER TAB */}
-                        {activeTab === 'pageHeroes' && (
-                            <div>
-                                <h2 style={{ marginBottom: '1.5rem' }}>Manage Page Hero Images</h2>
-                                <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
-                                    Update the top banner image for all dynamic pages, departments, and the library.
-                                    (These images appear at the top of the respective pages)
-                                </p>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                                    {pageHeroes.map(hero => (
-                                        <div key={hero.id} style={{ background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--glass-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                                            <div style={{ height: '180px', background: '#000', position: 'relative' }}>
-                                                {hero.image ? (
-                                                    <img src={hero.image} alt={hero.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
-                                                ) : (
-                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>No Image</div>
-                                                )}
-                                                <div style={{ position: 'absolute', inset: 0, padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
-                                                    <div style={{ color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '0.2rem' }}>{hero.type} | /{hero.slug}</div>
-                                                    <div style={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>{hero.title || 'Untitled Page'}</div>
-                                                    <div style={{ color: '#ccc', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{hero.subtitle || 'No subtitle set'}</div>
+
+                            {/* ABOUT / FACULTY stats TAB */}
+                            {
+                                activeTab === 'about' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Faculty / Stats</h2>
+                                            <button onClick={() => { setEditingItem(null); setFacultyStatForm({ value: '', label: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Stat</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                                            {facultyStats.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--glass-border)' }}>
+                                                    <h3 style={{ fontSize: '2rem', color: 'var(--primary)' }}>{item.value}</h3>
+                                                    <p style={{ fontSize: '0.9rem' }}>{item.label}</p>
+                                                    <div style={{ marginTop: '1rem', justifyContent: 'center', display: 'flex' }}>{renderActionButtons(item, setFacultyStatForm)}</div>
                                                 </div>
-                                            </div>
-                                            <div style={{ padding: '1.2rem', display: 'grid', gap: '0.8rem' }}>
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>Page Title</label>
-                                                    <input
-                                                        type="text"
-                                                        value={hero.title || ''}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            setPageHeroes(prev => prev.map(h => h.id === hero.id ? { ...h, title: val } : h));
-                                                        }}
-                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white', fontSize: '0.9rem' }}
-                                                    />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* PROGRAMS TAB */}
+                            {
+                                activeTab === 'programs' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Programs</h2>
+                                            <button onClick={() => { setEditingItem(null); setProgramForm({ title: '', subtitle: '', description: '', image: '', color: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Program</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {programs.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    {item.image && (
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.title}
+                                                            style={{ width: '100%', height: '150px', objectFit: 'cover' }}
+                                                        />
+                                                    )}
+                                                    <div style={{ height: '5px', background: `linear-gradient(to right, var(--primary), var(--secondary))` }}></div>
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <h3 style={{ fontSize: '1.2rem' }}>{item.title}</h3>
+                                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-highlight)' }}>{item.subtitle}</p>
+                                                        <p style={{ fontSize: '0.9rem', margin: '0.5rem 0', color: 'var(--text-muted)' }}>{item.description}</p>
+                                                        <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setProgramForm)}</div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>Subtitle / Description</label>
-                                                    <input
-                                                        type="text"
-                                                        value={hero.subtitle || ''}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            setPageHeroes(prev => prev.map(h => h.id === hero.id ? { ...h, subtitle: val } : h));
-                                                        }}
-                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white', fontSize: '0.9rem' }}
-                                                    />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* NEWS & EVENTS TAB */}
+                            {
+                                activeTab === 'news' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>News & Events</h2>
+                                            <button onClick={() => { setEditingItem(null); setNewsForm({ image: '', title: '', date: '', category: '', desc: '', pdf_url: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add News/Event</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                                            {newsEvents.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    <img src={item.image} alt={item.title} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                            <span>{item.date}</span>
+                                                            <span>{item.category}</span>
+                                                        </div>
+                                                        <h3 style={{ fontSize: '1.1rem', margin: '0.5rem 0' }}>{item.title}</h3>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.desc}</p>
+                                                        <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setNewsForm)}</div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>Hero Image</label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+
+
+                            {/* TICKER ALERTS TAB */}
+                            {
+                                activeTab === 'ticker-alerts' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Ticker Alerts</h2>
+                                            <button onClick={() => { setEditingItem(null); setTickerForm({ message: '', link: '#', type: 'info', isActive: true }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Alert</button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Message</th>
+                                                        <th style={{ padding: '1rem' }}>Type</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {tickerAlerts.map(item => (
+                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                            <td style={{ padding: '1rem' }}>{item.message}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <span style={{
+                                                                    padding: '2px 8px', borderRadius: '4px', fontSize: '0.85rem',
+                                                                    background: item.type === 'danger' ? 'rgba(239, 68, 68, 0.2)' : item.type === 'warning' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                                                                    color: item.type === 'danger' ? '#ef4444' : item.type === 'warning' ? '#f59e0b' : '#3b82f6'
+                                                                }}>
+                                                                    {item.type.toUpperCase()}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>{item.isActive ? 'Active' : 'Inactive'}</td>
+                                                            <td style={{ padding: '1rem' }}>{renderActionButtons(item, setTickerForm)}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* POPUP ALERT TAB */}
+                            {
+                                activeTab === 'popup-alert' && (
+                                    <div>
+                                        <h2 style={{ marginBottom: '1.5rem' }}>Popup Alert Setting</h2>
+                                        <div style={{ background: 'var(--bg-section)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--glass-border)', maxWidth: '600px' }}>
+                                            <form onSubmit={async (e) => {
+                                                e.preventDefault();
+                                                try {
+                                                    const res = await fetch(`${API_BASE_URL}/api/popup-alert`, {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify(popupAlert)
+                                                    });
+                                                    if (res.ok) {
+                                                        const saved = await res.json();
+                                                        setPopupAlert(saved);
+                                                        alert('Popup settings saved!');
+                                                    } else {
+                                                        alert('Failed to save');
+                                                    }
+                                                } catch (err) { alert('Error saving'); }
+                                            }}>
+                                                <div style={{ marginBottom: '1rem' }}>
+                                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Popup Image</label>
                                                     <ImageUpload
-                                                        value={hero.image}
-                                                        onUpload={(url) => {
-                                                            setPageHeroes(prev => prev.map(h => h.id === hero.id ? { ...h, image: url } : h));
-                                                        }}
+                                                        value={popupAlert?.image || ''}
+                                                        onUpload={(url) => setPopupAlert(prev => ({ ...prev, image: url }))}
+                                                    />
+                                                </div>
+
+                                                <div style={{ marginBottom: '1rem' }}>
+                                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Link URL (Optional)</label>
+                                                    <input
+                                                        type="text"
+                                                        value={popupAlert?.link || ''}
+                                                        onChange={(e) => setPopupAlert(prev => ({ ...prev, link: e.target.value }))}
+                                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}
+                                                        placeholder="https://..."
+                                                    />
+                                                </div>
+
+                                                <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={popupAlert?.isVisible ?? true}
+                                                        onChange={(e) => setPopupAlert(prev => ({ ...prev, isVisible: e.target.checked }))}
+                                                        id="popupVisible"
+                                                        style={{ width: '20px', height: '20px' }}
+                                                    />
+                                                    <label htmlFor="popupVisible" style={{ cursor: 'pointer', color: 'var(--text-main)' }}>Enable Popup on Home Page</label>
+                                                </div>
+
+                                                <button type="submit" className="btn btn-primary">Save Settings</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* DEPARTMENTS TAB */}
+                            {
+                                activeTab === 'departments' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Departments</h2>
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                                <button onClick={() => { setEditingItem(null); setDeptTab('details'); setDeptForm({ slug: '', type: 'UG', name: '', heroImage: '', overview: '', vision: '', mission: '', peo: '', pso: '', po: '', quickFacts: '[]', milestones: '[]', coreValues: '[]', hod: { name: '', designation: '', image: '', message: '' } }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Department</button>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {departments.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    <img src={item.heroImage} alt={item.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <h3 style={{ fontSize: '1.2rem' }}>{item.name}</h3>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>HOD: {item.hod?.name}</p>
+                                                        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                                            <button onClick={() => startEditDepartment(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
+                                                            <button onClick={() => handleGenericDelete(item._id, '/api/departments', setDepartments)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+
+
+                            {/* RESOURCES TAB */}
+                            {
+                                activeTab === 'resources' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Resources</h2>
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                                <select
+                                                    onChange={(e) => {
+                                                        const cat = e.target.value;
+                                                        // Trigger fetch with category filter (if backend supported it)
+                                                        // For now, simpler to fetch all and filter client side or handle in future
+                                                    }}
+                                                    style={{ padding: '0.5rem', borderRadius: '5px' }}
+                                                >
+                                                    <option value="">All Categories</option>
+                                                    <option value="Digital Library">Digital Library</option>
+                                                    <option value="Regulations">Regulations</option>
+                                                    <option value="Syllabus & Curriculum">Syllabus & Curriculum</option>
+                                                    <option value="Statutory Bodies">Statutory Bodies</option>
+                                                    <option value="Forms">Forms</option>
+                                                    <option value="Academic Calendar">Academic Calendar</option>
+                                                    <option value="Faculty Handbook">Faculty Handbook</option>
+                                                    <option value="Student Handbook">Student Handbook</option>
+                                                </select>
+                                                <button onClick={() => { setEditingItem(null); setResourceForm({ title: '', category: 'Digital Library', description: '', fileUrl: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Resource</button>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            {resources.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                                                            <h3 style={{ fontSize: '1.2rem', margin: 0 }}>{item.title}</h3>
+                                                            <span style={{ fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px' }}>{item.category}</span>
+                                                        </div>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.description}</p>
+                                                        {item.fileUrl && <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', fontSize: '0.9rem', display: 'block', marginTop: '0.5rem' }}>View File/Link &rarr;</a>}
+                                                    </div>
+                                                    <div>{renderActionButtons(item, setResourceForm)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* PLACEMENT TAB */}
+                            {
+                                activeTab === 'placement' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Placement Partners</h2>
+                                            <button onClick={() => { setEditingItem(null); setPlacementForm({ name: '', logo: '', row: 1 }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Partner</button>
+                                        </div>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                                            {placements.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '150px' }}>
+                                                    <div style={{ position: 'relative', width: '100%' }}>
+                                                        <div style={{ position: 'absolute', top: '-5px', right: '-5px', background: item.row === 2 ? 'var(--primary)' : 'var(--secondary)', color: 'white', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>Row {item.row || 1}</div>
+                                                    </div>
+                                                    <img src={item.logo} alt={item.name} style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '0.5rem' }} />
+                                                    <p style={{ fontWeight: '500', fontSize: '0.8rem', textAlign: 'center' }}>{item.name}</p>
+                                                    <div style={{ marginTop: '0.5rem', width: '100%', display: 'flex', justifyContent: 'center' }}>{renderActionButtons(item, setPlacementForm)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* MOMENTS TAB */}
+                            {
+                                activeTab === 'moments' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Moments</h2>
+                                            <button onClick={() => { setEditingItem(null); setMomentForm({ title: '', description: '', image: '', date: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Moment</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {moments.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    <img src={item.image} alt={item.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <h3 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>{item.title}</h3>
+                                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(item.date).toLocaleDateString()}</p>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.5rem 0' }}>{item.description}</p>
+                                                        <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setMomentForm)}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* ADVICE TAB */}
+                            {
+                                activeTab === 'advice' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Student & Alumni Advice</h2>
+                                            <button onClick={() => { setEditingItem(null); setAdviceForm({ name: '', role: '', message: '', image: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Advice</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {advice.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', gap: '1rem', alignItems: 'start' }}>
+                                                    <img src={item.image || 'https://via.placeholder.com/60'} alt={item.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                    <div style={{ flex: 1 }}>
+                                                        <h3 style={{ fontSize: '1.1rem', margin: 0 }}>{item.name}</h3>
+                                                        <p style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>{item.role}</p>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>"{item.message}"</p>
+                                                        <div style={{ marginTop: '0.5rem' }}>{renderActionButtons(item, setAdviceForm)}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* SPORTS TAB */}
+                            {
+                                activeTab === 'sports' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Sports Facilities</h2>
+                                            <button onClick={() => { setEditingItem(null); setSportForm({ name: '', type: 'Outdoor', count: '', image: '', description: '', gallery: '[]' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Sport</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {sports.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    <img src={item.image} alt={item.name} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                            <h3 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>{item.name}</h3>
+                                                            <span style={{ fontSize: '0.75rem', background: 'var(--secondary)', color: 'black', padding: '2px 8px', borderRadius: '12px', height: 'fit-content' }}>{item.type}</span>
+                                                        </div>
+                                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.count}</p>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.5rem 0' }}>{item.description}</p>
+                                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>
+                                                            {item.gallery && item.gallery.length} Photos in Gallery
+                                                        </div>
+                                                        <div style={{ marginTop: '1rem' }}>{renderActionButtons({
+                                                            ...item,
+                                                            gallery: JSON.stringify(item.gallery ? item.gallery.map(url => ({ url })) : [])
+                                                        }, setSportForm)}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* GALLERY TAB */}
+                            {
+                                activeTab === 'gallery' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Gallery Events</h2>
+                                            <button onClick={() => { setEditingItem(null); setGalleryEventForm({ eventName: '', date: '', photos: '[]' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Event</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {gallery.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    {/* Cover Image from first photo */}
+                                                    <div style={{ height: '200px', background: '#000', position: 'relative' }}>
+                                                        {item.photos && item.photos.length > 0 ? (
+                                                            <img src={item.photos[0].src} alt={item.eventName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        ) : (
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666' }}>No Photos</div>
+                                                        )}
+                                                    </div>
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <h3 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>{item.eventName}</h3>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                                                            {item.date ? new Date(item.date).toLocaleDateString() : 'No Date'} • {item.photos?.length || 0} Photos
+                                                        </p>
+                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                            <button onClick={() => startEditGalleryEvent(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
+                                                            <button onClick={() => handleGenericDelete(item._id, '/api/gallery-events', setGallery)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* VIDEO GALLERY TAB */}
+                            {
+                                activeTab === 'video-gallery' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Video Gallery</h2>
+                                            <button onClick={() => { setEditingItem(null); setVideoForm({ title: '', url: '', thumbnail: '', category: 'General' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Video</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {videos.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)', padding: '1rem' }}>
+                                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem' }}>{item.title}</div>
+                                                    <div style={{ wordBreak: 'break-all', color: 'var(--primary)', marginBottom: '0.5rem' }}>{item.url}</div>
+                                                    <div>{renderActionButtons(item, setVideoForm)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* VIRTUAL TOUR TAB */}
+                            {
+                                activeTab === 'virtual-tour' && (
+                                    <div>
+                                        <div style={{ background: 'var(--bg-section)', padding: '2rem', borderRadius: '16px' }}>
+                                            <h2>Virtual Tour Settings</h2>
+                                            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Update the 360-degree virtual tour link shown on the website.</p>
+                                            <div style={{ display: 'grid', gap: '1.2rem' }}>
+                                                {renderInput('Tour URL (Iframe src)', 'tourUrl', virtualTour?.tourUrl || '', (e) => setVirtualTour({ ...virtualTour, tourUrl: e.target.value }))}
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
+                                                    <textarea
+                                                        value={virtualTour?.description || ''}
+                                                        onChange={(e) => setVirtualTour({ ...virtualTour, description: e.target.value })}
+                                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '100px' }}
                                                     />
                                                 </div>
                                                 <button
                                                     onClick={async () => {
                                                         try {
-                                                            const res = await fetch(`${API_BASE_URL}/api/update-hero`, {
-                                                                method: 'PUT',
+                                                            const res = await fetch(`${API_BASE_URL}/api/virtual-tour`, {
+                                                                method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
-                                                                body: JSON.stringify({
-                                                                    type: hero.type,
-                                                                    id: hero.id,
-                                                                    slug: hero.slug,
-                                                                    image: hero.image,
-                                                                    title: hero.title,
-                                                                    subtitle: hero.subtitle
-                                                                })
+                                                                body: JSON.stringify(virtualTour)
                                                             });
-                                                            if (res.ok) {
-                                                                alert(`Successfully updated hero for ${hero.slug}`);
-                                                            } else {
-                                                                alert('Failed to save to server');
-                                                            }
-                                                        } catch (e) {
-                                                            alert('Error updating hero');
-                                                        }
+                                                            if (res.ok) alert('Virtual Tour Updated!');
+                                                            else alert('Failed to update');
+                                                        } catch (e) { alert('Error updating'); }
                                                     }}
-                                                    style={{ marginTop: '0.5rem', background: 'var(--primary)', color: 'var(--bg-dark)', border: 'none', padding: '0.6rem', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+                                                    className="btn btn-primary"
+                                                    style={{ marginTop: '1rem' }}
                                                 >
-                                                    Save Hero Settings
+                                                    Save Settings
                                                 </button>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                                    </div>
+                                )
+                            }
 
-
-                        {/* ABOUT / FACULTY stats TAB */}
-                        {
-                            activeTab === 'about' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Faculty / Stats</h2>
-                                        <button onClick={() => { setEditingItem(null); setFacultyStatForm({ value: '', label: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Stat</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                                        {facultyStats.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--glass-border)' }}>
-                                                <h3 style={{ fontSize: '2rem', color: 'var(--primary)' }}>{item.value}</h3>
-                                                <p style={{ fontSize: '0.9rem' }}>{item.label}</p>
-                                                <div style={{ marginTop: '1rem', justifyContent: 'center', display: 'flex' }}>{renderActionButtons(item, setFacultyStatForm)}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* PROGRAMS TAB */}
-                        {
-                            activeTab === 'programs' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Programs</h2>
-                                        <button onClick={() => { setEditingItem(null); setProgramForm({ title: '', subtitle: '', description: '', image: '', color: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Program</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {programs.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                {item.image && (
-                                                    <img
-                                                        src={item.image}
-                                                        alt={item.title}
-                                                        style={{ width: '100%', height: '150px', objectFit: 'cover' }}
-                                                    />
-                                                )}
-                                                <div style={{ height: '5px', background: `linear-gradient(to right, var(--primary), var(--secondary))` }}></div>
-                                                <div style={{ padding: '1rem' }}>
-                                                    <h3 style={{ fontSize: '1.2rem' }}>{item.title}</h3>
-                                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-highlight)' }}>{item.subtitle}</p>
-                                                    <p style={{ fontSize: '0.9rem', margin: '0.5rem 0', color: 'var(--text-muted)' }}>{item.description}</p>
-                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setProgramForm)}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* NEWS & EVENTS TAB */}
-                        {
-                            activeTab === 'news' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>News & Events</h2>
-                                        <button onClick={() => { setEditingItem(null); setNewsForm({ image: '', title: '', date: '', category: '', desc: '', pdf_url: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add News/Event</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                                        {newsEvents.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                <img src={item.image} alt={item.title} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                                        <span>{item.date}</span>
-                                                        <span>{item.category}</span>
-                                                    </div>
-                                                    <h3 style={{ fontSize: '1.1rem', margin: '0.5rem 0' }}>{item.title}</h3>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.desc}</p>
-                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setNewsForm)}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-
-
-                        {/* TICKER ALERTS TAB */}
-                        {
-                            activeTab === 'ticker-alerts' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Ticker Alerts</h2>
-                                        <button onClick={() => { setEditingItem(null); setTickerForm({ message: '', link: '#', type: 'info', isActive: true }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Alert</button>
-                                    </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Message</th>
-                                                    <th style={{ padding: '1rem' }}>Type</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {tickerAlerts.map(item => (
-                                                    <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <td style={{ padding: '1rem' }}>{item.message}</td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <span style={{
-                                                                padding: '2px 8px', borderRadius: '4px', fontSize: '0.85rem',
-                                                                background: item.type === 'danger' ? 'rgba(239, 68, 68, 0.2)' : item.type === 'warning' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                                                                color: item.type === 'danger' ? '#ef4444' : item.type === 'warning' ? '#f59e0b' : '#3b82f6'
-                                                            }}>
-                                                                {item.type.toUpperCase()}
-                                                            </span>
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>{item.isActive ? 'Active' : 'Inactive'}</td>
-                                                        <td style={{ padding: '1rem' }}>{renderActionButtons(item, setTickerForm)}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* POPUP ALERT TAB */}
-                        {
-                            activeTab === 'popup-alert' && (
-                                <div>
-                                    <h2 style={{ marginBottom: '1.5rem' }}>Popup Alert Setting</h2>
-                                    <div style={{ background: 'var(--bg-section)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--glass-border)', maxWidth: '600px' }}>
-                                        <form onSubmit={async (e) => {
-                                            e.preventDefault();
-                                            try {
-                                                const res = await fetch(`${API_BASE_URL}/api/popup-alert`, {
-                                                    method: 'POST',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify(popupAlert)
-                                                });
-                                                if (res.ok) {
-                                                    const saved = await res.json();
-                                                    setPopupAlert(saved);
-                                                    alert('Popup settings saved!');
-                                                } else {
-                                                    alert('Failed to save');
-                                                }
-                                            } catch (err) { alert('Error saving'); }
-                                        }}>
-                                            <div style={{ marginBottom: '1rem' }}>
-                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Popup Image</label>
-                                                <ImageUpload
-                                                    value={popupAlert?.image || ''}
-                                                    onUpload={(url) => setPopupAlert(prev => ({ ...prev, image: url }))}
-                                                />
-                                            </div>
-
-                                            <div style={{ marginBottom: '1rem' }}>
-                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Link URL (Optional)</label>
-                                                <input
-                                                    type="text"
-                                                    value={popupAlert?.link || ''}
-                                                    onChange={(e) => setPopupAlert(prev => ({ ...prev, link: e.target.value }))}
-                                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}
-                                                    placeholder="https://..."
-                                                />
-                                            </div>
-
-                                            <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={popupAlert?.isVisible ?? true}
-                                                    onChange={(e) => setPopupAlert(prev => ({ ...prev, isVisible: e.target.checked }))}
-                                                    id="popupVisible"
-                                                    style={{ width: '20px', height: '20px' }}
-                                                />
-                                                <label htmlFor="popupVisible" style={{ cursor: 'pointer', color: 'var(--text-main)' }}>Enable Popup on Home Page</label>
-                                            </div>
-
-                                            <button type="submit" className="btn btn-primary">Save Settings</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* DEPARTMENTS TAB */}
-                        {
-                            activeTab === 'departments' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Departments</h2>
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <button onClick={() => { setEditingItem(null); setDeptTab('details'); setDeptForm({ slug: '', type: 'UG', name: '', heroImage: '', overview: '', vision: '', mission: '', peo: '', pso: '', po: '', quickFacts: '[]', milestones: '[]', coreValues: '[]', hod: { name: '', designation: '', image: '', message: '' } }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Department</button>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {departments.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                <img src={item.heroImage} alt={item.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '1rem' }}>
-                                                    <h3 style={{ fontSize: '1.2rem' }}>{item.name}</h3>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>HOD: {item.hod?.name}</p>
-                                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                                        <button onClick={() => startEditDepartment(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
-                                                        <button onClick={() => handleGenericDelete(item._id, '/api/departments', setDepartments)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-
-
-                        {/* RESOURCES TAB */}
-                        {
-                            activeTab === 'resources' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Resources</h2>
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <select
-                                                onChange={(e) => {
-                                                    const cat = e.target.value;
-                                                    // Trigger fetch with category filter (if backend supported it)
-                                                    // For now, simpler to fetch all and filter client side or handle in future
-                                                }}
-                                                style={{ padding: '0.5rem', borderRadius: '5px' }}
-                                            >
-                                                <option value="">All Categories</option>
-                                                <option value="Digital Library">Digital Library</option>
-                                                <option value="Regulations">Regulations</option>
-                                                <option value="Syllabus & Curriculum">Syllabus & Curriculum</option>
-                                                <option value="Statutory Bodies">Statutory Bodies</option>
-                                                <option value="Forms">Forms</option>
-                                                <option value="Academic Calendar">Academic Calendar</option>
-                                                <option value="Faculty Handbook">Faculty Handbook</option>
-                                                <option value="Student Handbook">Student Handbook</option>
-                                            </select>
-                                            <button onClick={() => { setEditingItem(null); setResourceForm({ title: '', category: 'Digital Library', description: '', fileUrl: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Resource</button>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'grid', gap: '1rem' }}>
-                                        {resources.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                                                        <h3 style={{ fontSize: '1.2rem', margin: 0 }}>{item.title}</h3>
-                                                        <span style={{ fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px' }}>{item.category}</span>
-                                                    </div>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.description}</p>
-                                                    {item.fileUrl && <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', fontSize: '0.9rem', display: 'block', marginTop: '0.5rem' }}>View File/Link &rarr;</a>}
-                                                </div>
-                                                <div>{renderActionButtons(item, setResourceForm)}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* PLACEMENT TAB */}
-                        {
-                            activeTab === 'placement' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Placement Partners</h2>
-                                        <button onClick={() => { setEditingItem(null); setPlacementForm({ name: '', logo: '', row: 1 }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Partner</button>
-                                    </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-                                        {placements.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '150px' }}>
-                                                <div style={{ position: 'relative', width: '100%' }}>
-                                                    <div style={{ position: 'absolute', top: '-5px', right: '-5px', background: item.row === 2 ? 'var(--primary)' : 'var(--secondary)', color: 'white', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>Row {item.row || 1}</div>
-                                                </div>
-                                                <img src={item.logo} alt={item.name} style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '0.5rem' }} />
-                                                <p style={{ fontWeight: '500', fontSize: '0.8rem', textAlign: 'center' }}>{item.name}</p>
-                                                <div style={{ marginTop: '0.5rem', width: '100%', display: 'flex', justifyContent: 'center' }}>{renderActionButtons(item, setPlacementForm)}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* MOMENTS TAB */}
-                        {
-                            activeTab === 'moments' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Moments</h2>
-                                        <button onClick={() => { setEditingItem(null); setMomentForm({ title: '', description: '', image: '', date: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Moment</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {moments.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                <img src={item.image} alt={item.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '1rem' }}>
-                                                    <h3 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>{item.title}</h3>
-                                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(item.date).toLocaleDateString()}</p>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.5rem 0' }}>{item.description}</p>
-                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setMomentForm)}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* ADVICE TAB */}
-                        {
-                            activeTab === 'advice' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Student & Alumni Advice</h2>
-                                        <button onClick={() => { setEditingItem(null); setAdviceForm({ name: '', role: '', message: '', image: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Advice</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {advice.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', gap: '1rem', alignItems: 'start' }}>
-                                                <img src={item.image || 'https://via.placeholder.com/60'} alt={item.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} />
-                                                <div style={{ flex: 1 }}>
-                                                    <h3 style={{ fontSize: '1.1rem', margin: 0 }}>{item.name}</h3>
-                                                    <p style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '0.5rem' }}>{item.role}</p>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>"{item.message}"</p>
-                                                    <div style={{ marginTop: '0.5rem' }}>{renderActionButtons(item, setAdviceForm)}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* SPORTS TAB */}
-                        {
-                            activeTab === 'sports' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Sports Facilities</h2>
-                                        <button onClick={() => { setEditingItem(null); setSportForm({ name: '', type: 'Outdoor', count: '', image: '', description: '', gallery: '[]' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Sport</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {sports.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                <img src={item.image} alt={item.name} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                        <h3 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>{item.name}</h3>
-                                                        <span style={{ fontSize: '0.75rem', background: 'var(--secondary)', color: 'black', padding: '2px 8px', borderRadius: '12px', height: 'fit-content' }}>{item.type}</span>
-                                                    </div>
-                                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.count}</p>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.5rem 0' }}>{item.description}</p>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-highlight)', marginBottom: '0.5rem' }}>
-                                                        {item.gallery && item.gallery.length} Photos in Gallery
-                                                    </div>
-                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons({
-                                                        ...item,
-                                                        gallery: JSON.stringify(item.gallery ? item.gallery.map(url => ({ url })) : [])
-                                                    }, setSportForm)}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* GALLERY TAB */}
-                        {
-                            activeTab === 'gallery' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Gallery Events</h2>
-                                        <button onClick={() => { setEditingItem(null); setGalleryEventForm({ eventName: '', date: '', photos: '[]' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Event</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {gallery.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                {/* Cover Image from first photo */}
-                                                <div style={{ height: '200px', background: '#000', position: 'relative' }}>
-                                                    {item.photos && item.photos.length > 0 ? (
-                                                        <img src={item.photos[0].src} alt={item.eventName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                    ) : (
-                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666' }}>No Photos</div>
-                                                    )}
-                                                </div>
-                                                <div style={{ padding: '1rem' }}>
-                                                    <h3 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0' }}>{item.eventName}</h3>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                                                        {item.date ? new Date(item.date).toLocaleDateString() : 'No Date'} • {item.photos?.length || 0} Photos
-                                                    </p>
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        <button onClick={() => startEditGalleryEvent(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
-                                                        <button onClick={() => handleGenericDelete(item._id, '/api/gallery-events', setGallery)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* VIDEO GALLERY TAB */}
-                        {
-                            activeTab === 'video-gallery' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Video Gallery</h2>
-                                        <button onClick={() => { setEditingItem(null); setVideoForm({ title: '', url: '', thumbnail: '', category: 'General' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Video</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {videos.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)', padding: '1rem' }}>
-                                                <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem' }}>{item.title}</div>
-                                                <div style={{ wordBreak: 'break-all', color: 'var(--primary)', marginBottom: '0.5rem' }}>{item.url}</div>
-                                                <div>{renderActionButtons(item, setVideoForm)}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* VIRTUAL TOUR TAB */}
-                        {
-                            activeTab === 'virtual-tour' && (
-                                <div>
-                                    <div style={{ background: 'var(--bg-section)', padding: '2rem', borderRadius: '16px' }}>
-                                        <h2>Virtual Tour Settings</h2>
-                                        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Update the 360-degree virtual tour link shown on the website.</p>
-                                        <div style={{ display: 'grid', gap: '1.2rem' }}>
-                                            {renderInput('Tour URL (Iframe src)', 'tourUrl', virtualTour?.tourUrl || '', (e) => setVirtualTour({ ...virtualTour, tourUrl: e.target.value }))}
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Description</label>
-                                                <textarea
-                                                    value={virtualTour?.description || ''}
-                                                    onChange={(e) => setVirtualTour({ ...virtualTour, description: e.target.value })}
-                                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '100px' }}
-                                                />
-                                            </div>
-                                            <button
-                                                onClick={async () => {
-                                                    try {
-                                                        const res = await fetch(`${API_BASE_URL}/api/virtual-tour`, {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify(virtualTour)
-                                                        });
-                                                        if (res.ok) alert('Virtual Tour Updated!');
-                                                        else alert('Failed to update');
-                                                    } catch (e) { alert('Error updating'); }
-                                                }}
-                                                className="btn btn-primary"
-                                                style={{ marginTop: '1rem' }}
-                                            >
-                                                Save Settings
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* PAGES TAB */}
-                        {
-                            activeTab === 'pages' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Dynamic Pages</h2>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button
-                                                onClick={async () => {
-                                                    const corePages = [
-                                                        'hostel', 'sports', 'amenities', 'fest', 'cells',
-                                                        'associations', 'clubs', 'wellness', 'cafeteria', 'food-court'
-                                                    ];
-                                                    let added = 0;
-                                                    setLoading(true);
-                                                    try {
-                                                        const existingSlugs = pages.map(p => p.slug);
-                                                        for (const slug of corePages) {
-                                                            if (!existingSlugs.includes(slug)) {
-                                                                const res = await fetch(`${API_BASE_URL}/api/pages`, {
-                                                                    method: 'POST',
-                                                                    headers: { 'Content-Type': 'application/json' },
-                                                                    body: JSON.stringify({
-                                                                        title: slug.charAt(0).toUpperCase() + slug.slice(1).replace('-', ' '),
-                                                                        slug: slug,
-                                                                        subtitle: 'Manage Content Here',
-                                                                        heroImage: '',
-                                                                        content: 'Default Content',
-                                                                        sections: []
-                                                                    })
-                                                                });
-                                                                if (res.ok) added++;
+                            {/* PAGES TAB */}
+                            {
+                                activeTab === 'pages' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Dynamic Pages</h2>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={async () => {
+                                                        const corePages = [
+                                                            'hostel', 'sports', 'amenities', 'fest', 'cells',
+                                                            'associations', 'clubs', 'wellness', 'cafeteria', 'food-court'
+                                                        ];
+                                                        let added = 0;
+                                                        setLoading(true);
+                                                        try {
+                                                            const existingSlugs = pages.map(p => p.slug);
+                                                            for (const slug of corePages) {
+                                                                if (!existingSlugs.includes(slug)) {
+                                                                    const res = await fetch(`${API_BASE_URL}/api/pages`, {
+                                                                        method: 'POST',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({
+                                                                            title: slug.charAt(0).toUpperCase() + slug.slice(1).replace('-', ' '),
+                                                                            slug: slug,
+                                                                            subtitle: 'Manage Content Here',
+                                                                            heroImage: '',
+                                                                            content: 'Default Content',
+                                                                            sections: []
+                                                                        })
+                                                                    });
+                                                                    if (res.ok) added++;
+                                                                }
                                                             }
-                                                        }
-                                                        if (added > 0) {
-                                                            alert(`Added ${added} missing core pages.`);
-                                                            fetchData('pages');
-                                                        } else {
-                                                            alert('All core pages already exist.');
-                                                        }
-                                                    } catch (e) { console.error(e); alert('Error syncing pages'); }
-                                                    finally { setLoading(false); }
-                                                }}
-                                                style={{ background: '#4CAF50', color: 'white', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-                                            >
-                                                ↻ Sync Core Pages
-                                            </button>
-                                            <button onClick={() => { setEditingItem(null); setPageForm({ title: '', slug: '', subtitle: '', heroImage: '', content: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Page</button>
+                                                            if (added > 0) {
+                                                                alert(`Added ${added} missing core pages.`);
+                                                                fetchData('pages');
+                                                            } else {
+                                                                alert('All core pages already exist.');
+                                                            }
+                                                        } catch (e) { console.error(e); alert('Error syncing pages'); }
+                                                        finally { setLoading(false); }
+                                                    }}
+                                                    style={{ background: '#4CAF50', color: 'white', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                                                >
+                                                    ↻ Sync Core Pages
+                                                </button>
+                                                <button onClick={() => { setEditingItem(null); setPageForm({ title: '', slug: '', subtitle: '', heroImage: '', content: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Page</button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                        {pages.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                    <h3 style={{ margin: 0 }}>{item.title}</h3>
-                                                    <small style={{ color: 'var(--text-muted)' }}>/{item.slug}</small>
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                                    <a href={`/page/${item.slug}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-highlight)', fontSize: '0.9rem', textDecoration: 'underline' }}>View Page</a>
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        <button onClick={() => startEditPage(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
-                                                        <button onClick={() => handleGenericDelete(item._id, '/api/pages', setPages)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            {pages.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <h3 style={{ margin: 0 }}>{item.title}</h3>
+                                                        <small style={{ color: 'var(--text-muted)' }}>/{item.slug}</small>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {
-                            activeTab === 'research-items' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Research Items</h2>
-                                        <button onClick={() => { setEditingItem(null); setResearchForm({ title: '', category: 'department-research', type: '', description: '', author: '', department: '', year: new Date().getFullYear().toString(), link: '', image: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Item</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gap: '1rem' }}>
-                                        {researchItems.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{item.title}</h3>
-                                                    <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                                                        <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{item.category}</span>
-                                                        <span>{item.type}</span>
-                                                        <span>{item.year}</span>
-                                                    </div>
-                                                </div>
-                                                <div>{renderActionButtons(item, setResearchForm)}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-
-
-                        {/* CAREERS TAB */}
-                        {
-                            activeTab === 'careers' && !showModal && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Career Opportunities</h2>
-                                        <button onClick={() => {
-                                            setEditingItem(null);
-                                            setCareerForm({ title: '', department: '', location: '', type: 'Full-time', description: '', requirements: '', responsibilities: '', salary: '', status: 'Active', closingDate: '' });
-                                            setShowModal(true);
-                                        }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Career</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gap: '1rem' }}>
-                                        {careers.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                                                    <div style={{ flex: 1 }}>
-                                                        <h3 style={{ margin: 0, fontSize: '1.3rem', marginBottom: '0.5rem' }}>{item.title}</h3>
-                                                        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-                                                            <span>🏢 {item.department}</span>
-                                                            <span>📍 {item.location}</span>
-                                                            <span>⏰ {item.type}</span>
-                                                            <span style={{
-                                                                background: item.status === 'Active' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                                                color: item.status === 'Active' ? '#22c55e' : '#ef4444',
-                                                                padding: '2px 8px',
-                                                                borderRadius: '4px',
-                                                                fontWeight: '600'
-                                                            }}>
-                                                                {item.status}
-                                                            </span>
+                                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                                        <a href={`/page/${item.slug}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-highlight)', fontSize: '0.9rem', textDecoration: 'underline' }}>View Page</a>
+                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                            <button onClick={() => startEditPage(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
+                                                            <button onClick={() => handleGenericDelete(item._id, '/api/pages', setPages)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
                                                         </div>
                                                     </div>
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        <button onClick={() => startEditCareer(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
-                                                        <button onClick={() => handleGenericDelete(item._id, '/api/careers', setCareers)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {
+                                activeTab === 'research-items' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Research Items</h2>
+                                            <button onClick={() => { setEditingItem(null); setResearchForm({ title: '', category: 'department-research', type: '', description: '', author: '', department: '', year: new Date().getFullYear().toString(), link: '', image: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Item</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            {researchItems.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{item.title}</h3>
+                                                        <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                                                            <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{item.category}</span>
+                                                            <span>{item.type}</span>
+                                                            <span>{item.year}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div>{renderActionButtons(item, setResearchForm)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+
+
+                            {/* CAREERS TAB */}
+                            {
+                                activeTab === 'careers' && !showModal && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Career Opportunities</h2>
+                                            <button onClick={() => {
+                                                setEditingItem(null);
+                                                setCareerForm({ title: '', department: '', location: '', type: 'Full-time', description: '', requirements: '', responsibilities: '', salary: '', status: 'Active', closingDate: '' });
+                                                setShowModal(true);
+                                            }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Career</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            {careers.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <h3 style={{ margin: 0, fontSize: '1.3rem', marginBottom: '0.5rem' }}>{item.title}</h3>
+                                                            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                                                                <span>🏢 {item.department}</span>
+                                                                <span>📍 {item.location}</span>
+                                                                <span>⏰ {item.type}</span>
+                                                                <span style={{
+                                                                    background: item.status === 'Active' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                                                    color: item.status === 'Active' ? '#22c55e' : '#ef4444',
+                                                                    padding: '2px 8px',
+                                                                    borderRadius: '4px',
+                                                                    fontWeight: '600'
+                                                                }}>
+                                                                    {item.status}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                            <button onClick={() => startEditCareer(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
+                                                            <button onClick={() => handleGenericDelete(item._id, '/api/careers', setCareers)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                        </div>
+                                                    </div>
+                                                    <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0', lineHeight: '1.6' }}>{item.description}</p>
+                                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>
+                                                        <span style={{ color: 'var(--text-highlight)', fontWeight: '600' }}>💰 {item.salary}</span>
+                                                        {item.closingDate && (
+                                                            <span style={{ color: 'var(--text-muted)' }}>
+                                                                Closes: {new Date(item.closingDate).toLocaleDateString()}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
-                                                <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0', lineHeight: '1.6' }}>{item.description}</p>
-                                                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', fontSize: '0.9rem' }}>
-                                                    <span style={{ color: 'var(--text-highlight)', fontWeight: '600' }}>💰 {item.salary}</span>
-                                                    {item.closingDate && (
-                                                        <span style={{ color: 'var(--text-muted)' }}>
-                                                            Closes: {new Date(item.closingDate).toLocaleDateString()}
-                                                        </span>
-                                                    )}
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* LIFE OF EASA TAB */}
+                            {
+                                activeTab === 'life-of-EASA' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Life at EASA</h2>
+                                            <button onClick={() => { setEditingItem(null); setLifeOfEASAForm({ imageUrl: '', title: '', category: '', description: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Item</button>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                                            {lifeOfEASA.map(item => (
+                                                <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                                    <img src={item.imageUrl} alt={item.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                                                    <div style={{ padding: '1rem' }}>
+                                                        <span style={{ fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px' }}>{item.category}</span>
+                                                        <h3 style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>{item.title}</h3>
+                                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.description}</p>
+                                                        <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setLifeOfEASAForm)}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* LIFE OF EASA TAB */}
-                        {
-                            activeTab === 'life-of-EASA' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Life at EASA</h2>
-                                        <button onClick={() => { setEditingItem(null); setLifeOfEASAForm({ imageUrl: '', title: '', category: '', description: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Item</button>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                                        {lifeOfEASA.map(item => (
-                                            <div key={item._id} style={{ background: 'var(--bg-section)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                                                <img src={item.imageUrl} alt={item.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '1rem' }}>
-                                                    <span style={{ fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '4px' }}>{item.category}</span>
-                                                    <h3 style={{ fontSize: '1.2rem', margin: '0.5rem 0' }}>{item.title}</h3>
-                                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.description}</p>
-                                                    <div style={{ marginTop: '1rem' }}>{renderActionButtons(item, setLifeOfEASAForm)}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* MILESTONES TAB */}
-                        {
-                            activeTab === 'milestones' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>Institute Milestones</h2>
-                                        <button onClick={() => { setEditingItem(null); setMilestoneForm({ year: '', title: '', description: '', order: 0 }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Milestone</button>
-                                    </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--text-main)' }}>
-                                            <thead>
-                                                <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                                    <th style={{ padding: '1rem' }}>Year</th>
-                                                    <th style={{ padding: '1rem' }}>Title</th>
-                                                    <th style={{ padding: '1rem' }}>Description</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {instituteMilestones.map(item => (
-                                                    <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <td style={{ padding: '1rem' }}>{item.year}</td>
-                                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.title}</td>
-                                                        <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{item.description}</td>
-                                                        <td style={{ padding: '1rem' }}>{renderActionButtons(item, setMilestoneForm)}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-
-
-
-                        {/* ALUMNI TAB */}
-                        {
-                            activeTab === 'alumni' && (
-                                <div>
-
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Name</th>
-                                                    <th style={{ padding: '1rem' }}>Batch</th>
-                                                    <th style={{ padding: '1rem' }}>Dept</th>
-                                                    <th style={{ padding: '1rem' }}>Job</th>
-                                                    <th style={{ padding: '1rem' }}>Contact</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {alumni.map(item => (
-                                                    <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                            <img src={item.photoUrl || 'https://via.placeholder.com/40'} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                                                            {item.name}
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>{item.batch}</td>
-                                                        <td style={{ padding: '1rem' }}>{item.department}</td>
-                                                        <td style={{ padding: '1rem' }}>{item.currentJob}</td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <div style={{ fontSize: '0.8rem' }}>{item.email}</div>
-                                                            <div style={{ fontSize: '0.8rem' }}>{item.phone}</div>
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <select
-                                                                value={item.status}
-                                                                onChange={async (e) => {
-                                                                    const newStatus = e.target.value;
-                                                                    try {
-                                                                        await fetch(`${API_BASE_URL}/api/alumni/${item._id}`, {
-                                                                            method: 'PUT',
-                                                                            headers: { 'Content-Type': 'application/json' },
-                                                                            body: JSON.stringify({ status: newStatus })
-                                                                        });
-                                                                        fetchData('alumni');
-                                                                    } catch (err) { console.error(err); }
-                                                                }}
-                                                                style={{ padding: '0.3rem', borderRadius: '4px' }}
-                                                            >
-                                                                <option value="Pending">Pending</option>
-                                                                <option value="Approved">Approved</option>
-                                                                <option value="Rejected">Rejected</option>
-                                                            </select>
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <button onClick={() => handleGenericDelete(item._id, '/api/alumni', setAlumni)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* GRIEVANCES TAB */}
-                        {
-                            activeTab === 'grievances' && (
-                                <div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <h2 style={{ marginBottom: '1.5rem' }}>Grievances / Feedback</h2>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
-                                            <thead>
-                                                <tr style={{ background: 'rgba(0,0,0,0.2)', textAlign: 'left' }}>
-                                                    <th style={{ padding: '1rem' }}>Name</th>
-                                                    <th style={{ padding: '1rem' }}>Type</th>
-                                                    <th style={{ padding: '1rem' }}>Subject</th>
-                                                    <th style={{ padding: '1rem' }}>Message</th>
-                                                    <th style={{ padding: '1rem' }}>Contact</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {grievances.map(item => (
-                                                    <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <div>{item.name}</div>
-                                                            {item.rollNo && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Roll: {item.rollNo}</div>}
-                                                            {item.department && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Dept: {item.department}</div>}
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <span style={{ fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>{item.type}</span>
-                                                        </td>
-                                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.subject}</td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <div style={{ maxWidth: '300px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.message}</div>
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <div style={{ fontSize: '0.8rem' }}>{item.email}</div>
-                                                            <div style={{ fontSize: '0.8rem' }}>{item.phone}</div>
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <select
-                                                                value={item.status || 'Pending'}
-                                                                onChange={async (e) => {
-                                                                    const newStatus = e.target.value;
-                                                                    try {
-                                                                        await fetch(`${API_BASE_URL}/api/grievances/${item._id}`, {
-                                                                            method: 'PUT',
-                                                                            headers: { 'Content-Type': 'application/json' },
-                                                                            body: JSON.stringify({ status: newStatus })
-                                                                        });
-                                                                        fetchData('grievances');
-                                                                    } catch (err) { console.error(err); }
-                                                                }}
-                                                                className="custom-select"
-                                                            >
-                                                                <option value="Pending">Pending</option>
-                                                                <option value="Reviewed">Reviewed</option>
-                                                                <option value="Resolved">Resolved</option>
-                                                            </select>
-                                                        </td>
-                                                        <td style={{ padding: '1rem' }}>
-                                                            <button onClick={() => handleGenericDelete(item._id, '/api/grievances', setGrievances)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* ENQUIRIES TAB */}
-                        {
-                            activeTab === 'enquiries' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <h2 style={{ margin: 0 }}>General Enquiries</h2>
-                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                {enquiries.length}
-                                            </span>
+                                            ))}
                                         </div>
-                                        <button
-                                            onClick={() => exportTableToCsv('general_enquiries', enquiries)}
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-                                        >
-                                            Download CSV ⬇
-                                        </button>
                                     </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Date</th>
-                                                    <th style={{ padding: '1rem' }}>Name</th>
-                                                    <th style={{ padding: '1rem' }}>Email</th>
-                                                    <th style={{ padding: '1rem' }}>Phone</th>
-                                                    <th style={{ padding: '1rem' }}>Message</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {enquiries.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No enquiries found.</td>
+                                )
+                            }
+
+                            {/* MILESTONES TAB */}
+                            {
+                                activeTab === 'milestones' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>Institute Milestones</h2>
+                                            <button onClick={() => { setEditingItem(null); setMilestoneForm({ year: '', title: '', description: '', order: 0 }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add Milestone</button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', color: 'var(--text-main)' }}>
+                                                <thead>
+                                                    <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                                        <th style={{ padding: '1rem' }}>Year</th>
+                                                        <th style={{ padding: '1rem' }}>Title</th>
+                                                        <th style={{ padding: '1rem' }}>Description</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
                                                     </tr>
-                                                ) : (
-                                                    enquiries.map(item => (
+                                                </thead>
+                                                <tbody>
+                                                    {instituteMilestones.map(item => (
                                                         <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
-                                                            </td>
-                                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.name}</td>
-                                                            <td style={{ padding: '1rem' }}>{item.email}</td>
-                                                            <td style={{ padding: '1rem' }}>{item.phone}</td>
-                                                            <td style={{ padding: '1rem', maxWidth: '300px' }}>{item.message}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <select
-                                                                    value={item.status || 'New'}
-                                                                    onChange={(e) => handleUpdateFormStatus('/api/enquiry', item._id, e.target.value, setEnquiries)}
-                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: item.status === 'New' ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-section)', color: item.status === 'New' ? '#60a5fa' : 'var(--text-main)', border: '1px solid var(--glass-border)' }}
-                                                                >
-                                                                    <option value="New">New</option>
-                                                                    <option value="Contacted">Contacted</option>
-                                                                    <option value="Resolved">Resolved</option>
-                                                                </select>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <button onClick={() => handleGenericDelete(item._id, '/api/enquiry', setEnquiries)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                            </td>
+                                                            <td style={{ padding: '1rem' }}>{item.year}</td>
+                                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.title}</td>
+                                                            <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{item.description}</td>
+                                                            <td style={{ padding: '1rem' }}>{renderActionButtons(item, setMilestoneForm)}</td>
                                                         </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* JOB APPLICATIONS TAB */}
-                        {
-                            activeTab === 'job-applications' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <h2 style={{ margin: 0 }}>Job & Faculty Applications</h2>
-                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                {jobApplications.length}
-                                            </span>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        <button
-                                            onClick={() => exportTableToCsv('job_applications', jobApplications)}
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-                                        >
-                                            Download CSV ⬇
-                                        </button>
                                     </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Date</th>
-                                                    <th style={{ padding: '1rem' }}>Candidate</th>
-                                                    <th style={{ padding: '1rem' }}>Position & Dept</th>
-                                                    <th style={{ padding: '1rem' }}>Qualification</th>
-                                                    <th style={{ padding: '1rem' }}>Experience</th>
-                                                    <th style={{ padding: '1rem' }}>Resume</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {jobApplications.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No job applications found.</td>
+                                )
+                            }
+
+
+
+
+                            {/* ALUMNI TAB */}
+                            {
+                                activeTab === 'alumni' && (
+                                    <div>
+
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Name</th>
+                                                        <th style={{ padding: '1rem' }}>Batch</th>
+                                                        <th style={{ padding: '1rem' }}>Dept</th>
+                                                        <th style={{ padding: '1rem' }}>Job</th>
+                                                        <th style={{ padding: '1rem' }}>Contact</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
                                                     </tr>
-                                                ) : (
-                                                    jobApplications.map(item => (
+                                                </thead>
+                                                <tbody>
+                                                    {alumni.map(item => (
                                                         <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                            <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                <img src={item.photoUrl || 'https://via.placeholder.com/40'} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                                {item.name}
                                                             </td>
+                                                            <td style={{ padding: '1rem' }}>{item.batch}</td>
+                                                            <td style={{ padding: '1rem' }}>{item.department}</td>
+                                                            <td style={{ padding: '1rem' }}>{item.currentJob}</td>
                                                             <td style={{ padding: '1rem' }}>
-                                                                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <div style={{ fontWeight: '600', color: 'var(--text-highlight)' }}>{item.position || item.jobTitle || 'Faculty'}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.department}</div>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>{item.qualification}</td>
-                                                            <td style={{ padding: '1rem' }}>{item.experience}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                {item.resumeUrl ? (
-                                                                    <a href={item.resumeUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8', fontWeight: 'bold', textDecoration: 'underline' }}>
-                                                                        View Resume 📄
-                                                                    </a>
-                                                                ) : (
-                                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No File</span>
-                                                                )}
+                                                                <div style={{ fontSize: '0.8rem' }}>{item.email}</div>
+                                                                <div style={{ fontSize: '0.8rem' }}>{item.phone}</div>
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>
                                                                 <select
-                                                                    value={item.status || 'Pending'}
-                                                                    onChange={(e) => handleUpdateFormStatus('/api/job-applications', item._id, e.target.value, setJobApplications)}
-                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                    value={item.status}
+                                                                    onChange={async (e) => {
+                                                                        const newStatus = e.target.value;
+                                                                        try {
+                                                                            await fetch(`${API_BASE_URL}/api/alumni/${item._id}`, {
+                                                                                method: 'PUT',
+                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                body: JSON.stringify({ status: newStatus })
+                                                                            });
+                                                                            fetchData('alumni');
+                                                                        } catch (err) { console.error(err); }
+                                                                    }}
+                                                                    style={{ padding: '0.3rem', borderRadius: '4px' }}
                                                                 >
                                                                     <option value="Pending">Pending</option>
-                                                                    <option value="Shortlisted">Shortlisted</option>
-                                                                    <option value="Interviewed">Interviewed</option>
-                                                                    <option value="Hired">Hired</option>
-                                                                    <option value="Rejected">Rejected</option>
-                                                                </select>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <button onClick={() => handleGenericDelete(item._id, '/api/job-applications', setJobApplications)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* COUNSELING TAB */}
-                        {
-                            activeTab === 'counseling' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <h2 style={{ margin: 0 }}>Career Counseling & Guidance (ASCEND)</h2>
-                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                {counselingList.length}
-                                            </span>
-                                        </div>
-                                        <button
-                                            onClick={() => exportTableToCsv('counseling_requests', counselingList)}
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-                                        >
-                                            Download CSV ⬇
-                                        </button>
-                                    </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Date</th>
-                                                    <th style={{ padding: '1rem' }}>Student / Applicant</th>
-                                                    <th style={{ padding: '1rem' }}>Year & Branch</th>
-                                                    <th style={{ padding: '1rem' }}>Service Requested</th>
-                                                    <th style={{ padding: '1rem' }}>Preferred Slot</th>
-                                                    <th style={{ padding: '1rem' }}>Message / Goals</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {counselingList.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No counseling requests found.</td>
-                                                    </tr>
-                                                ) : (
-                                                    counselingList.map(item => (
-                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>{item.currentYearBranch || 'N/A'}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                                    {item.serviceType || 'General Career Guidance'}
-                                                                </span>
-                                                            </td>
-                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>{item.preferredSlot || 'Any Time'}</td>
-                                                            <td style={{ padding: '1rem', maxWidth: '280px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.message}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <select
-                                                                    value={item.status || 'Pending'}
-                                                                    onChange={(e) => handleUpdateFormStatus('/api/counseling', item._id, e.target.value, setCounselingList)}
-                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
-                                                                >
-                                                                    <option value="Pending">Pending</option>
-                                                                    <option value="Contacted">Contacted</option>
-                                                                    <option value="Scheduled">Scheduled</option>
-                                                                    <option value="Completed">Completed</option>
-                                                                </select>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <button onClick={() => handleGenericDelete(item._id, '/api/counseling', setCounselingList)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* STARTUP PITCHES TAB */}
-                        {
-                            activeTab === 'startup-pitches' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <h2 style={{ margin: 0 }}>Startup & Incubation Pitches (EDC)</h2>
-                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                {startupPitches.length}
-                                            </span>
-                                        </div>
-                                        <button
-                                            onClick={() => exportTableToCsv('startup_pitches', startupPitches)}
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-                                        >
-                                            Download CSV ⬇
-                                        </button>
-                                    </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Date</th>
-                                                    <th style={{ padding: '1rem' }}>Founder / Team</th>
-                                                    <th style={{ padding: '1rem' }}>Startup Title</th>
-                                                    <th style={{ padding: '1rem' }}>Category & Stage</th>
-                                                    <th style={{ padding: '1rem' }}>Problem & Solution</th>
-                                                    <th style={{ padding: '1rem' }}>Deck / Link</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {startupPitches.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No startup pitches found.</td>
-                                                    </tr>
-                                                ) : (
-                                                    startupPitches.map(item => (
-                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <div style={{ fontWeight: 'bold' }}>{item.founderName}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
-                                                            </td>
-                                                            <td style={{ padding: '1rem', fontWeight: '600', color: 'var(--text-highlight)' }}>{item.startupTitle}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <div style={{ fontSize: '0.9rem' }}>{item.category}</div>
-                                                                <span style={{ fontSize: '0.75rem', background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', marginTop: '4px' }}>
-                                                                    {item.currentStage || 'Ideation'}
-                                                                </span>
-                                                            </td>
-                                                            <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.problemSolution}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                {item.pitchDeckUrl ? (
-                                                                    <a href={item.pitchDeckUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8', fontWeight: 'bold', textDecoration: 'underline' }}>
-                                                                        Pitch Deck 🔗
-                                                                    </a>
-                                                                ) : (
-                                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No Link</span>
-                                                                )}
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <select
-                                                                    value={item.status || 'Pending'}
-                                                                    onChange={(e) => handleUpdateFormStatus('/api/startup-pitches', item._id, e.target.value, setStartupPitches)}
-                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
-                                                                >
-                                                                    <option value="Pending">Pending</option>
-                                                                    <option value="Under Review">Under Review</option>
-                                                                    <option value="Shortlisted">Shortlisted</option>
                                                                     <option value="Approved">Approved</option>
                                                                     <option value="Rejected">Rejected</option>
                                                                 </select>
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>
-                                                                <button onClick={() => handleGenericDelete(item._id, '/api/startup-pitches', setStartupPitches)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/alumni', setAlumni)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
                                                             </td>
                                                         </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* PAC FEEDBACK TAB */}
-                        {
-                            activeTab === 'pac-feedback' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <h2 style={{ margin: 0 }}>Program Advisory Committee (PAC) Feedback</h2>
-                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                {pacFeedbacks.length}
-                                            </span>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        <button
-                                            onClick={() => exportTableToCsv('pac_curriculum_feedback', pacFeedbacks)}
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-                                        >
-                                            Download CSV ⬇
-                                        </button>
                                     </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Date</th>
-                                                    <th style={{ padding: '1rem' }}>Stakeholder</th>
-                                                    <th style={{ padding: '1rem' }}>Category</th>
-                                                    <th style={{ padding: '1rem' }}>Department & Year</th>
-                                                    <th style={{ padding: '1rem' }}>Rating</th>
-                                                    <th style={{ padding: '1rem' }}>Curriculum Suggestions</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {pacFeedbacks.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No PAC feedback found.</td>
+                                )
+                            }
+
+                            {/* GRIEVANCES TAB */}
+                            {
+                                activeTab === 'grievances' && (
+                                    <div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <h2 style={{ marginBottom: '1.5rem' }}>Grievances / Feedback</h2>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                                <thead>
+                                                    <tr style={{ background: 'rgba(0,0,0,0.2)', textAlign: 'left' }}>
+                                                        <th style={{ padding: '1rem' }}>Name</th>
+                                                        <th style={{ padding: '1rem' }}>Type</th>
+                                                        <th style={{ padding: '1rem' }}>Subject</th>
+                                                        <th style={{ padding: '1rem' }}>Message</th>
+                                                        <th style={{ padding: '1rem' }}>Contact</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
                                                     </tr>
-                                                ) : (
-                                                    pacFeedbacks.map(item => (
+                                                </thead>
+                                                <tbody>
+                                                    {grievances.map(item => (
                                                         <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div>{item.name}</div>
+                                                                {item.rollNo && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Roll: {item.rollNo}</div>}
+                                                                {item.department && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Dept: {item.department}</div>}
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>
-                                                                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                                <span style={{ fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>{item.type}</span>
+                                                            </td>
+                                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.subject}</td>
+                                                            <td style={{ padding: '1rem' }}>
+                                                                <div style={{ maxWidth: '300px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.message}</div>
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>
-                                                                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                                    {item.stakeholderType || 'Industry Expert'}
-                                                                </span>
+                                                                <div style={{ fontSize: '0.8rem' }}>{item.email}</div>
+                                                                <div style={{ fontSize: '0.8rem' }}>{item.phone}</div>
                                                             </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <div>{item.department}</div>
-                                                                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{item.academicYear}</div>
-                                                            </td>
-                                                            <td style={{ padding: '1rem', fontWeight: 'bold', color: '#F59E0B' }}>
-                                                                {'★'.repeat(item.rating || 5)} ({item.rating || 5}/5)
-                                                            </td>
-                                                            <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.feedback}</td>
                                                             <td style={{ padding: '1rem' }}>
                                                                 <select
-                                                                    value={item.status || 'New'}
-                                                                    onChange={(e) => handleUpdateFormStatus('/api/pac-feedback', item._id, e.target.value, setPacFeedbacks)}
-                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                    value={item.status || 'Pending'}
+                                                                    onChange={async (e) => {
+                                                                        const newStatus = e.target.value;
+                                                                        try {
+                                                                            await fetch(`${API_BASE_URL}/api/grievances/${item._id}`, {
+                                                                                method: 'PUT',
+                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                body: JSON.stringify({ status: newStatus })
+                                                                            });
+                                                                            fetchData('grievances');
+                                                                        } catch (err) { console.error(err); }
+                                                                    }}
+                                                                    className="custom-select"
                                                                 >
-                                                                    <option value="New">New</option>
+                                                                    <option value="Pending">Pending</option>
                                                                     <option value="Reviewed">Reviewed</option>
-                                                                    <option value="Action Taken">Action Taken</option>
+                                                                    <option value="Resolved">Resolved</option>
                                                                 </select>
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>
-                                                                <button onClick={() => handleGenericDelete(item._id, '/api/pac-feedback', setPacFeedbacks)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                <button onClick={() => handleGenericDelete(item._id, '/api/grievances', setGrievances)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
                                                             </td>
                                                         </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* PARTNER CONNECT TAB */}
-                        {
-                            activeTab === 'partner-connect' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <h2 style={{ margin: 0 }}>SDG & Institutional Partner Connects</h2>
-                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                {partnerConnects.length}
-                                            </span>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        <button
-                                            onClick={() => exportTableToCsv('sdg_partner_connects', partnerConnects)}
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-                                        >
-                                            Download CSV ⬇
-                                        </button>
                                     </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Date</th>
-                                                    <th style={{ padding: '1rem' }}>Organization</th>
-                                                    <th style={{ padding: '1rem' }}>Contact Person</th>
-                                                    <th style={{ padding: '1rem' }}>Contact Details</th>
-                                                    <th style={{ padding: '1rem' }}>Target SDG</th>
-                                                    <th style={{ padding: '1rem' }}>Proposal Details</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {partnerConnects.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No partner requests found.</td>
-                                                    </tr>
-                                                ) : (
-                                                    partnerConnects.map(item => (
-                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                                {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
-                                                            </td>
-                                                            <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>{item.orgName}</td>
-                                                            <td style={{ padding: '1rem', fontWeight: '600' }}>{item.contactPerson}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <div style={{ fontSize: '0.85rem' }}>{item.email}</div>
-                                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                                    {item.targetSdg}
-                                                                </span>
-                                                            </td>
-                                                            <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.proposalDetails}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <select
-                                                                    value={item.status || 'New'}
-                                                                    onChange={(e) => handleUpdateFormStatus('/api/partner-connect', item._id, e.target.value, setPartnerConnects)}
-                                                                    style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
-                                                                >
-                                                                    <option value="New">New</option>
-                                                                    <option value="Contacted">Contacted</option>
-                                                                    <option value="In Discussion">In Discussion</option>
-                                                                    <option value="Partnered">Partnered</option>
-                                                                    <option value="Archived">Archived</option>
-                                                                </select>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <button onClick={() => handleGenericDelete(item._id, '/api/partner-connect', setPartnerConnects)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )
-                        }
+                                )
+                            }
 
-                        {/* NEWSLETTER SUBSCRIBERS TAB */}
-                        {
-                            activeTab === 'newsletter' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <h2 style={{ margin: 0 }}>Newsletter Subscribers</h2>
-                                            <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                                {newsletterSubscribers.length}
-                                            </span>
+                            {/* ENQUIRIES TAB */}
+                            {
+                                activeTab === 'enquiries' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <h2 style={{ margin: 0 }}>General Enquiries</h2>
+                                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                    {enquiries.length}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => exportTableToCsv('general_enquiries', enquiries)}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                            >
+                                                Download CSV ⬇
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => exportTableToCsv('newsletter_subscribers', newsletterSubscribers)}
-                                            className="btn btn-primary"
-                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-                                        >
-                                            Download CSV ⬇
-                                        </button>
-                                    </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', maxWidth: '900px' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Date Subscribed</th>
-                                                    <th style={{ padding: '1rem' }}>Subscriber Email</th>
-                                                    <th style={{ padding: '1rem' }}>Status</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {newsletterSubscribers.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No subscribers found.</td>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Date</th>
+                                                        <th style={{ padding: '1rem' }}>Name</th>
+                                                        <th style={{ padding: '1rem' }}>Email</th>
+                                                        <th style={{ padding: '1rem' }}>Phone</th>
+                                                        <th style={{ padding: '1rem' }}>Message</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
                                                     </tr>
-                                                ) : (
-                                                    newsletterSubscribers.map(item => (
-                                                        <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                            <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                                                {item.subscribedAt ? new Date(item.subscribedAt).toLocaleDateString() : 'N/A'}
-                                                            </td>
-                                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.email}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <span style={{ padding: '4px 10px', borderRadius: '50px', background: item.status === 'Active' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: item.status === 'Active' ? '#22c55e' : '#ef4444', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                                                    {item.status || 'Active'}
-                                                                </span>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <button onClick={() => handleGenericDelete(item._id, '/api/newsletter', setNewsletterSubscribers)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
-                                                            </td>
+                                                </thead>
+                                                <tbody>
+                                                    {enquiries.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No enquiries found.</td>
                                                         </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
+                                                    ) : (
+                                                        enquiries.map(item => (
+                                                            <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                    {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                                </td>
+                                                                <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.name}</td>
+                                                                <td style={{ padding: '1rem' }}>{item.email}</td>
+                                                                <td style={{ padding: '1rem' }}>{item.phone}</td>
+                                                                <td style={{ padding: '1rem', maxWidth: '300px' }}>{item.message}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <select
+                                                                        value={item.status || 'New'}
+                                                                        onChange={(e) => handleUpdateFormStatus('/api/enquiry', item._id, e.target.value, setEnquiries)}
+                                                                        style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: item.status === 'New' ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-section)', color: item.status === 'New' ? '#60a5fa' : 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                    >
+                                                                        <option value="New">New</option>
+                                                                        <option value="Contacted">Contacted</option>
+                                                                        <option value="Resolved">Resolved</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <button onClick={() => handleGenericDelete(item._id, '/api/enquiry', setEnquiries)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                            )
-                        }
+                                )
+                            }
 
-                        {
-                            activeTab === 'institution' && renderSingletonForm(institution, setInstitution, '/api/institution', [
-                                { key: 'title', label: 'Page Title' },
-                                { key: 'subtitle', label: 'Header Subtitle' },
-                                { key: 'heroImage', label: 'Hero Image', type: 'image' },
-                                { key: 'content', label: 'General Content', type: 'textarea' },
-                                { key: 'history', label: 'History Content', type: 'textarea' },
-                                { key: 'legacy', label: 'Legacy Content', type: 'textarea' }
-                            ])
-                        }
+                            {/* JOB APPLICATIONS TAB */}
+                            {
+                                activeTab === 'job-applications' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <h2 style={{ margin: 0 }}>Job & Faculty Applications</h2>
+                                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                    {jobApplications.length}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => exportTableToCsv('job_applications', jobApplications)}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                            >
+                                                Download CSV ⬇
+                                            </button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Date</th>
+                                                        <th style={{ padding: '1rem' }}>Candidate</th>
+                                                        <th style={{ padding: '1rem' }}>Position & Dept</th>
+                                                        <th style={{ padding: '1rem' }}>Qualification</th>
+                                                        <th style={{ padding: '1rem' }}>Experience</th>
+                                                        <th style={{ padding: '1rem' }}>Resume</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {jobApplications.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No job applications found.</td>
+                                                        </tr>
+                                                    ) : (
+                                                        jobApplications.map(item => (
+                                                            <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                    {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div style={{ fontWeight: '600', color: 'var(--text-highlight)' }}>{item.position || item.jobTitle || 'Faculty'}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.department}</div>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>{item.qualification}</td>
+                                                                <td style={{ padding: '1rem' }}>{item.experience}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    {item.resumeUrl ? (
+                                                                        <a href={item.resumeUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8', fontWeight: 'bold', textDecoration: 'underline' }}>
+                                                                            View Resume 📄
+                                                                        </a>
+                                                                    ) : (
+                                                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No File</span>
+                                                                    )}
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <select
+                                                                        value={item.status || 'Pending'}
+                                                                        onChange={(e) => handleUpdateFormStatus('/api/job-applications', item._id, e.target.value, setJobApplications)}
+                                                                        style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                    >
+                                                                        <option value="Pending">Pending</option>
+                                                                        <option value="Shortlisted">Shortlisted</option>
+                                                                        <option value="Interviewed">Interviewed</option>
+                                                                        <option value="Hired">Hired</option>
+                                                                        <option value="Rejected">Rejected</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <button onClick={() => handleGenericDelete(item._id, '/api/job-applications', setJobApplications)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
 
-                        {
-                            activeTab === 'infrastructure' && renderSingletonForm(infrastructure, setInfrastructure, '/api/infrastructure', [
-                                { key: 'title', label: 'Page Title' },
-                                { key: 'subtitle', label: 'Header Subtitle' },
-                                { key: 'heroImage', label: 'Hero Image', type: 'image' },
-                                { key: 'description', label: 'Main Description', type: 'textarea' },
-                            ])
-                        }
+                            {/* COUNSELING TAB */}
+                            {
+                                activeTab === 'counseling' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <h2 style={{ margin: 0 }}>Career Counseling & Guidance (ASCEND)</h2>
+                                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                    {counselingList.length}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => exportTableToCsv('counseling_requests', counselingList)}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                            >
+                                                Download CSV ⬇
+                                            </button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Date</th>
+                                                        <th style={{ padding: '1rem' }}>Student / Applicant</th>
+                                                        <th style={{ padding: '1rem' }}>Year & Branch</th>
+                                                        <th style={{ padding: '1rem' }}>Service Requested</th>
+                                                        <th style={{ padding: '1rem' }}>Preferred Slot</th>
+                                                        <th style={{ padding: '1rem' }}>Message / Goals</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {counselingList.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No counseling requests found.</td>
+                                                        </tr>
+                                                    ) : (
+                                                        counselingList.map(item => (
+                                                            <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                    {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>{item.currentYearBranch || 'N/A'}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                                        {item.serviceType || 'General Career Guidance'}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>{item.preferredSlot || 'Any Time'}</td>
+                                                                <td style={{ padding: '1rem', maxWidth: '280px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.message}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <select
+                                                                        value={item.status || 'Pending'}
+                                                                        onChange={(e) => handleUpdateFormStatus('/api/counseling', item._id, e.target.value, setCounselingList)}
+                                                                        style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                    >
+                                                                        <option value="Pending">Pending</option>
+                                                                        <option value="Contacted">Contacted</option>
+                                                                        <option value="Scheduled">Scheduled</option>
+                                                                        <option value="Completed">Completed</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <button onClick={() => handleGenericDelete(item._id, '/api/counseling', setCounselingList)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
 
-                        {
-                            activeTab === 'sustainability' && renderSingletonForm(sustainability, setSustainability, '/api/sustainability', [
-                                { key: 'title', label: 'Page Title' },
-                                { key: 'subtitle', label: 'Header Subtitle' },
-                                { key: 'heroImage', label: 'Hero Image', type: 'image' },
-                                { key: 'description', label: 'Main Description', type: 'textarea' },
-                            ])
-                        }
+                            {/* STARTUP PITCHES TAB */}
+                            {
+                                activeTab === 'startup-pitches' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <h2 style={{ margin: 0 }}>Startup & Incubation Pitches (EDC)</h2>
+                                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                    {startupPitches.length}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => exportTableToCsv('startup_pitches', startupPitches)}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                            >
+                                                Download CSV ⬇
+                                            </button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Date</th>
+                                                        <th style={{ padding: '1rem' }}>Founder / Team</th>
+                                                        <th style={{ padding: '1rem' }}>Startup Title</th>
+                                                        <th style={{ padding: '1rem' }}>Category & Stage</th>
+                                                        <th style={{ padding: '1rem' }}>Problem & Solution</th>
+                                                        <th style={{ padding: '1rem' }}>Deck / Link</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {startupPitches.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No startup pitches found.</td>
+                                                        </tr>
+                                                    ) : (
+                                                        startupPitches.map(item => (
+                                                            <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                    {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div style={{ fontWeight: 'bold' }}>{item.founderName}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                                </td>
+                                                                <td style={{ padding: '1rem', fontWeight: '600', color: 'var(--text-highlight)' }}>{item.startupTitle}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div style={{ fontSize: '0.9rem' }}>{item.category}</div>
+                                                                    <span style={{ fontSize: '0.75rem', background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', marginTop: '4px' }}>
+                                                                        {item.currentStage || 'Ideation'}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.problemSolution}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    {item.pitchDeckUrl ? (
+                                                                        <a href={item.pitchDeckUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#38BDF8', fontWeight: 'bold', textDecoration: 'underline' }}>
+                                                                            Pitch Deck 🔗
+                                                                        </a>
+                                                                    ) : (
+                                                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No Link</span>
+                                                                    )}
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <select
+                                                                        value={item.status || 'Pending'}
+                                                                        onChange={(e) => handleUpdateFormStatus('/api/startup-pitches', item._id, e.target.value, setStartupPitches)}
+                                                                        style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                    >
+                                                                        <option value="Pending">Pending</option>
+                                                                        <option value="Under Review">Under Review</option>
+                                                                        <option value="Shortlisted">Shortlisted</option>
+                                                                        <option value="Approved">Approved</option>
+                                                                        <option value="Rejected">Rejected</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <button onClick={() => handleGenericDelete(item._id, '/api/startup-pitches', setStartupPitches)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
 
-                        {
-                            activeTab === 'community-outreach' && renderSingletonForm(communityOutreach, setCommunityOutreach, '/api/community-outreach', [
-                                { key: 'title', label: 'Page Title' },
-                                { key: 'subtitle', label: 'Header Subtitle' },
-                                { key: 'heroImage', label: 'Hero Image', type: 'image' },
-                                { key: 'description', label: 'Main Description', type: 'textarea' },
-                            ])
-                        }
+                            {/* PAC FEEDBACK TAB */}
+                            {
+                                activeTab === 'pac-feedback' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <h2 style={{ margin: 0 }}>Program Advisory Committee (PAC) Feedback</h2>
+                                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                    {pacFeedbacks.length}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => exportTableToCsv('pac_curriculum_feedback', pacFeedbacks)}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                            >
+                                                Download CSV ⬇
+                                            </button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Date</th>
+                                                        <th style={{ padding: '1rem' }}>Stakeholder</th>
+                                                        <th style={{ padding: '1rem' }}>Category</th>
+                                                        <th style={{ padding: '1rem' }}>Department & Year</th>
+                                                        <th style={{ padding: '1rem' }}>Rating</th>
+                                                        <th style={{ padding: '1rem' }}>Curriculum Suggestions</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {pacFeedbacks.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No PAC feedback found.</td>
+                                                        </tr>
+                                                    ) : (
+                                                        pacFeedbacks.map(item => (
+                                                            <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                    {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.email}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                                        {item.stakeholderType || 'Industry Expert'}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div>{item.department}</div>
+                                                                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{item.academicYear}</div>
+                                                                </td>
+                                                                <td style={{ padding: '1rem', fontWeight: 'bold', color: '#F59E0B' }}>
+                                                                    {'★'.repeat(item.rating || 5)} ({item.rating || 5}/5)
+                                                                </td>
+                                                                <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.feedback}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <select
+                                                                        value={item.status || 'New'}
+                                                                        onChange={(e) => handleUpdateFormStatus('/api/pac-feedback', item._id, e.target.value, setPacFeedbacks)}
+                                                                        style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                    >
+                                                                        <option value="New">New</option>
+                                                                        <option value="Reviewed">Reviewed</option>
+                                                                        <option value="Action Taken">Action Taken</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <button onClick={() => handleGenericDelete(item._id, '/api/pac-feedback', setPacFeedbacks)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
 
-                        {/* PLACEMENT PAGE TAB */}
-                        {activeTab === 'placement-page' && placementData && (
-                            <form onSubmit={handlePlacementSubmit} style={{ maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                <div className="glass-card">
-                                    <h3>Hero & Overview</h3>
-                                    <ImageUpload value={placementData.heroImage} onUpload={(url) => setPlacementData({ ...placementData, heroImage: url })} />
-                                    <div style={{ marginTop: '1rem' }}></div>
-                                    {renderInput('Page Title', 'name', placementData.name, (e) => setPlacementData({ ...placementData, name: e.target.value }))}
-                                    {renderInput('Vision', 'vision', placementData.vision, (e) => setPlacementData({ ...placementData, vision: e.target.value }))}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '1rem' }}>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Overview</label>
-                                        <textarea
-                                            value={placementData.overview}
-                                            onChange={(e) => setPlacementData({ ...placementData, overview: e.target.value })}
-                                            style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)', minHeight: '100px' }}
+                            {/* PARTNER CONNECT TAB */}
+                            {
+                                activeTab === 'partner-connect' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <h2 style={{ margin: 0 }}>SDG & Institutional Partner Connects</h2>
+                                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                    {partnerConnects.length}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => exportTableToCsv('sdg_partner_connects', partnerConnects)}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                            >
+                                                Download CSV ⬇
+                                            </button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Date</th>
+                                                        <th style={{ padding: '1rem' }}>Organization</th>
+                                                        <th style={{ padding: '1rem' }}>Contact Person</th>
+                                                        <th style={{ padding: '1rem' }}>Contact Details</th>
+                                                        <th style={{ padding: '1rem' }}>Target SDG</th>
+                                                        <th style={{ padding: '1rem' }}>Proposal Details</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {partnerConnects.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="8" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No partner requests found.</td>
+                                                        </tr>
+                                                    ) : (
+                                                        partnerConnects.map(item => (
+                                                            <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                    {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : 'N/A'}
+                                                                </td>
+                                                                <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--text-highlight)' }}>{item.orgName}</td>
+                                                                <td style={{ padding: '1rem', fontWeight: '600' }}>{item.contactPerson}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div style={{ fontSize: '0.85rem' }}>{item.email}</div>
+                                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.phone}</div>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                                        {item.targetSdg}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '1rem', maxWidth: '300px', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{item.proposalDetails}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <select
+                                                                        value={item.status || 'New'}
+                                                                        onChange={(e) => handleUpdateFormStatus('/api/partner-connect', item._id, e.target.value, setPartnerConnects)}
+                                                                        style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', background: 'var(--bg-section)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                                                    >
+                                                                        <option value="New">New</option>
+                                                                        <option value="Contacted">Contacted</option>
+                                                                        <option value="In Discussion">In Discussion</option>
+                                                                        <option value="Partnered">Partnered</option>
+                                                                        <option value="Archived">Archived</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <button onClick={() => handleGenericDelete(item._id, '/api/partner-connect', setPartnerConnects)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {/* NEWSLETTER SUBSCRIBERS TAB */}
+                            {
+                                activeTab === 'newsletter' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <h2 style={{ margin: 0 }}>Newsletter Subscribers</h2>
+                                                <span style={{ background: 'var(--primary)', color: 'white', padding: '2px 10px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                                    {newsletterSubscribers.length}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => exportTableToCsv('newsletter_subscribers', newsletterSubscribers)}
+                                                className="btn btn-primary"
+                                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+                                            >
+                                                Download CSV ⬇
+                                            </button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', maxWidth: '900px' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Date Subscribed</th>
+                                                        <th style={{ padding: '1rem' }}>Subscriber Email</th>
+                                                        <th style={{ padding: '1rem' }}>Status</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {newsletterSubscribers.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No subscribers found.</td>
+                                                        </tr>
+                                                    ) : (
+                                                        newsletterSubscribers.map(item => (
+                                                            <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                                <td style={{ padding: '1rem', whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                                    {item.subscribedAt ? new Date(item.subscribedAt).toLocaleDateString() : 'N/A'}
+                                                                </td>
+                                                                <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.email}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <span style={{ padding: '4px 10px', borderRadius: '50px', background: item.status === 'Active' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: item.status === 'Active' ? '#22c55e' : '#ef4444', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                                                        {item.status || 'Active'}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <button onClick={() => handleGenericDelete(item._id, '/api/newsletter', setNewsletterSubscribers)} style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}>Delete</button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                            {
+                                activeTab === 'institution' && renderSingletonForm(institution, setInstitution, '/api/institution', [
+                                    { key: 'title', label: 'Page Title' },
+                                    { key: 'subtitle', label: 'Header Subtitle' },
+                                    { key: 'heroImage', label: 'Hero Image', type: 'image' },
+                                    { key: 'content', label: 'General Content', type: 'textarea' },
+                                    { key: 'history', label: 'History Content', type: 'textarea' },
+                                    { key: 'legacy', label: 'Legacy Content', type: 'textarea' }
+                                ])
+                            }
+
+                            {
+                                activeTab === 'infrastructure' && renderSingletonForm(infrastructure, setInfrastructure, '/api/infrastructure', [
+                                    { key: 'title', label: 'Page Title' },
+                                    { key: 'subtitle', label: 'Header Subtitle' },
+                                    { key: 'heroImage', label: 'Hero Image', type: 'image' },
+                                    { key: 'description', label: 'Main Description', type: 'textarea' },
+                                ])
+                            }
+
+                            {
+                                activeTab === 'sustainability' && renderSingletonForm(sustainability, setSustainability, '/api/sustainability', [
+                                    { key: 'title', label: 'Page Title' },
+                                    { key: 'subtitle', label: 'Header Subtitle' },
+                                    { key: 'heroImage', label: 'Hero Image', type: 'image' },
+                                    { key: 'description', label: 'Main Description', type: 'textarea' },
+                                ])
+                            }
+
+                            {
+                                activeTab === 'community-outreach' && renderSingletonForm(communityOutreach, setCommunityOutreach, '/api/community-outreach', [
+                                    { key: 'title', label: 'Page Title' },
+                                    { key: 'subtitle', label: 'Header Subtitle' },
+                                    { key: 'heroImage', label: 'Hero Image', type: 'image' },
+                                    { key: 'description', label: 'Main Description', type: 'textarea' },
+                                ])
+                            }
+
+                            {/* PLACEMENT PAGE TAB */}
+                            {activeTab === 'placement-page' && placementData && (
+                                <form onSubmit={handlePlacementSubmit} style={{ maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    <div className="glass-card">
+                                        <h3>Hero & Overview</h3>
+                                        <ImageUpload value={placementData.heroImage} onUpload={(url) => setPlacementData({ ...placementData, heroImage: url })} />
+                                        <div style={{ marginTop: '1rem' }}></div>
+                                        {renderInput('Page Title', 'name', placementData.name, (e) => setPlacementData({ ...placementData, name: e.target.value }))}
+                                        {renderInput('Vision', 'vision', placementData.vision, (e) => setPlacementData({ ...placementData, vision: e.target.value }))}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '1rem' }}>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Overview</label>
+                                            <textarea
+                                                value={placementData.overview}
+                                                onChange={(e) => setPlacementData({ ...placementData, overview: e.target.value })}
+                                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)', minHeight: '100px' }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '1rem' }}>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mission (One per line)</label>
+                                            <textarea
+                                                value={Array.isArray(placementData.mission) ? placementData.mission.join('\n') : placementData.mission}
+                                                onChange={(e) => setPlacementData({ ...placementData, mission: e.target.value.split('\n') })}
+                                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)', minHeight: '100px' }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="glass-card">
+                                        <h3>Contact Info</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            {renderInput('Contact Name', 'c_name', placementData.contact?.name, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, name: e.target.value } }))}
+                                            {renderInput('Designation', 'c_desig', placementData.contact?.designation, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, designation: e.target.value } }))}
+                                            {renderInput('Email', 'c_email', placementData.contact?.email, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, email: e.target.value } }))}
+                                            {renderInput('Phone', 'c_phone', placementData.contact?.phone, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, phone: e.target.value } }))}
+                                        </div>
+                                        {renderInput('Address', 'c_addr', placementData.contact?.address, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, address: e.target.value } }))}
+                                    </div>
+
+                                    <div className="glass-card">
+                                        <h3>Recruiters (Logos)</h3>
+                                        <DynamicJsonBuilder
+                                            label="Recruiters List"
+                                            value={JSON.stringify(placementData.recruiters || [])}
+                                            onChange={(val) => setPlacementData({ ...placementData, recruiters: JSON.parse(val) })}
+                                            fields={[
+                                                { key: 'name', label: 'Company Name' },
+                                                { key: 'logo', label: 'Logo', type: 'image' }
+                                            ]}
                                         />
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '1rem' }}>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mission (One per line)</label>
-                                        <textarea
-                                            value={Array.isArray(placementData.mission) ? placementData.mission.join('\n') : placementData.mission}
-                                            onChange={(e) => setPlacementData({ ...placementData, mission: e.target.value.split('\n') })}
-                                            style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)', minHeight: '100px' }}
+
+                                    <div className="glass-card">
+                                        <h3>Statistics & Charts</h3>
+                                        <DynamicJsonBuilder
+                                            label="Placement Stats"
+                                            value={JSON.stringify(placementData.stats || [])}
+                                            onChange={(val) => setPlacementData({ ...placementData, stats: JSON.parse(val) })}
+                                            fields={[
+                                                { key: 'label', label: 'Label' },
+                                                { key: 'value', label: 'Value' },
+                                                { key: 'icon', label: 'Icon (e.g. FaRocket)' }
+                                            ]}
+                                        />
+                                        <div style={{ marginTop: '1rem' }}></div>
+                                        <DynamicJsonBuilder
+                                            label="Branch-wise Data"
+                                            value={JSON.stringify(placementData.branchData || [])}
+                                            onChange={(val) => setPlacementData({ ...placementData, branchData: JSON.parse(val) })}
+                                            fields={[
+                                                { key: 'branch', label: 'Branch' },
+                                                { key: 'placed', label: 'Placed %' }
+                                            ]}
                                         />
                                     </div>
-                                </div>
 
-                                <div className="glass-card">
-                                    <h3>Contact Info</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        {renderInput('Contact Name', 'c_name', placementData.contact?.name, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, name: e.target.value } }))}
-                                        {renderInput('Designation', 'c_desig', placementData.contact?.designation, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, designation: e.target.value } }))}
-                                        {renderInput('Email', 'c_email', placementData.contact?.email, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, email: e.target.value } }))}
-                                        {renderInput('Phone', 'c_phone', placementData.contact?.phone, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, phone: e.target.value } }))}
+                                    <div className="glass-card">
+                                        <h3>Programs & Internships</h3>
+                                        <DynamicJsonBuilder
+                                            label="Training Programs"
+                                            value={JSON.stringify(placementData.trainingPrograms || [])}
+                                            onChange={(val) => setPlacementData({ ...placementData, trainingPrograms: JSON.parse(val) })}
+                                            fields={[
+                                                { key: 'title', label: 'Title' },
+                                                { key: 'desc', label: 'Description' }
+                                            ]}
+                                        />
+                                        <div style={{ marginTop: '1rem' }}></div>
+                                        <DynamicJsonBuilder
+                                            label="Internships"
+                                            value={JSON.stringify(placementData.internships || [])}
+                                            onChange={(val) => setPlacementData({ ...placementData, internships: JSON.parse(val) })}
+                                            fields={[
+                                                { key: 'company', label: 'Company' },
+                                                { key: 'role', label: 'Role' },
+                                                { key: 'stipend', label: 'Stipend' },
+                                                { key: 'duration', label: 'Duration' }
+                                            ]}
+                                        />
                                     </div>
-                                    {renderInput('Address', 'c_addr', placementData.contact?.address, (e) => setPlacementData({ ...placementData, contact: { ...placementData.contact, address: e.target.value } }))}
-                                </div>
 
-                                <div className="glass-card">
-                                    <h3>Recruiters (Logos)</h3>
-                                    <DynamicJsonBuilder
-                                        label="Recruiters List"
-                                        value={JSON.stringify(placementData.recruiters || [])}
-                                        onChange={(val) => setPlacementData({ ...placementData, recruiters: JSON.parse(val) })}
-                                        fields={[
-                                            { key: 'name', label: 'Company Name' },
-                                            { key: 'logo', label: 'Logo', type: 'image' }
-                                        ]}
-                                    />
-                                </div>
-
-                                <div className="glass-card">
-                                    <h3>Statistics & Charts</h3>
-                                    <DynamicJsonBuilder
-                                        label="Placement Stats"
-                                        value={JSON.stringify(placementData.stats || [])}
-                                        onChange={(val) => setPlacementData({ ...placementData, stats: JSON.parse(val) })}
-                                        fields={[
-                                            { key: 'label', label: 'Label' },
-                                            { key: 'value', label: 'Value' },
-                                            { key: 'icon', label: 'Icon (e.g. FaRocket)' }
-                                        ]}
-                                    />
-                                    <div style={{ marginTop: '1rem' }}></div>
-                                    <DynamicJsonBuilder
-                                        label="Branch-wise Data"
-                                        value={JSON.stringify(placementData.branchData || [])}
-                                        onChange={(val) => setPlacementData({ ...placementData, branchData: JSON.parse(val) })}
-                                        fields={[
-                                            { key: 'branch', label: 'Branch' },
-                                            { key: 'placed', label: 'Placed %' }
-                                        ]}
-                                    />
-                                </div>
-
-                                <div className="glass-card">
-                                    <h3>Programs & Internships</h3>
-                                    <DynamicJsonBuilder
-                                        label="Training Programs"
-                                        value={JSON.stringify(placementData.trainingPrograms || [])}
-                                        onChange={(val) => setPlacementData({ ...placementData, trainingPrograms: JSON.parse(val) })}
-                                        fields={[
-                                            { key: 'title', label: 'Title' },
-                                            { key: 'desc', label: 'Description' }
-                                        ]}
-                                    />
-                                    <div style={{ marginTop: '1rem' }}></div>
-                                    <DynamicJsonBuilder
-                                        label="Internships"
-                                        value={JSON.stringify(placementData.internships || [])}
-                                        onChange={(val) => setPlacementData({ ...placementData, internships: JSON.parse(val) })}
-                                        fields={[
-                                            { key: 'company', label: 'Company' },
-                                            { key: 'role', label: 'Role' },
-                                            { key: 'stipend', label: 'Stipend' },
-                                            { key: 'duration', label: 'Duration' }
-                                        ]}
-                                    />
-                                </div>
-
-                                <div className="glass-card">
-                                    <h3>Testimonials</h3>
-                                    <DynamicJsonBuilder
-                                        label="Student Testimonials"
-                                        value={JSON.stringify(placementData.testimonials || [])}
-                                        onChange={(val) => setPlacementData({ ...placementData, testimonials: JSON.parse(val) })}
-                                        fields={[
-                                            { key: 'name', label: 'Student Name' },
-                                            { key: 'branch', label: 'Branch' },
-                                            { key: 'company', label: 'Placed In' },
-                                            { key: 'text', label: 'Testimonial' }
-                                        ]}
-                                    />
-                                </div>
-
-                                <div className="glass-card">
-                                    <h3>Placement Process</h3>
-                                    <DynamicJsonBuilder
-                                        label="Process Steps"
-                                        value={JSON.stringify(placementData.process || [])}
-                                        onChange={(val) => setPlacementData({ ...placementData, process: JSON.parse(val) })}
-                                        fields={[
-                                            { key: 'step', label: 'Step Number' },
-                                            { key: 'title', label: 'Title' },
-                                            { key: 'desc', label: 'Description' }
-                                        ]}
-                                    />
-                                </div>
-
-                                <div className="glass-card">
-                                    <h3>Gallery</h3>
-                                    <DynamicJsonBuilder
-                                        label="Gallery Images"
-                                        value={JSON.stringify((placementData.gallery || []).map(img => ({ url: img })))}
-                                        onChange={(val) => setPlacementData({ ...placementData, gallery: JSON.parse(val).map(item => item.url) })}
-                                        fields={[
-                                            { key: 'url', label: 'Image', type: 'image' }
-                                        ]}
-                                    />
-                                </div>
-
-                                <div className="glass-card">
-                                    <h3>Downloads</h3>
-                                    <DynamicJsonBuilder
-                                        label="Downloadable Files"
-                                        value={JSON.stringify(placementData.downloads || [])}
-                                        onChange={(val) => setPlacementData({ ...placementData, downloads: JSON.parse(val) })}
-                                        fields={[
-                                            { key: 'title', label: 'File Title' },
-                                            { key: 'size', label: 'Size (e.g. 2MB)' },
-                                            { key: 'fileType', label: 'Type (e.g. PDF)' },
-                                            { key: 'fileUrl', label: 'PDF File', type: 'file' }
-                                        ]}
-                                    />
-                                </div>
-
-                                <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>Save Placement Page</button>
-                            </form>
-                        )
-                        }
-
-                        {/* USER MANAGEMENT TAB */}
-                        {
-                            activeTab === 'users' && (
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2>User Management</h2>
-                                        <button onClick={() => { setEditingItem(null); setUserForm({ username: '', password: '', role: 'admin' }); setShowModal(true); }} className="btn btn-primary">+ Add User</button>
+                                    <div className="glass-card">
+                                        <h3>Testimonials</h3>
+                                        <DynamicJsonBuilder
+                                            label="Student Testimonials"
+                                            value={JSON.stringify(placementData.testimonials || [])}
+                                            onChange={(val) => setPlacementData({ ...placementData, testimonials: JSON.parse(val) })}
+                                            fields={[
+                                                { key: 'name', label: 'Student Name' },
+                                                { key: 'branch', label: 'Branch' },
+                                                { key: 'company', label: 'Placed In' },
+                                                { key: 'text', label: 'Testimonial' }
+                                            ]}
+                                        />
                                     </div>
-                                    <div style={{ overflowX: 'auto' }}>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                            <thead>
-                                                <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
-                                                    <th style={{ padding: '1rem' }}>Username</th>
-                                                    <th style={{ padding: '1rem' }}>Role</th>
-                                                    <th style={{ padding: '1rem' }}>Created At</th>
-                                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {users.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                                            No users found.
-                                                        </td>
+
+                                    <div className="glass-card">
+                                        <h3>Placement Process</h3>
+                                        <DynamicJsonBuilder
+                                            label="Process Steps"
+                                            value={JSON.stringify(placementData.process || [])}
+                                            onChange={(val) => setPlacementData({ ...placementData, process: JSON.parse(val) })}
+                                            fields={[
+                                                { key: 'step', label: 'Step Number' },
+                                                { key: 'title', label: 'Title' },
+                                                { key: 'desc', label: 'Description' }
+                                            ]}
+                                        />
+                                    </div>
+
+                                    <div className="glass-card">
+                                        <h3>Gallery</h3>
+                                        <DynamicJsonBuilder
+                                            label="Gallery Images"
+                                            value={JSON.stringify((placementData.gallery || []).map(img => ({ url: img })))}
+                                            onChange={(val) => setPlacementData({ ...placementData, gallery: JSON.parse(val).map(item => item.url) })}
+                                            fields={[
+                                                { key: 'url', label: 'Image', type: 'image' }
+                                            ]}
+                                        />
+                                    </div>
+
+                                    <div className="glass-card">
+                                        <h3>Downloads</h3>
+                                        <DynamicJsonBuilder
+                                            label="Downloadable Files"
+                                            value={JSON.stringify(placementData.downloads || [])}
+                                            onChange={(val) => setPlacementData({ ...placementData, downloads: JSON.parse(val) })}
+                                            fields={[
+                                                { key: 'title', label: 'File Title' },
+                                                { key: 'size', label: 'Size (e.g. 2MB)' },
+                                                { key: 'fileType', label: 'Type (e.g. PDF)' },
+                                                { key: 'fileUrl', label: 'PDF File', type: 'file' }
+                                            ]}
+                                        />
+                                    </div>
+
+                                    <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>Save Placement Page</button>
+                                </form>
+                            )
+                            }
+
+                            {/* USER MANAGEMENT TAB */}
+                            {
+                                activeTab === 'users' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h2>User Management</h2>
+                                            <button onClick={() => { setEditingItem(null); setUserForm({ username: '', password: '', role: 'admin' }); setShowModal(true); }} className="btn btn-primary">+ Add User</button>
+                                        </div>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'left', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <th style={{ padding: '1rem' }}>Username</th>
+                                                        <th style={{ padding: '1rem' }}>Role</th>
+                                                        <th style={{ padding: '1rem' }}>Created At</th>
+                                                        <th style={{ padding: '1rem' }}>Actions</th>
                                                     </tr>
-                                                ) : (
-                                                    users.map(user => (
-                                                        <tr key={user._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                                                            <td style={{ padding: '1rem' }}>{user.username}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <span style={{
-                                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem',
-                                                                    background: user.role === 'superadmin' ? 'var(--primary)' : 'var(--glass-highlight)',
-                                                                    color: 'white',
-                                                                    textTransform: 'capitalize'
-                                                                }}>
-                                                                    {user.role}
-                                                                </span>
-                                                            </td>
-                                                            <td style={{ padding: '1rem' }}>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
-                                                            <td style={{ padding: '1rem' }}>
-                                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                                    <button
-                                                                        onClick={() => startEdit(user, setUserForm)}
-                                                                        style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}
-                                                                    >
-                                                                        Edit
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            if (window.confirm(`Are you sure you want to delete user "${user.username}"?`)) {
-                                                                                handleGenericDelete(user._id, '/api/users', setUsers);
-                                                                            }
-                                                                        }}
-                                                                        style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}
-                                                                    >
-                                                                        Delete
-                                                                    </button>
-                                                                </div>
+                                                </thead>
+                                                <tbody>
+                                                    {users.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                                                No users found.
                                                             </td>
                                                         </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
+                                                    ) : (
+                                                        users.map(user => (
+                                                            <tr key={user._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                                                                <td style={{ padding: '1rem' }}>{user.username}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <span style={{
+                                                                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem',
+                                                                        background: user.role === 'superadmin' ? 'var(--primary)' : 'var(--glass-highlight)',
+                                                                        color: 'white',
+                                                                        textTransform: 'capitalize'
+                                                                    }}>
+                                                                        {user.role}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ padding: '1rem' }}>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
+                                                                <td style={{ padding: '1rem' }}>
+                                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                        <button
+                                                                            onClick={() => startEdit(user, setUserForm)}
+                                                                            style={{ background: '#2196F3', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}
+                                                                        >
+                                                                            Edit
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                if (window.confirm(`Are you sure you want to delete user "${user.username}"?`)) {
+                                                                                    handleGenericDelete(user._id, '/api/users', setUsers);
+                                                                                }
+                                                                            }}
+                                                                            style={{ background: '#ff4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '5px', cursor: 'pointer' }}
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                            )
-                        }
-
-                    </div >
+                                )
+                            }
+                        </div >
+                        
                 )}
-            </div >
+                </div >
+
         </div >
     );
 };
