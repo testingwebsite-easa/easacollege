@@ -3432,7 +3432,7 @@ const DepartmentPage = () => {
                         </div>
 
                         <Link
-                            to={`/coe?center=${department.slug.includes('cyber') ? 'cyber-shield' : 'coe-aimaa'}`}
+                            to={`/coe?center=${department.coe?.id || (department.slug.includes('cyber') ? 'cyber-shield' : department.slug.includes('electrical') ? 'energy-studies' : 'coe-aimaa')}`}
                             style={{
                                 padding: '0.8rem 1.8rem',
                                 borderRadius: '14px',

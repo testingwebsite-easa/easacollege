@@ -8,7 +8,8 @@ import {
     FaGraduationCap, FaServer, FaBullseye, FaChartLine,
     FaQuoteLeft, FaUniversity, FaAtom, FaCheck,
     FaShieldAlt, FaLock, FaUserSecret, FaBug, FaNetworkWired,
-    FaCodeBranch, FaLaptopCode
+    FaCodeBranch, FaLaptopCode, FaSolarPanel, FaChargingStation,
+    FaBolt, FaLeaf, FaCar, FaBatteryFull
 } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -341,6 +342,189 @@ const CenterOfExcellencePage = () => {
                 { name: 'Microsoft Learn', focus: 'Azure AI, Cognitive Services & Power BI', domain: 'Business Intelligence' },
                 { name: 'Maxbite Technologies', focus: 'IoT, Industrial Analytics & Smart Systems', domain: 'Smart Systems' }
             ]
+        },
+        {
+            id: 'energy-studies',
+            code: 'CENTRE FOR ENERGY STUDIES',
+            badgeCode: 'CoE-CES',
+            shortTitle: 'Energy Studies & Renewable Tech',
+            title: 'Centre of Excellence in Energy Studies',
+            subtitle: 'CENTRE FOR ENERGY STUDIES',
+            tagline: '“Innovating Sustainable Energy Solutions for a Greener Future.”',
+            department: 'Department of Electrical and Electronics Engineering',
+            category: 'Renewable Energy, E-Mobility & Smart Grids',
+            icon: <FaSolarPanel />,
+            color: '#f59e0b',
+            accent: 'rgba(245, 158, 11, 0.2)',
+            glowColor: 'rgba(245, 158, 11, 0.35)',
+            gradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #10b981 100%)',
+            badgeGradient: 'linear-gradient(135deg, #d97706 0%, #10b981 100%)',
+            themeBorder: 'rgba(245, 158, 11, 0.35)',
+            themeLightBorder: 'rgba(245, 158, 11, 0.2)',
+            themeText: '#fbbf24',
+            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80',
+            logo: '/images/coe-energy-studies-logo.png',
+            description: 'Fostering education, research, innovation, industry collaboration and sustainable solutions in emerging energy technologies for societal and industrial development.',
+            vision: 'To become a recognized Centre of Excellence in energy studies by fostering education, research, innovation, industry collaboration and sustainable solutions in emerging energy technologies for societal and industrial development.',
+            mission: [
+                'Provide advanced training in renewable energy, energy storage, electric mobility, power electronics and smart energy systems.',
+                'Promote research, innovation and interdisciplinary collaboration in sustainable energy technologies.',
+                'Bridge the gap between academia and industry through experiential learning, internships and industry-supported projects.',
+                'Develop skilled professionals capable of addressing real-world energy and sustainability challenges.',
+                'Promote energy conservation, environmental sustainability and clean-energy practices.',
+                'Establish a platform for technology development, consultancy, knowledge exchange and societal outreach.'
+            ],
+            objectives: [
+                'Develop competency in renewable and emerging energy technologies among students and faculty.',
+                'Facilitate industry-oriented training programmes, workshops, internships and certification programmes.',
+                'Promote research, innovation, patents, publications and funded projects in energy-related domains.',
+                'Establish strong collaborations with industries, research organizations, universities and energy agencies.',
+                'Provide consultancy, energy auditing, testing and technical support in energy systems.',
+                'Encourage student projects, entrepreneurship, start-ups and technology-based innovations.',
+                'Enhance employability through hands-on learning and industry-oriented projects.',
+                'Promote energy conservation, sustainable development and clean-energy awareness.'
+            ],
+            thrustAreas: [
+                {
+                    title: 'Renewable Energy',
+                    icon: <FaSolarPanel />,
+                    color: '#10b981',
+                    accentBg: 'rgba(16, 185, 129, 0.12)',
+                    borderColor: 'rgba(16, 185, 129, 0.35)',
+                    topics: [
+                        'Solar Photovoltaic Systems',
+                        'Wind Energy Systems',
+                        'Hybrid Renewable Energy Systems',
+                        'Emerging Renewable Energy Technologies'
+                    ]
+                },
+                {
+                    title: 'Energy Storage & E-Mobility',
+                    icon: <FaChargingStation />,
+                    color: '#f59e0b',
+                    accentBg: 'rgba(245, 158, 11, 0.12)',
+                    borderColor: 'rgba(245, 158, 11, 0.35)',
+                    topics: [
+                        'Battery Energy Storage Systems',
+                        'Battery Management Systems',
+                        'Electric Vehicles',
+                        'EV Charging Infrastructure'
+                    ]
+                },
+                {
+                    title: 'Power & Smart Energy Systems',
+                    icon: <FaBolt />,
+                    color: '#06b6d4',
+                    accentBg: 'rgba(6, 182, 212, 0.12)',
+                    borderColor: 'rgba(6, 182, 212, 0.35)',
+                    topics: [
+                        'Power Electronics & Advanced Converters',
+                        'Smart Grids & Micro grids',
+                        'Distributed Energy Resources',
+                        'Energy Management & Optimization'
+                    ]
+                },
+                {
+                    title: 'Emerging Energy Technologies',
+                    icon: <FaLightbulb />,
+                    color: '#8b5cf6',
+                    accentBg: 'rgba(139, 92, 246, 0.12)',
+                    borderColor: 'rgba(139, 92, 246, 0.35)',
+                    topics: [
+                        'AI & IoT for Energy Systems',
+                        'Energy Forecasting & Intelligent Control',
+                        'Green Hydrogen',
+                        'Energy Efficiency & Energy Auditing'
+                    ]
+                }
+            ],
+            keyFeatures: [
+                'Industry-aligned training and certification programmes.',
+                'Advanced renewable energy and power electronics laboratory facilities.',
+                'Hands-on projects in solar PV, energy storage, EVs and hybrid energy systems.',
+                'Industry-supported projects, internships and consultancy activities.',
+                'Research and innovation ecosystem for sustainable energy technologies.',
+                'Workshops, FDPs, seminars, conferences, hackathons and innovation challenges.',
+                'Support for research publications, patents, funded projects and technology development.',
+                'Entrepreneurship and start up support for clean-energy innovations.'
+            ],
+            expectedOutcomes: [
+                {
+                    stakeholder: 'Students',
+                    icon: <FaGraduationCap />,
+                    color: '#38bdf8',
+                    points: [
+                        'Enhanced technical skills',
+                        'Certifications & internships',
+                        'Industry-ready projects',
+                        'Better employability',
+                        'Entrepreneurship opportunities'
+                    ]
+                },
+                {
+                    stakeholder: 'Faculty',
+                    icon: <FaUsers />,
+                    color: '#a855f7',
+                    points: [
+                        'Research publications & patents',
+                        'Funded research projects',
+                        'Industry engagement',
+                        'Collaborative research',
+                        'Knowledge exchange'
+                    ]
+                },
+                {
+                    stakeholder: 'Institution',
+                    icon: <FaAward />,
+                    color: '#f59e0b',
+                    points: [
+                        'Strong industry partnerships',
+                        'Improved research output',
+                        'Increased research funding',
+                        'Innovation ecosystem',
+                        'Technology development'
+                    ]
+                },
+                {
+                    stakeholder: 'Industry & Society',
+                    icon: <FaIndustry />,
+                    color: '#10b981',
+                    points: [
+                        'Access to skilled graduates',
+                        'Consultancy & technical support',
+                        'Joint innovation projects',
+                        'Sustainable energy solutions',
+                        'Energy awareness & conservation'
+                    ]
+                }
+            ],
+            facilities: [
+                { name: 'Solar PV & Hybrid Energy Testbed', spec: 'Rooftop Grid-Tied PV Array, MPPT Power Emulators & Inverters' },
+                { name: 'EV & Battery Management Rig', spec: 'Lithium-ion Battery Pack Testers, BMS Diagnostics & EV Powertrain Simulators' },
+                { name: 'Smart Microgrid & SCADA Hub', spec: 'Distributed Energy Management System, Smart Metering & IoT Energy Analysers' },
+                { name: 'Advanced Power Electronics Lab', spec: 'Digital Signal Controller (DSP) Converters, Wide-Bandgap GaN/SiC Modules' }
+            ],
+            projects: [
+                { title: 'AI-Driven Solar Forecasting & Microgrid Load Balancing', tag: 'Smart Grids', status: 'Active Research' },
+                { title: 'IoT-Based Smart EV Charging Station with Dynamic Load Sharing', tag: 'E-Mobility', status: 'Prototype Live' },
+                { title: 'Green Hydrogen Generation & Fuel Cell Energy Storage Integration', tag: 'Clean Tech', status: 'Funded Project' }
+            ],
+            certifications: [
+                'Certified Energy Auditor & Manager (BEE)',
+                'Solar PV System Design & Installation (NISE)',
+                'Electric Vehicle Powertrain & BMS Specialist',
+                'Smart Grid & Power Electronics Professional'
+            ],
+            leadFaculty: ['Mr. Ranjithkumar G (HOD - EEE)', 'Energy Systems Faculty & Research Team'],
+            leadDepartment: 'Department of Electrical and Electronics Engineering',
+            industryPartners: [
+                { name: 'Schneider Electric Energy Academy', focus: 'Smart Energy Management, Microgrids & Automation', domain: 'Smart Grids' },
+                { name: 'L&T Power & Solar Division', focus: 'Renewable PV Systems, EPC Projects & Grid Integration', domain: 'Renewable Energy' },
+                { name: 'Tata Power EV Charging Network', focus: 'EV Fast Chargers, Fleet Infrastructure & Battery Swapping', domain: 'E-Mobility' },
+                { name: 'Bureau of Energy Efficiency (BEE)', focus: 'Energy Auditing, Conservation & Industrial Energy Protocols', domain: 'Energy Efficiency' },
+                { name: 'Maxbite Technologies', focus: 'Industrial IoT Energy Analytics & Predictive Maintenance', domain: 'IoT Energy Systems' },
+                { name: 'Rabwin Industries', focus: 'Precision Drives, Power Converters & Green Tech Fabrication', domain: 'Clean Tech' }
+            ]
         }
     ];
 
@@ -354,9 +538,15 @@ const CenterOfExcellencePage = () => {
 
     useEffect(() => {
         const param = searchParams.get('center');
-        if (param && (param === 'cyber-shield' || param === 'coe-aimaa' || param === 'aimaa' || param === 'csdd')) {
-            const mapped = (param === 'aimaa' || param === 'coe-aimaa') ? 'coe-aimaa' : 'cyber-shield';
-            setActiveCenterId(mapped);
+        if (param) {
+            const clean = param.toLowerCase();
+            if (clean === 'energy-studies' || clean === 'energy' || clean === 'ces' || clean === 'coe-ces') {
+                setActiveCenterId('energy-studies');
+            } else if (clean === 'aimaa' || clean === 'coe-aimaa') {
+                setActiveCenterId('coe-aimaa');
+            } else if (clean === 'cyber-shield' || clean === 'csdd') {
+                setActiveCenterId('cyber-shield');
+            }
         }
     }, [searchParams]);
 
@@ -586,60 +776,110 @@ const CenterOfExcellencePage = () => {
                             {/* TOP HERO BANNER WITH THEMATIC IMAGE BACKGROUND */}
                             <div style={{
                                 position: 'relative',
-                                minHeight: '360px',
+                                minHeight: '380px',
                                 background: `
-                                    linear-gradient(to right, rgba(7, 11, 20, 0.94) 0%, rgba(15, 23, 42, 0.85) 50%, rgba(15, 23, 42, 0.4) 100%),
+                                    linear-gradient(180deg, rgba(7, 11, 20, 0.88) 0%, rgba(15, 23, 42, 0.96) 100%),
                                     url(${activeCenter.image})
                                 `,
                                 backgroundSize: 'cover',
-                                backgroundPosition: 'center right',
-                                padding: '3.5rem 2.5rem',
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                                backgroundPosition: 'center',
+                                padding: '3.5rem 2rem',
+                                display: 'flex',
+                                flexDirection: 'column',
                                 alignItems: 'center',
-                                gap: '2.5rem',
+                                justifyContent: 'center',
+                                textAlign: 'center',
+                                gap: '1.25rem',
                                 borderBottom: `1px solid ${activeCenter.themeBorder}`
                             }}>
-                                <div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1.2rem' }}>
-                                        <div style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            background: activeCenter.badgeGradient,
-                                            color: '#ffffff',
-                                            fontSize: '0.85rem',
-                                            fontWeight: '800',
-                                            padding: '0.45rem 1.1rem',
-                                            borderRadius: '20px',
-                                            width: 'fit-content',
-                                            letterSpacing: '0.5px',
-                                            boxShadow: `0 4px 14px ${activeCenter.glowColor}`
-                                        }}>
-                                            {activeCenter.icon} {activeCenter.code}
-                                        </div>
-                                        <div style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: '0.4rem',
-                                            background: 'rgba(255, 255, 255, 0.08)',
-                                            backdropFilter: 'blur(10px)',
-                                            color: '#e2e8f0',
-                                            fontSize: '0.85rem',
-                                            fontWeight: '600',
-                                            padding: '0.45rem 1.1rem',
-                                            borderRadius: '20px',
-                                            border: '1px solid rgba(255, 255, 255, 0.15)'
-                                        }}>
-                                            <FaUniversity style={{ color: activeCenter.color }} /> {activeCenter.department}
-                                        </div>
+                                {/* BADGES */}
+                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}>
+                                    <div style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        background: activeCenter.badgeGradient,
+                                        color: '#ffffff',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '800',
+                                        padding: '0.45rem 1.2rem',
+                                        borderRadius: '20px',
+                                        boxShadow: `0 4px 14px ${activeCenter.glowColor}`
+                                    }}>
+                                        {activeCenter.icon} {activeCenter.code}
                                     </div>
+                                    <div style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem',
+                                        background: 'rgba(255, 255, 255, 0.08)',
+                                        backdropFilter: 'blur(10px)',
+                                        color: '#e2e8f0',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        padding: '0.45rem 1.2rem',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(255, 255, 255, 0.15)'
+                                    }}>
+                                        <FaUniversity style={{ color: activeCenter.color }} /> {activeCenter.department}
+                                    </div>
+                                </div>
 
-                                    <h2 style={{ fontSize: 'clamp(2rem, 3.2vw, 2.8rem)', fontWeight: '900', color: '#ffffff', marginBottom: '0.5rem', lineHeight: '1.2' }}>
+                                {/* OFFICIAL EMBEDDED LOGO (CENTERED & PERFECT ROUND) */}
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0.5rem 0' }}>
+                                    <motion.div
+                                        key={activeCenter.id + '-logo'}
+                                        initial={{ scale: 0.85, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={{ duration: 0.5 }}
+                                        style={{
+                                            width: 'clamp(170px, 18vw, 210px)',
+                                            height: 'clamp(170px, 18vw, 210px)',
+                                            borderRadius: '50%',
+                                            padding: '6px',
+                                            background: activeCenter.badgeGradient,
+                                            boxShadow: `0 16px 40px -6px ${activeCenter.glowColor}, 0 0 30px ${activeCenter.glowColor}`,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                        <div style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            borderRadius: '50%',
+                                            overflow: 'hidden',
+                                            background: '#ffffff',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.15)'
+                                        }}>
+                                            <img
+                                                src={activeCenter.logo}
+                                                alt={`${activeCenter.title} Official Logo`}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '50%',
+                                                    display: 'block'
+                                                }}
+                                                onError={(e) => {
+                                                    e.currentTarget.src = '/images/easa_logo.png';
+                                                }}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                </div>
+
+                                {/* TITLE & DETAILS */}
+                                <div style={{ maxWidth: '850px' }}>
+                                    <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.9rem)', fontWeight: '900', color: '#ffffff', marginBottom: '0.4rem', lineHeight: '1.2' }}>
                                         {activeCenter.title}
                                     </h2>
                                     
-                                    <div style={{ fontSize: '1.15rem', fontWeight: '700', color: '#cbd5e1', marginBottom: '0.8rem' }}>
+                                    <div style={{ fontSize: '1.15rem', fontWeight: '800', color: '#cbd5e1', marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                         {activeCenter.subtitle}
                                     </div>
 
@@ -650,54 +890,17 @@ const CenterOfExcellencePage = () => {
                                         fontWeight: '700',
                                         display: 'flex',
                                         alignItems: 'center',
+                                        justifyContent: 'center',
                                         gap: '0.6rem',
-                                        marginTop: '0.2rem',
                                         marginBottom: '0.9rem',
                                         textShadow: `0 2px 10px ${activeCenter.glowColor}`
                                     }}>
-                                        <FaQuoteLeft size={15} style={{ opacity: 0.9, color: activeCenter.color }} /> {activeCenter.tagline}
+                                        <FaQuoteLeft size={14} style={{ opacity: 0.9, color: activeCenter.color }} /> {activeCenter.tagline}
                                     </div>
 
-                                    <p style={{ color: '#cbd5e1', fontSize: '1.02rem', maxWidth: '750px', margin: 0, lineHeight: '1.7' }}>
+                                    <p style={{ color: '#cbd5e1', fontSize: '1.05rem', margin: '0 auto', lineHeight: '1.7', maxWidth: '780px' }}>
                                         {activeCenter.description}
                                     </p>
-                                </div>
-
-                                {/* OFFICIAL EMBEDDED LOGO */}
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <motion.div
-                                        key={activeCenter.id + '-logo'}
-                                        initial={{ scale: 0.9, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        transition={{ duration: 0.5 }}
-                                        style={{
-                                            width: 'clamp(200px, 22vw, 260px)',
-                                            height: 'clamp(200px, 22vw, 260px)',
-                                            borderRadius: '50%',
-                                            padding: '8px',
-                                            background: activeCenter.badgeGradient,
-                                            boxShadow: `0 16px 40px -6px ${activeCenter.glowColor}, 0 0 30px ${activeCenter.glowColor}`,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}
-                                    >
-                                        <img
-                                            src={activeCenter.logo}
-                                            alt={`${activeCenter.title} Official Logo`}
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'contain',
-                                                borderRadius: '50%',
-                                                background: '#071018',
-                                                boxShadow: 'inset 0 0 12px rgba(0,0,0,0.4)'
-                                            }}
-                                            onError={(e) => {
-                                                e.currentTarget.src = '/images/easa_logo.png';
-                                            }}
-                                        />
-                                    </motion.div>
                                 </div>
                             </div>
 

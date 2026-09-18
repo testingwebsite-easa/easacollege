@@ -543,6 +543,14 @@ export const departments = [
                 equipment: "Siemens S7-1200 Programmable Logic Controllers, SCADA Interface Terminals, Synchro Transmitter-Receiver Systems, AC/DC Servomotor Position Controllers"
             }
         ],
+        coe: {
+            id: "energy-studies",
+            code: "CoE-CES",
+            name: "CENTRE FOR ENERGY STUDIES",
+            subname: "Centre of Excellence in Energy Studies",
+            tagline: "Innovating Sustainable Energy Solutions for a Greener Future.",
+            logo: "/images/coe-energy-studies-logo.png"
+        },
         mou: [
             { partner: "Maxbite Technologies Pvt. Ltd", purpose: "Advanced Industrial Training & Research Collaboration", year: "2023", benefits: "IoT & Smart Manufacturing" },
             { partner: "Rabwin Industries", purpose: "Skill Development & Placement Support", year: "2022", benefits: "Precision Engineering" },
