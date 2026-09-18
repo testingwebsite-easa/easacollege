@@ -168,7 +168,19 @@ const renderCreditDistributionTable = (subjects) => {
         distribution[cat] = Array(8).fill(0);
     });
 
+    const seenLangCategories = new Set();
     subjects.forEach(subj => {
+        const isLang1 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE I');
+        const isLang2 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE II');
+        
+        if (isLang1 || isLang2) {
+            const key = `${subj.semester || 1}_${isLang1 ? 'lang1' : 'lang2'}`;
+            if (seenLangCategories.has(key)) {
+                return;
+            }
+            seenLangCategories.add(key);
+        }
+
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
@@ -263,7 +275,7 @@ const renderCreditDistributionTable = (subjects) => {
                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: '500' }}>{categoryLabels[cat]}</td>
                                     {distribution[cat].map((val, semIdx) => (
                                         <td key={semIdx} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: val > 0 ? 'var(--text-main)' : 'var(--text-muted)' }}>
-                                            {val > 0 ? val : '-'}
+                                             {val > 0 ? val : '-'}
                                         </td>
                                     ))}
                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>
@@ -312,7 +324,19 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         distribution[cat] = Array(8).fill(0);
     });
 
+    const seenLangCategories = new Set();
     subjects.forEach(subj => {
+        const isLang1 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE I');
+        const isLang2 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE II');
+        
+        if (isLang1 || isLang2) {
+            const key = `${subj.semester || 1}_${isLang1 ? 'lang1' : 'lang2'}`;
+            if (seenLangCategories.has(key)) {
+                return;
+            }
+            seenLangCategories.add(key);
+        }
+
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
@@ -1303,23 +1327,35 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'THEORY' || (s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('LANGUAGE') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
         const practicalCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'PRACTICAL' || ((s.category?.toUpperCase().includes('PRACTICAL') || s.category?.toUpperCase().includes('LAB')) && !s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
         const theoryCumPracticalCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('THEORY') && s.category?.toUpperCase().includes('PRACTICAL'));
-        const employabilityCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('EMPLOYABILITY') || s.categoryType === 'EEC');
-        const mandatoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('MANDATORY') || s.categoryType === 'MC');
         const languageElective1 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE I'));
         const languageElective2 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE II'));
+        const employabilityCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('EMPLOYABILITY') || s.categoryType === 'EEC');
+        const mandatoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('MANDATORY') || s.categoryType === 'MC');
 
         const accounted = new Set([
             ...theoryCourses,
             ...practicalCourses,
             ...theoryCumPracticalCourses,
-            ...employabilityCourses,
-            ...mandatoryCourses,
             ...languageElective1,
-            ...languageElective2
+            ...languageElective2,
+            ...employabilityCourses,
+            ...mandatoryCourses
         ]);
         const otherCourses = subjectsForSem.filter(s => !accounted.has(s));
 
-        const semTotalCredits = subjectsForSem.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
+        // Exclude Language Elective options from raw semester total sum
+        const regularCoursesForTotal = subjectsForSem.filter(s => {
+            const isLang1 = languageElective1.includes(s);
+            const isLang2 = languageElective2.includes(s);
+            return !isLang1 && !isLang2;
+        });
+
+        const semTotalContactPeriods = regularCoursesForTotal.reduce((sum, s) => {
+            const cp = (s.contactPeriods !== undefined && s.contactPeriods !== '') ? Number(s.contactPeriods) : (Number(s.l || 0) + Number(s.t || 0) + Number(s.p || 0));
+            return sum + (Number.isNaN(cp) ? 0 : cp);
+        }, 0);
+
+        const semTotalCredits = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
 
         const renderCourseRows = (courseList) => {
             return courseList.map(s => `
@@ -1387,20 +1423,6 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             ${renderCourseRows(practicalCourses)}
                         ` : ''}
 
-                        ${employabilityCourses.length > 0 ? `
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
-                            </tr>
-                            ${renderCourseRows(employabilityCourses)}
-                        ` : ''}
-
-                        ${mandatoryCourses.length > 0 ? `
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">MANDATORY COURSES</td>
-                            </tr>
-                            ${renderCourseRows(mandatoryCourses)}
-                        ` : ''}
-
                         ${languageElective1.length > 0 ? `
                             <tr class="category-row">
                                 <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – I</td>
@@ -1415,6 +1437,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             ${renderCourseRows(languageElective2)}
                         ` : ''}
 
+                        ${employabilityCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
+                            </tr>
+                            ${renderCourseRows(employabilityCourses)}
+                        ` : ''}
+
+                        ${mandatoryCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">MANDATORY COURSES</td>
+                            </tr>
+                            ${renderCourseRows(mandatoryCourses)}
+                        ` : ''}
+
                         ${otherCourses.length > 0 ? `
                             <tr class="category-row">
                                 <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Other Courses</td>
@@ -1423,7 +1459,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                         ` : ''}
 
                         <tr style="font-weight: bold; background: rgba(0,0,0,0.02); border-top: 1.5px solid #000;">
-                            <td colSpan="7" style="text-align: center; font-weight: bold; font-family: Arial, sans-serif;">TOTAL</td>
+                            <td colSpan="6" style="text-align: center; font-weight: bold; font-family: Arial, sans-serif;">TOTAL</td>
+                            <td class="center" style="font-weight: bold;">${semTotalContactPeriods}</td>
                             <td class="center" style="font-weight: bold;">${semTotalCredits}</td>
                             <td colSpan="3"></td>
                         </tr>

@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaFilePdf, FaBook, FaFileWord, FaFileExcel, FaCloudUploadAlt, FaUpload, FaCheckCircle, FaSpinner, FaExclamationTriangle, FaListAlt } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaFilePdf, FaBook, FaBookOpen, FaFileWord, FaFileExcel, FaCloudUploadAlt, FaUpload, FaCheckCircle, FaSpinner, FaExclamationTriangle, FaListAlt, FaLock, FaInfoCircle, FaBullseye, FaGraduationCap, FaLightbulb, FaChartBar, FaCalendarAlt } from 'react-icons/fa';
 import { departments as staticDepartments } from '../data/departmentsData';
 import { getDetailedSyllabusForSubject, SYLLABUS_DATA } from '../data/syllabusData';
 import { parseWordSyllabusClient } from '../utils/wordSyllabusParser';
 import { parseExcelSyllabusClient } from '../utils/excelSyllabusParser';
 import collegeLogo from '../assets/EASA College Logo.webp';
 import API_BASE_URL from '../api';
+
+const getDeptDisplayName = (slugOrName) => {
+    if (!slugOrName) return '';
+    const found = staticDepartments.find(d => d.slug === slugOrName || d.name?.toLowerCase() === slugOrName?.toLowerCase());
+    if (found) return found.name;
+    return slugOrName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+};
 
 const getRomanNumeral = (num) => {
     const roman = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -108,7 +115,19 @@ const renderCreditDistributionTable = (subjects) => {
         distribution[cat] = Array(8).fill(0);
     });
 
+    const seenLangCategories = new Set();
     subjects.forEach(subj => {
+        const isLang1 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE I');
+        const isLang2 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE II');
+        
+        if (isLang1 || isLang2) {
+            const key = `${subj.semester || 1}_${isLang1 ? 'lang1' : 'lang2'}`;
+            if (seenLangCategories.has(key)) {
+                return;
+            }
+            seenLangCategories.add(key);
+        }
+
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
@@ -243,7 +262,19 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         distribution[cat] = Array(8).fill(0);
     });
 
+    const seenLangCategories = new Set();
     subjects.forEach(subj => {
+        const isLang1 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE I');
+        const isLang2 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE II');
+        
+        if (isLang1 || isLang2) {
+            const key = `${subj.semester || 1}_${isLang1 ? 'lang1' : 'lang2'}`;
+            if (seenLangCategories.has(key)) {
+                return;
+            }
+            seenLangCategories.add(key);
+        }
+
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
@@ -1167,23 +1198,35 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'THEORY' || (s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('LANGUAGE') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
         const practicalCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'PRACTICAL' || ((s.category?.toUpperCase().includes('PRACTICAL') || s.category?.toUpperCase().includes('LAB')) && !s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
         const theoryCumPracticalCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('THEORY') && s.category?.toUpperCase().includes('PRACTICAL'));
-        const employabilityCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('EMPLOYABILITY') || s.categoryType === 'EEC');
-        const mandatoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('MANDATORY') || s.categoryType === 'MC');
         const languageElective1 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE I'));
         const languageElective2 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE II'));
+        const employabilityCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('EMPLOYABILITY') || s.categoryType === 'EEC');
+        const mandatoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('MANDATORY') || s.categoryType === 'MC');
 
         const accounted = new Set([
             ...theoryCourses,
             ...practicalCourses,
             ...theoryCumPracticalCourses,
-            ...employabilityCourses,
-            ...mandatoryCourses,
             ...languageElective1,
-            ...languageElective2
+            ...languageElective2,
+            ...employabilityCourses,
+            ...mandatoryCourses
         ]);
         const otherCourses = subjectsForSem.filter(s => !accounted.has(s));
 
-        const semTotalCredits = subjectsForSem.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
+        // Exclude Language Elective options from raw semester total sum
+        const regularCoursesForTotal = subjectsForSem.filter(s => {
+            const isLang1 = languageElective1.includes(s);
+            const isLang2 = languageElective2.includes(s);
+            return !isLang1 && !isLang2;
+        });
+
+        const semTotalContactPeriods = regularCoursesForTotal.reduce((sum, s) => {
+            const cp = (s.contactPeriods !== undefined && s.contactPeriods !== '') ? Number(s.contactPeriods) : (Number(s.l || 0) + Number(s.t || 0) + Number(s.p || 0));
+            return sum + (Number.isNaN(cp) ? 0 : cp);
+        }, 0);
+
+        const semTotalCredits = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
 
         const renderCourseRows = (courseList) => {
             return courseList.map(s => `
@@ -1251,20 +1294,6 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             ${renderCourseRows(practicalCourses)}
                         ` : ''}
 
-                        ${employabilityCourses.length > 0 ? `
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
-                            </tr>
-                            ${renderCourseRows(employabilityCourses)}
-                        ` : ''}
-
-                        ${mandatoryCourses.length > 0 ? `
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">MANDATORY COURSES</td>
-                            </tr>
-                            ${renderCourseRows(mandatoryCourses)}
-                        ` : ''}
-
                         ${languageElective1.length > 0 ? `
                             <tr class="category-row">
                                 <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – I</td>
@@ -1279,6 +1308,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             ${renderCourseRows(languageElective2)}
                         ` : ''}
 
+                        ${employabilityCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
+                            </tr>
+                            ${renderCourseRows(employabilityCourses)}
+                        ` : ''}
+
+                        ${mandatoryCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">MANDATORY COURSES</td>
+                            </tr>
+                            ${renderCourseRows(mandatoryCourses)}
+                        ` : ''}
+
                         ${otherCourses.length > 0 ? `
                             <tr class="category-row">
                                 <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Other Courses</td>
@@ -1287,7 +1330,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                         ` : ''}
 
                         <tr style="font-weight: bold; background: rgba(0,0,0,0.02); border-top: 1.5px solid #000;">
-                            <td colSpan="7" style="text-align: center; font-weight: bold; font-family: Arial, sans-serif;">TOTAL</td>
+                            <td colSpan="6" style="text-align: center; font-weight: bold; font-family: Arial, sans-serif;">TOTAL</td>
+                            <td class="center" style="font-weight: bold;">${semTotalContactPeriods}</td>
                             <td class="center" style="font-weight: bold;">${semTotalCredits}</td>
                             <td colSpan="3"></td>
                         </tr>
@@ -2172,16 +2216,22 @@ const DepartmentManager = () => {
         if (lower === 'agri') return 'agriculture-engineering';
         if (lower === 'mba') return 'master-of-business-administration';
 
+        if (lower === 'science-and-humanities' || lower === 'science and humanities' || lower === 'sciences and humanities' || lower === 's&h' || lower === 'sh') return 'science-and-humanities';
+        if (lower.includes('science') && lower.includes('humanities')) return 'science-and-humanities';
+        if (lower.includes('humanities') || lower === 'sh' || lower === 's&h') return 'science-and-humanities';
+
         found = staticDepartments.find(d =>
             d.name.toLowerCase().includes(lower) ||
             lower.includes(d.name.toLowerCase())
         );
         if (found) return found.slug;
 
-        return '';
+        return lower.replace(/\s+/g, '-');
     };
 
-    const isHOD = user?.role === 'hod';
+    const userRole = (user?.role || '').toLowerCase().trim();
+    const isHOD = userRole === 'hod';
+    const isAdmin = !isHOD && (userRole === 'admin' || userRole === 'superadmin' || !!localStorage.getItem('admin_token'));
     const hodDeptSlug = isHOD ? getDeptSlug(user?.department) : '';
     const hodDeptObj = isHOD ? staticDepartments.find(d => d.slug === hodDeptSlug) : null;
 
@@ -2215,6 +2265,7 @@ const DepartmentManager = () => {
             }
         }
     }, [academicLevel, filteredDepts, selectedDept, isHOD]);
+    const [activeDeptTab, setActiveDeptTab] = useState('syllabus');
     const [deptData, setDeptData] = useState(null);
     const [creditDetails, setCreditDetails] = useState(null);
     const [data, setData] = useState({
@@ -2240,6 +2291,56 @@ const DepartmentManager = () => {
             .catch(err => console.error("Failed to fetch institute mission-vision", err));
     }, []);
 
+    // Custom Centered Modal Dialog State (replaces top browser popups)
+    const [dialogState, setDialogState] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        note: '',
+        type: 'confirm', // 'confirm' | 'alert' | 'danger' | 'warning' | 'success'
+        confirmText: 'OK',
+        cancelText: 'Cancel',
+        onConfirm: null,
+        onCancel: null
+    });
+
+    const showConfirmDialog = ({ title = 'Confirmation', message, note = '', confirmText = 'OK', cancelText = 'Cancel', type = 'confirm', onConfirm, onCancel }) => {
+        setDialogState({
+            isOpen: true,
+            title,
+            message,
+            note,
+            type,
+            confirmText,
+            cancelText,
+            onConfirm: () => {
+                setDialogState(prev => ({ ...prev, isOpen: false }));
+                if (onConfirm) onConfirm();
+            },
+            onCancel: () => {
+                setDialogState(prev => ({ ...prev, isOpen: false }));
+                if (onCancel) onCancel();
+            }
+        });
+    };
+
+    const showAlertDialog = ({ title = 'Notice', message, note = '', type = 'alert', buttonText = 'OK', onClose }) => {
+        setDialogState({
+            isOpen: true,
+            title,
+            message,
+            note,
+            type,
+            confirmText: buttonText,
+            cancelText: null,
+            onConfirm: () => {
+                setDialogState(prev => ({ ...prev, isOpen: false }));
+                if (onClose) onClose();
+            },
+            onCancel: null
+        });
+    };
+
     const [newSubject, setNewSubject] = useState({
         semester: 1,
         vertical: '',
@@ -2247,6 +2348,7 @@ const DepartmentManager = () => {
         category: 'THEORY',
         code: '',
         title: '',
+        creatorDept: '',
         categoryType: 'HUM',
         l: 0,
         t: 0,
@@ -2343,7 +2445,8 @@ const DepartmentManager = () => {
                         courseMap.set(codeKey, {
                             ...(courseMap.get(codeKey) || {}),
                             ...bc,
-                            code: codeKey
+                            code: codeKey,
+                            creatorDept: bc.creatorDept || bc.sourceDept
                         });
                     }
                 });
@@ -2359,7 +2462,8 @@ const DepartmentManager = () => {
                                 ...(courseMap.get(codeKey) || {}),
                                 ...s,
                                 code: codeKey,
-                                sourceDept: selectedDept
+                                creatorDept: s.creatorDept || selectedDept,
+                                sourceDept: s.creatorDept || selectedDept
                             });
                         }
                     }
@@ -2417,6 +2521,7 @@ const DepartmentManager = () => {
                     ...prev,
                     code: (matched.code || prev.code).toUpperCase(),
                     title: matched.title || prev.title,
+                    creatorDept: matched.creatorDept || matched.sourceDept || '',
                     category: matched.category || prev.category || 'THEORY',
                     categoryType: matched.categoryType || prev.categoryType || 'HUM',
                     categoryName: matched.categoryName || prev.categoryName || '',
@@ -2477,6 +2582,7 @@ const DepartmentManager = () => {
                     ...prev,
                     code: (matched.code || prev.code).toUpperCase(),
                     title: matched.title || prev.title,
+                    creatorDept: matched.creatorDept || matched.sourceDept || prev.creatorDept || '',
                     category: matched.category || prev.category || 'THEORY',
                     categoryType: matched.categoryType || prev.categoryType || 'HUM',
                     categoryName: matched.categoryName || prev.categoryName || '',
@@ -2616,12 +2722,22 @@ const DepartmentManager = () => {
     const handleApplyScannedSubjects = async () => {
         if (!scannedWordData || scannedWordData.length === 0) return;
 
+        const preparedScanned = scannedWordData.map(s => {
+            const cleanCode = (s.code || '').trim().toUpperCase();
+            const matched = masterCourses.find(c => c.code?.toUpperCase() === cleanCode);
+            return {
+                ...s,
+                code: cleanCode,
+                creatorDept: s.creatorDept || matched?.creatorDept || matched?.sourceDept || selectedDept
+            };
+        });
+
         let nextSubjects = [];
         if (importMode === 'replace') {
-            nextSubjects = [...scannedWordData];
+            nextSubjects = [...preparedScanned];
         } else {
             const existingCodes = new Set((data.subjects || []).map(s => (s.code || '').toUpperCase().trim()));
-            const filteredNew = scannedWordData.filter(s => !existingCodes.has((s.code || '').toUpperCase().trim()));
+            const filteredNew = preparedScanned.filter(s => !existingCodes.has((s.code || '').toUpperCase().trim()));
             nextSubjects = [...(data.subjects || []), ...filteredNew];
         }
 
@@ -2653,13 +2769,22 @@ const DepartmentManager = () => {
             setData(savedResult || updatedData);
             setIsWordScanModalOpen(false);
             setScannedWordData([]);
-            alert(`✅ Successfully imported and saved ${importedCount} subjects to the database for ${selectedDept.toUpperCase()}!`);
+            showAlertDialog({
+                title: 'Import Successful',
+                message: `Successfully imported and saved ${importedCount} subjects to the database for ${selectedDept.toUpperCase()}!`,
+                type: 'success'
+            });
         } catch (err) {
             console.error('Save error after scan:', err);
             setData(updatedData);
             setIsWordScanModalOpen(false);
             setScannedWordData([]);
-            alert(`⚠️ Scanned subjects applied to current view, but database save returned: ${err.message}\n\nPlease click "Save All Changes" or ensure you are logged in as Admin / HOD.`);
+            showAlertDialog({
+                title: 'Save Warning',
+                message: `Scanned subjects applied to current view, but database save returned: ${err.message}`,
+                note: 'Please click "Save All Changes" or ensure you are logged in as Admin / HOD.',
+                type: 'warning'
+            });
         }
     };
 
@@ -2717,6 +2842,19 @@ const DepartmentManager = () => {
 
         const originalIndex = selectedSyllabusSubjectIndex;
         const currentSubject = data.subjects[originalIndex];
+
+        // Permission check: only creator department or admin can update syllabus content
+        const isCreator = !currentSubject?.creatorDept || currentSubject?.creatorDept === selectedDept || isAdmin;
+        if (!isCreator) {
+            showAlertDialog({
+                title: 'Shared Course (Read Only)',
+                message: `This syllabus was created by ${getDeptDisplayName(currentSubject?.creatorDept) || 'another department'}. Only the creator department or an administrator can modify it.`,
+                type: 'warning'
+            });
+            setSelectedSyllabusSubjectIndex(null);
+            setSyllabusEditValue(null);
+            return;
+        }
 
         const updatedSubject = {
             ...currentSubject,
@@ -2860,7 +2998,11 @@ const DepartmentManager = () => {
             return true;
         } catch (error) {
             console.error('Error updating department data:', error);
-            alert('Failed to save changes: ' + error.message);
+            showAlertDialog({
+                title: 'Save Error',
+                message: 'Failed to save changes: ' + error.message,
+                type: 'danger'
+            });
             return false;
         }
     };
@@ -2895,28 +3037,67 @@ const DepartmentManager = () => {
 
     const handleSaveEditSubject = async () => {
         if (!editingSubjectValue.code || !editingSubjectValue.title) {
-            alert('Please enter Course Code and Title.');
+            showAlertDialog({
+                title: 'Missing Required Fields',
+                message: 'Please enter Course Code and Title.',
+                type: 'warning'
+            });
             return;
         }
 
-        const lVal = editingSubjectValue.l === '' ? 0 : Number(editingSubjectValue.l || 0);
-        const tVal = editingSubjectValue.t === '' ? 0 : Number(editingSubjectValue.t || 0);
-        const pVal = editingSubjectValue.p === '' ? 0 : Number(editingSubjectValue.p || 0);
-        const ciaVal = editingSubjectValue.cia === '' ? 0 : Number(editingSubjectValue.cia || 0);
-        const eseVal = editingSubjectValue.ese === '' ? 0 : Number(editingSubjectValue.ese || 0);
+        const isCreator = !editingSubjectValue.creatorDept || editingSubjectValue.creatorDept === selectedDept || isAdmin;
+        const matched = masterCourses.find(c => c.code?.toUpperCase() === (editingSubjectValue.code || '').toUpperCase());
 
-        const updatedSubj = {
-            ...editingSubjectValue,
-            code: editingSubjectValue.code.toUpperCase(),
-            l: lVal,
-            t: tVal,
-            p: pVal,
-            contactPeriods: lVal + tVal + pVal,
-            cia: ciaVal,
-            ese: eseVal,
-            total: ciaVal + eseVal,
-            credits: Number(editingSubjectValue.credits || 0)
-        };
+        let updatedSubj;
+        if (!isCreator && matched) {
+            // Preserve master course data from creator department, only update local department curriculum placement
+            updatedSubj = {
+                ...matched,
+                ...editingSubjectValue,
+                // Lock core course data
+                title: matched.title,
+                l: matched.l,
+                t: matched.t,
+                p: matched.p,
+                contactPeriods: matched.contactPeriods,
+                credits: matched.credits,
+                cia: matched.cia,
+                ese: matched.ese,
+                total: matched.total,
+                subtitle: matched.subtitle,
+                categoryName: matched.categoryName,
+                prerequisites: matched.prerequisites,
+                objectives: matched.objectives,
+                outcomes: matched.outcomes,
+                units: matched.units,
+                textbooks: matched.textbooks,
+                references: matched.references,
+                webReferences: matched.webReferences,
+                experiments: matched.experiments,
+                coPoMapping: matched.coPoMapping,
+                creatorDept: matched.creatorDept || editingSubjectValue.creatorDept
+            };
+        } else {
+            const lVal = editingSubjectValue.l === '' ? 0 : Number(editingSubjectValue.l || 0);
+            const tVal = editingSubjectValue.t === '' ? 0 : Number(editingSubjectValue.t || 0);
+            const pVal = editingSubjectValue.p === '' ? 0 : Number(editingSubjectValue.p || 0);
+            const ciaVal = editingSubjectValue.cia === '' ? 0 : Number(editingSubjectValue.cia || 0);
+            const eseVal = editingSubjectValue.ese === '' ? 0 : Number(editingSubjectValue.ese || 0);
+
+            updatedSubj = {
+                ...editingSubjectValue,
+                code: editingSubjectValue.code.toUpperCase(),
+                creatorDept: editingSubjectValue.creatorDept || selectedDept,
+                l: lVal,
+                t: tVal,
+                p: pVal,
+                contactPeriods: lVal + tVal + pVal,
+                cia: ciaVal,
+                ese: eseVal,
+                total: ciaVal + eseVal,
+                credits: Number(editingSubjectValue.credits || 0)
+            };
+        }
 
         const updatedSubjects = [...data.subjects];
         updatedSubjects[editingSubjectIndex] = updatedSubj;
@@ -2927,6 +3108,7 @@ const DepartmentManager = () => {
         if (success) {
             setEditingSubjectIndex(null);
             setEditingSubjectValue(null);
+            fetchMasterCourses();
         }
     };
 
@@ -2941,27 +3123,40 @@ const DepartmentManager = () => {
         }
     };
 
-    const handleDeleteItem = async (section, index) => {
-        if (!window.confirm('Are you sure you want to delete this item?')) return;
+    const handleDeleteItem = (section, index) => {
+        showConfirmDialog({
+            title: 'Delete Item',
+            message: 'Are you sure you want to delete this item?',
+            type: 'danger',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+                const newArray = [...data[section]];
+                newArray.splice(index, 1);
 
-        const newArray = [...data[section]];
-        newArray.splice(index, 1);
-
-        const updatedData = { ...data, [section]: newArray };
-        await updateBackend(updatedData);
+                const updatedData = { ...data, [section]: newArray };
+                await updateBackend(updatedData);
+            }
+        });
     };
 
     const handleAddSubject = async () => {
         if (!newSubject.code || !newSubject.title) {
-            alert('Please enter Course Code and Title.');
+            showAlertDialog({
+                title: 'Missing Required Fields',
+                message: 'Please enter Course Code and Title.',
+                type: 'warning'
+            });
             return;
         }
         const cleanCode = newSubject.code.toUpperCase();
         const matched = masterCourses.find(c => c.code?.toUpperCase() === cleanCode);
+        const creatorDept = newSubject.creatorDept || matched?.creatorDept || matched?.sourceDept || selectedDept;
 
         const subjectToAdd = {
             ...newSubject,
             code: cleanCode,
+            creatorDept: creatorDept,
             objectives: (newSubject.objectives && newSubject.objectives.length > 0)
                 ? newSubject.objectives
                 : (matched?.objectives || []),
@@ -3014,7 +3209,7 @@ const DepartmentManager = () => {
         const success = await updateBackend(updatedData);
         if (success) {
             setNewSubject({
-                semester: 1, vertical: '', verticalName: '', category: 'THEORY', code: '', title: '', categoryType: 'HUM',
+                semester: 1, vertical: '', verticalName: '', category: 'THEORY', code: '', title: '', creatorDept: '', categoryType: 'HUM',
                 l: 0, t: 0, p: 0, contactPeriods: 0, credits: 0, cia: 0, ese: 0, total: 0, isOpenElective: false, offeringDept: '',
                 prerequisites: '', subtitle: '', categoryName: '', objectives: [], outcomes: [], units: [], textbooks: [], references: [], webReferences: [], experiments: [], coPoMapping: []
             });
@@ -3023,12 +3218,29 @@ const DepartmentManager = () => {
         }
     };
 
-    const handleDeleteSubject = async (index) => {
-        if (!window.confirm('Are you sure you want to delete this subject?')) return;
-        const newArray = [...(data.subjects || [])];
-        newArray.splice(index, 1);
-        const updatedData = { ...data, subjects: newArray };
-        await updateBackend(updatedData);
+    const handleDeleteSubject = (index) => {
+        const subj = data.subjects && data.subjects[index];
+        const isCreator = !subj?.creatorDept || subj.creatorDept === selectedDept || isAdmin;
+        const creatorName = subj?.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
+
+        showConfirmDialog({
+            title: isCreator ? 'Delete Course' : 'Remove Course',
+            message: isCreator
+                ? `Are you sure you want to delete "${subj?.code || 'this course'}" from the curriculum?`
+                : `Remove ${subj?.code || 'this course'} from your department's curriculum?`,
+            note: !isCreator && creatorName
+                ? `The master course details created by ${creatorName} will remain safe in the system.`
+                : '',
+            type: isCreator ? 'danger' : 'warning',
+            confirmText: isCreator ? 'Delete' : 'Remove',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+                const newArray = [...(data.subjects || [])];
+                newArray.splice(index, 1);
+                const updatedData = { ...data, subjects: newArray };
+                await updateBackend(updatedData);
+            }
+        });
     };
 
     const handleStartEdit = (section, index, currentValue) => {
@@ -3204,66 +3416,132 @@ const DepartmentManager = () => {
                 </div>
             )}
 
-            {/* Regulation & Meeting Dates Edit Section */}
+            {/* Department Navigation Tabs (Curriculum & Syllabus, Vision & Mission, PEO, PSO, PO, Regulation & Dates) */}
             <div style={{
-                background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '12px',
-                border: '1px solid var(--glass-border)', marginBottom: '2rem',
-                display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center'
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.6rem',
+                marginBottom: '1.75rem',
+                background: 'var(--bg-card)',
+                padding: '0.65rem 0.85rem',
+                borderRadius: '12px',
+                border: '1px solid var(--glass-border)',
+                alignItems: 'center'
             }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Academic Regulation</label>
-                    <input
-                        type="text"
-                        value={data.regulation || ''}
-                        onChange={(e) => setData(prev => ({ ...prev, regulation: e.target.value }))}
-                        style={{
-                            padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)',
-                            background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none',
-                            fontWeight: '500', fontSize: '1rem'
-                        }}
-                        placeholder="e.g. R-2023"
-                    />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Board of Studies Meeting Date</label>
-                    <input
-                        type="text"
-                        value={data.bosMeetingDate || ''}
-                        onChange={(e) => setData(prev => ({ ...prev, bosMeetingDate: e.target.value }))}
-                        style={{
-                            padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)',
-                            background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none',
-                            fontWeight: '500', fontSize: '1rem'
-                        }}
-                    />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
-                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Academic Council Meeting Date</label>
-                    <input
-                        type="text"
-                        value={data.acMeetingDate || ''}
-                        onChange={(e) => setData(prev => ({ ...prev, acMeetingDate: e.target.value }))}
-                        style={{
-                            padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)',
-                            background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none',
-                            fontWeight: '500', fontSize: '1rem'
-                        }}
-                    />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%' }}>
-                    <button
-                        onClick={async () => {
-                            const success = await updateBackend(data);
-                            if (success) {
-                                alert('Regulation details updated successfully!');
-                            }
-                        }}
-                        className="btn btn-primary"
-                        style={{ padding: '0.75rem 1.5rem', fontWeight: 'bold' }}
-                    >
-                        Save Regulation Details
-                    </button>
-                </div>
+                <button
+                    onClick={() => setActiveDeptTab('syllabus')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.65rem 1.2rem',
+                        borderRadius: '8px',
+                        border: activeDeptTab === 'syllabus' ? '1px solid var(--primary)' : '1px solid transparent',
+                        background: activeDeptTab === 'syllabus' ? 'var(--primary)' : 'rgba(255,255,255,0.04)',
+                        color: activeDeptTab === 'syllabus' ? '#ffffff' : 'var(--text-muted)',
+                        fontWeight: activeDeptTab === 'syllabus' ? 'bold' : '500',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <FaBookOpen /> Curriculum & Syllabus
+                </button>
+                <button
+                    onClick={() => setActiveDeptTab('vision_mission')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.65rem 1.2rem',
+                        borderRadius: '8px',
+                        border: activeDeptTab === 'vision_mission' ? '1px solid var(--primary)' : '1px solid transparent',
+                        background: activeDeptTab === 'vision_mission' ? 'var(--primary)' : 'rgba(255,255,255,0.04)',
+                        color: activeDeptTab === 'vision_mission' ? '#ffffff' : 'var(--text-muted)',
+                        fontWeight: activeDeptTab === 'vision_mission' ? 'bold' : '500',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <FaBullseye /> Vision & Mission
+                </button>
+                <button
+                    onClick={() => setActiveDeptTab('peo')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.65rem 1.2rem',
+                        borderRadius: '8px',
+                        border: activeDeptTab === 'peo' ? '1px solid var(--primary)' : '1px solid transparent',
+                        background: activeDeptTab === 'peo' ? 'var(--primary)' : 'rgba(255,255,255,0.04)',
+                        color: activeDeptTab === 'peo' ? '#ffffff' : 'var(--text-muted)',
+                        fontWeight: activeDeptTab === 'peo' ? 'bold' : '500',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <FaGraduationCap /> PEO
+                </button>
+                <button
+                    onClick={() => setActiveDeptTab('pso')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.65rem 1.2rem',
+                        borderRadius: '8px',
+                        border: activeDeptTab === 'pso' ? '1px solid var(--primary)' : '1px solid transparent',
+                        background: activeDeptTab === 'pso' ? 'var(--primary)' : 'rgba(255,255,255,0.04)',
+                        color: activeDeptTab === 'pso' ? '#ffffff' : 'var(--text-muted)',
+                        fontWeight: activeDeptTab === 'pso' ? 'bold' : '500',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <FaLightbulb /> PSO
+                </button>
+                <button
+                    onClick={() => setActiveDeptTab('po')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.65rem 1.2rem',
+                        borderRadius: '8px',
+                        border: activeDeptTab === 'po' ? '1px solid var(--primary)' : '1px solid transparent',
+                        background: activeDeptTab === 'po' ? 'var(--primary)' : 'rgba(255,255,255,0.04)',
+                        color: activeDeptTab === 'po' ? '#ffffff' : 'var(--text-muted)',
+                        fontWeight: activeDeptTab === 'po' ? 'bold' : '500',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <FaChartBar /> PO
+                </button>
+                <button
+                    onClick={() => setActiveDeptTab('regulation')}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.65rem 1.2rem',
+                        borderRadius: '8px',
+                        border: activeDeptTab === 'regulation' ? '1px solid var(--primary)' : '1px solid transparent',
+                        background: activeDeptTab === 'regulation' ? 'var(--primary)' : 'rgba(255,255,255,0.04)',
+                        color: activeDeptTab === 'regulation' ? '#ffffff' : 'var(--text-muted)',
+                        fontWeight: activeDeptTab === 'regulation' ? 'bold' : '500',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                    }}
+                >
+                    <FaCalendarAlt /> Regulation & Dates
+                </button>
             </div>
 
             {loading ? (
@@ -3271,19 +3549,107 @@ const DepartmentManager = () => {
                     Loading department data...
                 </div>
             ) : (
-                <div className="department-sections-grid">
-                    {selectedDept !== 'science-and-humanities' && selectedDept !== 'sh' && (
-                        <>
-                            {renderSection('Mission', 'mission')}
-                            {renderSection('Vision', 'vision')}
-                            {renderSection('Program Educational Objectives (PEO)', 'peo')}
-                            {renderSection('Program Specific Outcomes (PSO)', 'pso')}
-                            {renderSection('Program Outcomes (PO)', 'po')}
-                        </>
+                <>
+                    {/* Tab 1: Academic Regulation & Meeting Dates */}
+                    {activeDeptTab === 'regulation' && (
+                        <div style={{
+                            background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '12px',
+                            border: '1px solid var(--glass-border)', marginBottom: '2rem',
+                            display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center'
+                        }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Academic Regulation</label>
+                                <input
+                                    type="text"
+                                    value={data.regulation || ''}
+                                    onChange={(e) => setData(prev => ({ ...prev, regulation: e.target.value }))}
+                                    style={{
+                                        padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)',
+                                        background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none',
+                                        fontWeight: '500', fontSize: '1rem'
+                                    }}
+                                    placeholder="e.g. R-2023"
+                                />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Board of Studies Meeting Date</label>
+                                <input
+                                    type="text"
+                                    value={data.bosMeetingDate || ''}
+                                    onChange={(e) => setData(prev => ({ ...prev, bosMeetingDate: e.target.value }))}
+                                    style={{
+                                        padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)',
+                                        background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none',
+                                        fontWeight: '500', fontSize: '1rem'
+                                    }}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: '1', minWidth: '250px' }}>
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Academic Council Meeting Date</label>
+                                <input
+                                    type="text"
+                                    value={data.acMeetingDate || ''}
+                                    onChange={(e) => setData(prev => ({ ...prev, acMeetingDate: e.target.value }))}
+                                    style={{
+                                        padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)',
+                                        background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none',
+                                        fontWeight: '500', fontSize: '1rem'
+                                    }}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%' }}>
+                                <button
+                                    onClick={async () => {
+                                        const success = await updateBackend(data);
+                                        if (success) {
+                                            showAlertDialog({
+                                                title: 'Regulation Details Saved',
+                                                message: 'Regulation details have been updated successfully in the system!',
+                                                type: 'success'
+                                            });
+                                        }
+                                    }}
+                                    className="btn btn-primary"
+                                    style={{ padding: '0.75rem 1.5rem', fontWeight: 'bold' }}
+                                >
+                                    Save Regulation Details
+                                </button>
+                            </div>
+                        </div>
                     )}
 
-                    {/* Subjects Section */}
-                    <div className="dept-section-card" style={{ gridColumn: '1 / -1', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                    {/* Tab 2: Vision & Mission */}
+                    {activeDeptTab === 'vision_mission' && (
+                        <div className="department-sections-grid">
+                            {renderSection('Department Vision', 'vision')}
+                            {renderSection('Department Mission', 'mission')}
+                        </div>
+                    )}
+
+                    {/* Tab 3: PEO */}
+                    {activeDeptTab === 'peo' && (
+                        <div className="department-sections-grid">
+                            {renderSection('Program Educational Objectives (PEO)', 'peo')}
+                        </div>
+                    )}
+
+                    {/* Tab 4: PSO */}
+                    {activeDeptTab === 'pso' && (
+                        <div className="department-sections-grid">
+                            {renderSection('Program Specific Outcomes (PSO)', 'pso')}
+                        </div>
+                    )}
+
+                    {/* Tab 5: PO */}
+                    {activeDeptTab === 'po' && (
+                        <div className="department-sections-grid">
+                            {renderSection('Program Outcomes (PO)', 'po')}
+                        </div>
+                    )}
+
+                    {/* Tab 6: Curriculum & Syllabus */}
+                    {activeDeptTab === 'syllabus' && (
+                        <div className="dept-section-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '1rem' }}>
                             <h3 style={{ fontSize: '1.2rem', color: 'var(--primary)', margin: 0 }}>Syllabus Subjects</h3>
                             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -3647,9 +4013,34 @@ const DepartmentManager = () => {
                                                                                     {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName}
                                                                                 </td>
                                                                             </tr>
-                                                                            {categorySubjects.map((subj, subjIdx) => (
+                                                                            {categorySubjects.map((subj, subjIdx) => {
+                                                                                const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
+                                                                                const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
+                                                                                return (
                                                                                 <tr key={subjIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                                                                        <div>{subj.code}</div>
+                                                                                        {!isCourseCreator && (
+                                                                                            <span
+                                                                                                title={`Course created by ${creatorName}. Shared in read-only mode.`}
+                                                                                                style={{
+                                                                                                    display: 'inline-flex',
+                                                                                                    alignItems: 'center',
+                                                                                                    gap: '3px',
+                                                                                                    fontSize: '0.68rem',
+                                                                                                    padding: '1px 5px',
+                                                                                                    borderRadius: '4px',
+                                                                                                    background: 'rgba(99, 102, 241, 0.15)',
+                                                                                                    color: '#a5b4fc',
+                                                                                                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                                                                    marginTop: '3px',
+                                                                                                    fontWeight: 'normal'
+                                                                                                }}
+                                                                                            >
+                                                                                                <FaLock size={7} /> {creatorName || 'Shared'}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </td>
                                                                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
                                                                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
                                                                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
@@ -3662,19 +4053,54 @@ const DepartmentManager = () => {
                                                                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
                                                                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
                                                                                         <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                            <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.3rem 0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }} title="Manage Syllabus">
-                                                                                                Syllabus <FaBook size={10} />
+                                                                                            <button
+                                                                                                onClick={() => handleStartManageSyllabus(subj.originalIndex)}
+                                                                                                className={isCourseCreator ? "btn btn-primary" : "btn"}
+                                                                                                style={{
+                                                                                                    padding: '0.3rem 0.5rem',
+                                                                                                    display: 'inline-flex',
+                                                                                                    alignItems: 'center',
+                                                                                                    justifyContent: 'center',
+                                                                                                    gap: '0.25rem',
+                                                                                                    fontSize: '0.75rem',
+                                                                                                    whiteSpace: 'nowrap',
+                                                                                                    background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
+                                                                                                    border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
+                                                                                                    color: isCourseCreator ? undefined : '#c7d2fe'
+                                                                                                }}
+                                                                                                title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
+                                                                                            >
+                                                                                                {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
                                                                                             </button>
-                                                                                            <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.3rem 0.45rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
+                                                                                            <button
+                                                                                                onClick={() => handleStartEditSubject(subj.originalIndex)}
+                                                                                                className="btn"
+                                                                                                style={{
+                                                                                                    padding: '0.3rem 0.45rem',
+                                                                                                    background: 'var(--bg-main)',
+                                                                                                    border: '1px solid var(--glass-border)',
+                                                                                                    color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
+                                                                                                    display: 'inline-flex',
+                                                                                                    alignItems: 'center',
+                                                                                                    justifyContent: 'center'
+                                                                                                }}
+                                                                                                title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
+                                                                                            >
                                                                                                 <FaEdit size={11} />
                                                                                             </button>
-                                                                                            <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
+                                                                                            <button
+                                                                                                onClick={() => handleDeleteSubject(subj.originalIndex)}
+                                                                                                className="btn btn-danger"
+                                                                                                style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                                                title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
+                                                                                            >
                                                                                                 <FaTrash size={11} />
                                                                                             </button>
                                                                                         </div>
                                                                                     </td>
                                                                                 </tr>
-                                                                            ))}
+                                                                                );
+                                                                            })}
                                                                         </React.Fragment>
                                                                     ))}
                                                                 </tbody>
@@ -3726,9 +4152,33 @@ const DepartmentManager = () => {
                                                                                     </td>
                                                                                 </tr>
                                                                                 {subjectsForVert.map((subj, subjIdx) => {
+                                                                                    const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
+                                                                                    const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
                                                                                     return (
                                                                                         <tr key={subjIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                                                                                <div>{subj.code}</div>
+                                                                                                {!isCourseCreator && (
+                                                                                                    <span
+                                                                                                        title={`Course created by ${creatorName}. Shared in read-only mode.`}
+                                                                                                        style={{
+                                                                                                            display: 'inline-flex',
+                                                                                                            alignItems: 'center',
+                                                                                                            gap: '3px',
+                                                                                                            fontSize: '0.68rem',
+                                                                                                            padding: '1px 5px',
+                                                                                                            borderRadius: '4px',
+                                                                                                            background: 'rgba(99, 102, 241, 0.15)',
+                                                                                                            color: '#a5b4fc',
+                                                                                                            border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                                                                            marginTop: '3px',
+                                                                                                            fontWeight: 'normal'
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <FaLock size={7} /> {creatorName || 'Shared'}
+                                                                                                    </span>
+                                                                                                )}
+                                                                                            </td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
@@ -3740,13 +4190,47 @@ const DepartmentManager = () => {
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
                                                                                                 <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                                    <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.3rem 0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }} title="Manage Syllabus">
-                                                                                                        Syllabus <FaBook size={10} />
+                                                                                                    <button
+                                                                                                        onClick={() => handleStartManageSyllabus(subj.originalIndex)}
+                                                                                                        className={isCourseCreator ? "btn btn-primary" : "btn"}
+                                                                                                        style={{
+                                                                                                            padding: '0.3rem 0.5rem',
+                                                                                                            display: 'inline-flex',
+                                                                                                            alignItems: 'center',
+                                                                                                            justifyContent: 'center',
+                                                                                                            gap: '0.25rem',
+                                                                                                            fontSize: '0.75rem',
+                                                                                                            whiteSpace: 'nowrap',
+                                                                                                            background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
+                                                                                                            border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
+                                                                                                            color: isCourseCreator ? undefined : '#c7d2fe'
+                                                                                                        }}
+                                                                                                        title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
+                                                                                                    >
+                                                                                                        {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
                                                                                                     </button>
-                                                                                                    <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.3rem 0.45rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
+                                                                                                    <button
+                                                                                                        onClick={() => handleStartEditSubject(subj.originalIndex)}
+                                                                                                        className="btn"
+                                                                                                        style={{
+                                                                                                            padding: '0.3rem 0.45rem',
+                                                                                                            background: 'var(--bg-main)',
+                                                                                                            border: '1px solid var(--glass-border)',
+                                                                                                            color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
+                                                                                                            display: 'inline-flex',
+                                                                                                            alignItems: 'center',
+                                                                                                            justifyContent: 'center'
+                                                                                                        }}
+                                                                                                        title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
+                                                                                                    >
                                                                                                         <FaEdit size={11} />
                                                                                                     </button>
-                                                                                                    <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
+                                                                                                    <button
+                                                                                                        onClick={() => handleDeleteSubject(subj.originalIndex)}
+                                                                                                        className="btn btn-danger"
+                                                                                                        style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                                                        title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
+                                                                                                    >
                                                                                                         <FaTrash size={11} />
                                                                                                     </button>
                                                                                                 </div>
@@ -3810,9 +4294,33 @@ const DepartmentManager = () => {
                                                                                     </td>
                                                                                 </tr>
                                                                                 {deptSubjects.map((subj, idx) => {
+                                                                                    const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
+                                                                                    const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
                                                                                     return (
                                                                                         <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                                                                                <div>{subj.code}</div>
+                                                                                                {!isCourseCreator && (
+                                                                                                    <span
+                                                                                                        title={`Course created by ${creatorName}. Shared in read-only mode.`}
+                                                                                                        style={{
+                                                                                                            display: 'inline-flex',
+                                                                                                            alignItems: 'center',
+                                                                                                            gap: '3px',
+                                                                                                            fontSize: '0.68rem',
+                                                                                                            padding: '1px 5px',
+                                                                                                            borderRadius: '4px',
+                                                                                                            background: 'rgba(99, 102, 241, 0.15)',
+                                                                                                            color: '#a5b4fc',
+                                                                                                            border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                                                                            marginTop: '3px',
+                                                                                                            fontWeight: 'normal'
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <FaLock size={7} /> {creatorName || 'Shared'}
+                                                                                                    </span>
+                                                                                                )}
+                                                                                            </td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
@@ -3824,13 +4332,47 @@ const DepartmentManager = () => {
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
                                                                                                 <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                                    <button onClick={() => handleStartManageSyllabus(subj.originalIndex)} className="btn btn-primary" style={{ padding: '0.3rem 0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }} title="Manage Syllabus">
-                                                                                                        Syllabus <FaBook size={10} />
+                                                                                                    <button
+                                                                                                        onClick={() => handleStartManageSyllabus(subj.originalIndex)}
+                                                                                                        className={isCourseCreator ? "btn btn-primary" : "btn"}
+                                                                                                        style={{
+                                                                                                            padding: '0.3rem 0.5rem',
+                                                                                                            display: 'inline-flex',
+                                                                                                            alignItems: 'center',
+                                                                                                            justifyContent: 'center',
+                                                                                                            gap: '0.25rem',
+                                                                                                            fontSize: '0.75rem',
+                                                                                                            whiteSpace: 'nowrap',
+                                                                                                            background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
+                                                                                                            border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
+                                                                                                            color: isCourseCreator ? undefined : '#c7d2fe'
+                                                                                                        }}
+                                                                                                        title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
+                                                                                                    >
+                                                                                                        {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
                                                                                                     </button>
-                                                                                                    <button onClick={() => handleStartEditSubject(subj.originalIndex)} className="btn" style={{ padding: '0.3rem 0.45rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Edit Subject">
+                                                                                                    <button
+                                                                                                        onClick={() => handleStartEditSubject(subj.originalIndex)}
+                                                                                                        className="btn"
+                                                                                                        style={{
+                                                                                                            padding: '0.3rem 0.45rem',
+                                                                                                            background: 'var(--bg-main)',
+                                                                                                            border: '1px solid var(--glass-border)',
+                                                                                                            color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
+                                                                                                            display: 'inline-flex',
+                                                                                                            alignItems: 'center',
+                                                                                                            justifyContent: 'center'
+                                                                                                        }}
+                                                                                                        title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
+                                                                                                    >
                                                                                                         <FaEdit size={11} />
                                                                                                     </button>
-                                                                                                    <button onClick={() => handleDeleteSubject(subj.originalIndex)} className="btn btn-danger" style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} title="Delete Subject">
+                                                                                                    <button
+                                                                                                        onClick={() => handleDeleteSubject(subj.originalIndex)}
+                                                                                                        className="btn btn-danger"
+                                                                                                        style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                                                        title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
+                                                                                                    >
                                                                                                         <FaTrash size={11} />
                                                                                                     </button>
                                                                                                 </div>
@@ -3854,14 +4396,18 @@ const DepartmentManager = () => {
                                 }
                             </div>
                         )}
-
-
                     </div>
-                </div>
-            )}
+                )}
+            </>
+        )}
 
             {/* Edit Subject Modal */}
-            {editingSubjectIndex !== null && editingSubjectValue !== null && (
+            {/* Edit Subject Modal */}
+            {editingSubjectIndex !== null && editingSubjectValue !== null && (() => {
+                const isCreator = !editingSubjectValue.creatorDept || editingSubjectValue.creatorDept === selectedDept || isAdmin;
+                const creatorName = editingSubjectValue.creatorDept ? getDeptDisplayName(editingSubjectValue.creatorDept) : '';
+
+                return (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                     background: 'rgba(15, 23, 42, 0.85)', zIndex: 99999,
@@ -3875,51 +4421,81 @@ const DepartmentManager = () => {
                         boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)', margin: 0 }}>Edit Subject</h3>
+                            <div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)', margin: 0 }}>Edit Subject</h3>
+                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                    {isCreator ? `Creator Department: ${getDeptDisplayName(selectedDept)}` : `Shared from: ${creatorName || 'Master Bank'} (Core Details Locked)`}
+                                </span>
+                            </div>
                             <button onClick={handleCancelEditSubject} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}><FaTimes /></button>
                         </div>
 
+                        {!isCreator && (
+                            <div style={{
+                                padding: '0.85rem 1rem',
+                                background: 'rgba(234, 179, 8, 0.12)',
+                                border: '1px solid rgba(234, 179, 8, 0.35)',
+                                borderRadius: '8px',
+                                color: '#fef08a',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                fontSize: '0.85rem'
+                            }}>
+                                <FaLock size={16} style={{ color: '#facc15', flexShrink: 0 }} />
+                                <div>
+                                    <strong style={{ color: '#ffffff' }}>Course Data Owned by {creatorName}</strong>
+                                    <p style={{ margin: '0.2rem 0 0', fontSize: '0.78rem', color: '#cbd5e1' }}>
+                                        Course Code, Title, and L-T-P-Credits are managed by <strong>{creatorName}</strong> and cannot be edited by other departments. You can only adjust the semester or elective category placement within your department's curriculum.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Inter-Department Master Course Bank Quick Selector */}
-                        <div style={{ padding: '0.8rem 1rem', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(59, 130, 246, 0.08))', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '6px' }}>
-                                <label style={{ fontSize: '0.85rem', color: '#a5b4fc', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
-                                    ⚡ Sync / Auto-Fill from Inter-Department Course Bank
-                                </label>
+                        {isCreator && (
+                            <div style={{ padding: '0.8rem 1rem', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(59, 130, 246, 0.08))', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '6px' }}>
+                                    <label style={{ fontSize: '0.85rem', color: '#a5b4fc', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                                        ⚡ Sync / Auto-Fill from Inter-Department Course Bank
+                                    </label>
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <select
+                                        value={editingSubjectValue.code || ''}
+                                        onChange={e => {
+                                            const sel = e.target.value;
+                                            if (sel) {
+                                                applyMasterCourseToEditingSubject(sel);
+                                            }
+                                        }}
+                                        style={{
+                                            flex: 1, minWidth: '240px', padding: '0.6rem 0.8rem', borderRadius: '6px',
+                                            background: 'var(--bg-main)', border: '1px solid rgba(99, 102, 241, 0.45)',
+                                            color: 'white', outline: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '500'
+                                        }}
+                                    >
+                                        <option value="">-- Choose Course from Master Bank to Auto-Sync ({masterCourses.length} available) --</option>
+                                        {masterCourses.map(c => (
+                                            <option key={c.code} value={c.code}>
+                                                {c.code} - {c.title} (L-T-P: {c.l || 0}-{c.t || 0}-{c.p || 0}, C: {c.credits || 0}) • {c.sourceDeptName || 'Master Bank'}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                                <select
-                                    value={editingSubjectValue.code || ''}
-                                    onChange={e => {
-                                        const sel = e.target.value;
-                                        if (sel) {
-                                            applyMasterCourseToEditingSubject(sel);
-                                        }
-                                    }}
-                                    style={{
-                                        flex: 1, minWidth: '240px', padding: '0.6rem 0.8rem', borderRadius: '6px',
-                                        background: 'var(--bg-main)', border: '1px solid rgba(99, 102, 241, 0.45)',
-                                        color: 'white', outline: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '500'
-                                    }}
-                                >
-                                    <option value="">-- Choose Course from Master Bank to Auto-Sync ({masterCourses.length} available) --</option>
-                                    {masterCourses.map(c => (
-                                        <option key={c.code} value={c.code}>
-                                            {c.code} - {c.title} (L-T-P: {c.l || 0}-{c.t || 0}-{c.p || 0}, C: {c.credits || 0}) • {c.sourceDeptName || 'Master Bank'}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
+                        )}
 
                         {/* Subject Fields */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                             {/* Course Code */}
                             <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Code</label>
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Code {!isCreator && '🔒'}</label>
                                 <input
                                     type="text"
                                     list="master-course-codes-list"
                                     value={editingSubjectValue.code || ''}
+                                    disabled={!isCreator}
                                     onChange={e => {
                                         const val = e.target.value.toUpperCase();
                                         updateEditingSubjectField('code', val);
@@ -3929,36 +4505,67 @@ const DepartmentManager = () => {
                                         }
                                     }}
                                     placeholder="e.g. HS3151"
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                 />
                             </div>
 
                             {/* Course Title */}
                             <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Title</label>
-                                <input type="text" value={editingSubjectValue.title || ''} onChange={e => updateEditingSubjectField('title', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Title {!isCreator && '🔒'}</label>
+                                <input
+                                    type="text"
+                                    value={editingSubjectValue.title || ''}
+                                    disabled={!isCreator}
+                                    onChange={e => updateEditingSubjectField('title', e.target.value)}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                />
                             </div>
 
                             {/* L-T-P-Credits-ContactPeriods */}
                             <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>L (Lecture periods)</label>
-                                <input type="number" value={editingSubjectValue.l === undefined ? '' : editingSubjectValue.l} onChange={e => { const val = e.target.value; updateEditingSubjectField('l', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>L (Lecture periods) {!isCreator && '🔒'}</label>
+                                <input
+                                    type="number"
+                                    disabled={!isCreator}
+                                    value={editingSubjectValue.l === undefined ? '' : editingSubjectValue.l}
+                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('l', val === '' ? '' : Math.max(0, Number(val))); }}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                />
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>T (Tutorial periods)</label>
-                                <input type="number" value={editingSubjectValue.t === undefined ? '' : editingSubjectValue.t} onChange={e => { const val = e.target.value; updateEditingSubjectField('t', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>T (Tutorial periods) {!isCreator && '🔒'}</label>
+                                <input
+                                    type="number"
+                                    disabled={!isCreator}
+                                    value={editingSubjectValue.t === undefined ? '' : editingSubjectValue.t}
+                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('t', val === '' ? '' : Math.max(0, Number(val))); }}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                />
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>P (Practical periods)</label>
-                                <input type="number" value={editingSubjectValue.p === undefined ? '' : editingSubjectValue.p} onChange={e => { const val = e.target.value; updateEditingSubjectField('p', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>P (Practical periods) {!isCreator && '🔒'}</label>
+                                <input
+                                    type="number"
+                                    disabled={!isCreator}
+                                    value={editingSubjectValue.p === undefined ? '' : editingSubjectValue.p}
+                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('p', val === '' ? '' : Math.max(0, Number(val))); }}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                />
                             </div>
                             <div>
                                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Total Contact Periods</label>
                                 <input type="number" value={editingSubjectValue.contactPeriods === undefined ? '' : editingSubjectValue.contactPeriods} readOnly style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed', outline: 'none' }} />
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Credits</label>
-                                <input type="number" step="any" value={editingSubjectValue.credits === undefined ? '' : editingSubjectValue.credits} onChange={e => { const val = e.target.value; updateEditingSubjectField('credits', val === '' ? '' : Number(val)); }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Credits {!isCreator && '🔒'}</label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    disabled={!isCreator}
+                                    value={editingSubjectValue.credits === undefined ? '' : editingSubjectValue.credits}
+                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('credits', val === '' ? '' : Number(val)); }}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                />
                             </div>
 
                             {/* Category and Category Type */}
@@ -3991,12 +4598,28 @@ const DepartmentManager = () => {
 
                             {/* CIA, ESE, Total Marks */}
                             <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>CIA Marks</label>
-                                <input type="number" min="0" max="100" value={editingSubjectValue.cia === undefined ? '' : editingSubjectValue.cia} onChange={e => { const val = e.target.value; updateEditingSubjectField('cia', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>CIA Marks {!isCreator && '🔒'}</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    disabled={!isCreator}
+                                    value={editingSubjectValue.cia === undefined ? '' : editingSubjectValue.cia}
+                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('cia', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                />
                             </div>
                             <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>ESE Marks</label>
-                                <input type="number" min="0" max="100" value={editingSubjectValue.ese === undefined ? '' : editingSubjectValue.ese} onChange={e => { const val = e.target.value; updateEditingSubjectField('ese', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>ESE Marks {!isCreator && '🔒'}</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    disabled={!isCreator}
+                                    value={editingSubjectValue.ese === undefined ? '' : editingSubjectValue.ese}
+                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('ese', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                />
                             </div>
                             <div>
                                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Total Marks</label>
@@ -4045,11 +4668,16 @@ const DepartmentManager = () => {
                         </div>
                     </div>
                 </div>
-            )}
+                );
+            })()}
 
             {/* Manage Syllabus Modal */}
             {selectedSyllabusSubjectIndex !== null && syllabusEditValue !== null && (() => {
+                const currentSubject = data.subjects[selectedSyllabusSubjectIndex];
+                const isCreator = !currentSubject?.creatorDept || currentSubject?.creatorDept === selectedDept || isAdmin;
+                const creatorName = currentSubject?.creatorDept ? getDeptDisplayName(currentSubject.creatorDept) : '';
                 const showExercisesTab = (syllabusEditValue.category || '').toUpperCase().includes('PRACTICAL') || (syllabusEditValue.category || '').toUpperCase().includes('LAB');
+
                 return (
                     <div style={{
                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -4065,11 +4693,35 @@ const DepartmentManager = () => {
                             color: 'white'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)', margin: 0 }}>
-                                    Manage Syllabus: {syllabusEditValue.code} - {syllabusEditValue.title}
-                                </h3>
+                                <div>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        Manage Syllabus: {syllabusEditValue.code} - {syllabusEditValue.title}
+                                        {!isCreator && <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.2)', color: '#93c5fd', border: '1px solid rgba(59, 130, 246, 0.4)', fontWeight: 'normal', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><FaLock /> Read Only</span>}
+                                    </h3>
+                                </div>
                                 <button onClick={() => { setSelectedSyllabusSubjectIndex(null); setSyllabusEditValue(null); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}><FaTimes /></button>
                             </div>
+
+                            {/* Ownership Alert Banner if read-only */}
+                            {!isCreator && (
+                                <div style={{
+                                    padding: '0.85rem 1.1rem',
+                                    background: 'rgba(59, 130, 246, 0.08)',
+                                    border: '1px solid rgba(59, 130, 246, 0.25)',
+                                    borderRadius: '8px',
+                                    color: '#93c5fd',
+                                    fontSize: '0.88rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    lineHeight: 1.5
+                                }}>
+                                    <FaLock style={{ color: '#60a5fa', fontSize: '1.1rem', flexShrink: 0 }} />
+                                    <div>
+                                        <strong>Shared Course Syllabus (Read-Only):</strong> This course was created by <strong>{creatorName || 'another department'}</strong>. You can view all syllabus details and use this course in your curriculum, but master syllabus modifications are reserved for the creator department or an Administrator.
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Tabs Navigation */}
                             <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>
@@ -4105,29 +4757,49 @@ const DepartmentManager = () => {
                                     <>
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                             <div>
-                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Subtitle (e.g. Common to all branches)</label>
-                                                <input type="text" value={syllabusEditValue.subtitle} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, subtitle: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} placeholder="e.g. Common to all B.E/B.Tech Programmes" />
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Subtitle (e.g. Common to all branches) {!isCreator && '🔒'}</label>
+                                                <input
+                                                    type="text"
+                                                    disabled={!isCreator}
+                                                    value={syllabusEditValue.subtitle}
+                                                    onChange={e => setSyllabusEditValue({ ...syllabusEditValue, subtitle: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                                    placeholder="e.g. Common to all B.E/B.Tech Programmes"
+                                                />
                                             </div>
                                             <div>
-                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category Full Name</label>
-                                                <input type="text" value={syllabusEditValue.categoryName} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, categoryName: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} placeholder="e.g. Humanities, Social Sciences and Management Course (HUM)" />
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category Full Name {!isCreator && '🔒'}</label>
+                                                <input
+                                                    type="text"
+                                                    disabled={!isCreator}
+                                                    value={syllabusEditValue.categoryName}
+                                                    onChange={e => setSyllabusEditValue({ ...syllabusEditValue, categoryName: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                                    placeholder="e.g. Humanities, Social Sciences and Management Course (HUM)"
+                                                />
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Pre-requisites</label>
-                                            <textarea value={syllabusEditValue.prerequisites} onChange={e => setSyllabusEditValue({ ...syllabusEditValue, prerequisites: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '60px', resize: 'vertical' }} placeholder="e.g. Basic knowledge of English grammar..." />
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Pre-requisites {!isCreator && '🔒'}</label>
+                                            <textarea
+                                                disabled={!isCreator}
+                                                value={syllabusEditValue.prerequisites}
+                                                onChange={e => setSyllabusEditValue({ ...syllabusEditValue, prerequisites: e.target.value })}
+                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', minHeight: '60px', resize: 'vertical', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                                placeholder="e.g. Basic knowledge of English grammar..."
+                                            />
                                         </div>
 
                                         <div>
-                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Objectives </h4>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Objectives {!isCreator && '🔒'}</h4>
                                             <div style={{ overflowX: 'auto' }}>
                                                 <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
                                                     <thead>
                                                         <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
                                                             <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
                                                             <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Objective Description</th>
-                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                            {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -4137,65 +4809,70 @@ const DepartmentManager = () => {
                                                                 <td style={{ padding: '0.5rem 0.75rem' }}>
                                                                     <input
                                                                         type="text"
+                                                                        disabled={!isCreator}
                                                                         value={obj}
                                                                         onChange={e => {
                                                                             const newObjs = [...syllabusEditValue.objectives];
                                                                             newObjs[idx] = e.target.value;
                                                                             setSyllabusEditValue({ ...syllabusEditValue, objectives: newObjs });
                                                                         }}
-                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                     />
                                                                 </td>
-                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            const newObjs = syllabusEditValue.objectives.filter((_, i) => i !== idx);
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, objectives: newObjs });
-                                                                        }}
-                                                                        className="btn btn-danger"
-                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                    >
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </td>
+                                                                {isCreator && (
+                                                                    <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                const newObjs = syllabusEditValue.objectives.filter((_, i) => i !== idx);
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, objectives: newObjs });
+                                                                            }}
+                                                                            className="btn btn-danger"
+                                                                            style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                        >
+                                                                            <FaTrash />
+                                                                        </button>
+                                                                    </td>
+                                                                )}
                                                             </tr>
                                                         ))}
                                                         {syllabusEditValue.objectives.length === 0 && (
                                                             <tr>
-                                                                <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No objectives defined. Add one below.</td>
+                                                                <td colSpan={isCreator ? 3 : 2} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No objectives defined.</td>
                                                             </tr>
                                                         )}
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                <input
-                                                    type="text"
-                                                    id="newObjectiveInput"
-                                                    placeholder="Type new course objective description here..."
-                                                    style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
-                                                />
-                                                <button
-                                                    onClick={() => {
-                                                        const input = document.getElementById('newObjectiveInput');
-                                                        if (input && input.value.trim()) {
-                                                            setSyllabusEditValue({
-                                                                ...syllabusEditValue,
-                                                                objectives: [...syllabusEditValue.objectives, input.value.trim()]
-                                                            });
-                                                            input.value = '';
-                                                        }
-                                                    }}
-                                                    className="btn btn-primary"
-                                                    style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                                >
-                                                    <FaPlus /> Add Objective
-                                                </button>
-                                            </div>
+                                            {isCreator && (
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                    <input
+                                                        type="text"
+                                                        id="newObjectiveInput"
+                                                        placeholder="Type new course objective description here..."
+                                                        style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const input = document.getElementById('newObjectiveInput');
+                                                            if (input && input.value.trim()) {
+                                                                setSyllabusEditValue({
+                                                                    ...syllabusEditValue,
+                                                                    objectives: [...syllabusEditValue.objectives, input.value.trim()]
+                                                                });
+                                                                input.value = '';
+                                                            }
+                                                        }}
+                                                        className="btn btn-primary"
+                                                        style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                    >
+                                                        <FaPlus /> Add Objective
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div>
-                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Outcomes (COs) </h4>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Outcomes (COs) {!isCreator && '🔒'}</h4>
                                             <div style={{ overflowX: 'auto' }}>
                                                 <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
                                                     <thead>
@@ -4203,7 +4880,7 @@ const DepartmentManager = () => {
                                                             <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>CO No</th>
                                                             <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Course Outcome Description</th>
                                                             <th style={{ padding: '0.6rem 0.75rem', width: '22%', color: 'var(--text-main)', fontWeight: 'bold' }}>RBT Level</th>
-                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                            {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -4212,110 +4889,117 @@ const DepartmentManager = () => {
                                                                 <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
                                                                     <input
                                                                         type="text"
+                                                                        disabled={!isCreator}
                                                                         value={co.coNo}
                                                                         onChange={e => {
                                                                             const newOutcomes = [...syllabusEditValue.outcomes];
                                                                             newOutcomes[idx].coNo = e.target.value;
                                                                             setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
                                                                         }}
-                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', fontWeight: 'bold', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                     />
                                                                 </td>
                                                                 <td style={{ padding: '0.5rem 0.75rem' }}>
                                                                     <textarea
+                                                                        disabled={!isCreator}
                                                                         value={co.outcome}
                                                                         onChange={e => {
                                                                             const newOutcomes = [...syllabusEditValue.outcomes];
                                                                             newOutcomes[idx].outcome = e.target.value;
                                                                             setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
                                                                         }}
-                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '55px', resize: 'vertical' }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', minHeight: '55px', resize: 'vertical', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                     />
                                                                 </td>
                                                                 <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
                                                                     <select
+                                                                        disabled={!isCreator}
                                                                         value={co.rbtLevel}
                                                                         onChange={e => {
                                                                             const newOutcomes = [...syllabusEditValue.outcomes];
                                                                             newOutcomes[idx].rbtLevel = e.target.value;
                                                                             setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
                                                                         }}
-                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
                                                                     >
                                                                         {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
                                                                             <option key={lvl} value={lvl}>{lvl}</option>
                                                                         ))}
                                                                     </select>
                                                                 </td>
-                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', verticalAlign: 'top' }}>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            const newOutcomes = syllabusEditValue.outcomes.filter((_, i) => i !== idx);
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
-                                                                        }}
-                                                                        className="btn btn-danger"
-                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                    >
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </td>
+                                                                {isCreator && (
+                                                                    <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', verticalAlign: 'top' }}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                const newOutcomes = syllabusEditValue.outcomes.filter((_, i) => i !== idx);
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
+                                                                            }}
+                                                                            className="btn btn-danger"
+                                                                            style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                        >
+                                                                            <FaTrash />
+                                                                        </button>
+                                                                    </td>
+                                                                )}
                                                             </tr>
                                                         ))}
                                                         {syllabusEditValue.outcomes.length === 0 && (
                                                             <tr>
-                                                                <td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No course outcomes defined. Add one below.</td>
+                                                                <td colSpan={isCreator ? 4 : 3} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No course outcomes defined.</td>
                                                             </tr>
                                                         )}
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '15% 55% 20% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                                <input
-                                                    type="text"
-                                                    id="newCoNoInput"
-                                                    placeholder="CO No"
-                                                    defaultValue={`CO${syllabusEditValue.outcomes.length + 1}`}
-                                                    style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
-                                                />
-                                                <textarea
-                                                    id="newOutcomeInput"
-                                                    placeholder="Type new course outcome description..."
-                                                    style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical' }}
-                                                />
-                                                <select
-                                                    id="newOutcomeRbtSelect"
-                                                    defaultValue="Apply"
-                                                    style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                                >
-                                                    {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
-                                                        <option key={lvl} value={lvl}>{lvl}</option>
-                                                    ))}
-                                                </select>
-                                                <button
-                                                    onClick={() => {
-                                                        const coNoInput = document.getElementById('newCoNoInput');
-                                                        const outcomeInput = document.getElementById('newOutcomeInput');
-                                                        const rbtSelect = document.getElementById('newOutcomeRbtSelect');
-                                                        if (coNoInput && outcomeInput && rbtSelect && outcomeInput.value.trim()) {
-                                                            const newCo = {
-                                                                coNo: coNoInput.value.trim() || `CO${syllabusEditValue.outcomes.length + 1}`,
-                                                                outcome: outcomeInput.value.trim(),
-                                                                rbtLevel: rbtSelect.value
-                                                            };
-                                                            setSyllabusEditValue({
-                                                                ...syllabusEditValue,
-                                                                outcomes: [...syllabusEditValue.outcomes, newCo]
-                                                            });
-                                                            outcomeInput.value = '';
-                                                            coNoInput.value = `CO${syllabusEditValue.outcomes.length + 2}`;
-                                                        }
-                                                    }}
-                                                    className="btn btn-primary"
-                                                    style={{ padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
-                                                >
-                                                    <FaPlus />
-                                                </button>
-                                            </div>
+                                            {isCreator && (
+                                                <div style={{ display: 'grid', gridTemplateColumns: '15% 55% 20% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                                    <input
+                                                        type="text"
+                                                        id="newCoNoInput"
+                                                        placeholder="CO No"
+                                                        defaultValue={`CO${syllabusEditValue.outcomes.length + 1}`}
+                                                        style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
+                                                    />
+                                                    <textarea
+                                                        id="newOutcomeInput"
+                                                        placeholder="Type new course outcome description..."
+                                                        style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical' }}
+                                                    />
+                                                    <select
+                                                        id="newOutcomeRbtSelect"
+                                                        defaultValue="Apply"
+                                                        style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                    >
+                                                        {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
+                                                            <option key={lvl} value={lvl}>{lvl}</option>
+                                                        ))}
+                                                    </select>
+                                                    <button
+                                                        onClick={() => {
+                                                            const coNoInput = document.getElementById('newCoNoInput');
+                                                            const outcomeInput = document.getElementById('newOutcomeInput');
+                                                            const rbtSelect = document.getElementById('newOutcomeRbtSelect');
+                                                            if (coNoInput && outcomeInput && rbtSelect && outcomeInput.value.trim()) {
+                                                                const newCo = {
+                                                                    coNo: coNoInput.value.trim() || `CO${syllabusEditValue.outcomes.length + 1}`,
+                                                                    outcome: outcomeInput.value.trim(),
+                                                                    rbtLevel: rbtSelect.value
+                                                                };
+                                                                setSyllabusEditValue({
+                                                                    ...syllabusEditValue,
+                                                                    outcomes: [...syllabusEditValue.outcomes, newCo]
+                                                                });
+                                                                outcomeInput.value = '';
+                                                                coNoInput.value = `CO${syllabusEditValue.outcomes.length + 2}`;
+                                                            }
+                                                        }}
+                                                        className="btn btn-primary"
+                                                        style={{ padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                                                    >
+                                                        <FaPlus />
+                                                    </button>
+                                                </div>
+                                            )}
                                             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
                                                 <button
                                                     onClick={() => setActiveSyllabusTab('units')}
@@ -4331,7 +5015,7 @@ const DepartmentManager = () => {
 
                                 {activeSyllabusTab === 'units' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>Unit-wise Syllabus </h4>
+                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>Unit-wise Syllabus {!isCreator && '🔒'}</h4>
                                         <div style={{ overflowX: 'auto' }}>
                                             <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)' }}>
                                                 <thead>
@@ -4339,7 +5023,7 @@ const DepartmentManager = () => {
                                                         <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit No</th>
                                                         <th style={{ padding: '0.6rem 0.75rem', width: '33%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit Title</th>
                                                         <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Topics (One topic per line)</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '10%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '10%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -4348,29 +5032,32 @@ const DepartmentManager = () => {
                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
                                                                 <input
                                                                     type="text"
+                                                                    disabled={!isCreator}
                                                                     value={unit.unitNo}
                                                                     onChange={e => {
                                                                         const newUnits = [...syllabusEditValue.units];
                                                                         newUnits[idx].unitNo = e.target.value;
                                                                         setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
                                                                     }}
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', fontWeight: 'bold', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                 />
                                                             </td>
                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
                                                                 <input
                                                                     type="text"
+                                                                    disabled={!isCreator}
                                                                     value={unit.title}
                                                                     onChange={e => {
                                                                         const newUnits = [...syllabusEditValue.units];
                                                                         newUnits[idx].title = e.target.value;
                                                                         setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
                                                                     }}
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                 />
                                                             </td>
                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
                                                                 <textarea
+                                                                    disabled={!isCreator}
                                                                     value={unit.topics.join('\n')}
                                                                     onChange={e => {
                                                                         const newUnits = [...syllabusEditValue.units];
@@ -4378,76 +5065,80 @@ const DepartmentManager = () => {
                                                                         setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
                                                                     }}
                                                                     placeholder="Enter topics, one per line..."
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '80px', resize: 'vertical', fontSize: '0.85rem' }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', minHeight: '80px', resize: 'vertical', fontSize: '0.85rem', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                 />
                                                             </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top', textAlign: 'center' }}>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        const newUnits = syllabusEditValue.units.filter((_, i) => i !== idx);
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                    }}
-                                                                    className="btn btn-danger"
-                                                                    style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                >
-                                                                    <FaTrash />
-                                                                </button>
-                                                            </td>
+                                                            {isCreator && (
+                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top', textAlign: 'center' }}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newUnits = syllabusEditValue.units.filter((_, i) => i !== idx);
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                        }}
+                                                                        className="btn btn-danger"
+                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    >
+                                                                        <FaTrash />
+                                                                    </button>
+                                                                </td>
+                                                            )}
                                                         </tr>
                                                     ))}
                                                     {syllabusEditValue.units.length === 0 && (
                                                         <tr>
-                                                            <td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No units defined. Add one below.</td>
+                                                            <td colSpan={isCreator ? 4 : 3} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No units defined.</td>
                                                         </tr>
                                                     )}
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '15% 35% 40% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                            <input
-                                                type="text"
-                                                id="newUnitNoInput"
-                                                placeholder="Unit No"
-                                                defaultValue={`UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`}
-                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
-                                            />
-                                            <input
-                                                type="text"
-                                                id="newUnitTitleInput"
-                                                placeholder="Unit Title (e.g. INTRODUCTION)..."
-                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
-                                            />
-                                            <textarea
-                                                id="newUnitTopicsInput"
-                                                placeholder="Enter topics, one per line..."
-                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical', fontSize: '0.85rem' }}
-                                            />
-                                            <button
-                                                onClick={() => {
-                                                    const unitNoInput = document.getElementById('newUnitNoInput');
-                                                    const titleInput = document.getElementById('newUnitTitleInput');
-                                                    const topicsInput = document.getElementById('newUnitTopicsInput');
-                                                    if (unitNoInput && titleInput && topicsInput && (titleInput.value.trim() || topicsInput.value.trim())) {
-                                                        const newUnit = {
-                                                            unitNo: unitNoInput.value.trim() || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`,
-                                                            title: titleInput.value.trim(),
-                                                            topics: topicsInput.value.trim().split('\n').filter(t => t.trim() !== '')
-                                                        };
-                                                        setSyllabusEditValue({
-                                                            ...syllabusEditValue,
-                                                            units: [...syllabusEditValue.units, newUnit]
-                                                        });
-                                                        titleInput.value = '';
-                                                        topicsInput.value = '';
-                                                        unitNoInput.value = `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length + 1] || (syllabusEditValue.units.length + 2)}`;
-                                                    }
-                                                }}
-                                                className="btn btn-primary"
-                                                style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
-                                            >
-                                                <FaPlus />
-                                            </button>
-                                        </div>
+                                        {isCreator && (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '15% 35% 40% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                                <input
+                                                    type="text"
+                                                    id="newUnitNoInput"
+                                                    placeholder="Unit No"
+                                                    defaultValue={`UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`}
+                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    id="newUnitTitleInput"
+                                                    placeholder="Unit Title (e.g. INTRODUCTION)..."
+                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                />
+                                                <textarea
+                                                    id="newUnitTopicsInput"
+                                                    placeholder="Enter topics, one per line..."
+                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical', fontSize: '0.85rem' }}
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        const unitNoInput = document.getElementById('newUnitNoInput');
+                                                        const titleInput = document.getElementById('newUnitTitleInput');
+                                                        const topicsInput = document.getElementById('newUnitTopicsInput');
+                                                        if (unitNoInput && titleInput && topicsInput && (titleInput.value.trim() || topicsInput.value.trim())) {
+                                                            const newUnit = {
+                                                                unitNo: unitNoInput.value.trim() || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`,
+                                                                title: titleInput.value.trim(),
+                                                                topics: topicsInput.value.trim().split('\n').filter(t => t.trim() !== '')
+                                                            };
+                                                            setSyllabusEditValue({
+                                                                ...syllabusEditValue,
+                                                                units: [...syllabusEditValue.units, newUnit]
+                                                            });
+                                                            titleInput.value = '';
+                                                            topicsInput.value = '';
+                                                            unitNoInput.value = `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length + 1] || (syllabusEditValue.units.length + 2)}`;
+                                                        }
+                                                    }}
+                                                    className="btn btn-primary"
+                                                    style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                                                >
+                                                    <FaPlus />
+                                                </button>
+                                            </div>
+                                        )}
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
                                             <button
                                                 onClick={() => setActiveSyllabusTab(showExercisesTab ? 'experiments' : 'textbooks-references')}
@@ -4462,7 +5153,7 @@ const DepartmentManager = () => {
 
                                 {activeSyllabusTab === 'experiments' && showExercisesTab && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>List of Exercises</h4>
+                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>List of Exercises {!isCreator && '🔒'}</h4>
                                         <div style={{ overflowX: 'auto' }}>
                                             <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)' }}>
                                                 <thead>
@@ -4471,7 +5162,7 @@ const DepartmentManager = () => {
                                                         <th style={{ padding: '0.6rem 0.75rem', width: '58%', color: 'var(--text-main)', fontWeight: 'bold' }}>Exercise / Experiment Name</th>
                                                         <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold', textAlign: 'center' }}>CO</th>
                                                         <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold', textAlign: 'center' }}>RBT Level</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '8%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                        {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '8%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -4480,134 +5171,142 @@ const DepartmentManager = () => {
                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                                 <input
                                                                     type="text"
+                                                                    disabled={!isCreator}
                                                                     value={exp.sNo || ''}
                                                                     onChange={e => {
                                                                         const newExps = [...(syllabusEditValue.experiments || [])];
                                                                         newExps[idx].sNo = e.target.value;
                                                                         setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
                                                                     }}
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', textAlign: 'center', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                 />
                                                             </td>
                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle' }}>
                                                                 <input
                                                                     type="text"
+                                                                    disabled={!isCreator}
                                                                     value={exp.name || ''}
                                                                     onChange={e => {
                                                                         const newExps = [...(syllabusEditValue.experiments || [])];
                                                                         newExps[idx].name = e.target.value;
                                                                         setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
                                                                     }}
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                 />
                                                             </td>
                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                                 <input
                                                                     type="text"
+                                                                    disabled={!isCreator}
                                                                     value={exp.co || ''}
                                                                     onChange={e => {
                                                                         const newExps = [...(syllabusEditValue.experiments || [])];
                                                                         newExps[idx].co = e.target.value;
                                                                         setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
                                                                     }}
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', textAlign: 'center', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                 />
                                                             </td>
                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
                                                                 <select
+                                                                    disabled={!isCreator}
                                                                     value={exp.rbtLevel || 'Apply'}
                                                                     onChange={e => {
                                                                         const newExps = [...(syllabusEditValue.experiments || [])];
                                                                         newExps[idx].rbtLevel = e.target.value;
                                                                         setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
                                                                     }}
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
                                                                 >
                                                                     {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
                                                                         <option key={lvl} value={lvl}>{lvl}</option>
                                                                     ))}
                                                                 </select>
                                                             </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        const newExps = (syllabusEditValue.experiments || []).filter((_, i) => i !== idx);
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
-                                                                    }}
-                                                                    className="btn btn-danger"
-                                                                    style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                >
-                                                                    <FaTrash />
-                                                                </button>
-                                                            </td>
+                                                            {isCreator && (
+                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const newExps = (syllabusEditValue.experiments || []).filter((_, i) => i !== idx);
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, experiments: newExps });
+                                                                        }}
+                                                                        className="btn btn-danger"
+                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    >
+                                                                        <FaTrash />
+                                                                    </button>
+                                                                </td>
+                                                            )}
                                                         </tr>
                                                     ))}
                                                     {(!syllabusEditValue.experiments || syllabusEditValue.experiments.length === 0) && (
                                                         <tr>
-                                                            <td colSpan="5" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No exercises defined. Add one below.</td>
+                                                            <td colSpan={isCreator ? 5 : 4} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No exercises defined.</td>
                                                         </tr>
                                                     )}
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '10% 54% 12% 16% 8%', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                            <input
-                                                type="text"
-                                                id="newExpSNoInput"
-                                                placeholder="S.No"
-                                                defaultValue={(syllabusEditValue.experiments || []).length + 1}
-                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold', textAlign: 'center' }}
-                                            />
-                                            <input
-                                                type="text"
-                                                id="newExpNameInput"
-                                                placeholder="Experiment Name..."
-                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
-                                            />
-                                            <input
-                                                type="text"
-                                                id="newExpCoInput"
-                                                placeholder="CO"
-                                                defaultValue="CO1"
-                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }}
-                                            />
-                                            <select
-                                                id="newExpRbtSelect"
-                                                defaultValue="Apply"
-                                                style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                            >
-                                                {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
-                                                    <option key={lvl} value={lvl}>{lvl}</option>
-                                                ))}
-                                            </select>
-                                            <button
-                                                onClick={() => {
-                                                    const sNoInput = document.getElementById('newExpSNoInput');
-                                                    const nameInput = document.getElementById('newExpNameInput');
-                                                    const coInput = document.getElementById('newExpCoInput');
-                                                    const rbtSelect = document.getElementById('newExpRbtSelect');
-                                                    if (sNoInput && nameInput && coInput && rbtSelect && nameInput.value.trim()) {
-                                                        const newExp = {
-                                                            sNo: sNoInput.value.trim() || String((syllabusEditValue.experiments || []).length + 1),
-                                                            name: nameInput.value.trim(),
-                                                            co: coInput.value.trim() || 'CO1',
-                                                            rbtLevel: rbtSelect.value
-                                                        };
-                                                        const updatedExps = [...(syllabusEditValue.experiments || []), newExp];
-                                                        setSyllabusEditValue({
-                                                            ...syllabusEditValue,
-                                                            experiments: updatedExps
-                                                        });
-                                                        nameInput.value = '';
-                                                        sNoInput.value = String(updatedExps.length + 1);
-                                                    }
-                                                }}
-                                                className="btn btn-primary"
-                                                style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
-                                            >
-                                                <FaPlus />
-                                            </button>
-                                        </div>
+                                        {isCreator && (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '10% 54% 12% 16% 8%', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                                <input
+                                                    type="text"
+                                                    id="newExpSNoInput"
+                                                    placeholder="S.No"
+                                                    defaultValue={(syllabusEditValue.experiments || []).length + 1}
+                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold', textAlign: 'center' }}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    id="newExpNameInput"
+                                                    placeholder="Experiment Name..."
+                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    id="newExpCoInput"
+                                                    placeholder="CO"
+                                                    defaultValue="CO1"
+                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', textAlign: 'center' }}
+                                                />
+                                                <select
+                                                    id="newExpRbtSelect"
+                                                    defaultValue="Apply"
+                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                >
+                                                    {['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'].map(lvl => (
+                                                        <option key={lvl} value={lvl}>{lvl}</option>
+                                                    ))}
+                                                </select>
+                                                <button
+                                                    onClick={() => {
+                                                        const sNoInput = document.getElementById('newExpSNoInput');
+                                                        const nameInput = document.getElementById('newExpNameInput');
+                                                        const coInput = document.getElementById('newExpCoInput');
+                                                        const rbtSelect = document.getElementById('newExpRbtSelect');
+                                                        if (sNoInput && nameInput && coInput && rbtSelect && nameInput.value.trim()) {
+                                                            const newExp = {
+                                                                sNo: sNoInput.value.trim() || String((syllabusEditValue.experiments || []).length + 1),
+                                                                name: nameInput.value.trim(),
+                                                                co: coInput.value.trim() || 'CO1',
+                                                                rbtLevel: rbtSelect.value
+                                                            };
+                                                            const updatedExps = [...(syllabusEditValue.experiments || []), newExp];
+                                                            setSyllabusEditValue({
+                                                                ...syllabusEditValue,
+                                                                experiments: updatedExps
+                                                            });
+                                                            nameInput.value = '';
+                                                            sNoInput.value = String(updatedExps.length + 1);
+                                                        }
+                                                    }}
+                                                    className="btn btn-primary"
+                                                    style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                                                >
+                                                    <FaPlus />
+                                                </button>
+                                            </div>
+                                        )}
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
                                             <button
                                                 onClick={() => setActiveSyllabusTab('textbooks-references')}
@@ -4623,14 +5322,14 @@ const DepartmentManager = () => {
                                 {activeSyllabusTab === 'textbooks-references' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                         <div>
-                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Textbooks </h4>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Textbooks {!isCreator && '🔒'}</h4>
                                             <div style={{ overflowX: 'auto' }}>
                                                 <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
                                                     <thead>
                                                         <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
                                                             <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
                                                             <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Textbook details (title, authors, publisher, year)</th>
-                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                            {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -4640,72 +5339,77 @@ const DepartmentManager = () => {
                                                                 <td style={{ padding: '0.5rem 0.75rem' }}>
                                                                     <input
                                                                         type="text"
+                                                                        disabled={!isCreator}
                                                                         value={tb}
                                                                         onChange={e => {
                                                                             const newTbs = [...syllabusEditValue.textbooks];
                                                                             newTbs[idx] = e.target.value;
                                                                             setSyllabusEditValue({ ...syllabusEditValue, textbooks: newTbs });
                                                                         }}
-                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                     />
                                                                 </td>
-                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            const newTbs = syllabusEditValue.textbooks.filter((_, i) => i !== idx);
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, textbooks: newTbs });
-                                                                        }}
-                                                                        className="btn btn-danger"
-                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                    >
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </td>
+                                                                {isCreator && (
+                                                                    <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                const newTbs = syllabusEditValue.textbooks.filter((_, i) => i !== idx);
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, textbooks: newTbs });
+                                                                            }}
+                                                                            className="btn btn-danger"
+                                                                            style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                        >
+                                                                            <FaTrash />
+                                                                        </button>
+                                                                    </td>
+                                                                )}
                                                             </tr>
                                                         ))}
                                                         {syllabusEditValue.textbooks.length === 0 && (
                                                             <tr>
-                                                                <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No textbooks defined. Add one below.</td>
+                                                                <td colSpan={isCreator ? 3 : 2} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No textbooks defined.</td>
                                                             </tr>
                                                         )}
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <input
-                                                    type="text"
-                                                    id="newTextbookInput"
-                                                    placeholder="Enter textbook title, authors, publisher, year..."
-                                                    style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
-                                                />
-                                                <button
-                                                    onClick={() => {
-                                                        const input = document.getElementById('newTextbookInput');
-                                                        if (input && input.value.trim()) {
-                                                            setSyllabusEditValue({
-                                                                ...syllabusEditValue,
-                                                                textbooks: [...syllabusEditValue.textbooks, input.value.trim()]
-                                                            });
-                                                            input.value = '';
-                                                        }
-                                                    }}
-                                                    className="btn btn-primary"
-                                                    style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                                >
-                                                    <FaPlus /> Add Textbook
-                                                </button>
-                                            </div>
+                                            {isCreator && (
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <input
+                                                        type="text"
+                                                        id="newTextbookInput"
+                                                        placeholder="Enter textbook title, authors, publisher, year..."
+                                                        style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const input = document.getElementById('newTextbookInput');
+                                                            if (input && input.value.trim()) {
+                                                                setSyllabusEditValue({
+                                                                    ...syllabusEditValue,
+                                                                    textbooks: [...syllabusEditValue.textbooks, input.value.trim()]
+                                                                });
+                                                                input.value = '';
+                                                            }
+                                                        }}
+                                                        className="btn btn-primary"
+                                                        style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                    >
+                                                        <FaPlus /> Add Textbook
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div>
-                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Reference Books</h4>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Reference Books {!isCreator && '🔒'}</h4>
                                             <div style={{ overflowX: 'auto' }}>
                                                 <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
                                                     <thead>
                                                         <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
                                                             <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
                                                             <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Reference book details (title, authors, publisher, year)</th>
-                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                            {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -4715,72 +5419,77 @@ const DepartmentManager = () => {
                                                                 <td style={{ padding: '0.5rem 0.75rem' }}>
                                                                     <input
                                                                         type="text"
+                                                                        disabled={!isCreator}
                                                                         value={ref}
                                                                         onChange={e => {
                                                                             const newRefs = [...syllabusEditValue.references];
                                                                             newRefs[idx] = e.target.value;
                                                                             setSyllabusEditValue({ ...syllabusEditValue, references: newRefs });
                                                                         }}
-                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                     />
                                                                 </td>
-                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            const newRefs = syllabusEditValue.references.filter((_, i) => i !== idx);
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, references: newRefs });
-                                                                        }}
-                                                                        className="btn btn-danger"
-                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                    >
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </td>
+                                                                {isCreator && (
+                                                                    <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                const newRefs = syllabusEditValue.references.filter((_, i) => i !== idx);
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, references: newRefs });
+                                                                            }}
+                                                                            className="btn btn-danger"
+                                                                            style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                        >
+                                                                            <FaTrash />
+                                                                        </button>
+                                                                    </td>
+                                                                )}
                                                             </tr>
                                                         ))}
                                                         {syllabusEditValue.references.length === 0 && (
                                                             <tr>
-                                                                <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No references defined. Add one below.</td>
+                                                                <td colSpan={isCreator ? 3 : 2} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No references defined.</td>
                                                             </tr>
                                                         )}
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <input
-                                                    type="text"
-                                                    id="newReferenceInput"
-                                                    placeholder="Enter reference book title, authors, publisher, year..."
-                                                    style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
-                                                />
-                                                <button
-                                                    onClick={() => {
-                                                        const input = document.getElementById('newReferenceInput');
-                                                        if (input && input.value.trim()) {
-                                                            setSyllabusEditValue({
-                                                                ...syllabusEditValue,
-                                                                references: [...syllabusEditValue.references, input.value.trim()]
-                                                            });
-                                                            input.value = '';
-                                                        }
-                                                    }}
-                                                    className="btn btn-primary"
-                                                    style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                                >
-                                                    <FaPlus /> Add Reference
-                                                </button>
-                                            </div>
+                                            {isCreator && (
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <input
+                                                        type="text"
+                                                        id="newReferenceInput"
+                                                        placeholder="Enter reference book title, authors, publisher, year..."
+                                                        style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const input = document.getElementById('newReferenceInput');
+                                                            if (input && input.value.trim()) {
+                                                                setSyllabusEditValue({
+                                                                    ...syllabusEditValue,
+                                                                    references: [...syllabusEditValue.references, input.value.trim()]
+                                                                });
+                                                                input.value = '';
+                                                            }
+                                                        }}
+                                                        className="btn btn-primary"
+                                                        style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                    >
+                                                        <FaPlus /> Add Reference
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div>
-                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Additional / Web References</h4>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Additional / Web References {!isCreator && '🔒'}</h4>
                                             <div style={{ overflowX: 'auto' }}>
                                                 <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
                                                     <thead>
                                                         <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
                                                             <th style={{ padding: '0.6rem 0.75rem', width: '8%', color: 'var(--text-main)', fontWeight: 'bold' }}>S.No</th>
                                                             <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Web reference URL</th>
-                                                            <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>
+                                                            {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '12%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -4790,61 +5499,66 @@ const DepartmentManager = () => {
                                                                 <td style={{ padding: '0.5rem 0.75rem' }}>
                                                                     <input
                                                                         type="text"
+                                                                        disabled={!isCreator}
                                                                         value={web}
                                                                         onChange={e => {
                                                                             const newWebs = [...(syllabusEditValue.webReferences || [])];
                                                                             newWebs[idx] = e.target.value;
                                                                             setSyllabusEditValue({ ...syllabusEditValue, webReferences: newWebs });
                                                                         }}
-                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                     />
                                                                 </td>
-                                                                <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            const newWebs = (syllabusEditValue.webReferences || []).filter((_, i) => i !== idx);
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, webReferences: newWebs });
-                                                                        }}
-                                                                        className="btn btn-danger"
-                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                    >
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </td>
+                                                                {isCreator && (
+                                                                    <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                const newWebs = (syllabusEditValue.webReferences || []).filter((_, i) => i !== idx);
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, webReferences: newWebs });
+                                                                            }}
+                                                                            className="btn btn-danger"
+                                                                            style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                        >
+                                                                            <FaTrash />
+                                                                        </button>
+                                                                    </td>
+                                                                )}
                                                             </tr>
                                                         ))}
                                                         {(!syllabusEditValue.webReferences || syllabusEditValue.webReferences.length === 0) && (
                                                             <tr>
-                                                                <td colSpan="3" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No web references defined. Add one below.</td>
+                                                                <td colSpan={isCreator ? 3 : 2} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No web references defined.</td>
                                                             </tr>
                                                         )}
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <input
-                                                    type="text"
-                                                    id="newWebReferenceInput"
-                                                    placeholder="Enter web reference URL (e.g., https://example.com)..."
-                                                    style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
-                                                />
-                                                <button
-                                                    onClick={() => {
-                                                        const input = document.getElementById('newWebReferenceInput');
-                                                        if (input && input.value.trim()) {
-                                                            setSyllabusEditValue({
-                                                                ...syllabusEditValue,
-                                                                webReferences: [...(syllabusEditValue.webReferences || []), input.value.trim()]
-                                                            });
-                                                            input.value = '';
-                                                        }
-                                                    }}
-                                                    className="btn btn-primary"
-                                                    style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                                                >
-                                                    <FaPlus /> Add Web Reference
-                                                </button>
-                                            </div>
+                                            {isCreator && (
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <input
+                                                        type="text"
+                                                        id="newWebReferenceInput"
+                                                        placeholder="Enter web reference URL (e.g., https://example.com)..."
+                                                        style={{ flex: 1, padding: '0.6rem', borderRadius: '6px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const input = document.getElementById('newWebReferenceInput');
+                                                            if (input && input.value.trim()) {
+                                                                setSyllabusEditValue({
+                                                                    ...syllabusEditValue,
+                                                                    webReferences: [...(syllabusEditValue.webReferences || []), input.value.trim()]
+                                                                });
+                                                                input.value = '';
+                                                            }
+                                                        }}
+                                                        className="btn btn-primary"
+                                                        style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                                    >
+                                                        <FaPlus /> Add Web Reference
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -4852,7 +5566,7 @@ const DepartmentManager = () => {
                                 {activeSyllabusTab === 'co-po-mapping' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                         <h4 style={{ fontSize: '1rem', color: 'var(--primary)', fontWeight: 'bold' }}>
-                                            Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
+                                            Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs) {!isCreator && '🔒'}
                                         </h4>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                                             Select correlation levels: <strong>3</strong> (High), <strong>2</strong> (Medium), <strong>1</strong> (Low), or <strong>-</strong> (No Correlation).
@@ -4863,7 +5577,7 @@ const DepartmentManager = () => {
                                                     <tr style={{ background: 'rgba(255, 255, 255, 0.05)', borderBottom: '1px solid var(--glass-border)' }}>
                                                         <th style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold', minWidth: '80px' }}>COs</th>
                                                         {Array.from({ length: data.po?.length || 12 }).map((_, i) => (
-                                                            <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PO{i + 1}</th>
+                                                             <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PO{i + 1}</th>
                                                         ))}
                                                         {Array.from({ length: data.pso?.length || 2 }).map((_, i) => (
                                                             <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PSO{i + 1}</th>
@@ -4879,13 +5593,14 @@ const DepartmentManager = () => {
                                                                 return (
                                                                     <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
                                                                         <select
+                                                                            disabled={!isCreator}
                                                                             value={row[key] || '-'}
                                                                             onChange={e => {
                                                                                 const newMapping = [...(syllabusEditValue.coPoMapping || [])];
                                                                                 newMapping[rIdx] = { ...row, [key]: e.target.value };
                                                                                 setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
                                                                             }}
-                                                                            style={{ padding: '0.3rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', width: '50px', textAlign: 'center' }}
+                                                                            style={{ padding: '0.3rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', width: '50px', textAlign: 'center', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
                                                                         >
                                                                             <option value="-">-</option>
                                                                             <option value="1">1</option>
@@ -4900,13 +5615,14 @@ const DepartmentManager = () => {
                                                                 return (
                                                                     <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
                                                                         <select
+                                                                            disabled={!isCreator}
                                                                             value={row[key] || '-'}
                                                                             onChange={e => {
                                                                                 const newMapping = [...(syllabusEditValue.coPoMapping || [])];
                                                                                 newMapping[rIdx] = { ...row, [key]: e.target.value };
                                                                                 setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
                                                                             }}
-                                                                            style={{ padding: '0.3rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', width: '50px', textAlign: 'center' }}
+                                                                            style={{ padding: '0.3rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', width: '50px', textAlign: 'center', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
                                                                         >
                                                                             <option value="-">-</option>
                                                                             <option value="1">1</option>
@@ -4942,8 +5658,14 @@ const DepartmentManager = () => {
                             </div>
 
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: '0.5rem' }}>
-                                <button onClick={() => { setSelectedSyllabusSubjectIndex(null); setSyllabusEditValue(null); }} className="btn" style={{ padding: '0.6rem 1.2rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}>Cancel</button>
-                                <button onClick={handleSaveSyllabus} className="btn btn-primary" style={{ padding: '0.6rem 1.2rem' }}>Save Syllabus</button>
+                                {isCreator ? (
+                                    <>
+                                        <button onClick={() => { setSelectedSyllabusSubjectIndex(null); setSyllabusEditValue(null); }} className="btn" style={{ padding: '0.6rem 1.2rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}>Cancel</button>
+                                        <button onClick={handleSaveSyllabus} className="btn btn-primary" style={{ padding: '0.6rem 1.2rem' }}>Save Syllabus</button>
+                                    </>
+                                ) : (
+                                    <button onClick={() => { setSelectedSyllabusSubjectIndex(null); setSyllabusEditValue(null); }} className="btn btn-primary" style={{ padding: '0.6rem 1.4rem' }}>Close (View Only)</button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -5564,6 +6286,150 @@ const DepartmentManager = () => {
                                     </button>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Centered Alert / Confirm Dialog */}
+            {dialogState.isOpen && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    backdropFilter: 'blur(8px)',
+                    zIndex: 999999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1.5rem',
+                    animation: 'fadeIn 0.2s ease'
+                }}>
+                    <div style={{
+                        background: '#0f172a',
+                        border: dialogState.type === 'danger'
+                            ? '1px solid rgba(239, 68, 68, 0.45)'
+                            : dialogState.type === 'warning'
+                                ? '1px solid rgba(245, 158, 11, 0.45)'
+                                : dialogState.type === 'success'
+                                    ? '1px solid rgba(16, 185, 129, 0.45)'
+                                    : '1px solid rgba(99, 102, 241, 0.5)',
+                        borderRadius: '16px',
+                        padding: '1.8rem',
+                        width: '100%',
+                        maxWidth: '460px',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.75)',
+                        color: '#f8fafc',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1.25rem',
+                        textAlign: 'center',
+                        alignItems: 'center'
+                    }}>
+                        <div style={{
+                            width: '54px',
+                            height: '54px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.5rem',
+                            background: dialogState.type === 'danger'
+                                ? 'rgba(239, 68, 68, 0.15)'
+                                : dialogState.type === 'warning'
+                                    ? 'rgba(245, 158, 11, 0.15)'
+                                    : dialogState.type === 'success'
+                                        ? 'rgba(16, 185, 129, 0.15)'
+                                        : 'rgba(99, 102, 241, 0.15)',
+                            color: dialogState.type === 'danger'
+                                ? '#ef4444'
+                                : dialogState.type === 'warning'
+                                    ? '#f59e0b'
+                                    : dialogState.type === 'success'
+                                        ? '#10b981'
+                                        : '#818cf8',
+                            border: `1px solid ${
+                                dialogState.type === 'danger' ? 'rgba(239, 68, 68, 0.35)'
+                                : dialogState.type === 'warning' ? 'rgba(245, 158, 11, 0.35)'
+                                : dialogState.type === 'success' ? 'rgba(16, 185, 129, 0.35)'
+                                : 'rgba(99, 102, 241, 0.35)'
+                            }`
+                        }}>
+                            {dialogState.type === 'danger' ? <FaExclamationTriangle />
+                                : dialogState.type === 'warning' ? <FaExclamationTriangle />
+                                : dialogState.type === 'success' ? <FaCheckCircle />
+                                : <FaInfoCircle />}
+                        </div>
+
+                        <div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff', margin: '0 0 0.5rem 0' }}>
+                                {dialogState.title}
+                            </h3>
+                            <p style={{ fontSize: '0.92rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
+                                {dialogState.message}
+                            </p>
+                            {dialogState.note && (
+                                <div style={{
+                                    marginTop: '0.85rem',
+                                    padding: '0.65rem 0.85rem',
+                                    background: 'rgba(59, 130, 246, 0.1)',
+                                    border: '1px solid rgba(59, 130, 246, 0.25)',
+                                    borderRadius: '8px',
+                                    fontSize: '0.83rem',
+                                    color: '#93c5fd',
+                                    lineHeight: 1.4,
+                                    textAlign: 'left'
+                                }}>
+                                    <strong>Note:</strong> {dialogState.note}
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}>
+                            {dialogState.cancelText && (
+                                <button
+                                    onClick={dialogState.onCancel}
+                                    className="btn"
+                                    style={{
+                                        flex: 1,
+                                        padding: '0.65rem 1.2rem',
+                                        background: 'rgba(255, 255, 255, 0.07)',
+                                        border: '1px solid var(--glass-border)',
+                                        color: '#e2e8f0',
+                                        borderRadius: '8px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {dialogState.cancelText}
+                                </button>
+                            )}
+                            <button
+                                onClick={dialogState.onConfirm}
+                                className="btn"
+                                style={{
+                                    flex: 1,
+                                    padding: '0.65rem 1.2rem',
+                                    background: dialogState.type === 'danger'
+                                        ? '#dc2626'
+                                        : dialogState.type === 'warning'
+                                            ? '#d97706'
+                                            : dialogState.type === 'success'
+                                                ? '#059669'
+                                                : 'var(--primary, #6366f1)',
+                                    border: 'none',
+                                    color: '#fff',
+                                    borderRadius: '8px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                                }}
+                            >
+                                {dialogState.confirmText}
+                            </button>
                         </div>
                     </div>
                 </div>

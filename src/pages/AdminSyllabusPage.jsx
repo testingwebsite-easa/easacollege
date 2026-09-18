@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DepartmentManager from '../components/DepartmentManager';
-import { FaShieldAlt, FaHome, FaSignOutAlt, FaBookOpen } from 'react-icons/fa';
+import { FaShieldAlt, FaSignOutAlt, FaBookOpen } from 'react-icons/fa';
 
 const AdminSyllabusPage = () => {
     const navigate = useNavigate();
@@ -66,45 +66,6 @@ const AdminSyllabusPage = () => {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                    <Link
-                        to="/"
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.4rem',
-                            color: '#e2e8f0',
-                            textDecoration: 'none',
-                            fontSize: '0.85rem',
-                            padding: '0.4rem 0.8rem',
-                            borderRadius: '6px',
-                            background: 'rgba(255, 255, 255, 0.05)'
-                        }}
-                    >
-                        <FaHome size={12} /> View Website
-                    </Link>
-
-                    <Link
-                        to="/resources/syllabus-curriculum"
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.4rem',
-                            color: '#38bdf8',
-                            textDecoration: 'none',
-                            fontSize: '0.85rem',
-                            padding: '0.4rem 0.8rem',
-                            borderRadius: '6px',
-                            background: 'rgba(56, 189, 248, 0.1)',
-                            border: '1px solid rgba(56, 189, 248, 0.2)'
-                        }}
-                    >
-                        Public Syllabus View
-                    </Link>
-
                     {user && (
                         <div style={{
                             display: 'inline-flex',

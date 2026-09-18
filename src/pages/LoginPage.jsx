@@ -34,11 +34,14 @@ const LoginPage = () => {
         try {
             const data = await login(loginData.username, loginData.password);
             
-            // Set both tokens for seamless full control across CMS & Syllabus
+            // Set tokens based on authenticated user role
             if (data?.token) {
                 localStorage.setItem('authToken', data.token);
-                if (data?.user?.role === 'admin' || isAdminPath || data?.user?.role === 'hod') {
+                const roleLower = (data?.user?.role || '').toLowerCase().trim();
+                if (roleLower === 'admin' || roleLower === 'superadmin' || isAdminPath) {
                     localStorage.setItem('admin_token', data.token);
+                } else {
+                    localStorage.removeItem('admin_token');
                 }
             }
 

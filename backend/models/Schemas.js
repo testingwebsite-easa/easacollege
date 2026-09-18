@@ -712,6 +712,7 @@ module.exports = {
             total: Number,
             isOpenElective: { type: Boolean, default: false },
             offeringDept: String,
+            creatorDept: { type: String, default: '' },
             prerequisites: { type: String, default: '' },
             categoryName: { type: String, default: '' },
             subtitle: { type: String, default: '' },
