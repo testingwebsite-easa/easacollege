@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import DepartmentManager from '../../components/DepartmentManager';
 import '../../styles/Dashboards.css';
 
 const HODDashboard = () => {
     const { user, logout } = useAuth();
-    const [activeTab, setActiveTab] = useState('departments');
 
     const handleLogout = () => {
         logout();
@@ -26,24 +25,9 @@ const HODDashboard = () => {
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="dashboard-tabs">
-                <button
-                    className={`tab-btn ${activeTab === 'departments' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('departments')}
-                >
-                    Manage Department Details
-                </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="dashboard-content">
-                {activeTab === 'departments' ? (
-                    <div className="tab-content">
-                        <h2>Department Data Manager</h2>
-                        <DepartmentManager />
-                    </div>
-                ) : null}
+            {/* Main Content */}
+            <div className="dashboard-content" style={{ marginTop: '1rem' }}>
+                <DepartmentManager />
             </div>
         </div>
     );

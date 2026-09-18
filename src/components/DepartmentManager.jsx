@@ -810,7 +810,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
         const experiments = subj.experiments || [];
 
-        const coPoMapping = (subj.coPoMapping && subj.coPoMapping.length === 5)
+        const coPoMapping = (subj.coPoMapping && subj.coPoMapping.length > 0)
             ? subj.coPoMapping
             : [1, 2, 3, 4, 5].map(num => {
                 const mapObj = { coNo: `CO ${num}` };
@@ -2792,9 +2792,21 @@ const DepartmentManager = () => {
         const subj = data.subjects[originalIndex];
         setSelectedSyllabusSubjectIndex(originalIndex);
 
-        const prefilledMapping = (subj.coPoMapping && subj.coPoMapping.length > 0)
+        let prefilledMapping = (subj.coPoMapping && subj.coPoMapping.length > 0)
             ? subj.coPoMapping.map(m => ({ ...m }))
             : [];
+
+        if (prefilledMapping.length === 0) {
+            const coSource = (subj.outcomes && subj.outcomes.length > 0)
+                ? subj.outcomes.map((co, idx) => co.coNo || `CO ${idx + 1}`)
+                : ['CO 1', 'CO 2', 'CO 3', 'CO 4', 'CO 5'];
+            prefilledMapping = coSource.map(coNo => {
+                const mapObj = { coNo };
+                for (let i = 1; i <= (data.po?.length || 12); i++) mapObj[`po${i}`] = '-';
+                for (let i = 1; i <= (data.pso?.length || 2); i++) mapObj[`pso${i}`] = '-';
+                return mapObj;
+            });
+        }
 
         // Prefill values - strictly clean, completely blank if not entered
         const prefilledSyllabus = {
@@ -3964,10 +3976,11 @@ const DepartmentManager = () => {
                                                 const categoriesGrouped = subjectsForSem.reduce((acc, subj) => {
                                                     let cat = subj.category || 'THEORY';
                                                     const cUpper = String(cat).toUpperCase().trim();
-                                                    if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED')) cat = 'THEORY CUM PRACTICAL';
-                                                    else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR') cat = 'PRACTICAL';
-                                                    else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC')) cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
-                                                    else if (cUpper.includes('MANDATORY') || cUpper.includes('MC')) cat = 'MANDATORY COURSES';
+                                                    const typeUpper = String(subj.categoryType || '').toUpperCase().trim();
+                                                    if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED') || (Number(subj.l || 0) > 0 && Number(subj.p || 0) > 0 && !cUpper.includes('THEORY') && !cUpper.includes('PRACTICAL'))) cat = 'THEORY CUM PRACTICAL';
+                                                    else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR' || (typeUpper === 'PCC' && Number(subj.l || 0) === 0 && Number(subj.p || 0) > 0)) cat = 'PRACTICAL';
+                                                    else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC') || typeUpper === 'EEC') cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
+                                                    else if (cUpper.includes('MANDATORY') || cUpper.includes('MC') || typeUpper === 'MC') cat = 'MANDATORY COURSES';
                                                     else if (cUpper.includes('LANGUAGE') && (cUpper.includes('I') || cUpper.includes('1'))) cat = 'Language Elective – I';
                                                     else if (cUpper.includes('LANGUAGE') && (cUpper.includes('II') || cUpper.includes('2'))) cat = 'Language Elective - II';
                                                     else if (cUpper.includes('HONOR')) cat = 'Electives for Honors Degree';
@@ -4010,7 +4023,7 @@ const DepartmentManager = () => {
                                                                         <React.Fragment key={catIdx}>
                                                                             <tr>
                                                                                 <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                                                                                    {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName}
+                                                                                    {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
                                                                                 </td>
                                                                             </tr>
                                                                             {categorySubjects.map((subj, subjIdx) => {
@@ -4676,7 +4689,9 @@ const DepartmentManager = () => {
                 const currentSubject = data.subjects[selectedSyllabusSubjectIndex];
                 const isCreator = !currentSubject?.creatorDept || currentSubject?.creatorDept === selectedDept || isAdmin;
                 const creatorName = currentSubject?.creatorDept ? getDeptDisplayName(currentSubject.creatorDept) : '';
-                const showExercisesTab = (syllabusEditValue.category || '').toUpperCase().includes('PRACTICAL') || (syllabusEditValue.category || '').toUpperCase().includes('LAB');
+                const catUp = (syllabusEditValue.category || '').toUpperCase();
+                const typeUp = (syllabusEditValue.categoryType || '').toUpperCase();
+                const showExercisesTab = catUp.includes('PRACTICAL') || catUp.includes('LAB') || catUp.includes('THEORY CUM PRACTICAL') || catUp.includes('INTEGRATED') || catUp.includes('EMPLOYABILITY') || catUp.includes('EEC') || typeUp === 'EEC' || (Number(syllabusEditValue.p || 0) > 0);
 
                 return (
                     <div style={{
@@ -4892,9 +4907,16 @@ const DepartmentManager = () => {
                                                                         disabled={!isCreator}
                                                                         value={co.coNo}
                                                                         onChange={e => {
+                                                                            const oldCoNo = co.coNo;
                                                                             const newOutcomes = [...syllabusEditValue.outcomes];
                                                                             newOutcomes[idx].coNo = e.target.value;
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
+                                                                            const newMapping = (syllabusEditValue.coPoMapping || []).map((m, i) => {
+                                                                                if (m.coNo === oldCoNo || i === idx) {
+                                                                                    return { ...m, coNo: e.target.value };
+                                                                                }
+                                                                                return m;
+                                                                            });
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes, coPoMapping: newMapping });
                                                                         }}
                                                                         style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', fontWeight: 'bold', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                     />
@@ -4931,8 +4953,10 @@ const DepartmentManager = () => {
                                                                     <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', verticalAlign: 'top' }}>
                                                                         <button
                                                                             onClick={() => {
+                                                                                const removedCo = syllabusEditValue.outcomes[idx];
                                                                                 const newOutcomes = syllabusEditValue.outcomes.filter((_, i) => i !== idx);
-                                                                                setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
+                                                                                const newMapping = (syllabusEditValue.coPoMapping || []).filter((m, i) => m.coNo !== removedCo?.coNo && i !== idx);
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes, coPoMapping: newMapping });
                                                                             }}
                                                                             className="btn btn-danger"
                                                                             style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
@@ -4985,9 +5009,14 @@ const DepartmentManager = () => {
                                                                     outcome: outcomeInput.value.trim(),
                                                                     rbtLevel: rbtSelect.value
                                                                 };
+                                                                const newMapRow = { coNo: newCo.coNo };
+                                                                for (let i = 1; i <= (data.po?.length || 12); i++) newMapRow[`po${i}`] = '-';
+                                                                for (let i = 1; i <= (data.pso?.length || 2); i++) newMapRow[`pso${i}`] = '-';
+
                                                                 setSyllabusEditValue({
                                                                     ...syllabusEditValue,
-                                                                    outcomes: [...syllabusEditValue.outcomes, newCo]
+                                                                    outcomes: [...syllabusEditValue.outcomes, newCo],
+                                                                    coPoMapping: [...(syllabusEditValue.coPoMapping || []), newMapRow]
                                                                 });
                                                                 outcomeInput.value = '';
                                                                 coNoInput.value = `CO${syllabusEditValue.outcomes.length + 2}`;
@@ -5585,71 +5614,91 @@ const DepartmentManager = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {(syllabusEditValue.coPoMapping || []).map((row, rIdx) => (
-                                                        <tr key={rIdx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                            <td style={{ padding: '0.5rem 0.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{row.coNo}</td>
-                                                            {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
-                                                                const key = `po${i + 1}`;
-                                                                return (
-                                                                    <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
-                                                                        <select
-                                                                            disabled={!isCreator}
-                                                                            value={row[key] || '-'}
-                                                                            onChange={e => {
-                                                                                const newMapping = [...(syllabusEditValue.coPoMapping || [])];
-                                                                                newMapping[rIdx] = { ...row, [key]: e.target.value };
-                                                                                setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
-                                                                            }}
-                                                                            style={{ padding: '0.3rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', width: '50px', textAlign: 'center', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
-                                                                        >
-                                                                            <option value="-">-</option>
-                                                                            <option value="1">1</option>
-                                                                            <option value="2">2</option>
-                                                                            <option value="3">3</option>
-                                                                        </select>
-                                                                    </td>
-                                                                );
-                                                            })}
-                                                            {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
-                                                                const key = `pso${i + 1}`;
-                                                                return (
-                                                                    <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
-                                                                        <select
-                                                                            disabled={!isCreator}
-                                                                            value={row[key] || '-'}
-                                                                            onChange={e => {
-                                                                                const newMapping = [...(syllabusEditValue.coPoMapping || [])];
-                                                                                newMapping[rIdx] = { ...row, [key]: e.target.value };
-                                                                                setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
-                                                                            }}
-                                                                            style={{ padding: '0.3rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', width: '50px', textAlign: 'center', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
-                                                                        >
-                                                                            <option value="-">-</option>
-                                                                            <option value="1">1</option>
-                                                                            <option value="2">2</option>
-                                                                            <option value="3">3</option>
-                                                                        </select>
-                                                                    </td>
-                                                                );
-                                                            })}
-                                                        </tr>
-                                                    ))}
-                                                    {/* Calculated Average Row */}
-                                                    <tr style={{ background: 'rgba(255, 255, 255, 0.02)', fontWeight: 'bold', borderTop: '2px solid var(--glass-border)' }}>
-                                                        <td style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>Average</td>
-                                                        {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
-                                                            const key = `po${i + 1}`;
-                                                            const values = (syllabusEditValue.coPoMapping || []).map(row => row[key]).filter(v => v && v !== '-').map(Number);
-                                                            const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
-                                                            return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
-                                                        })}
-                                                        {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
-                                                            const key = `pso${i + 1}`;
-                                                            const values = (syllabusEditValue.coPoMapping || []).map(row => row[key]).filter(v => v && v !== '-').map(Number);
-                                                            const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
-                                                            return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
-                                                        })}
-                                                    </tr>
+                                                    {(() => {
+                                                        const mappingRows = (syllabusEditValue.coPoMapping && syllabusEditValue.coPoMapping.length > 0)
+                                                            ? syllabusEditValue.coPoMapping
+                                                            : (syllabusEditValue.outcomes && syllabusEditValue.outcomes.length > 0
+                                                                ? syllabusEditValue.outcomes.map((co, idx) => {
+                                                                    const mapObj = { coNo: co.coNo || `CO ${idx + 1}` };
+                                                                    for (let i = 1; i <= (data.po?.length || 12); i++) mapObj[`po${i}`] = '-';
+                                                                    for (let i = 1; i <= (data.pso?.length || 2); i++) mapObj[`pso${i}`] = '-';
+                                                                    return mapObj;
+                                                                })
+                                                                : [1, 2, 3, 4, 5].map(num => {
+                                                                    const mapObj = { coNo: `CO ${num}` };
+                                                                    for (let i = 1; i <= (data.po?.length || 12); i++) mapObj[`po${i}`] = '-';
+                                                                    for (let i = 1; i <= (data.pso?.length || 2); i++) mapObj[`pso${i}`] = '-';
+                                                                    return mapObj;
+                                                                }));
+
+                                                        return (
+                                                            <>
+                                                                {mappingRows.map((row, rIdx) => (
+                                                                    <tr key={rIdx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                                        <td style={{ padding: '0.5rem 0.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{row.coNo}</td>
+                                                                        {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
+                                                                            const key = `po${i + 1}`;
+                                                                            return (
+                                                                                <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
+                                                                                    <select
+                                                                                        disabled={!isCreator}
+                                                                                        value={row[key] || '-'}
+                                                                                        onChange={e => {
+                                                                                            const newMapping = mappingRows.map((m, idx) => idx === rIdx ? { ...m, [key]: e.target.value } : { ...m });
+                                                                                            setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
+                                                                                        }}
+                                                                                        style={{ padding: '0.3rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', width: '50px', textAlign: 'center', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
+                                                                                    >
+                                                                                        <option value="-">-</option>
+                                                                                        <option value="1">1</option>
+                                                                                        <option value="2">2</option>
+                                                                                        <option value="3">3</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                            );
+                                                                        })}
+                                                                        {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
+                                                                            const key = `pso${i + 1}`;
+                                                                            return (
+                                                                                <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
+                                                                                    <select
+                                                                                        disabled={!isCreator}
+                                                                                        value={row[key] || '-'}
+                                                                                        onChange={e => {
+                                                                                            const newMapping = mappingRows.map((m, idx) => idx === rIdx ? { ...m, [key]: e.target.value } : { ...m });
+                                                                                            setSyllabusEditValue({ ...syllabusEditValue, coPoMapping: newMapping });
+                                                                                        }}
+                                                                                        style={{ padding: '0.3rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', width: '50px', textAlign: 'center', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
+                                                                                    >
+                                                                                        <option value="-">-</option>
+                                                                                        <option value="1">1</option>
+                                                                                        <option value="2">2</option>
+                                                                                        <option value="3">3</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                            );
+                                                                        })}
+                                                                    </tr>
+                                                                ))}
+                                                                {/* Calculated Average Row */}
+                                                                <tr style={{ background: 'rgba(255, 255, 255, 0.02)', fontWeight: 'bold', borderTop: '2px solid var(--glass-border)' }}>
+                                                                    <td style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>Average</td>
+                                                                    {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
+                                                                        const key = `po${i + 1}`;
+                                                                        const values = mappingRows.map(row => row[key]).filter(v => v && v !== '-').map(Number);
+                                                                        const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
+                                                                        return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
+                                                                    })}
+                                                                    {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
+                                                                        const key = `pso${i + 1}`;
+                                                                        const values = mappingRows.map(row => row[key]).filter(v => v && v !== '-').map(Number);
+                                                                        const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
+                                                                        return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
+                                                                    })}
+                                                                </tr>
+                                                            </>
+                                                        );
+                                                    })()}
                                                 </tbody>
                                             </table>
                                         </div>

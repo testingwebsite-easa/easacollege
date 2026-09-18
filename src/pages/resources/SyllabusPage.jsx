@@ -938,7 +938,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
         const experiments = subj.experiments || [];
 
-        const coPoMapping = (subj.coPoMapping && subj.coPoMapping.length === 5)
+        const coPoMapping = (subj.coPoMapping && subj.coPoMapping.length > 0)
             ? subj.coPoMapping
             : [1, 2, 3, 4, 5].map(num => {
                 const mapObj = { coNo: `CO ${num}` };
@@ -2752,7 +2752,18 @@ const SyllabusPage = () => {
                                                 <tbody>
                                                     {Object.entries(
                                                         subjectsForSem.reduce((acc, subj) => {
-                                                            const cat = subj.category || 'THEORY';
+                                                            let cat = subj.category || 'THEORY';
+                                                            const cUpper = String(cat).toUpperCase().trim();
+                                                            const typeUpper = String(subj.categoryType || '').toUpperCase().trim();
+                                                            if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED') || (Number(subj.l || 0) > 0 && Number(subj.p || 0) > 0 && !cUpper.includes('THEORY') && !cUpper.includes('PRACTICAL'))) cat = 'THEORY CUM PRACTICAL';
+                                                            else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR' || (typeUpper === 'PCC' && Number(subj.l || 0) === 0 && Number(subj.p || 0) > 0)) cat = 'PRACTICAL';
+                                                            else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC') || typeUpper === 'EEC') cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
+                                                            else if (cUpper.includes('MANDATORY') || cUpper.includes('MC') || typeUpper === 'MC') cat = 'MANDATORY COURSES';
+                                                            else if (cUpper.includes('LANGUAGE') && (cUpper.includes('I') || cUpper.includes('1'))) cat = 'Language Elective – I';
+                                                            else if (cUpper.includes('LANGUAGE') && (cUpper.includes('II') || cUpper.includes('2'))) cat = 'Language Elective - II';
+                                                            else if (cUpper.includes('HONOR')) cat = 'Electives for Honors Degree';
+                                                            else cat = 'THEORY';
+
                                                             if (!acc[cat]) acc[cat] = [];
                                                             acc[cat].push(subj);
                                                             return acc;
@@ -2761,7 +2772,7 @@ const SyllabusPage = () => {
                                                         <React.Fragment key={catIndex}>
                                                             <tr>
                                                                 <td colSpan="11" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                                                                    {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName}
+                                                                    {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
                                                                 </td>
                                                             </tr>
                                                             {categorySubjects.map((subj, subjIdx) => (
