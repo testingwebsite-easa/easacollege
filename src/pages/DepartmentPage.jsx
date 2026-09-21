@@ -52,7 +52,7 @@ const DepartmentPage = () => {
     const [selectedPoster, setSelectedPoster] = useState(null);
     const [selectedPdf, setSelectedPdf] = useState(null);
 
-    const isSH = department?.slug === 'science-and-humanities' || department?.id === 'science-and-humanities' || id === 'science-and-humanities' || id === 'sh';
+    const isSH = department?.slug === 'science-and-humanities' || department?.id === 'science-and-humanities' || id === 'science-and-humanities' || id === 'sh' || (department?.slug || '').toLowerCase().includes('science') && (department?.slug || '').toLowerCase().includes('humanities') || (department?.name || '').toLowerCase().includes('science') && (department?.name || '').toLowerCase().includes('humanities') || (department?.name || '').toLowerCase().includes('science & humanities');
 
     // Navigation sections list
     const sections = [
@@ -468,7 +468,7 @@ const DepartmentPage = () => {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
                         {department.pso.map((pso, idx) => {
-                            const strPso = typeof pso === 'string' ? pso : (pso.description ? `${pso.code || `PSO${idx+1}`}: ${pso.description}` : pso.title);
+                            const strPso = typeof pso === 'string' ? pso : (pso.description ? `${pso.code || `PSO${idx + 1}`}: ${pso.description}` : pso.title);
                             const match = strPso.match(/^(PSO\d+)\s*:\s*(.*)$/i);
                             const tag = match ? match[1].toUpperCase() : `PSO ${idx + 1}`;
                             const text = match ? match[2] : strPso;
@@ -731,8 +731,8 @@ const DepartmentPage = () => {
     const renderFaculty = () => {
         const displayFaculty = facultyList.length > 0 ? facultyList : (department?.faculty || []);
         const subjects = ['All', ...new Set(displayFaculty.map(f => f.subject || f.researchArea).filter(Boolean))];
-        const filteredFaculty = facultyFilter === 'All' 
-            ? displayFaculty 
+        const filteredFaculty = facultyFilter === 'All'
+            ? displayFaculty
             : displayFaculty.filter(f => (f.subject || f.researchArea) === facultyFilter);
 
         return (
@@ -1941,7 +1941,7 @@ const DepartmentPage = () => {
             'PEC': { bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.3)', label: 'Professional Electives (PEC)' },
             'OEC': { bg: 'rgba(139, 92, 246, 0.15)', text: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)', label: 'Open Electives (OEC)' },
             'EEC': { bg: 'rgba(6, 182, 212, 0.15)', text: '#22d3ee', border: 'rgba(6, 182, 212, 0.3)', label: 'Employability Enhancement (EEC)' },
-            'MC':  { bg: 'rgba(244, 63, 94, 0.15)',  text: '#fb7185', border: 'rgba(244, 63, 94, 0.3)',  label: 'Mandatory Non-Credit (MC)' },
+            'MC': { bg: 'rgba(244, 63, 94, 0.15)', text: '#fb7185', border: 'rgba(244, 63, 94, 0.3)', label: 'Mandatory Course (MC)' },
         };
 
         const getCategoryBadge = (cat) => {
@@ -2380,75 +2380,86 @@ const DepartmentPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredCourses.map((course, idx) => (
-                                        <tr
-                                            key={course.id || idx}
-                                            style={{
-                                                borderBottom: '1px solid var(--glass-border)',
-                                                transition: 'background 0.2s',
-                                                cursor: 'pointer'
-                                            }}
-                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                            onClick={() => setSelectedSubjectModal(course)}
-                                        >
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.85rem' }}>{idx + 1}</td>
-                                            <td style={{ padding: '1rem' }}>{getCategoryBadge(course.categoryType)}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.95rem' }}>{course.code}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                    <span>{course.title || course.name}</span>
-                                                    {course.verticalName && (
-                                                        <span style={{ fontSize: '0.75rem', color: '#c084fc' }}>• {course.verticalName}</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.l !== undefined ? course.l : 3}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.t !== undefined ? course.t : 0}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.p !== undefined ? course.p : 0}</td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '700' }}>{course.contactPeriods || (Number(course.l || 0) + Number(course.t || 0) + Number(course.p || 0))}</td>
-                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                                <span style={{
-                                                    display: 'inline-block',
-                                                    padding: '0.25rem 0.7rem',
-                                                    borderRadius: '8px',
-                                                    background: Number(course.credits) > 0 ? 'rgba(230, 182, 39, 0.15)' : 'rgba(148, 163, 184, 0.15)',
-                                                    color: Number(course.credits) > 0 ? 'var(--secondary)' : 'var(--text-muted)',
-                                                    fontWeight: '900',
-                                                    fontSize: '0.85rem'
-                                                }}>
-                                                    {course.credits}
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
-                                                {course.cia || 40} / {course.ese || 60}
-                                            </td>
-                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setSelectedSubjectModal(course);
-                                                    }}
-                                                    style={{
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        gap: '4px',
-                                                        padding: '0.45rem 0.9rem',
+                                    {filteredCourses.map((course, idx) => {
+                                        const isInduction = (course.title || course.name || '').toUpperCase().includes('INDUCTION') || (course.code || '').toUpperCase().includes('INDUCTION');
+                                        return (
+                                            <tr
+                                                key={course.id || idx}
+                                                style={{
+                                                    borderBottom: '1px solid var(--glass-border)',
+                                                    transition: 'background 0.2s',
+                                                    cursor: 'pointer'
+                                                }}
+                                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                                onClick={() => setSelectedSubjectModal(course)}
+                                            >
+                                                <td style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.85rem' }}>{idx + 1}</td>
+                                                <td style={{ padding: '1rem' }}>{getCategoryBadge(course.categoryType)}</td>
+                                                <td style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: '800', fontSize: '0.95rem' }}>{course.code}</td>
+                                                <td style={{ padding: '1rem', color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                        <span>{course.title || course.name}</span>
+                                                        {course.verticalName && (
+                                                            <span style={{ fontSize: '0.75rem', color: '#c084fc' }}>• {course.verticalName}</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                {isInduction ? (
+                                                    <td colSpan={4} style={{ padding: '1rem', color: 'var(--primary)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '800', letterSpacing: '0.5px' }}>
+                                                        2 WEEKS
+                                                    </td>
+                                                ) : (
+                                                    <>
+                                                        <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.l !== undefined ? course.l : 3}</td>
+                                                        <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.t !== undefined ? course.t : 0}</td>
+                                                        <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '600' }}>{course.p !== undefined ? course.p : 0}</td>
+                                                        <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '700' }}>{course.contactPeriods || (Number(course.l || 0) + Number(course.t || 0) + Number(course.p || 0))}</td>
+                                                    </>
+                                                )}
+                                                <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                    <span style={{
+                                                        display: 'inline-block',
+                                                        padding: '0.25rem 0.7rem',
                                                         borderRadius: '8px',
-                                                        background: 'rgba(99, 102, 241, 0.15)',
-                                                        color: '#818cf8',
-                                                        border: '1px solid rgba(99, 102, 241, 0.3)',
-                                                        fontSize: '0.75rem',
-                                                        fontWeight: '800',
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.2s'
-                                                    }}
-                                                >
-                                                    <FaEye size={11} /> Syllabus
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                        background: Number(course.credits) > 0 ? 'rgba(230, 182, 39, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+                                                        color: Number(course.credits) > 0 ? 'var(--secondary)' : 'var(--text-muted)',
+                                                        fontWeight: '900',
+                                                        fontSize: '0.85rem'
+                                                    }}>
+                                                        {isInduction ? 0 : course.credits}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.85rem', fontWeight: '600' }}>
+                                                    {isInduction ? '-' : `${course.cia || 40} / ${course.ese || 60}`}
+                                                </td>
+                                                <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedSubjectModal(course);
+                                                        }}
+                                                        style={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px',
+                                                            padding: '0.45rem 0.9rem',
+                                                            borderRadius: '8px',
+                                                            background: 'rgba(99, 102, 241, 0.15)',
+                                                            color: '#818cf8',
+                                                            border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: '800',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        <FaEye size={11} /> Syllabus
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -2651,11 +2662,11 @@ const DepartmentPage = () => {
                                 </div>
                             </div>
 
-                            {/* Course Outcomes (COs) */}
+                            {/* Course Outcomes (COs)*/}
                             {selectedSubjectModal.courseOutcomes && selectedSubjectModal.courseOutcomes.length > 0 && (
                                 <div style={{ marginBottom: '2rem' }}>
                                     <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.75rem' }}>
-                                        Course Outcomes (COs) & Cognitive Domains:
+                                        Course Outcomes (COs)& Cognitive Domains:
                                     </h4>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                         {selectedSubjectModal.courseOutcomes.map((co, coIdx) => (
@@ -2689,39 +2700,39 @@ const DepartmentPage = () => {
 
                             {/* Textbooks & References */}
                             {((selectedSubjectModal.textBooks && selectedSubjectModal.textBooks.length > 0) ||
-                              (selectedSubjectModal.referenceBooks && selectedSubjectModal.referenceBooks.length > 0)) && (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                                    {selectedSubjectModal.textBooks && selectedSubjectModal.textBooks.length > 0 && (
-                                        <div>
-                                            <h4 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.5rem' }}>
-                                                Text Books:
-                                            </h4>
-                                            <ul style={{ paddingLeft: '1.2rem', margin: 0, fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: '1.5' }}>
-                                                {selectedSubjectModal.textBooks.map((tb, tbIdx) => (
-                                                    <li key={tbIdx} style={{ marginBottom: '0.3rem' }}>
-                                                        <strong>{tb.author}</strong>, "{tb.title}", {tb.publisher} {tb.year ? `(${tb.year})` : ''}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
+                                (selectedSubjectModal.referenceBooks && selectedSubjectModal.referenceBooks.length > 0)) && (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                                        {selectedSubjectModal.textBooks && selectedSubjectModal.textBooks.length > 0 && (
+                                            <div>
+                                                <h4 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.5rem' }}>
+                                                    Text Books:
+                                                </h4>
+                                                <ul style={{ paddingLeft: '1.2rem', margin: 0, fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: '1.5' }}>
+                                                    {selectedSubjectModal.textBooks.map((tb, tbIdx) => (
+                                                        <li key={tbIdx} style={{ marginBottom: '0.3rem' }}>
+                                                            <strong>{tb.author}</strong>, "{tb.title}", {tb.publisher} {tb.year ? `(${tb.year})` : ''}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
 
-                                    {selectedSubjectModal.referenceBooks && selectedSubjectModal.referenceBooks.length > 0 && (
-                                        <div>
-                                            <h4 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.5rem' }}>
-                                                References:
-                                            </h4>
-                                            <ul style={{ paddingLeft: '1.2rem', margin: 0, fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: '1.5' }}>
-                                                {selectedSubjectModal.referenceBooks.map((rb, rbIdx) => (
-                                                    <li key={rbIdx} style={{ marginBottom: '0.3rem' }}>
-                                                        <strong>{rb.author}</strong>, "{rb.title}", {rb.publisher} {rb.year ? `(${rb.year})` : ''}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                        {selectedSubjectModal.referenceBooks && selectedSubjectModal.referenceBooks.length > 0 && (
+                                            <div>
+                                                <h4 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.5rem' }}>
+                                                    References:
+                                                </h4>
+                                                <ul style={{ paddingLeft: '1.2rem', margin: 0, fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: '1.5' }}>
+                                                    {selectedSubjectModal.referenceBooks.map((rb, rbIdx) => (
+                                                        <li key={rbIdx} style={{ marginBottom: '0.3rem' }}>
+                                                            <strong>{rb.author}</strong>, "{rb.title}", {rb.publisher} {rb.year ? `(${rb.year})` : ''}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
                             {/* Modal Actions */}
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--glass-border)' }}>
@@ -3604,15 +3615,15 @@ const DepartmentPage = () => {
         );
     }
 
-    const degreePrefix = department.degree || (department.type === 'PG' ? 'M.E.' : 'B.E. / B.Tech');
-    const pageTitle = department.seoTitle || `Best ${degreePrefix} in ${department.name} in Coimbatore`;
-    const pageDesc = department.seoDescription || `Pursue ${degreePrefix} in ${department.name} at EASA College Coimbatore. Future-proof curriculum, high-impact research, expert faculty, and 100% placement support. Check eligibility & admissions.`;
-    const pageKeywords = department.seoKeywords || `${department.name}, ${degreePrefix} ${department.name}, Best Engineering College in Coimbatore, Anna University Affiliated, Engineering Placements Coimbatore, EASA College, Vision Mission ${department.name}`;
+    const degreePrefix = isSH ? '' : (department.degree || (department.type === 'PG' ? 'M.E.' : 'B.E. / B.Tech'));
+    const pageTitle = department.seoTitle || (isSH ? `Department of ${department.name} - EASA College Coimbatore` : `Best ${degreePrefix} in ${department.name} in Coimbatore`);
+    const pageDesc = department.seoDescription || (isSH ? `Explore the Department of ${department.name} at EASA College Coimbatore. Strong foundational learning, expert faculty, modern labs, and academic excellence.` : `Pursue ${degreePrefix} in ${department.name} at EASA College Coimbatore. Future-proof curriculum, high-impact research, expert faculty, and 100% placement support. Check eligibility & admissions.`);
+    const pageKeywords = department.seoKeywords || `${department.name}, ${degreePrefix ? `${degreePrefix} ${department.name}, ` : ''}Best Engineering College in Coimbatore, Anna University Affiliated, Engineering Placements Coimbatore, EASA College, Vision Mission ${department.name}`;
 
     const departmentSchema = {
         "@context": "https://schema.org",
         "@type": "Course",
-        "name": `${degreePrefix} in ${department.name}`,
+        "name": isSH ? `Department of ${department.name}` : `${degreePrefix} in ${department.name}`,
         "description": department.overview || pageDesc,
         "provider": {
             "@type": "CollegeOrUniversity",
@@ -3627,7 +3638,7 @@ const DepartmentPage = () => {
                 "addressCountry": "IN"
             }
         },
-        "educationalCredentialAwarded": degreePrefix,
+        "educationalCredentialAwarded": degreePrefix || "General Engineering Foundation",
         "hasCourseInstance": {
             "@type": "CourseInstance",
             "courseMode": "Full-Time",

@@ -5,9 +5,9 @@ import Footer from "../components/Footer";
 import SEO from "../components/SEO";
 import AdmissionForm from "../components/AdmissionForm";
 import GlobalHero from "../components/GlobalHero";
-import { 
-    FaFilePdf, FaSearch, FaChevronDown, FaChevronUp, FaLeaf, 
-    FaFilter, FaTimes, FaExternalLinkAlt, FaAward, FaCheckCircle, 
+import {
+    FaFilePdf, FaSearch, FaChevronDown, FaChevronUp, FaLeaf,
+    FaFilter, FaTimes, FaExternalLinkAlt, FaAward, FaCheckCircle,
     FaBookOpen, FaDownload, FaLayerGroup, FaArrowRight
 } from "react-icons/fa";
 import "./inner1.css";
@@ -99,7 +99,7 @@ const naacData = [
                 id: "2.6",
                 title: "Criterion 2.6 - Student Performance and Learning Outcomes",
                 items: [
-                    { metric: "2.6.1", parameter: "Programme Outcomes (POs) and Course Outcomes (COs) for all Programmes offered by the institution are stated and displayed on website and attainment of POs and COs are evaluated", link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/criterion-2/2.6.1/viewpage.pdf" },
+                    { metric: "2.6.1", parameter: "Programme Outcomes (POs) and Course Outcomes (COs)for all Programmes offered by the institution are stated and displayed on website and attainment of POs and COs are evaluated", link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/criterion-2/2.6.1/viewpage.pdf" },
                     { metric: "2.6.2", parameter: "Pass percentage of Students during last five years", link: "https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/criterion-2/2.6.2/2.6.2-index.pdf" }
                 ]
             },
@@ -390,7 +390,7 @@ const Naac = () => {
 
                 const lowerSearch = searchTerm.toLowerCase().trim();
                 const matchedSubCriteria = criterion.subCriteria.map(sub => {
-                    const matchedItems = sub.items.filter(item => 
+                    const matchedItems = sub.items.filter(item =>
                         item.metric.toLowerCase().includes(lowerSearch) ||
                         item.parameter.toLowerCase().includes(lowerSearch)
                     );
@@ -450,12 +450,12 @@ const Naac = () => {
                         <li><a href="/naac-extended-profile"><FaBookOpen className="menu-icon" /> Extended Profile</a></li>
                         {[1, 2, 3, 4, 5, 6, 7].map(num => (
                             <li key={num}>
-                                <a 
-                                    href={`#c${num}`} 
-                                    onClick={(e) => { 
-                                        e.preventDefault(); 
+                                <a
+                                    href={`#c${num}`}
+                                    onClick={(e) => {
+                                        e.preventDefault();
                                         setSelectedCriterionFilter("all");
-                                        scrollToSection(`c${num}`); 
+                                        scrollToSection(`c${num}`);
                                     }}
                                 >
                                     <FaLeaf className="menu-icon" /> Criterion {num}
@@ -473,7 +473,7 @@ const Naac = () => {
 
             {/* Main Content Area */}
             <div className="container naac-content py-12" style={{ maxWidth: '1400px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
-                
+
                 {/* 3D Overview Highlights Banner */}
                 <div className="naac-overview-grid mb-10">
                     <div className="overview-3d-card primary-highlight">
@@ -499,10 +499,10 @@ const Naac = () => {
                             <p className="overview-text">
                                 Access the official Self Study Report submitted to NAAC.
                             </p>
-                            <a 
-                                href="https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/ssr.pdf" 
-                                target="_blank" 
-                                rel="noreferrer" 
+                            <a
+                                href="https://easa-college.s3.eu-north-1.amazonaws.com/assets/naac/ssr.pdf"
+                                target="_blank"
+                                rel="noreferrer"
                                 className="btn-ssr-download"
                             >
                                 <FaDownload /> Download SSR PDF <FaArrowRight />
@@ -545,8 +545,8 @@ const Naac = () => {
                                 className="naac-search-input"
                             />
                             {searchTerm && (
-                                <button 
-                                    className="clear-search-btn" 
+                                <button
+                                    className="clear-search-btn"
                                     onClick={() => setSearchTerm("")}
                                     title="Clear search"
                                 >
@@ -556,15 +556,15 @@ const Naac = () => {
                         </div>
 
                         <div className="view-controls">
-                            <button 
-                                className="control-btn" 
+                            <button
+                                className="control-btn"
                                 onClick={() => handleExpandAll(true)}
                                 title="Expand all sections"
                             >
                                 <FaChevronDown /> Expand All
                             </button>
-                            <button 
-                                className="control-btn" 
+                            <button
+                                className="control-btn"
                                 onClick={() => handleExpandAll(false)}
                                 title="Collapse all sections"
                             >
@@ -636,7 +636,7 @@ const Naac = () => {
                                 {...fadeInUp}
                             >
                                 {/* Criterion Header */}
-                                <div 
+                                <div
                                     className={`criterion-card-header ${isExpanded ? "open" : ""}`}
                                     onClick={() => toggleCriterion(criterion.id)}
                                 >
@@ -690,10 +690,10 @@ const Naac = () => {
                                                                     <p className="parameter-description">{item.parameter}</p>
                                                                 </div>
                                                                 <div className="metric-action-column">
-                                                                    <a 
-                                                                        href={item.link} 
-                                                                        target="_blank" 
-                                                                        rel="noreferrer" 
+                                                                    <a
+                                                                        href={item.link}
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
                                                                         className="btn-view-document"
                                                                         title={`View PDF document for Metric ${item.metric}`}
                                                                     >

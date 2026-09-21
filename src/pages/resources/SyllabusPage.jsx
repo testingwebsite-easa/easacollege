@@ -12,6 +12,7 @@ import { FaFilePdf, FaEye, FaDownload, FaBookOpen, FaGraduationCap, FaChevronDow
 import collegeLogo from '../../assets/Logo - Blue.webp';
 
 import { SYLLABUS_DATA, GENERIC_FIRST_YEAR, getDetailedSyllabusForSubject } from '../../data/syllabusData';
+import { sanitizeCoPoMapping, sortSubjectsByCode } from '../../utils/coPoMappingUtils';
 
 const getRomanNumeral = (num) => {
     const roman = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -160,7 +161,7 @@ const renderCreditDistributionTable = (subjects) => {
         'PEC': 'Professional Elective Courses (PEC)',
         'OEC': 'Open Elective Courses (OEC)',
         'EEC': 'Employability Enhancement Courses (EEC)',
-        'MC': 'Mandatory Courses (Non-Credit) (MC)'
+        'MC': 'Mandatory Courses (MC)'
     };
 
     const distribution = {};
@@ -172,7 +173,7 @@ const renderCreditDistributionTable = (subjects) => {
     subjects.forEach(subj => {
         const isLang1 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE I');
         const isLang2 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE II');
-        
+
         if (isLang1 || isLang2) {
             const key = `${subj.semester || 1}_${isLang1 ? 'lang1' : 'lang2'}`;
             if (seenLangCategories.has(key)) {
@@ -275,7 +276,7 @@ const renderCreditDistributionTable = (subjects) => {
                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: '500' }}>{categoryLabels[cat]}</td>
                                     {distribution[cat].map((val, semIdx) => (
                                         <td key={semIdx} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: val > 0 ? 'var(--text-main)' : 'var(--text-muted)' }}>
-                                             {val > 0 ? val : '-'}
+                                            {val > 0 ? val : '-'}
                                         </td>
                                     ))}
                                     <td style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>
@@ -305,6 +306,39 @@ const renderCreditDistributionTable = (subjects) => {
     );
 };
 
+const formatDeptHeaderTitle = (degreePrefix, deptName, regYear) => {
+    let cleanPrefix = (degreePrefix || '').trim();
+    if (cleanPrefix) {
+        const upper = cleanPrefix.toUpperCase().replace(/\./g, '');
+        if (upper === 'BTECH') cleanPrefix = 'B.Tech.';
+        else if (upper === 'BE') cleanPrefix = 'B.E.';
+        else if (upper === 'ME') cleanPrefix = 'M.E.';
+        else if (upper === 'MBA') cleanPrefix = 'M.B.A.';
+        else if (!cleanPrefix.endsWith('.')) cleanPrefix += '.';
+    }
+
+    const smallWords = new Set(['and', 'or', 'of', 'in', 'for', 'the', 'to', 'cum', 'on', 'at', 'a', 'an']);
+    const formatTitleCase = (str) => {
+        if (!str) return '';
+        return str
+            .replace(/&/g, ' and ')
+            .toLowerCase()
+            .split(/\s+/)
+            .map((part, idx) => {
+                if (!part || part.trim() === '') return '';
+                const lower = part.toLowerCase();
+                if (idx > 0 && smallWords.has(lower)) return lower;
+                return lower.charAt(0).toUpperCase() + lower.slice(1);
+            })
+            .filter(Boolean)
+            .join(' ');
+    };
+
+    const formattedDept = formatTitleCase(deptName || '');
+    const reg = regYear || 'R-2023';
+    return `${cleanPrefix ? `${cleanPrefix} ` : ''}${formattedDept} (${reg})`.trim();
+};
+
 const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeetingDate, degreePrefix, deptName, regYear) => {
     const pageNum = ++pageTracker.current;
     const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
@@ -316,7 +350,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         'PEC': 'Professional Elective Courses (PEC)',
         'OEC': 'Open Elective Courses (OEC)',
         'EEC': 'Employability Enhancement Courses (EEC)',
-        'MC': 'Mandatory Courses (Non-Credit) (MC)'
+        'MC': 'Mandatory Courses (MC)'
     };
 
     const distribution = {};
@@ -324,35 +358,74 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         distribution[cat] = Array(8).fill(0);
     });
 
-    const seenLangCategories = new Set();
+    const validSubjectsForDistribution = [];
+    const regularSubjectsBySem = {};
+
     subjects.forEach(subj => {
-        const isLang1 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE I');
-        const isLang2 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE II');
-        
-        if (isLang1 || isLang2) {
-            const key = `${subj.semester || 1}_${isLang1 ? 'lang1' : 'lang2'}`;
-            if (seenLangCategories.has(key)) {
-                return;
-            }
-            seenLangCategories.add(key);
+        if (subj.isOpenElective || subj.vertical) {
+            validSubjectsForDistribution.push(subj);
+            return;
+        }
+        const sem = Number(subj.semester) || 1;
+        if (!regularSubjectsBySem[sem]) regularSubjectsBySem[sem] = [];
+        regularSubjectsBySem[sem].push(subj);
+    });
+
+    Object.entries(regularSubjectsBySem).forEach(([semStr, semSubjs]) => {
+        const lang1Options = semSubjs.filter(s => (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE – I') || (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE - I') || (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE I'));
+        const lang2Options = semSubjs.filter(s => (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE – II') || (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE - II') || (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE II'));
+
+        const hasLang1Placeholder = semSubjs.some(s => !lang1Options.includes(s) && ((s.title || '').toUpperCase().includes('LANGUAGE ELECTIVE') && ((s.title || '').toUpperCase().includes('I') || (s.code || '').toUpperCase().includes('EN10X') || (s.code || '').toUpperCase().includes('EN1X'))));
+        const hasLang2Placeholder = semSubjs.some(s => !lang2Options.includes(s) && ((s.title || '').toUpperCase().includes('LANGUAGE ELECTIVE') && ((s.title || '').toUpperCase().includes('II') || (s.code || '').toUpperCase().includes('EN20X') || (s.code || '').toUpperCase().includes('EN2X'))));
+
+        const excludedFromSem = new Set();
+        if (hasLang1Placeholder) {
+            lang1Options.forEach(s => excludedFromSem.add(s));
+        } else if (lang1Options.length > 1) {
+            lang1Options.slice(1).forEach(s => excludedFromSem.add(s));
         }
 
+        if (hasLang2Placeholder) {
+            lang2Options.forEach(s => excludedFromSem.add(s));
+        } else if (lang2Options.length > 1) {
+            lang2Options.slice(1).forEach(s => excludedFromSem.add(s));
+        }
+
+        semSubjs.forEach(s => {
+            if (!excludedFromSem.has(s)) {
+                validSubjectsForDistribution.push(s);
+            }
+        });
+    });
+
+    validSubjectsForDistribution.forEach(subj => {
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
         } else if (subj.vertical) {
             cat = 'PEC';
         } else {
-            const rawCat = (subj.category || subj.categoryType || '').toUpperCase().trim();
-            if (rawCat.includes('HUMANITIES') || rawCat === 'HS' || rawCat === 'HUM') cat = 'HUM';
-            else if (rawCat.includes('BASIC SCIENCE') || rawCat === 'BS' || rawCat === 'BSC') cat = 'BSC';
-            else if (rawCat.includes('ENGINEERING SCIENCE') || rawCat === 'ES' || rawCat === 'ESC') cat = 'ESC';
-            else if (rawCat.includes('PROFESSIONAL CORE') || rawCat === 'PC' || rawCat === 'PCC') cat = 'PCC';
-            else if (rawCat.includes('PROFESSIONAL ELECTIVE') || rawCat === 'PE' || rawCat === 'PEC') cat = 'PEC';
-            else if (rawCat.includes('OPEN ELECTIVE') || rawCat === 'OE' || rawCat === 'OEC') cat = 'OEC';
-            else if (rawCat.includes('PROJECT') || rawCat.includes('EMPLOYABILITY') || rawCat === 'EE' || rawCat === 'EEC') cat = 'EEC';
-            else if (rawCat.includes('MANDATORY') || rawCat === 'MC') cat = 'MC';
-            else cat = 'PCC';
+            const type = (subj.categoryType || '').toUpperCase().trim();
+            if (['HUM', 'HS', 'HSS'].includes(type)) cat = 'HUM';
+            else if (['BSC', 'BS'].includes(type)) cat = 'BSC';
+            else if (['ESC', 'ES'].includes(type)) cat = 'ESC';
+            else if (['PCC', 'PC'].includes(type)) cat = 'PCC';
+            else if (['PEC', 'PE'].includes(type)) cat = 'PEC';
+            else if (['OEC', 'OE'].includes(type)) cat = 'OEC';
+            else if (['EEC', 'EE'].includes(type)) cat = 'EEC';
+            else if (['MC'].includes(type)) cat = 'MC';
+            else {
+                const text = `${subj.categoryType || ''} ${subj.category || ''} ${subj.categoryName || ''}`.toUpperCase();
+                if (text.includes('HUMANITIES') || text.includes('MANAGEMENT') || text.includes('HUM') || text.includes('HS')) cat = 'HUM';
+                else if (text.includes('BASIC SCIENCE') || text.includes('BSC') || text.includes('BS')) cat = 'BSC';
+                else if (text.includes('ENGINEERING SCIENCE') || text.includes('ESC') || text.includes('ES')) cat = 'ESC';
+                else if (text.includes('PROFESSIONAL CORE') || text.includes('PCC') || text.includes('PC')) cat = 'PCC';
+                else if (text.includes('PROFESSIONAL ELECTIVE') || text.includes('PEC') || text.includes('PE')) cat = 'PEC';
+                else if (text.includes('OPEN ELECTIVE') || text.includes('OEC') || text.includes('OE')) cat = 'OEC';
+                else if (text.includes('EMPLOYABILITY') || text.includes('PROJECT') || text.includes('EEC') || text.includes('EE')) cat = 'EEC';
+                else if (text.includes('MANDATORY') || text.includes('MC')) cat = 'MC';
+                else cat = 'PCC';
+            }
         }
 
         let credits = 0;
@@ -466,7 +539,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         <div class="page">
             <div class="pdf-header pdf-header-inner">
                 <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">${degreePrefix ? degreePrefix.toUpperCase() : 'B.E.'} ${(deptName || '').toUpperCase()} (${regYear || 'R-2023'})</div>
+                <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear || 'R-2023')}</div>
             </div>
             
             <div class="title-block" style="margin-top: 15px; margin-bottom: 20px;">
@@ -527,7 +600,7 @@ const getDefaultCategoryName = (catType) => {
         'PEC': 'Professional Elective Course (PEC)',
         'OEC': 'Open Elective Course (OEC)',
         'EEC': 'Employability Enhancement Course (EEC)',
-        'MC': 'Mandatory Course (Non-Credit) (MC)'
+        'MC': 'Mandatory Course (MC)'
     };
     return map[catType] || catType || 'Professional Core Course (PCC)';
 };
@@ -585,26 +658,26 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 1. MANDATORY COURSE (MC)
     if (catUpper.includes('MC') || catUpper.includes('MANDATORY') || titleUpper.includes('MANDATORY')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">MANDATORY COURSE</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8.5pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">MANDATORY COURSE</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 6px; width: 50%;">Continuous Internal Assessment (100)</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 6px; width: 30%; vertical-align: middle;">End Semester Examination Theory</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 6px; width: 20%; vertical-align: middle;">Total</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 50%;">Continuous Internal Assessment (100)</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 30%; vertical-align: middle;">End Semester Examination Theory</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 20%; vertical-align: middle;">Total</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">CIAT - I</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">CIAT - II</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">CIAT - I</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">CIAT - II</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 6px;">50</td>
-                        <td style="border: 1.5px solid #000; padding: 6px;">50</td>
-                        <td style="border: 1.5px solid #000; padding: 6px;">-</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px;">50</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px;">50</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px;">-</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">100</td>
                     </tr>
                 </tbody>
             </table>
@@ -615,33 +688,33 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 2. MINI PROJECT
     if (titleUpper.includes('MINI PROJECT') || catUpper.includes('MINI PROJECT')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">Mini Project*</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8.5pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Mini Project*</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th colspan="4" style="border: 1.5px solid #000; padding: 6px;">Continuous assessment (100 Marks)</th>
+                        <th colspan="4" style="border: 1.5px solid #000; padding: 2.5px 3px;">Continuous assessment (100 Marks)</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 25%; vertical-align: middle;">Review I</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 25%; vertical-align: middle;">Review II</th>
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 4px; width: 50%;">Review III</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 25%; vertical-align: middle;">Review I</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 25%; vertical-align: middle;">Review II</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 50%;">Review III</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">Report</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">Viva-Voce Examination</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">Report</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">Viva-Voce Examination</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">25</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">25</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">30</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">25</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">25</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">30</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
                     </tr>
                 </tbody>
             </table>
-            <div style="font-size: 8pt; font-style: italic; margin-top: 3px; margin-bottom: 6px; text-align: left;">*Internal mode only</div>
+            <div style="font-size: 7pt; font-style: italic; margin-top: 2px; margin-bottom: 2px; text-align: left;">*Internal mode only</div>
         </div>
         `;
     }
@@ -649,37 +722,37 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 3. PROJECT WORK / INTERNSHIP CUM PROJECT WORK
     if (titleUpper.includes('PROJECT WORK') || titleUpper.includes('INTERNSHIP CUM PROJECT') || titleUpper.includes('FINAL YEAR PROJECT') || (titleUpper.includes('PROJECT') && !titleUpper.includes('MINI'))) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">Project Work / Internship cum project work</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Project Work / Internship cum project work</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th colspan="3" style="border: 1.5px solid #000; padding: 4px; width: 45%;">Continuous Assessment (60 Marks)</th>
-                        <th colspan="4" style="border: 1.5px solid #000; padding: 4px; width: 55%;">End Semester Examination (40 Marks)</th>
+                        <th colspan="3" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 45%;">Continuous Assessment (60 Marks)</th>
+                        <th colspan="4" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 55%;">End Semester Examination (40 Marks)</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 15%; vertical-align: middle;">Review I</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 15%; vertical-align: middle;">Review II</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 15%; vertical-align: middle;">Review III</th>
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 4px; width: 27%;">Project Thesis Report Evaluation</th>
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 4px; width: 28%;">Viva-Voce Examination</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 15%; vertical-align: middle;">Review I</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 15%; vertical-align: middle;">Review II</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 15%; vertical-align: middle;">Review III</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 27%;">Project Thesis Report Evaluation</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 28%;">Viva-Voce Examination</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 3px; width: 13.5%;">Guide</th>
-                        <th style="border: 1.5px solid #000; padding: 3px; width: 13.5%;">External</th>
-                        <th style="border: 1.5px solid #000; padding: 3px; width: 14%;">External</th>
-                        <th style="border: 1.5px solid #000; padding: 3px; width: 14%;">Internal</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 13.5%;">Guide</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 13.5%;">External</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">External</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Internal</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
                     </tr>
                 </tbody>
             </table>
@@ -690,29 +763,29 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 4. INTERNSHIP
     if (titleUpper.includes('INTERNSHIP') || catUpper.includes('INTERNSHIP')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">Internship</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8.5pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Internship</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th colspan="4" style="border: 1.5px solid #000; padding: 6px;">Final assessment (100 Marks)</th>
+                        <th colspan="4" style="border: 1.5px solid #000; padding: 2.5px 3px;">Final assessment (100 Marks)</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 25%; vertical-align: middle;">Project Report</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 25%; vertical-align: middle;">Presentation</th>
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 4px; width: 50%;">Viva-Voce Examination</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 25%; vertical-align: middle;">Project Report</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 25%; vertical-align: middle;">Presentation</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 50%;">Viva-Voce Examination</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">Course Coordinator</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">Industry representative</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">Course Coordinator</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">Industry representative</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">40</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">30</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">40</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">30</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
                     </tr>
                 </tbody>
             </table>
@@ -723,69 +796,69 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 5. THEORY WITH PRACTICAL COURSES (L > 0 and P > 0)
     if ((lVal > 0 && pVal > 0) || catUpper.includes('THEORY CUM PRACTICAL') || catUpper.includes('THEORY WITH PRACTICAL')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY WITH PRACTICAL COURSES</div>
-            <div style="text-align: center; font-size: 8.5pt; font-weight: bold; margin-bottom: 6px; font-family: Arial, sans-serif;">L T P C<br>${lVal} ${tVal} ${pVal} ${cVal}</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY WITH PRACTICAL COURSES</div>
+            <div style="text-align: center; font-size: 7.5pt; font-weight: bold; margin-bottom: 4px; font-family: Arial, sans-serif;">L T P C : ${lVal} ${tVal} ${pVal} ${cVal}</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 22%;">Assessment Components</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 12%;">Duration</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Syllabus to be covered</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 10%;">Max. Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Weightage for Internal Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Continuous Internal Assessment Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">End Semester Examination Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 22%;">Assessment Components</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 12%;">Duration</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Syllabus to be covered</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 10%;">Max. Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Weightage for Internal Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Continuous Internal Assessment Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">End Semester Examination Marks</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th colspan="7" style="border: 1.5px solid #000; padding: 4px; text-align: center;">Theory Component</th>
+                        <th colspan="7" style="border: 1.5px solid #000; padding: 2px 3px; text-align: center;">Theory Component</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 4px; text-align: center; font-weight: bold;">CIAT I</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">3 hours</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">2.5 units</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">13.5</td>
-                        <td rowspan="2" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">27</td>
-                        <td rowspan="5" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">50</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: center; font-weight: bold;">CIAT I</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">13.5</td>
+                        <td rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">27</td>
+                        <td rowspan="5" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">50</td>
                     </tr>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 4px; text-align: center; font-weight: bold;">CIAT II</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">3 hours</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">2.5 units</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">13.5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: center; font-weight: bold;">CIAT II</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">13.5</td>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <td colspan="6" style="border: 1.5px solid #000; padding: 4px; text-align: center;">Practical Component</td>
-                        <td style="border: 1.5px solid #000; display: none;"></td>
+                        <th colspan="6" style="border: 1.5px solid #000; padding: 2px 3px; text-align: center;">Practical Component</th>
+                        <th style="border: 1.5px solid #000; display: none;"></th>
                     </tr>
                     <tr>
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 4px; text-align: left;">Observation & Analysis of Experimental results, Viva Voce, Quiz based on rubrics.</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">9</td>
-                        <td rowspan="2" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">18</td>
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left;">Observation & Analysis of Experimental results, Viva Voce, Quiz based on rubrics.</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">9</td>
+                        <td rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">18</td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 4px; text-align: left;">Activities/ Test</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">9</td>
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left;">Activities/ Test</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">9</td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 4px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
-                            Attendance<br>(80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 6.5pt; line-height: 1.2;">
+                            Attendance (80-84%–1, 85-88%–2, 89-92%–3, 93-96%–4, 97-100%–5 Marks)
                         </td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">5</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">5</td>
-                        <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">5</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">-</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">-</td>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9;">
-                        <td colspan="5" style="border: 1.5px solid #000; padding: 4px; text-align: right;">Total</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">50</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">50</td>
+                        <td colspan="5" style="border: 1.5px solid #000; padding: 2px 3px; text-align: right;">Total</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">50</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">50</td>
                     </tr>
                 </tbody>
             </table>
@@ -796,45 +869,45 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 6. PRACTICAL COURSES (Pure Practical, L == 0, P > 0)
     if ((lVal === 0 && pVal > 0) || catUpper.includes('PRACTICAL') || catUpper.includes('LAB')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">PRACTICAL COURSES</div>
-            <div style="text-align: center; font-size: 8.5pt; font-weight: bold; margin-bottom: 6px; font-family: Arial, sans-serif;">L T P C<br>${lVal} ${tVal} ${pVal} ${cVal}</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">PRACTICAL COURSES</div>
+            <div style="text-align: center; font-size: 7.5pt; font-weight: bold; margin-bottom: 4px; font-family: Arial, sans-serif;">L T P C : ${lVal} ${tVal} ${pVal} ${cVal}</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 40%;">Assessment Components</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 12%;">Max. Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 16%;">Weightage for Internal Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 16%;">Continuous Internal Assessment Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 16%;">End Semester Examination Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 40%;">Assessment Components</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 12%;">Max. Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 16%;">Weightage for Internal Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 16%;">Continuous Internal Assessment Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 16%;">End Semester Examination Marks</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 4px; text-align: left;">Observation, Analysis of Experimental results& Record, Viva-voce based on rubrics.</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">75</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">41.25</td>
-                        <td rowspan="3" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">40</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: left;">Observation, Analysis of Experimental results & Record, Viva-voce based on rubrics.</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">75</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">40</td>
+                        <td rowspan="3" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">40</td>
                     </tr>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 4px; text-align: left;">Activities / Test</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">25</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">13.75</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: left;">Activities / Test</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">25</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">15</td>
                     </tr>
                     <tr>
-                        <td colspan="1" style="border: 1.5px solid #000; padding: 4px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
-                            Attendance<br>(80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
+                        <td colspan="1" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 6.5pt; line-height: 1.2;">
+                            Attendance (80-84%–1, 85-88%–2, 89-92%–3, 93-96%–4, 97-100%–5 Marks)
                         </td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">5</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">-</td>
-                        <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">-</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">5</td>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9;">
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 4px; text-align: right;">Total</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">60</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">40</td>
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: right;">Total</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">60</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">40</td>
                     </tr>
                 </tbody>
             </table>
@@ -844,55 +917,55 @@ const renderAssessmentComponentsHTML = (subj) => {
 
     // 7. THEORY COURSES (Default)
     return `
-    <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-        <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY COURSES</div>
-        <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+    <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+        <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY COURSES</div>
+        <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
             <thead>
                 <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 22%;">Assessment Components</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 12%;">Duration</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Syllabus to be covered</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 10%;">Max. Marks</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Weightage for Internal Marks</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Continuous Internal Assessment Marks</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">End Semester Examination Marks</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 22%;">Assessment Components</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 12%;">Duration</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Syllabus to be covered</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 10%;">Max. Marks</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Weightage for Internal Marks</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Continuous Internal Assessment Marks</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">End Semester Examination Marks</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td style="border: 1.5px solid #000; padding: 4px; text-align: center; font-weight: bold;">CIAT I</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">3 hours</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">2.5 units</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">12.25</td>
-                    <td rowspan="2" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">24.5</td>
-                    <td rowspan="4" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">60</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: center; font-weight: bold;">CIAT I</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">12.25</td>
+                    <td rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">25</td>
+                    <td rowspan="4" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">60</td>
                 </tr>
                 <tr>
-                    <td style="border: 1.5px solid #000; padding: 4px; text-align: center; font-weight: bold;">CIAT II</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">3 hours</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">2.5 units</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">12.25</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: center; font-weight: bold;">CIAT II</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">12.25</td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border: 1.5px solid #000; padding: 4px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
+                    <td colspan="4" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7pt; line-height: 1.2;">
                         Objective Test/Online Quiz, Assignment / Case study/ Seminar/Tutorial, Role Play, Poster Presentation, Group Discussions, Oral Presentation, Mini Project etc., (5 marks during CIAT I and 5 marks during CIAT II)
                     </td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">10.5</td>
-                    <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">10.5</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">10</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">10</td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border: 1.5px solid #000; padding: 4px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
-                        Attendance<br>(80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
+                    <td colspan="4" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7pt; line-height: 1.2;">
+                        Attendance (80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
                     </td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">5</td>
-                    <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">5</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">5</td>
                 </tr>
                 <tr style="font-weight: bold; background-color: #f9f9f9;">
-                    <td colspan="5" style="border: 1.5px solid #000; padding: 4px; text-align: right;">Total</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">40</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">60</td>
+                    <td colspan="5" style="border: 1.5px solid #000; padding: 2px 3px; text-align: right;">Total</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">40</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">60</td>
                 </tr>
             </tbody>
         </table>
@@ -900,11 +973,64 @@ const renderAssessmentComponentsHTML = (subj) => {
     `;
 };
 
+const formatCategoryWithCode = (rawCatName, catType, category) => {
+    let raw = (rawCatName || '').trim();
+    // Strip out (Non-Credit) or Non-Credit if present
+    raw = raw.replace(/\(\s*Non-Credit\s*\)/gi, '').replace(/\bNon-Credit\b/gi, '').replace(/\s{2,}/g, ' ').trim();
+    const type = (catType || category || '').trim().toUpperCase();
+
+    const map = {
+        'HUM': 'Humanities, Social Sciences and Management Course (HUM)',
+        'HSMC': 'Humanities, Social Sciences and Management Course (HUM)',
+        'HSC': 'Humanities, Social Sciences and Management Course (HUM)',
+        'BSC': 'Basic Science Course (BSC)',
+        'BS': 'Basic Science Course (BSC)',
+        'ESC': 'Engineering Science Course (ESC)',
+        'ES': 'Engineering Science Course (ESC)',
+        'PCC': 'Professional Core Course (PCC)',
+        'PC': 'Professional Core Course (PCC)',
+        'PEC': 'Professional Elective Course (PEC)',
+        'PE': 'Professional Elective Course (PEC)',
+        'OEC': 'Open Elective Course (OEC)',
+        'OE': 'Open Elective Course (OEC)',
+        'EEC': 'Employability Enhancement Course (EEC)',
+        'EE': 'Employability Enhancement Course (EEC)',
+        'MC': 'Mandatory Course (MC)',
+        'AC': 'Audit Course (AC)'
+    };
+
+    if (raw) {
+        if (/\([A-Za-z0-9\s-]+\)$/.test(raw)) {
+            return raw;
+        }
+        const upper = raw.toUpperCase();
+        if (upper.includes('HUMANITIES') || upper.includes('SOCIAL SCIENCES') || upper.includes('MANAGEMENT')) return 'Humanities, Social Sciences and Management Course (HUM)';
+        if (upper.includes('BASIC SCIENCE')) return 'Basic Science Course (BSC)';
+        if (upper.includes('ENGINEERING SCIENCE')) return 'Engineering Science Course (ESC)';
+        if (upper.includes('PROFESSIONAL CORE')) return 'Professional Core Course (PCC)';
+        if (upper.includes('PROFESSIONAL ELECTIVE')) return 'Professional Elective Course (PEC)';
+        if (upper.includes('OPEN ELECTIVE')) return 'Open Elective Course (OEC)';
+        if (upper.includes('EMPLOYABILITY')) return 'Employability Enhancement Course (EEC)';
+        if (upper.includes('MANDATORY')) return 'Mandatory Course (MC)';
+        if (upper.includes('AUDIT')) return 'Audit Course (AC)';
+        if (map[upper]) return map[upper];
+        if (type && map[type]) return map[type];
+        if (type) return `${raw} (${type})`;
+        return raw;
+    }
+
+    if (type && map[type]) {
+        return map[type];
+    }
+
+    return 'Professional Core Course (PCC)';
+};
+
 const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, acMeetingDate, poList, psoList, degreePrefix, deptName) => {
     if (!subjects || subjects.length === 0) return '';
 
     return subjects.map((subj, sIdx) => {
-        const categoryName = subj.categoryName || getDefaultCategoryName(subj.categoryType);
+        const categoryName = formatCategoryWithCode(subj.categoryName, subj.categoryType, subj.category);
         const prerequisites = subj.prerequisites || 'Basic knowledge of the subject.';
         const subtitleStr = subj.subtitle ? `<div style="font-size: 9.5pt; font-weight: normal; margin-top: 3px;">(${subj.subtitle})</div>` : '';
 
@@ -924,35 +1050,23 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 topics: Array.isArray(u.topics) ? u.topics : [u.topics || '']
             }));
 
-        const textbooks = (subj.textbooks && subj.textbooks.length > 0)
-            ? subj.textbooks
-            : ['Textbook of ' + (subj.title || 'Course') + ' - First Edition'];
+        const textbooks = (subj.textbooks && Array.isArray(subj.textbooks))
+            ? subj.textbooks.map(t => typeof t === 'string' ? t : (t.title ? `${t.author ? t.author + ', ' : ''}"${t.title}"${t.publisher ? ', ' + t.publisher : ''}${t.year ? ' (' + t.year + ')' : ''}` : '')).filter(t => t && t.trim() !== '')
+            : [];
 
-        const references = (subj.references && subj.references.length > 0)
-            ? subj.references
-            : ['Reference Book of ' + (subj.title || 'Course') + ' - Second Edition'];
+        const references = (subj.references && Array.isArray(subj.references))
+            ? subj.references.map(r => typeof r === 'string' ? r : (r.title ? `${r.author ? r.author + ', ' : ''}"${r.title}"${r.publisher ? ', ' + r.publisher : ''}${r.year ? ' (' + r.year + ')' : ''}` : '')).filter(r => r && r.trim() !== '')
+            : [];
 
-        const webReferences = (subj.webReferences && subj.webReferences.length > 0)
-            ? subj.webReferences
+        const webReferences = (subj.webReferences && Array.isArray(subj.webReferences))
+            ? subj.webReferences.filter(wr => wr && typeof wr === 'string' && wr.trim() !== '')
             : [];
 
         const experiments = subj.experiments || [];
 
-        const coPoMapping = (subj.coPoMapping && subj.coPoMapping.length > 0)
-            ? subj.coPoMapping
-            : [1, 2, 3, 4, 5].map(num => {
-                const mapObj = { coNo: `CO ${num}` };
-                for (let i = 1; i <= 12; i++) {
-                    mapObj[`po${i}`] = '-';
-                }
-                for (let i = 1; i <= 3; i++) {
-                    mapObj[`pso${i}`] = '-';
-                }
-                return mapObj;
-            });
-
         const poCount = (poList && poList.length > 0) ? poList.length : 11;
-        const psoCount = (psoList && psoList.length > 0) ? psoList.length : 2;
+        const psoCount = (psoList && psoList.length > 0) ? psoList.length : 3;
+        const coPoMapping = sanitizeCoPoMapping(subj.coPoMapping, subj.outcomes, poCount, psoCount);
 
         const lValue = subj.l !== undefined ? subj.l : 0;
         const tValue = subj.t !== undefined ? subj.t : 0;
@@ -963,44 +1077,47 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         const tVal = Number(tValue) || 0;
         const pVal = Number(pValue) || 0;
         const contactHrs = lVal + tVal + pVal;
-        const unitPeriods = contactHrs > 0 ? contactHrs * 3 : 9;
-        const totalPeriods = unitPeriods * 5;
+        const defaultUnitPeriods = contactHrs > 0 ? contactHrs * 3 : 9;
 
-        const pageNum1 = ++pageTracker.current;
-        const pageNum2 = ++pageTracker.current;
+        let calculatedTotalPeriods = 0;
+        let hasCustomUnitPeriods = false;
+        units.forEach(u => {
+            if (u.periods !== undefined && u.periods !== null && String(u.periods).trim() !== '') {
+                hasCustomUnitPeriods = true;
+                calculatedTotalPeriods += (Number(u.periods) || 0);
+            } else {
+                calculatedTotalPeriods += defaultUnitPeriods;
+            }
+        });
+        const totalPeriods = (hasCustomUnitPeriods && calculatedTotalPeriods > 0) ? calculatedTotalPeriods : (defaultUnitPeriods * (units.length || 5));
 
         // Subject Type Checks
+        const isInduction = (subj.title || '').toUpperCase().includes('INDUCTION') || (subj.code || '').toUpperCase().includes('INDUCTION');
         const categoryUpper = (subj.category || '').toUpperCase();
         const isPractical = categoryUpper.includes('PRACTICAL') || categoryUpper.includes('LAB');
         const isTheory = categoryUpper.includes('THEORY');
-        const isPurePractical = isPractical && !isTheory;
         const isTheoryCumPractical = isPractical && isTheory;
-
-        // Experiments Split for Pure Practical
-        const halfIndex = Math.ceil(experiments.length / 2);
-        const firstHalfExperiments = experiments.slice(0, halfIndex);
-        const secondHalfExperiments = experiments.slice(halfIndex);
 
         // Helper to render experiments table
         const renderExperimentsTableHTML = (expList, title = "List of Exercises") => {
             if (!expList || expList.length === 0) return '';
             return `
-                <div style="margin-top: 8px; margin-bottom: 8px; page-break-inside: avoid;">
-                    <h4 style="font-size: 9.5pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 4px 0; text-transform: uppercase;">${title}</h4>
+                <div style="margin-top: 4px; margin-bottom: 4px; page-break-inside: avoid;">
+                    <h4 style="font-size: 9pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 3px 0; text-transform: uppercase;">${title}</h4>
                     <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
                         <thead>
                             <tr style="font-weight: bold; font-family: Arial, sans-serif; background-color: #f2f2f2;">
-                                <th style="border: 1.5px solid #000; padding: 3px; width: 8%;">S.No.</th>
-                                <th style="border: 1.5px solid #000; padding: 3px; width: 67%; text-align: left;">List of Exercises</th>
-                                <th style="border: 1.5px solid #000; padding: 3px; width: 10%;">CO</th>
-                                <th style="border: 1.5px solid #000; padding: 3px; width: 15%;">RBT Level</th>
+                                <th style="border: 1.5px solid #000; padding: 2.5px; width: 8%;">S.No.</th>
+                                <th style="border: 1.5px solid #000; padding: 2.5px; width: 67%; text-align: left; padding-left: 6px;">List of Exercises</th>
+                                <th style="border: 1.5px solid #000; padding: 2.5px; width: 10%;">CO</th>
+                                <th style="border: 1.5px solid #000; padding: 2.5px; width: 15%;">RBT Level</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${expList.map(exp => `
                                 <tr>
                                     <td style="border: 1.5px solid #000; padding: 2px; text-align: center;">${exp.sNo || ''}</td>
-                                    <td style="border: 1.5px solid #000; padding: 2px; text-align: left; padding-left: 5px;">${exp.name || ''}</td>
+                                    <td style="border: 1.5px solid #000; padding: 2px 6px; text-align: left;">${exp.name || ''}</td>
                                     <td style="border: 1.5px solid #000; padding: 2px; text-align: center;">${exp.co || ''}</td>
                                     <td style="border: 1.5px solid #000; padding: 2px; text-align: center;">${exp.rbtLevel || 'Apply'}</td>
                                 </tr>
@@ -1011,112 +1128,132 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             `;
         };
 
+        const pageNum1 = ++pageTracker.current;
+        const pageNum2 = ++pageTracker.current;
+
         return `
         <!-- Syllabus Subject Page 1: ${(subj.code || '').toUpperCase()} -->
-        <div class="page">
+        <div class="page syllabus-page">
             <div class="pdf-header pdf-header-inner">
                 <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">${degreePrefix ? degreePrefix.toUpperCase() : 'B.E.'} ${(deptName || '').toUpperCase()} (${regYear})</div>
+                <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 8px; font-size: 9pt; border: 1.5px solid #000; page-break-inside: avoid;">
-                <tr>
-                    <td rowspan="2" style="width: 18%; border: 1.5px solid #000; padding: 5px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt;">
-                        ${(subj.code || '').toUpperCase()}
-                    </td>
-                    <td rowspan="2" style="width: 58%; border: 1.5px solid #000; padding: 5px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt; text-transform: uppercase;">
-                        ${subj.title || ''}
-                        ${subtitleStr}
-                    </td>
-                    <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">L</td>
-                    <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">T</td>
-                    <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">P</td>
-                    <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">C</td>
-                </tr>
-                <tr>
-                    <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">${lValue}</td>
-                    <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">${tValue}</td>
-                    <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">${pValue}</td>
-                    <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">${cValue}</td>
-                </tr>
-                ${subj.isOpenElective ? '' : `
-                <tr>
-                    <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">Category</td>
-                    <td colspan="5" style="border: 1.5px solid #000; padding: 4px;">${categoryName}</td>
-                </tr>
-                `}
-                <tr>
-                    <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">Pre requisites</td>
-                    <td colspan="5" style="border: 1.5px solid #000; padding: 4px; text-align: justify;">${prerequisites}</td>
-                </tr>
-            </table>
-
-            ${objectives.length > 0 ? `
-            <div class="section-container" style="margin-bottom: 8px; page-break-inside: avoid;">
-                <h3 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Course Objectives</h3>
-                <p style="font-size: 8.5pt; margin: 0 0 3px 0;">The course is intended to make the students to</p>
-                <ol style="margin: 0; padding-left: 18px;">
-                    ${objectives.map(obj => obj.trim() ? `<li style="margin-bottom: 2px; font-size: 8.5pt; text-align: justify;">${obj}</li>` : '').join('')}
-                </ol>
-            </div>
-            ` : ''}
-
-            ${outcomes.some(co => co.outcome && co.outcome.trim()) ? `
-            <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 8px; font-size: 8.5pt; border: 1.5px solid #000; page-break-inside: avoid;">
-                <thead>
+            <div class="syllabus-page-content" style="flex: 1 1 auto;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 6px; font-size: 9pt; border: 1.5px solid #000; page-break-inside: avoid;">
                     <tr>
-                        <th colspan="3" style="border: 1.5px solid #000; padding: 3px; text-align: center; font-weight: bold; font-family: Arial, sans-serif; text-transform: uppercase; font-size: 9pt;">Course Outcomes</th>
+                        <td rowspan="2" style="width: 18%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt;">
+                            ${(subj.code || '').toUpperCase()}
+                        </td>
+                        <td rowspan="2" style="width: 58%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt; text-transform: uppercase;">
+                            ${subj.title || ''}
+                            ${subtitleStr}
+                        </td>
+                        ${isInduction ? `
+                        <td rowspan="2" colspan="4" style="width: 24%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt; font-family: Arial, sans-serif;">
+                            2 WEEKS
+                        </td>
+                        ` : `
+                        <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">L</td>
+                        <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">T</td>
+                        <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">P</td>
+                        <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">C</td>
+                        `}
                     </tr>
+                    ${!isInduction ? `
                     <tr>
-                        <th colspan="3" style="border: 1.5px solid #000; padding: 3px; text-align: left; font-weight: normal; font-size: 8.5pt;">On successful completion of the course, students will be able</th>
+                        <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${lValue}</td>
+                        <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${tValue}</td>
+                        <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${pValue}</td>
+                        <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${cValue}</td>
                     </tr>
-                    <tr style="font-family: Arial, sans-serif; font-size: 8pt; font-weight: bold; text-align: center;">
-                        <th style="width: 12%; border: 1.5px solid #000; padding: 3px;">CO. No</th>
-                        <th style="width: 73%; border: 1.5px solid #000; padding: 3px; text-align: left;">Course Outcome</th>
-                        <th style="width: 15%; border: 1.5px solid #000; padding: 3px;">RBT Level</th>
+                    ` : ''}
+                    ${subj.isOpenElective ? '' : `
+                    <tr>
+                        <td style="border: 1.5px solid #000; padding: 3px 5px; font-weight: bold; font-size: 9pt;">Category</td>
+                        <td colspan="5" style="border: 1.5px solid #000; padding: 3px 5px; font-size: 9pt;">${categoryName}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    ${outcomes.map(co => co.outcome && co.outcome.trim() ? `
-                        <tr>
-                            <td style="border: 1.5px solid #000; padding: 3px; text-align: center; font-weight: bold;">${co.coNo}</td>
-                            <td style="border: 1.5px solid #000; padding: 3px; text-align: justify;">${co.outcome}</td>
-                            <td style="border: 1.5px solid #000; padding: 3px; text-align: center;">${co.rbtLevel || 'Apply'}</td>
-                        </tr>
-                    ` : '').join('')}
-                </tbody>
-            </table>
-            ` : ''}
+                    `}
+                    <tr>
+                        <td style="border: 1.5px solid #000; padding: 3px 5px; font-weight: bold; font-size: 9pt;">Pre requisites</td>
+                        <td colspan="5" style="border: 1.5px solid #000; padding: 3px 5px; text-align: justify; font-size: 9pt;">${prerequisites}</td>
+                    </tr>
+                </table>
 
-            <!-- Units or Exercises -->
-            <div style="margin-top: 6px; margin-bottom: 6px;">
-                ${isPurePractical
-                ? renderExperimentsTableHTML(firstHalfExperiments.length > 0 ? firstHalfExperiments : experiments, "List of Exercises")
-                : units.map((unit, uIdx) => {
-                    const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][uIdx] || (uIdx + 1)}`;
-                    const unitTitle = unit.title ? unit.title.toUpperCase() : '';
-                    const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
-
-                    return topicsStr ? `
-                            <div style="margin-bottom: 5px; text-align: justify; font-size: 8.5pt; line-height: 1.3; page-break-inside: avoid;">
-                                <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 8.5pt; margin-bottom: 1px;">
-                                    <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
-                                    <span>${unitPeriods} Periods</span>
-                                </div>
-                                <div style="font-size: 8.5pt; line-height: 1.3; text-align: justify;">
-                                    ${topicsStr}
-                                </div>
-                            </div>
-                        ` : '';
-                }).join('')}
-                
-                ${isTheoryCumPractical && experiments.length > 0 ? `
-                    ${renderExperimentsTableHTML(experiments, "List of Exercises / Experiments")}
+                ${objectives.length > 0 ? `
+                <div class="section-container" style="margin-bottom: 6px; page-break-inside: avoid;">
+                    <h3 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Course Objectives</h3>
+                    <p style="font-size: 9pt; margin: 0 0 2px 0;">The course is intended to make the students to</p>
+                    <ol style="margin: 0; padding-left: 18px;">
+                        ${objectives.map(obj => (obj && obj.trim()) ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;">${obj}</li>` : '').join('')}
+                    </ol>
+                </div>
                 ` : ''}
 
-                <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 8.5pt; margin-top: 5px; margin-bottom: 5px; border-top: 1px solid #ddd; padding-top: 3px;">
-                    TOTAL: ${totalPeriods} PERIODS
+                <!-- Units or Exercises -->
+                <div style="margin-top: 4px; margin-bottom: 4px;">
+                    ${isPractical && !isTheory ? `
+                        ${renderExperimentsTableHTML(experiments, "List of Exercises")}
+                    ` : units.map((unit, uIdx) => {
+            const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][uIdx] || (uIdx + 1)}`;
+            const unitTitle = unit.title ? unit.title.toUpperCase() : '';
+            const thisUnitPeriods = (unit.periods !== undefined && unit.periods !== null && String(unit.periods).trim() !== '') ? unit.periods : defaultUnitPeriods;
+            const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t && t.trim() !== '').join(', ') : (unit.topics || '');
+
+            return topicsStr ? `
+                                <div style="margin-bottom: 5px; text-align: justify; font-size: 9pt; line-height: 1.35; page-break-inside: avoid;">
+                                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
+                                        <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
+                                        <span>${thisUnitPeriods} Periods</span>
+                                    </div>
+                                    <div style="font-size: 9pt; line-height: 1.35; text-align: justify;">
+                                        ${topicsStr}
+                                    </div>
+                                </div>
+                            ` : '';
+        }).join('')}
+                    
+                    ${isTheoryCumPractical && experiments.length > 0 ? `
+                        ${renderExperimentsTableHTML(experiments, "List of Exercises / Experiments")}
+                    ` : ''}
+
+                    <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 9pt; margin-top: 4px; margin-bottom: 4px; border-top: 1px solid #ddd; padding-top: 2px;">
+                        ${isInduction ? 'TOTAL: 2 WEEKS' : `TOTAL: ${totalPeriods} PERIODS`}
+                    </div>
                 </div>
+
+                ${outcomes.some(co => (co && co.outcome && co.outcome.trim()) || (typeof co === 'string' && co.trim())) ? `
+                <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 4px; font-size: 8pt; border: 1.5px solid #000; page-break-inside: avoid;">
+                    <thead>
+                        <tr>
+                            <th colspan="3" style="border: 1.5px solid #000; padding: 2.5px; text-align: center; font-weight: bold; font-family: Arial, sans-serif; text-transform: uppercase; font-size: 8.5pt;">Course Outcomes</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" style="border: 1.5px solid #000; padding: 2px 4px; text-align: left; font-weight: normal; font-size: 8pt;">On successful completion of the course, students will be able to</th>
+                        </tr>
+                        <tr style="font-family: Arial, sans-serif; font-size: 7.5pt; font-weight: bold; text-align: center;">
+                            <th style="width: 12%; border: 1.5px solid #000; padding: 2px;">CO. No</th>
+                            <th style="width: 73%; border: 1.5px solid #000; padding: 2px; text-align: left; padding-left: 5px;">Course Outcome</th>
+                            <th style="width: 15%; border: 1.5px solid #000; padding: 2px;">RBT Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${outcomes.map(co => {
+            const coNo = co.coNo || (co.outcome ? co.outcome.slice(0, 3) : '');
+            const outcomeText = co.outcome || (typeof co === 'string' ? co : '');
+            const rbtLevel = co.rbtLevel || 'Apply';
+            if (!outcomeText || !outcomeText.trim()) return '';
+            return `
+                            <tr>
+                                <td style="border: 1.5px solid #000; padding: 1.5px 3px; text-align: center; font-weight: bold;">${coNo}</td>
+                                <td style="border: 1.5px solid #000; padding: 1.5px 5px; text-align: justify; line-height: 1.2;">${outcomeText}</td>
+                                <td style="border: 1.5px solid #000; padding: 1.5px 3px; text-align: center;">${rbtLevel}</td>
+                            </tr>
+                            `;
+        }).join('')}
+                    </tbody>
+                </table>
+                ` : ''}
             </div>
 
             <div class="pdf-footer pdf-footer-inner">
@@ -1127,114 +1264,112 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         </div>
 
         <!-- Syllabus Subject Page 2: ${(subj.code || '').toUpperCase()} -->
-        <div class="page">
+        <div class="page syllabus-page">
             <div class="pdf-header pdf-header-inner">
                 <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">${degreePrefix ? degreePrefix.toUpperCase() : 'B.E.'} ${(deptName || '').toUpperCase()} (${regYear})</div>
+                <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
             </div>
 
-            ${isPurePractical && secondHalfExperiments.length > 0 ? `
-                ${renderExperimentsTableHTML(secondHalfExperiments, "List of Exercises (Contd.)")}
-            ` : ''}
+            <div class="syllabus-page-content" style="flex: 1 1 auto;">
+                ${(textbooks.length > 0 || references.length > 0 || webReferences.length > 0) ? `
+                <div class="section-container" style="margin-top: 4px; margin-bottom: 6px; page-break-inside: avoid;">
+                    ${textbooks.length > 0 ? `
+                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Text Book${textbooks.length > 1 ? 's' : ''}</h4>
+                    <ol style="margin: 0 0 4px 0; padding-left: 18px;">
+                        ${textbooks.map(tb => tb.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;">${tb}</li>` : '').join('')}
+                    </ol>
+                    ` : ''}
 
-            ${(textbooks.length > 0 || references.length > 0 || webReferences.length > 0) ? `
-            <div class="section-container" style="margin-top: 6px; margin-bottom: 8px; page-break-inside: avoid;">
-                ${textbooks.length > 0 ? `
-                <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 3px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Text Book</h4>
-                <ol style="margin: 0 0 6px 0; padding-left: 18px;">
-                    ${textbooks.map(tb => tb.trim() ? `<li style="margin-bottom: 2px; font-size: 8.5pt; text-align: justify;">${tb}</li>` : '').join('')}
-                </ol>
+                    ${references.length > 0 ? `
+                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">References Books</h4>
+                    <ol style="margin: 0 0 4px 0; padding-left: 18px;">
+                        ${references.map(ref => ref.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;">${ref}</li>` : '').join('')}
+                    </ol>
+                    ` : ''}
+
+                    ${webReferences.length > 0 ? `
+                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Additional / Web References</h4>
+                    <ol style="margin: 0; padding-left: 18px;">
+                        ${webReferences.map(wr => wr.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;"><a href="${wr}" style="color: #000; text-decoration: underline;">${wr}</a></li>` : '').join('')}
+                    </ol>
+                    ` : ''}
+                </div>
                 ` : ''}
 
-                ${references.length > 0 ? `
-                <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 3px 0; font-family: Arial, sans-serif; text-transform: uppercase;">References Books</h4>
-                <ol style="margin: 0 0 6px 0; padding-left: 18px;">
-                    ${references.map(ref => ref.trim() ? `<li style="margin-bottom: 2px; font-size: 8.5pt; text-align: justify;">${ref}</li>` : '').join('')}
-                </ol>
-                ` : ''}
+                <div style="font-size: 8pt; font-weight: bold; margin-top: 4px; margin-bottom: 2px; font-family: Arial, sans-serif; text-align: center;">
+                    Mapping of Course Outcomes (COs)with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
+                </div>
 
-                ${webReferences.length > 0 ? `
-                <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 3px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Additional / Web References Links</h4>
-                <ol style="margin: 0; padding-left: 18px;">
-                    ${webReferences.map(wr => wr.trim() ? `<li style="margin-bottom: 2px; font-size: 8.5pt; text-align: justify;"><a href="${wr}" style="color: #000; text-decoration: underline;">${wr}</a></li>` : '').join('')}
-                </ol>
-                ` : ''}
-            </div>
-            ` : ''}
-
-            <div style="font-size: 8.5pt; font-weight: bold; margin-top: 6px; margin-bottom: 3px; text-transform: uppercase; font-family: Arial, sans-serif; text-align: center;">
-                Mapping of Course Outcomes (COs) with Programme Outcomes (POs) Programme Specific Outcomes (PSOs)
-            </div>
-
-            <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 6px; font-size: 8pt; border: 1.5px solid #000; text-align: center; page-break-inside: avoid;">
-                <thead>
-                    <tr>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 3px; width: 10%;">COs</th>
-                        <th colspan="${poCount}" style="border: 1.5px solid #000; padding: 3px;">POs</th>
-                        <th colspan="${psoCount}" style="border: 1.5px solid #000; padding: 3px;">PSOs</th>
-                    </tr>
-                    <tr>
-                        ${poList && poList.length > 0
-                        ? poList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 2px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
-                        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<th style="border: 1.5px solid #000; padding: 2px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
-                    }
-                        ${psoList && psoList.length > 0
-                        ? psoList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 2px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
-                        : [1, 2].map(n => `<th style="border: 1.5px solid #000; padding: 2px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
-                    }
-                    </tr>
-                </thead>
-                <tbody>
-                    ${coPoMapping.map(row => `
+                <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 4px; font-size: 7.5pt; border: 1.5px solid #000; text-align: center; page-break-inside: avoid;">
+                    <thead>
                         <tr>
-                            <td style="border: 1.5px solid #000; padding: 2px; font-weight: bold;">${row.coNo}</td>
-                            ${poList && poList.length > 0
-                            ? poList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 2px;">${row[`po${i + 1}`] || '-'}</td>`).join('')
-                            : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<td style="border: 1.5px solid #000; padding: 2px;">${row[`po${n}`] || '-'}</td>`).join('')
-                        }
-                            ${psoList && psoList.length > 0
-                            ? psoList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 2px;">${row[`pso${i + 1}`] || '-'}</td>`).join('')
-                            : [1, 2].map(n => `<td style="border: 1.5px solid #000; padding: 2px;">${row[`pso${n}`] || '-'}</td>`).join('')
-                        }
+                            <th rowspan="2" style="border: 1.5px solid #000; padding: 2px; width: 10%;">COs</th>
+                            <th colspan="${poCount}" style="border: 1.5px solid #000; padding: 2px;">POs</th>
+                            <th colspan="${psoCount}" style="border: 1.5px solid #000; padding: 2px;">PSOs</th>
                         </tr>
-                    `).join('')}
-                    <tr style="font-weight: bold; background-color: #f9f9f9;">
-                        <td style="border: 1.5px solid #000; padding: 2px;">Average</td>
-                        ${poList && poList.length > 0
-                        ? poList.map((_, i) => {
-                            const validValues = coPoMapping.map(r => Number(r[`po${i + 1}`])).filter(v => !isNaN(v) && v > 0);
-                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                            return `<td style="border: 1.5px solid #000; padding: 2px;">${avg}</td>`;
-                        }).join('')
-                        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => {
-                            const validValues = coPoMapping.map(r => Number(r[`po${n}`])).filter(v => !isNaN(v) && v > 0);
-                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                            return `<td style="border: 1.5px solid #000; padding: 2px;">${avg}</td>`;
-                        }).join('')
-                    }
-                        ${psoList && psoList.length > 0
-                        ? psoList.map((_, i) => {
-                            const validValues = coPoMapping.map(r => Number(r[`pso${i + 1}`])).filter(v => !isNaN(v) && v > 0);
-                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                            return `<td style="border: 1.5px solid #000; padding: 2px;">${avg}</td>`;
-                        }).join('')
-                        : [1, 2].map(n => {
-                            const validValues = coPoMapping.map(r => Number(r[`pso${n}`])).filter(v => !isNaN(v) && v > 0);
-                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                            return `<td style="border: 1.5px solid #000; padding: 2px;">${avg}</td>`;
-                        }).join('')
-                    }
-                    </tr>
-                </tbody>
-            </table>
-            <div style="display: flex; justify-content: space-between; font-size: 7.5pt; margin-top: 1px; margin-bottom: 4px;">
-                <span>3 - High</span>
-                <span>2 - Medium</span>
-                <span>1 - Low</span>
-                <span>"-" - No Correlation</span>
-            </div>
+                        <tr>
+                            ${poList && poList.length > 0
+                ? poList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${i + 1}</th>`).join('')
+                : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${n}</th>`).join('')
+            }
+                            ${psoList && psoList.length > 0
+                ? psoList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${i + 1}</th>`).join('')
+                : [1, 2, 3].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${n}</th>`).join('')
+            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${coPoMapping.map(row => `
+                            <tr>
+                                <td style="border: 1.5px solid #000; padding: 1.5px; font-weight: bold;">${row.coNo}</td>
+                                ${poList && poList.length > 0
+                    ? poList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`po${i + 1}`] || '-'}</td>`).join('')
+                    : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`po${n}`] || '-'}</td>`).join('')
+                }
+                                ${psoList && psoList.length > 0
+                    ? psoList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`pso${i + 1}`] || '-'}</td>`).join('')
+                    : [1, 2, 3].map(n => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`pso${n}`] || '-'}</td>`).join('')
+                }
+                            </tr>
+                        `).join('')}
+                        <tr style="font-weight: bold; background-color: #f9f9f9;">
+                            <td style="border: 1.5px solid #000; padding: 1.5px;">Average</td>
+                            ${poList && poList.length > 0
+                ? poList.map((_, i) => {
+                    const validValues = coPoMapping.map(r => Number(r[`po${i + 1}`])).filter(v => !isNaN(v) && v > 0);
+                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
+                }).join('')
+                : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => {
+                    const validValues = coPoMapping.map(r => Number(r[`po${n}`])).filter(v => !isNaN(v) && v > 0);
+                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
+                }).join('')
+            }
+                            ${psoList && psoList.length > 0
+                ? psoList.map((_, i) => {
+                    const validValues = coPoMapping.map(r => Number(r[`pso${i + 1}`])).filter(v => !isNaN(v) && v > 0);
+                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
+                }).join('')
+                : [1, 2, 3].map(n => {
+                    const validValues = coPoMapping.map(r => Number(r[`pso${n}`])).filter(v => !isNaN(v) && v > 0);
+                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
+                }).join('')
+            }
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="display: flex; justify-content: space-between; font-size: 7pt; margin-top: 1px; margin-bottom: 2px;">
+                    <span>3 - High</span>
+                    <span>2 - Medium</span>
+                    <span>1 - Low</span>
+                    <span>"-" - No Correlation</span>
+                </div>
 
-            ${renderAssessmentComponentsHTML(subj)}
+                ${renderAssessmentComponentsHTML(subj)}
+            </div>
 
             <div class="pdf-footer pdf-footer-inner">
                 <div class="footer-left">Passed in Board of Studies Meeting on ${bosMeetingDate}</div>
@@ -1265,8 +1400,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     const pageTracker = { current: 1 };
 
+    const isSH = (
+        (deptData?.slug || '').toLowerCase().includes('science') && (deptData?.slug || '').toLowerCase().includes('humanities')
+    ) || (
+            (deptData?.slug || '').toLowerCase() === 'sh' || (deptData?.slug || '').toLowerCase() === 's-and-h'
+        ) || (
+            (deptName || '').toLowerCase().includes('science') && (deptName || '').toLowerCase().includes('humanities')
+        ) || (
+            (deptName || '').toLowerCase().includes('science & humanities')
+        );
+
     let degreePrefix = "B.E.";
-    if (academicLevel === "PG") {
+    if (isSH) {
+        degreePrefix = "";
+    } else if (academicLevel === "PG") {
         degreePrefix = deptData.slug === 'master-of-business-administration' ? 'M.B.A.' : 'M.E.';
     } else {
         const techSlugs = [
@@ -1303,7 +1450,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     const getHeaderHTML = () => `
         <div class="pdf-header pdf-header-inner">
             <div class="left-col">EASA College of Engineering and Technology</div>
-            <div class="right-col">${degreePrefix} ${deptName.toUpperCase()} (${regYear})</div>
+            <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
         </div>
     `;
 
@@ -1321,7 +1468,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     // Helper to render semester table HTML
     const renderSemesterTableHTML = (semNum) => {
-        const subjectsForSem = semestersGrouped[semNum] || [];
+        const subjectsForSem = sortSubjectsByCode(semestersGrouped[semNum] || []);
         if (subjectsForSem.length === 0) return '';
 
         const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'THEORY' || (s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('LANGUAGE') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
@@ -1358,7 +1505,23 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         const semTotalCredits = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
 
         const renderCourseRows = (courseList) => {
-            return courseList.map(s => `
+            return sortSubjectsByCode(courseList).map(s => {
+                const isInduction = (s.title || '').toUpperCase().includes('INDUCTION') || (s.code || '').toUpperCase().includes('INDUCTION');
+                if (isInduction) {
+                    return `
+                    <tr>
+                        <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
+                        <td>${s.title}</td>
+                        <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'MC'}</td>
+                        <td class="center" colspan="4" style="font-weight: bold; font-family: Arial, sans-serif; font-size: 8pt; letter-spacing: 0.5px;">2 WEEKS</td>
+                        <td class="center" style="font-weight: bold;">0</td>
+                        <td class="center">-</td>
+                        <td class="center">-</td>
+                        <td class="center">-</td>
+                    </tr>
+                    `;
+                }
+                return `
                 <tr>
                     <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                     <td>${s.title}</td>
@@ -1372,7 +1535,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <td class="center">${s.ese !== undefined ? s.ese : 60}</td>
                     <td class="center">${s.total !== undefined ? s.total : 100}</td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         };
 
         return `
@@ -1423,20 +1587,6 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             ${renderCourseRows(practicalCourses)}
                         ` : ''}
 
-                        ${languageElective1.length > 0 ? `
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – I</td>
-                            </tr>
-                            ${renderCourseRows(languageElective1)}
-                        ` : ''}
-
-                        ${languageElective2.length > 0 ? `
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – II</td>
-                            </tr>
-                            ${renderCourseRows(languageElective2)}
-                        ` : ''}
-
                         ${employabilityCourses.length > 0 ? `
                             <tr class="category-row">
                                 <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
@@ -1466,6 +1616,74 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                         </tr>
                     </tbody>
                 </table>
+
+                ${languageElective1.length > 0 ? `
+                <div style="margin-top: 12px; page-break-inside: avoid;">
+                    <table class="curriculum-table">
+                        <thead>
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 4px 8px; border: 1.5px solid #000; text-transform: uppercase;">
+                                    LANGUAGE ELECTIVE – I
+                                </td>
+                            </tr>
+                            <tr>
+                                <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif;">Course Code</th>
+                                <th rowSpan="2" style="width: 42%; font-size: 8pt; font-family: Arial, sans-serif;">Course</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
+                                <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
+                                <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
+                                <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                            </tr>
+                            <tr>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">T</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">P</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">CIA</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">ESE</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${renderCourseRows(languageElective1)}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
+
+                ${languageElective2.length > 0 ? `
+                <div style="margin-top: 12px; page-break-inside: avoid;">
+                    <table class="curriculum-table">
+                        <thead>
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 4px 8px; border: 1.5px solid #000; text-transform: uppercase;">
+                                    LANGUAGE ELECTIVE – II
+                                </td>
+                            </tr>
+                            <tr>
+                                <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif;">Course Code</th>
+                                <th rowSpan="2" style="width: 42%; font-size: 8pt; font-family: Arial, sans-serif;">Course</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
+                                <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
+                                <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
+                                <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                            </tr>
+                            <tr>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">T</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">P</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">CIA</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">ESE</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${renderCourseRows(languageElective2)}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
             </div>
         `;
     };
@@ -1486,11 +1704,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 font-size: 10pt;
             }
             
-            /* Apply consistent font size and family to all elements on content pages (page 2 onwards) except headers and footers */
-            .print-table .page *:not(.pdf-header):not(.pdf-header *):not(.pdf-footer):not(.pdf-footer *),
-            .page:not(:first-of-type) *:not(.pdf-header):not(.pdf-header *):not(.pdf-footer):not(.pdf-footer *) {
-                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif !important;
-                font-size: 10pt !important;
+            /* Apply consistent font family to all elements on content pages (page 2 onwards) except headers and footers */
+            .print-table .page,
+            .page {
+                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
             }
             
             /* Header and Footer styles (exempt from the content page font/size overrides) */
@@ -1819,7 +2036,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             @media print {
                 @page {
                     size: A4 portrait;
-                    margin: 12mm 15mm 15mm 15mm;
+                    margin: 12mm 15mm 12mm 15mm;
                 }
                 body {
                     -webkit-print-color-adjust: exact;
@@ -1833,8 +2050,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 }
                 .cover-page {
                     width: 100% !important;
-                    min-height: 255mm !important;
-                    height: 255mm !important;
+                    height: 260mm !important;
+                    max-height: 260mm !important;
                     margin: 0 !important;
                     padding: 0 !important;
                     box-sizing: border-box !important;
@@ -1844,10 +2061,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     break-after: page !important;
                     page-break-inside: avoid !important;
                     break-inside: avoid !important;
+                    overflow: hidden !important;
                 }
                 .page {
                     width: 100% !important;
                     min-height: 255mm !important;
+                    height: auto !important;
+                    max-height: none !important;
                     margin: 0 !important;
                     padding: 0 !important;
                     box-sizing: border-box !important;
@@ -1860,10 +2080,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     display: flex !important;
                     flex-direction: column !important;
                     justify-content: space-between !important;
+                    overflow: visible !important;
                 }
                 .syllabus-subject-block {
                     width: 100% !important;
-                    min-height: 255mm !important;
                     margin: 0 !important;
                     padding: 0 !important;
                     box-sizing: border-box !important;
@@ -1874,9 +2094,6 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     break-before: page !important;
                     page-break-after: auto !important;
                     break-after: auto !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                    justify-content: space-between !important;
                 }
                 .pdf-header,
                 .pdf-header-inner {
@@ -1924,7 +2141,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     <body>
         <!-- Preview Control Bar -->
         <div class="preview-bar no-print">
-            <div class="preview-title">Curriculum & Syllabus Preview - ${degreePrefix} ${deptName} (${regYear})</div>
+            <div class="preview-title">Curriculum & Syllabus Preview - ${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
             <div>
                 <button class="preview-btn btn-print" onclick="window.print()">Print / Save PDF</button>
                 <button class="preview-btn btn-close" onclick="window.close()">Close Preview</button>
@@ -1945,7 +2162,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <!-- 2. DEGREE & DEPARTMENT -->
                 <div style="margin: 40px 0; text-align: center;">
                     <h2 style="font-family: Arial, sans-serif; font-size: 30pt; font-weight: bold; line-height: 1.5; text-transform: uppercase; margin: 0; padding: 0 10px;">
-                        ${degreePrefix} ${deptName.toUpperCase()}
+                        ${degreePrefix ? `${degreePrefix} ` : ''}${deptName.toUpperCase()}
                     </h2>
                 </div>
 
@@ -2078,7 +2295,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     ${getHeaderHTML()}
                     ${index === 0 ? `
                     <div class="title-block" style="margin-top: 15px; margin-bottom: 20px;">
-                        <h1 style="font-size: 15pt; font-family: Arial, sans-serif;">${degreePrefix.toUpperCase()} ${deptName.toUpperCase()}</h1>
+                        <h1 style="font-size: 15pt; font-family: Arial, sans-serif;">${degreePrefix ? `${degreePrefix.toUpperCase()} ` : ''}${deptName.toUpperCase()}</h1>
                         <h2 style="font-size: 11pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.5; margin-top: 10px;">
                             REGULATION – ${regYear.replace('R-', '')}<br>
                             CHOICE BASED CREDIT SYSTEM<br>
@@ -2127,7 +2344,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <tbody>
                         ${(() => {
                 return sortedVerticals.map(vertNum => {
-                    const subjectsForVert = verticalsGrouped[vertNum];
+                    const subjectsForVert = sortSubjectsByCode(verticalsGrouped[vertNum] || []);
                     const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
                     const romanNum = getRomanNumeral(vertNum);
 
@@ -2203,7 +2420,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 }, {});
                 const sortedOecDepts = Object.keys(oecsGrouped).sort();
                 return sortedOecDepts.map(deptName => {
-                    const deptSubjects = oecsGrouped[deptName];
+                    const deptSubjects = sortSubjectsByCode(oecsGrouped[deptName] || []);
                     return `
                                     <tr style="background: #f9f9f9;">
                                         <td colspan="10" style="font-weight: bold; text-align: center; font-size: 9.5pt; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 1px solid #000; padding: 6px;">
@@ -2407,10 +2624,12 @@ const SyllabusPage = () => {
         return semData ? semData.courses : [];
     };
 
-    // Get subjects to display in filter
-    const availableSubjects = selectedSemester === "all"
-        ? Array.from(new Map(syllabusBreakdown.flatMap(sem => sem.courses).map(course => [course.code, course])).values())
-        : getSubjectsForSemester(selectedSemester);
+    // Get subjects to display in filter (sorted A-Z)
+    const availableSubjects = sortSubjectsByCode(
+        selectedSemester === "all"
+            ? Array.from(new Map(syllabusBreakdown.flatMap(sem => sem.courses).map(course => [course.code, course])).values())
+            : getSubjectsForSemester(selectedSemester)
+    );
 
     // Get the selected subject details
     const getSelectedSubjectDetails = () => {
@@ -2775,21 +2994,32 @@ const SyllabusPage = () => {
                                                                     {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
                                                                 </td>
                                                             </tr>
-                                                            {categorySubjects.map((subj, subjIdx) => (
-                                                                <tr key={subjIdx}>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
-                                                                </tr>
-                                                            ))}
+                                                            {sortSubjectsByCode(categorySubjects).map((subj, subjIdx) => {
+                                                                const isInduction = (subj.title || subj.name || '').toUpperCase().includes('INDUCTION') || (subj.code || '').toUpperCase().includes('INDUCTION');
+                                                                return (
+                                                                    <tr key={subjIdx}>
+                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>{subj.code}</td>
+                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
+                                                                        {isInduction ? (
+                                                                            <td colSpan={4} style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                                                                                2 WEEKS
+                                                                            </td>
+                                                                        ) : (
+                                                                            <>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                            </>
+                                                                        )}
+                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{isInduction ? 0 : subj.credits}</td>
+                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.cia}</td>
+                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.ese}</td>
+                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.total}</td>
+                                                                    </tr>
+                                                                );
+                                                            })}
                                                         </React.Fragment>
                                                     ))}
                                                 </tbody>
@@ -2836,7 +3066,7 @@ const SyllabusPage = () => {
                                                         </thead>
                                                         <tbody>
                                                             {sortedVerticals.map(vertNum => {
-                                                                const subjectsForVert = verticalsGrouped[vertNum];
+                                                                const subjectsForVert = sortSubjectsByCode(verticalsGrouped[vertNum] || []);
                                                                 const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
                                                                 const romanNum = getRomanNumeral(vertNum);
 
@@ -2909,7 +3139,7 @@ const SyllabusPage = () => {
                                                             }, {});
                                                             const sortedOecDepts = Object.keys(oecsGrouped).sort();
                                                             return sortedOecDepts.map(deptName => {
-                                                                const deptSubjects = oecsGrouped[deptName];
+                                                                const deptSubjects = sortSubjectsByCode(oecsGrouped[deptName] || []);
                                                                 return (
                                                                     <React.Fragment key={`oec-dept-${deptName}`}>
                                                                         <tr style={{ background: 'rgba(255,255,255,0.03)' }}>

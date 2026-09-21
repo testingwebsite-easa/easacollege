@@ -656,15 +656,9 @@ function parseSheetRows(rows, defaultContext) {
                 ],
                 outcomes,
                 units,
-                textbooks: [
-                    `Standard Curriculum Textbook for ${title}, Latest Edition.`
-                ],
-                references: [
-                    `Reference Guide and Manual for ${title}, Reputed Academic Publishers.`
-                ],
-                webReferences: [
-                    `https://nptel.ac.in/courses`
-                ],
+                textbooks: [],
+                references: [],
+                webReferences: [],
                 coPoMapping: createDefaultMapping()
             };
 

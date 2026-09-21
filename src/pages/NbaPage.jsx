@@ -692,7 +692,7 @@ const NbaPage = () => {
                                                 Outcome-Based Education (OBE) Process Flow
                                             </h2>
                                             <p style={{ color: secondaryTextColor, fontSize: '1.05rem', margin: '0.5rem 0 0' }}>
-                                                How Course Outcomes (COs) feed directly into Program Outcomes (POs) and Program Educational Objectives (PEOs).
+                                                How Course Outcomes (COs)feed directly into Program Outcomes (POs) and Program Educational Objectives (PEOs).
                                             </p>
                                         </div>
 

@@ -13,6 +13,82 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 
 // Middleware for auth
 const { verifyToken } = require('./auth');
 
+function sanitizeCoPoMapping(coPoMapping, outcomes, poCount = 11, psoCount = 3) {
+    const normKey = (str) => String(str || '').replace(/\s+/g, '').toUpperCase();
+    const existingValuesMap = new Map();
+
+    if (Array.isArray(coPoMapping)) {
+        coPoMapping.forEach((row, idx) => {
+            if (!row || typeof row !== 'object') return;
+            const key = normKey(row.coNo) || `CO${idx + 1}`;
+            const existing = existingValuesMap.get(key) || {};
+            const merged = { ...existing, ...row, coNo: row.coNo || `CO ${idx + 1}` };
+            const maxPo = Math.max(poCount || 11, 11);
+            for (let i = 1; i <= maxPo; i++) {
+                const k = `po${i}`;
+                const val = (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') ? String(row[k]).trim() : '-';
+                const exVal = existing[k] !== undefined ? String(existing[k]).trim() : '-';
+                merged[k] = (val !== '-' && val !== '') ? val : exVal;
+            }
+            const maxPso = Math.max(psoCount || 3, 3);
+            for (let i = 1; i <= maxPso; i++) {
+                const k = `pso${i}`;
+                const val = (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') ? String(row[k]).trim() : '-';
+                const exVal = existing[k] !== undefined ? String(existing[k]).trim() : '-';
+                merged[k] = (val !== '-' && val !== '') ? val : exVal;
+            }
+            existingValuesMap.set(key, merged);
+        });
+    }
+
+    let targetCos = [];
+    if (Array.isArray(outcomes) && outcomes.length > 0) {
+        targetCos = outcomes
+            .filter(co => co && (typeof co === 'string' || (co.outcome && co.outcome.trim() !== '') || co.coNo))
+            .map((co, idx) => {
+                const raw = typeof co === 'object' ? (co.coNo || `CO ${idx + 1}`) : `CO ${idx + 1}`;
+                return String(raw).trim();
+            });
+    }
+
+    if (targetCos.length === 0) {
+        if (existingValuesMap.size > 0) {
+            targetCos = Array.from(existingValuesMap.values()).map((r, idx) => r.coNo || `CO ${idx + 1}`);
+        } else {
+            targetCos = ['CO 1', 'CO 2', 'CO 3', 'CO 4', 'CO 5'];
+        }
+    }
+
+    const seen = new Set();
+    const uniqueTargetCos = [];
+    targetCos.forEach((co, idx) => {
+        const key = normKey(co) || `CO${idx + 1}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueTargetCos.push(co);
+        }
+    });
+
+    const effectivePoCount = poCount || 11;
+    const effectivePsoCount = psoCount || 3;
+    return uniqueTargetCos.map((coLabel, idx) => {
+        const key = normKey(coLabel) || `CO${idx + 1}`;
+        const found = existingValuesMap.get(key) || (Array.isArray(coPoMapping) && coPoMapping[idx] ? coPoMapping[idx] : {});
+        const mapObj = { coNo: coLabel };
+        for (let i = 1; i <= effectivePoCount; i++) {
+            const k = `po${i}`;
+            const val = found && found[k] !== undefined && found[k] !== null ? String(found[k]).trim() : '-';
+            mapObj[k] = val || '-';
+        }
+        for (let i = 1; i <= effectivePsoCount; i++) {
+            const k = `pso${i}`;
+            const val = found && found[k] !== undefined && found[k] !== null ? String(found[k]).trim() : '-';
+            mapObj[k] = val || '-';
+        }
+        return mapObj;
+    });
+}
+
 // POST /api/departments/scan-syllabus-word - Scan and parse Word (.docx) syllabus files
 router.post('/scan-syllabus-word', upload.single('file'), async (req, res) => {
     try {
@@ -264,14 +340,25 @@ router.put('/:slug', verifyToken, async (req, res) => {
                     references: (Array.isArray(existingMaster.references) && existingMaster.references.length > 0) ? existingMaster.references : (subj.references || []),
                     webReferences: (Array.isArray(existingMaster.webReferences) && existingMaster.webReferences.length > 0) ? existingMaster.webReferences : (subj.webReferences || []),
                     experiments: (Array.isArray(existingMaster.experiments) && existingMaster.experiments.length > 0) ? existingMaster.experiments : (subj.experiments || []),
-                    coPoMapping: (Array.isArray(existingMaster.coPoMapping) && existingMaster.coPoMapping.length > 0) ? existingMaster.coPoMapping : (subj.coPoMapping || [])
+                    coPoMapping: sanitizeCoPoMapping(
+                        (Array.isArray(existingMaster.coPoMapping) && existingMaster.coPoMapping.length > 0) ? existingMaster.coPoMapping : (subj.coPoMapping || []),
+                        (Array.isArray(existingMaster.outcomes) && existingMaster.outcomes.length > 0) ? existingMaster.outcomes : (subj.outcomes || []),
+                        po?.length || 11,
+                        pso?.length || 3
+                    )
                 };
             }
 
             return {
                 ...subj,
                 code: codeKey,
-                creatorDept: creatorDept
+                creatorDept: creatorDept,
+                coPoMapping: sanitizeCoPoMapping(
+                    subj.coPoMapping,
+                    subj.outcomes,
+                    po?.length || 11,
+                    pso?.length || 3
+                )
             };
         });
 

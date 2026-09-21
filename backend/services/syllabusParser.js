@@ -740,9 +740,12 @@ function parseDetailedSyllabi(rawText) {
             currentSection = 'units';
             const unitNo = romanToNumber(unitMatch[1]);
             const unitTitle = cleanText(unitMatch[2]) || `Unit ${unitNo}`;
+            const periodsMatch = unitTitle.match(/(\d+)\s*(?:PERIODS|HOURS|PERIOD|HRS)/i);
+            const periods = periodsMatch ? periodsMatch[1] : '';
             currentUnit = {
                 unitNo: `Unit ${unitNo}`,
-                title: unitTitle.replace(/\d+\s*(PERIODS|HOURS|PERIOD).*$/i, '').trim(),
+                title: unitTitle.replace(/\d+\s*(?:PERIODS|HOURS|PERIOD|HRS).*$/i, '').trim(),
+                periods: periods,
                 topics: []
             };
             currentSubject.units.push(currentUnit);
@@ -852,9 +855,28 @@ async function parseWordSyllabus(buffer) {
                 }));
             }
 
-            if (!subj.coPoMapping || subj.coPoMapping.length === 0) {
-                subj.coPoMapping = createDefaultMapping();
+            const targetCos = (subj.outcomes && subj.outcomes.length > 0)
+                ? subj.outcomes.map((c, i) => c.coNo || `CO ${i + 1}`)
+                : ['CO 1', 'CO 2', 'CO 3', 'CO 4', 'CO 5'];
+
+            const existingMap = new Map();
+            if (Array.isArray(subj.coPoMapping)) {
+                subj.coPoMapping.forEach((r, i) => {
+                    if (r) {
+                        const k = String(r.coNo || `CO ${i + 1}`).replace(/\s+/g, '').toUpperCase();
+                        existingMap.set(k, r);
+                    }
+                });
             }
+
+            subj.coPoMapping = targetCos.map((coLabel, i) => {
+                const k = String(coLabel).replace(/\s+/g, '').toUpperCase();
+                const found = existingMap.get(k) || {};
+                const row = { coNo: coLabel };
+                for (let p = 1; p <= 12; p++) row[`po${p}`] = (found[`po${p}`] !== undefined && found[`po${p}`] !== '') ? found[`po${p}`] : '-';
+                for (let p = 1; p <= 3; p++) row[`pso${p}`] = (found[`pso${p}`] !== undefined && found[`pso${p}`] !== '') ? found[`pso${p}`] : '-';
+                return row;
+            });
         });
 
         return {
@@ -877,4 +899,3 @@ module.exports = {
     parseWordSyllabus,
     parseSyllabusWordDoc: parseWordSyllabus
 };
-

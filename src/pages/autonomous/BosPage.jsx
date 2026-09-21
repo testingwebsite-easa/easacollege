@@ -127,7 +127,7 @@ const bosData = {
     functions: [
         {
             title: "Curriculum & Syllabi Structuring",
-            desc: "Drafting semester-wise course schemes, credits, prerequisites, and Course Outcomes (COs) aligned with Bloom's Taxonomy."
+            desc: "Drafting semester-wise course schemes, credits, prerequisites, and Course Outcomes (COs)aligned with Bloom's Taxonomy."
         },
         {
             title: "Professional & Open Elective Baskets",

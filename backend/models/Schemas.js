@@ -725,6 +725,7 @@ module.exports = {
             units: [{
                 unitNo: String,
                 title: String,
+                periods: { type: String, default: '' },
                 topics: [String]
             }],
             textbooks: { type: [String], default: [] },

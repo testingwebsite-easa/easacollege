@@ -1,4 +1,5 @@
 import mammoth from 'mammoth';
+import { sanitizeCoPoMapping } from './coPoMappingUtils';
 
 /**
  * High-Precision Word Document Syllabus Parser for Autonomous / Anna University Syllabi
@@ -732,9 +733,12 @@ function parseDetailedSyllabi(rawText) {
             currentSection = 'units';
             const unitNo = romanToNumber(unitMatch[1]);
             const unitTitle = cleanText(unitMatch[2]) || `Unit ${unitNo}`;
+            const periodsMatch = unitTitle.match(/(\d+)\s*(?:PERIODS|HOURS|PERIOD|HRS)/i);
+            const periods = periodsMatch ? periodsMatch[1] : '';
             currentUnit = {
                 unitNo: `Unit ${unitNo}`,
-                title: unitTitle.replace(/\d+\s*(PERIODS|HOURS|PERIOD).*$/i, '').trim(),
+                title: unitTitle.replace(/\d+\s*(?:PERIODS|HOURS|PERIOD|HRS).*$/i, '').trim(),
+                periods: periods,
                 topics: []
             };
             currentSubject.units.push(currentUnit);
@@ -853,9 +857,7 @@ export async function parseWordSyllabusClient(fileOrBuffer) {
                 }));
             }
 
-            if (!subj.coPoMapping || subj.coPoMapping.length === 0) {
-                subj.coPoMapping = createDefaultMapping();
-            }
+            subj.coPoMapping = sanitizeCoPoMapping(subj.coPoMapping, subj.outcomes, 11, 3);
         });
 
         return {

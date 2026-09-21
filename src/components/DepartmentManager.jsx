@@ -5,6 +5,7 @@ import { departments as staticDepartments } from '../data/departmentsData';
 import { getDetailedSyllabusForSubject, SYLLABUS_DATA } from '../data/syllabusData';
 import { parseWordSyllabusClient } from '../utils/wordSyllabusParser';
 import { parseExcelSyllabusClient } from '../utils/excelSyllabusParser';
+import { sanitizeCoPoMapping, sortSubjectsByCode } from '../utils/coPoMappingUtils';
 import collegeLogo from '../assets/EASA College Logo.webp';
 import API_BASE_URL from '../api';
 
@@ -107,7 +108,7 @@ const renderCreditDistributionTable = (subjects) => {
         'PEC': 'Professional Elective Courses (PEC)',
         'OEC': 'Open Elective Courses (OEC)',
         'EEC': 'Employability Enhancement Courses (EEC)',
-        'MC': 'Mandatory Courses (Non-Credit) (MC)'
+        'MC': 'Mandatory Courses (MC)'
     };
 
     const distribution = {};
@@ -119,7 +120,7 @@ const renderCreditDistributionTable = (subjects) => {
     subjects.forEach(subj => {
         const isLang1 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE I');
         const isLang2 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE II');
-        
+
         if (isLang1 || isLang2) {
             const key = `${subj.semester || 1}_${isLang1 ? 'lang1' : 'lang2'}`;
             if (seenLangCategories.has(key)) {
@@ -243,6 +244,39 @@ const renderCreditDistributionTable = (subjects) => {
     );
 };
 
+const formatDeptHeaderTitle = (degreePrefix, deptName, regYear) => {
+    let cleanPrefix = (degreePrefix || '').trim();
+    if (cleanPrefix) {
+        const upper = cleanPrefix.toUpperCase().replace(/\./g, '');
+        if (upper === 'BTECH') cleanPrefix = 'B.Tech.';
+        else if (upper === 'BE') cleanPrefix = 'B.E.';
+        else if (upper === 'ME') cleanPrefix = 'M.E.';
+        else if (upper === 'MBA') cleanPrefix = 'M.B.A.';
+        else if (!cleanPrefix.endsWith('.')) cleanPrefix += '.';
+    }
+
+    const smallWords = new Set(['and', 'or', 'of', 'in', 'for', 'the', 'to', 'cum', 'on', 'at', 'a', 'an']);
+    const formatTitleCase = (str) => {
+        if (!str) return '';
+        return str
+            .replace(/&/g, ' and ')
+            .toLowerCase()
+            .split(/\s+/)
+            .map((part, idx) => {
+                if (!part || part.trim() === '') return '';
+                const lower = part.toLowerCase();
+                if (idx > 0 && smallWords.has(lower)) return lower;
+                return lower.charAt(0).toUpperCase() + lower.slice(1);
+            })
+            .filter(Boolean)
+            .join(' ');
+    };
+
+    const formattedDept = formatTitleCase(deptName || '');
+    const reg = regYear || 'R-2023';
+    return `${cleanPrefix ? `${cleanPrefix} ` : ''}${formattedDept} (${reg})`.trim();
+};
+
 const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeetingDate, degreePrefix, deptName, regYear) => {
     const pageNum = ++pageTracker.current;
     const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
@@ -254,7 +288,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         'PEC': 'Professional Elective Courses (PEC)',
         'OEC': 'Open Elective Courses (OEC)',
         'EEC': 'Employability Enhancement Courses (EEC)',
-        'MC': 'Mandatory Courses (Non-Credit) (MC)'
+        'MC': 'Mandatory Courses (MC)'
     };
 
     const distribution = {};
@@ -262,38 +296,86 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         distribution[cat] = Array(8).fill(0);
     });
 
-    const seenLangCategories = new Set();
+    const validSubjectsForDistribution = [];
+    const regularSubjectsBySem = {};
+
     subjects.forEach(subj => {
-        const isLang1 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE I');
-        const isLang2 = subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || subj.category?.toUpperCase().includes('LANGUAGE ELECTIVE II');
-        
-        if (isLang1 || isLang2) {
-            const key = `${subj.semester || 1}_${isLang1 ? 'lang1' : 'lang2'}`;
-            if (seenLangCategories.has(key)) {
-                return;
-            }
-            seenLangCategories.add(key);
+        if (subj.isOpenElective || subj.vertical) {
+            validSubjectsForDistribution.push(subj);
+            return;
+        }
+        const sem = Number(subj.semester) || 1;
+        if (!regularSubjectsBySem[sem]) regularSubjectsBySem[sem] = [];
+        regularSubjectsBySem[sem].push(subj);
+    });
+
+    Object.entries(regularSubjectsBySem).forEach(([semStr, semSubjs]) => {
+        const lang1Options = semSubjs.filter(s => (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE – I') || (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE - I') || (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE I'));
+        const lang2Options = semSubjs.filter(s => (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE – II') || (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE - II') || (s.category || '').toUpperCase().includes('LANGUAGE ELECTIVE II'));
+
+        const hasLang1Placeholder = semSubjs.some(s => !lang1Options.includes(s) && ((s.title || '').toUpperCase().includes('LANGUAGE ELECTIVE') && ((s.title || '').toUpperCase().includes('I') || (s.code || '').toUpperCase().includes('EN10X') || (s.code || '').toUpperCase().includes('EN1X'))));
+        const hasLang2Placeholder = semSubjs.some(s => !lang2Options.includes(s) && ((s.title || '').toUpperCase().includes('LANGUAGE ELECTIVE') && ((s.title || '').toUpperCase().includes('II') || (s.code || '').toUpperCase().includes('EN20X') || (s.code || '').toUpperCase().includes('EN2X'))));
+
+        const excludedFromSem = new Set();
+        if (hasLang1Placeholder) {
+            lang1Options.forEach(s => excludedFromSem.add(s));
+        } else if (lang1Options.length > 1) {
+            lang1Options.slice(1).forEach(s => excludedFromSem.add(s));
         }
 
+        if (hasLang2Placeholder) {
+            lang2Options.forEach(s => excludedFromSem.add(s));
+        } else if (lang2Options.length > 1) {
+            lang2Options.slice(1).forEach(s => excludedFromSem.add(s));
+        }
+
+        semSubjs.forEach(s => {
+            if (!excludedFromSem.has(s)) {
+                validSubjectsForDistribution.push(s);
+            }
+        });
+    });
+
+    validSubjectsForDistribution.forEach(subj => {
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
         } else if (subj.vertical) {
             cat = 'PEC';
         } else {
-            const rawCat = (subj.categoryType || '').toUpperCase().trim();
-            if (rawCat === 'HS' || rawCat === 'HUM') cat = 'HUM';
-            else if (rawCat === 'BS' || rawCat === 'BSC') cat = 'BSC';
-            else if (rawCat === 'ES' || rawCat === 'ESC') cat = 'ESC';
-            else if (rawCat === 'PC' || rawCat === 'PCC') cat = 'PCC';
-            else if (rawCat === 'PE' || rawCat === 'PEC') cat = 'PEC';
-            else if (rawCat === 'OE' || rawCat === 'OEC') cat = 'OEC';
-            else if (rawCat === 'EE' || rawCat === 'EEC') cat = 'EEC';
-            else if (rawCat === 'MC') cat = 'MC';
-            else cat = 'PCC';
+            const type = (subj.categoryType || '').toUpperCase().trim();
+            if (['HUM', 'HS', 'HSS'].includes(type)) cat = 'HUM';
+            else if (['BSC', 'BS'].includes(type)) cat = 'BSC';
+            else if (['ESC', 'ES'].includes(type)) cat = 'ESC';
+            else if (['PCC', 'PC'].includes(type)) cat = 'PCC';
+            else if (['PEC', 'PE'].includes(type)) cat = 'PEC';
+            else if (['OEC', 'OE'].includes(type)) cat = 'OEC';
+            else if (['EEC', 'EE'].includes(type)) cat = 'EEC';
+            else if (['MC'].includes(type)) cat = 'MC';
+            else {
+                const text = `${subj.categoryType || ''} ${subj.category || ''} ${subj.categoryName || ''}`.toUpperCase();
+                if (text.includes('HUMANITIES') || text.includes('MANAGEMENT') || text.includes('HUM') || text.includes('HS')) cat = 'HUM';
+                else if (text.includes('BASIC SCIENCE') || text.includes('BSC') || text.includes('BS')) cat = 'BSC';
+                else if (text.includes('ENGINEERING SCIENCE') || text.includes('ESC') || text.includes('ES')) cat = 'ESC';
+                else if (text.includes('PROFESSIONAL CORE') || text.includes('PCC') || text.includes('PC')) cat = 'PCC';
+                else if (text.includes('PROFESSIONAL ELECTIVE') || text.includes('PEC') || text.includes('PE')) cat = 'PEC';
+                else if (text.includes('OPEN ELECTIVE') || text.includes('OEC') || text.includes('OE')) cat = 'OEC';
+                else if (text.includes('EMPLOYABILITY') || text.includes('PROJECT') || text.includes('EEC') || text.includes('EE')) cat = 'EEC';
+                else if (text.includes('MANDATORY') || text.includes('MC')) cat = 'MC';
+                else cat = 'PCC';
+            }
         }
 
-        const credits = Number(subj.credits) || 0;
+        let credits = 0;
+        if (typeof subj.credits === 'number') {
+            credits = subj.credits;
+        } else if (typeof subj.credits === 'string') {
+            const parts = subj.credits.split('-');
+            if (parts.length > 0) {
+                const last = Number(parts[parts.length - 1]);
+                if (!isNaN(last)) credits = last;
+            }
+        }
 
         let sem = Number(subj.semester);
         if (!sem && subj.code) {
@@ -395,7 +477,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         <div class="page">
             <div class="pdf-header pdf-header-inner">
                 <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">${degreePrefix ? degreePrefix.toUpperCase() : 'B.E.'} ${(deptName || '').toUpperCase()} (${regYear || 'R-2023'})</div>
+                <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear || 'R-2023')}</div>
             </div>
             
             <div class="title-block" style="margin-top: 15px; margin-bottom: 20px;">
@@ -458,26 +540,26 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 1. MANDATORY COURSE (MC)
     if (catUpper.includes('MC') || catUpper.includes('MANDATORY') || titleUpper.includes('MANDATORY')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">MANDATORY COURSE</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8.5pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">MANDATORY COURSE</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 6px; width: 50%;">Continuous Internal Assessment (100)</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 6px; width: 30%; vertical-align: middle;">End Semester Examination Theory</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 6px; width: 20%; vertical-align: middle;">Total</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 50%;">Continuous Internal Assessment (100)</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 30%; vertical-align: middle;">End Semester Examination Theory</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 20%; vertical-align: middle;">Total</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">CIAT - I</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">CIAT - II</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">CIAT - I</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">CIAT - II</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 6px;">50</td>
-                        <td style="border: 1.5px solid #000; padding: 6px;">50</td>
-                        <td style="border: 1.5px solid #000; padding: 6px;">-</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px;">50</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px;">50</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px;">-</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">100</td>
                     </tr>
                 </tbody>
             </table>
@@ -488,33 +570,33 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 2. MINI PROJECT
     if (titleUpper.includes('MINI PROJECT') || catUpper.includes('MINI PROJECT')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">Mini Project*</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8.5pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Mini Project*</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th colspan="4" style="border: 1.5px solid #000; padding: 6px;">Continuous assessment (100 Marks)</th>
+                        <th colspan="4" style="border: 1.5px solid #000; padding: 2.5px 3px;">Continuous assessment (100 Marks)</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 25%; vertical-align: middle;">Review I</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 25%; vertical-align: middle;">Review II</th>
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 4px; width: 50%;">Review III</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 25%; vertical-align: middle;">Review I</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 25%; vertical-align: middle;">Review II</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 50%;">Review III</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">Report</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">Viva-Voce Examination</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">Report</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">Viva-Voce Examination</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">25</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">25</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">30</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">25</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">25</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">30</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
                     </tr>
                 </tbody>
             </table>
-            <div style="font-size: 8pt; font-style: italic; margin-top: 3px; margin-bottom: 6px; text-align: left;">*Internal mode only</div>
+            <div style="font-size: 7pt; font-style: italic; margin-top: 2px; margin-bottom: 2px; text-align: left;">*Internal mode only</div>
         </div>
         `;
     }
@@ -522,37 +604,37 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 3. PROJECT WORK / INTERNSHIP CUM PROJECT WORK
     if (titleUpper.includes('PROJECT WORK') || titleUpper.includes('INTERNSHIP CUM PROJECT') || titleUpper.includes('FINAL YEAR PROJECT') || (titleUpper.includes('PROJECT') && !titleUpper.includes('MINI'))) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">Project Work / Internship cum project work</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Project Work / Internship cum project work</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th colspan="3" style="border: 1.5px solid #000; padding: 4px; width: 45%;">Continuous Assessment (60 Marks)</th>
-                        <th colspan="4" style="border: 1.5px solid #000; padding: 4px; width: 55%;">End Semester Examination (40 Marks)</th>
+                        <th colspan="3" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 45%;">Continuous Assessment (60 Marks)</th>
+                        <th colspan="4" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 55%;">End Semester Examination (40 Marks)</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 15%; vertical-align: middle;">Review I</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 15%; vertical-align: middle;">Review II</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 15%; vertical-align: middle;">Review III</th>
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 4px; width: 27%;">Project Thesis Report Evaluation</th>
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 4px; width: 28%;">Viva-Voce Examination</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 15%; vertical-align: middle;">Review I</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 15%; vertical-align: middle;">Review II</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 15%; vertical-align: middle;">Review III</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 27%;">Project Thesis Report Evaluation</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 28%;">Viva-Voce Examination</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 3px; width: 13.5%;">Guide</th>
-                        <th style="border: 1.5px solid #000; padding: 3px; width: 13.5%;">External</th>
-                        <th style="border: 1.5px solid #000; padding: 3px; width: 14%;">External</th>
-                        <th style="border: 1.5px solid #000; padding: 3px; width: 14%;">Internal</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 13.5%;">Guide</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 13.5%;">External</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">External</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Internal</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
                     </tr>
                 </tbody>
             </table>
@@ -563,29 +645,29 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 4. INTERNSHIP
     if (titleUpper.includes('INTERNSHIP') || catUpper.includes('INTERNSHIP')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">Internship</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8.5pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Internship</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th colspan="4" style="border: 1.5px solid #000; padding: 6px;">Final assessment (100 Marks)</th>
+                        <th colspan="4" style="border: 1.5px solid #000; padding: 2.5px 3px;">Final assessment (100 Marks)</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 25%; vertical-align: middle;">Project Report</th>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 4px; width: 25%; vertical-align: middle;">Presentation</th>
-                        <th colspan="2" style="border: 1.5px solid #000; padding: 4px; width: 50%;">Viva-Voce Examination</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 25%; vertical-align: middle;">Project Report</th>
+                        <th rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 25%; vertical-align: middle;">Presentation</th>
+                        <th colspan="2" style="border: 1.5px solid #000; padding: 2px 3px; width: 50%;">Viva-Voce Examination</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">Course Coordinator</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 25%;">Industry representative</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">Course Coordinator</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 25%;">Industry representative</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">40</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">30</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">20</td>
-                        <td style="border: 1.5px solid #000; padding: 6px; font-weight: bold;">10</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">40</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">30</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">20</td>
+                        <td style="border: 1.5px solid #000; padding: 2.5px 3px; font-weight: bold;">10</td>
                     </tr>
                 </tbody>
             </table>
@@ -596,69 +678,69 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 5. THEORY WITH PRACTICAL COURSES (L > 0 and P > 0)
     if ((lVal > 0 && pVal > 0) || catUpper.includes('THEORY CUM PRACTICAL') || catUpper.includes('THEORY WITH PRACTICAL')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY WITH PRACTICAL COURSES</div>
-            <div style="text-align: center; font-size: 8.5pt; font-weight: bold; margin-bottom: 6px; font-family: Arial, sans-serif;">L T P C<br>${lVal} ${tVal} ${pVal} ${cVal}</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY WITH PRACTICAL COURSES</div>
+            <div style="text-align: center; font-size: 7.5pt; font-weight: bold; margin-bottom: 4px; font-family: Arial, sans-serif;">L T P C : ${lVal} ${tVal} ${pVal} ${cVal}</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 22%;">Assessment Components</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 12%;">Duration</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Syllabus to be covered</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 10%;">Max. Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Weightage for Internal Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Continuous Internal Assessment Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">End Semester Examination Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 22%;">Assessment Components</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 12%;">Duration</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Syllabus to be covered</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 10%;">Max. Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Weightage for Internal Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Continuous Internal Assessment Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">End Semester Examination Marks</th>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <th colspan="7" style="border: 1.5px solid #000; padding: 4px; text-align: center;">Theory Component</th>
+                        <th colspan="7" style="border: 1.5px solid #000; padding: 2px 3px; text-align: center;">Theory Component</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 4px; text-align: center; font-weight: bold;">CIAT I</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">3 hours</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">2.5 units</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">13.5</td>
-                        <td rowspan="2" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">27</td>
-                        <td rowspan="5" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">50</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: center; font-weight: bold;">CIAT I</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">13.5</td>
+                        <td rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">27</td>
+                        <td rowspan="5" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">50</td>
                     </tr>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 4px; text-align: center; font-weight: bold;">CIAT II</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">3 hours</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">2.5 units</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">13.5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: center; font-weight: bold;">CIAT II</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">13.5</td>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9; font-family: Arial, sans-serif;">
-                        <td colspan="6" style="border: 1.5px solid #000; padding: 4px; text-align: center;">Practical Component</td>
-                        <td style="border: 1.5px solid #000; display: none;"></td>
+                        <th colspan="6" style="border: 1.5px solid #000; padding: 2px 3px; text-align: center;">Practical Component</th>
+                        <th style="border: 1.5px solid #000; display: none;"></th>
                     </tr>
                     <tr>
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 4px; text-align: left;">Observation & Analysis of Experimental results, Viva Voce, Quiz based on rubrics.</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">9</td>
-                        <td rowspan="2" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">18</td>
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left;">Observation & Analysis of Experimental results, Viva Voce, Quiz based on rubrics.</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">9</td>
+                        <td rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">18</td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 4px; text-align: left;">Activities/ Test</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">9</td>
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left;">Activities/ Test</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">9</td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 4px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
-                            Attendance<br>(80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 6.5pt; line-height: 1.2;">
+                            Attendance (80-84%–1, 85-88%–2, 89-92%–3, 93-96%–4, 97-100%–5 Marks)
                         </td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">5</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">5</td>
-                        <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">5</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">-</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">-</td>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9;">
-                        <td colspan="5" style="border: 1.5px solid #000; padding: 4px; text-align: right;">Total</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">50</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">50</td>
+                        <td colspan="5" style="border: 1.5px solid #000; padding: 2px 3px; text-align: right;">Total</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">50</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">50</td>
                     </tr>
                 </tbody>
             </table>
@@ -669,45 +751,45 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 6. PRACTICAL COURSES (Pure Practical, L == 0, P > 0)
     if ((lVal === 0 && pVal > 0) || catUpper.includes('PRACTICAL') || catUpper.includes('LAB')) {
         return `
-        <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">PRACTICAL COURSES</div>
-            <div style="text-align: center; font-size: 8.5pt; font-weight: bold; margin-bottom: 6px; font-family: Arial, sans-serif;">L T P C<br>${lVal} ${tVal} ${pVal} ${cVal}</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+        <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">PRACTICAL COURSES</div>
+            <div style="text-align: center; font-size: 7.5pt; font-weight: bold; margin-bottom: 4px; font-family: Arial, sans-serif;">L T P C : ${lVal} ${tVal} ${pVal} ${cVal}</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 40%;">Assessment Components</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 12%;">Max. Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 16%;">Weightage for Internal Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 16%;">Continuous Internal Assessment Marks</th>
-                        <th style="border: 1.5px solid #000; padding: 4px; width: 16%;">End Semester Examination Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 40%;">Assessment Components</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 12%;">Max. Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 16%;">Weightage for Internal Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 16%;">Continuous Internal Assessment Marks</th>
+                        <th style="border: 1.5px solid #000; padding: 2px 3px; width: 16%;">End Semester Examination Marks</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 4px; text-align: left;">Observation, Analysis of Experimental results& Record, Viva-voce based on rubrics.</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">75</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">41.25</td>
-                        <td rowspan="3" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">40</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: left;">Observation, Analysis of Experimental results & Record, Viva-voce based on rubrics.</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">75</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">40</td>
+                        <td rowspan="3" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">40</td>
                     </tr>
                     <tr>
-                        <td style="border: 1.5px solid #000; padding: 4px; text-align: left;">Activities / Test</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">25</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">13.75</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: left;">Activities / Test</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">25</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">15</td>
                     </tr>
                     <tr>
-                        <td colspan="1" style="border: 1.5px solid #000; padding: 4px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
-                            Attendance<br>(80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
+                        <td colspan="1" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 6.5pt; line-height: 1.2;">
+                            Attendance (80-84%–1, 85-88%–2, 89-92%–3, 93-96%–4, 97-100%–5 Marks)
                         </td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">5</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">-</td>
-                        <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">-</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">5</td>
                     </tr>
                     <tr style="font-weight: bold; background-color: #f9f9f9;">
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 4px; text-align: right;">Total</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">60</td>
-                        <td style="border: 1.5px solid #000; padding: 4px;">40</td>
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: right;">Total</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">60</td>
+                        <td style="border: 1.5px solid #000; padding: 2px 3px;">40</td>
                     </tr>
                 </tbody>
             </table>
@@ -717,55 +799,55 @@ const renderAssessmentComponentsHTML = (subj) => {
 
     // 7. THEORY COURSES (Default)
     return `
-    <div style="margin-top: 14px; margin-bottom: 10px; page-break-inside: avoid;">
-        <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 8px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY COURSES</div>
-        <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+    <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+        <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY COURSES</div>
+        <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
             <thead>
                 <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 22%;">Assessment Components</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 12%;">Duration</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Syllabus to be covered</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 10%;">Max. Marks</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Weightage for Internal Marks</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">Continuous Internal Assessment Marks</th>
-                    <th style="border: 1.5px solid #000; padding: 4px; width: 14%;">End Semester Examination Marks</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 22%;">Assessment Components</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 12%;">Duration</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Syllabus to be covered</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 10%;">Max. Marks</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Weightage for Internal Marks</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">Continuous Internal Assessment Marks</th>
+                    <th style="border: 1.5px solid #000; padding: 2px 3px; width: 14%;">End Semester Examination Marks</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td style="border: 1.5px solid #000; padding: 4px; text-align: center; font-weight: bold;">CIAT I</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">3 hours</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">2.5 units</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">12.25</td>
-                    <td rowspan="2" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">24.5</td>
-                    <td rowspan="4" style="border: 1.5px solid #000; padding: 4px; vertical-align: middle; font-weight: bold;">60</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: center; font-weight: bold;">CIAT I</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">12.25</td>
+                    <td rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">25</td>
+                    <td rowspan="4" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">60</td>
                 </tr>
                 <tr>
-                    <td style="border: 1.5px solid #000; padding: 4px; text-align: center; font-weight: bold;">CIAT II</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">3 hours</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">2.5 units</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">100</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">12.25</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px; text-align: center; font-weight: bold;">CIAT II</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">12.25</td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border: 1.5px solid #000; padding: 4px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
+                    <td colspan="4" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7pt; line-height: 1.2;">
                         Objective Test/Online Quiz, Assignment / Case study/ Seminar/Tutorial, Role Play, Poster Presentation, Group Discussions, Oral Presentation, Mini Project etc., (5 marks during CIAT I and 5 marks during CIAT II)
                     </td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">10.5</td>
-                    <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">10.5</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">10</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">10</td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border: 1.5px solid #000; padding: 4px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
-                        Attendance<br>(80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
+                    <td colspan="4" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7pt; line-height: 1.2;">
+                        Attendance (80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
                     </td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">5</td>
-                    <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">5</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">5</td>
                 </tr>
                 <tr style="font-weight: bold; background-color: #f9f9f9;">
-                    <td colspan="5" style="border: 1.5px solid #000; padding: 4px; text-align: right;">Total</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">40</td>
-                    <td style="border: 1.5px solid #000; padding: 4px;">60</td>
+                    <td colspan="5" style="border: 1.5px solid #000; padding: 2px 3px; text-align: right;">Total</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">40</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">60</td>
                 </tr>
             </tbody>
         </table>
@@ -773,11 +855,64 @@ const renderAssessmentComponentsHTML = (subj) => {
     `;
 };
 
+const formatCategoryWithCode = (rawCatName, catType, category) => {
+    let raw = (rawCatName || '').trim();
+    // Strip out (Non-Credit) or Non-Credit if present
+    raw = raw.replace(/\(\s*Non-Credit\s*\)/gi, '').replace(/\bNon-Credit\b/gi, '').replace(/\s{2,}/g, ' ').trim();
+    const type = (catType || category || '').trim().toUpperCase();
+
+    const map = {
+        'HUM': 'Humanities, Social Sciences and Management Course (HUM)',
+        'HSMC': 'Humanities, Social Sciences and Management Course (HUM)',
+        'HSC': 'Humanities, Social Sciences and Management Course (HUM)',
+        'BSC': 'Basic Science Course (BSC)',
+        'BS': 'Basic Science Course (BSC)',
+        'ESC': 'Engineering Science Course (ESC)',
+        'ES': 'Engineering Science Course (ESC)',
+        'PCC': 'Professional Core Course (PCC)',
+        'PC': 'Professional Core Course (PCC)',
+        'PEC': 'Professional Elective Course (PEC)',
+        'PE': 'Professional Elective Course (PEC)',
+        'OEC': 'Open Elective Course (OEC)',
+        'OE': 'Open Elective Course (OEC)',
+        'EEC': 'Employability Enhancement Course (EEC)',
+        'EE': 'Employability Enhancement Course (EEC)',
+        'MC': 'Mandatory Course (MC)',
+        'AC': 'Audit Course (AC)'
+    };
+
+    if (raw) {
+        if (/\([A-Za-z0-9\s-]+\)$/.test(raw)) {
+            return raw;
+        }
+        const upper = raw.toUpperCase();
+        if (upper.includes('HUMANITIES') || upper.includes('SOCIAL SCIENCES') || upper.includes('MANAGEMENT')) return 'Humanities, Social Sciences and Management Course (HUM)';
+        if (upper.includes('BASIC SCIENCE')) return 'Basic Science Course (BSC)';
+        if (upper.includes('ENGINEERING SCIENCE')) return 'Engineering Science Course (ESC)';
+        if (upper.includes('PROFESSIONAL CORE')) return 'Professional Core Course (PCC)';
+        if (upper.includes('PROFESSIONAL ELECTIVE')) return 'Professional Elective Course (PEC)';
+        if (upper.includes('OPEN ELECTIVE')) return 'Open Elective Course (OEC)';
+        if (upper.includes('EMPLOYABILITY')) return 'Employability Enhancement Course (EEC)';
+        if (upper.includes('MANDATORY')) return 'Mandatory Course (MC)';
+        if (upper.includes('AUDIT')) return 'Audit Course (AC)';
+        if (map[upper]) return map[upper];
+        if (type && map[type]) return map[type];
+        if (type) return `${raw} (${type})`;
+        return raw;
+    }
+
+    if (type && map[type]) {
+        return map[type];
+    }
+
+    return 'Professional Core Course (PCC)';
+};
+
 const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, acMeetingDate, poList, psoList, degreePrefix, deptName) => {
     if (!subjects || subjects.length === 0) return '';
 
     return subjects.map((subj, sIdx) => {
-        const categoryName = subj.categoryName || getDefaultCategoryName(subj.categoryType);
+        const categoryName = formatCategoryWithCode(subj.categoryName, subj.categoryType, subj.category);
         const prerequisites = subj.prerequisites || 'Basic knowledge of the subject.';
         const subtitleStr = subj.subtitle ? `<div style="font-size: 9.5pt; font-weight: normal; margin-top: 3px;">(${subj.subtitle})</div>` : '';
 
@@ -797,34 +932,23 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 topics: Array.isArray(u.topics) ? u.topics : [u.topics || '']
             }));
 
-        const textbooks = (subj.textbooks && subj.textbooks.length > 0)
-            ? subj.textbooks
-            : ['Textbook of ' + (subj.title || 'Course') + ' - First Edition'];
+        const textbooks = (subj.textbooks && Array.isArray(subj.textbooks))
+            ? subj.textbooks.map(t => typeof t === 'string' ? t : (t.title ? `${t.author ? t.author + ', ' : ''}"${t.title}"${t.publisher ? ', ' + t.publisher : ''}${t.year ? ' (' + t.year + ')' : ''}` : '')).filter(t => t && t.trim() !== '')
+            : [];
 
-        const references = (subj.references && subj.references.length > 0)
-            ? subj.references
-            : ['Reference Book of ' + (subj.title || 'Course') + ' - Second Edition'];
-        const webReferences = (subj.webReferences && subj.webReferences.length > 0)
-            ? subj.webReferences
+        const references = (subj.references && Array.isArray(subj.references))
+            ? subj.references.map(r => typeof r === 'string' ? r : (r.title ? `${r.author ? r.author + ', ' : ''}"${r.title}"${r.publisher ? ', ' + r.publisher : ''}${r.year ? ' (' + r.year + ')' : ''}` : '')).filter(r => r && r.trim() !== '')
+            : [];
+
+        const webReferences = (subj.webReferences && Array.isArray(subj.webReferences))
+            ? subj.webReferences.filter(wr => wr && typeof wr === 'string' && wr.trim() !== '')
             : [];
 
         const experiments = subj.experiments || [];
 
-        const coPoMapping = (subj.coPoMapping && subj.coPoMapping.length > 0)
-            ? subj.coPoMapping
-            : [1, 2, 3, 4, 5].map(num => {
-                const mapObj = { coNo: `CO ${num}` };
-                for (let i = 1; i <= 12; i++) {
-                    mapObj[`po${i}`] = '-';
-                }
-                for (let i = 1; i <= 3; i++) {
-                    mapObj[`pso${i}`] = '-';
-                }
-                return mapObj;
-            });
-
         const poCount = (poList && poList.length > 0) ? poList.length : 11;
-        const psoCount = (psoList && psoList.length > 0) ? psoList.length : 2;
+        const psoCount = (psoList && psoList.length > 0) ? psoList.length : 3;
+        const coPoMapping = sanitizeCoPoMapping(subj.coPoMapping, subj.outcomes, poCount, psoCount);
 
         const lValue = subj.l !== undefined ? subj.l : 0;
         const tValue = subj.t !== undefined ? subj.t : 0;
@@ -835,44 +959,47 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         const tVal = Number(tValue) || 0;
         const pVal = Number(pValue) || 0;
         const contactHrs = lVal + tVal + pVal;
-        const unitPeriods = contactHrs > 0 ? contactHrs * 3 : 9;
-        const totalPeriods = unitPeriods * 5;
+        const defaultUnitPeriods = contactHrs > 0 ? contactHrs * 3 : 9;
 
-        const pageNum1 = ++pageTracker.current;
-        const pageNum2 = ++pageTracker.current;
+        let calculatedTotalPeriods = 0;
+        let hasCustomUnitPeriods = false;
+        units.forEach(u => {
+            if (u.periods !== undefined && u.periods !== null && String(u.periods).trim() !== '') {
+                hasCustomUnitPeriods = true;
+                calculatedTotalPeriods += (Number(u.periods) || 0);
+            } else {
+                calculatedTotalPeriods += defaultUnitPeriods;
+            }
+        });
+        const totalPeriods = (hasCustomUnitPeriods && calculatedTotalPeriods > 0) ? calculatedTotalPeriods : (defaultUnitPeriods * (units.length || 5));
 
         // Subject Type Checks
+        const isInduction = (subj.title || '').toUpperCase().includes('INDUCTION') || (subj.code || '').toUpperCase().includes('INDUCTION');
         const categoryUpper = (subj.category || '').toUpperCase();
         const isPractical = categoryUpper.includes('PRACTICAL') || categoryUpper.includes('LAB');
         const isTheory = categoryUpper.includes('THEORY');
-        const isPurePractical = isPractical && !isTheory;
         const isTheoryCumPractical = isPractical && isTheory;
-
-        // Experiments Split for Pure Practical
-        const halfIndex = Math.ceil(experiments.length / 2);
-        const firstHalfExperiments = experiments.slice(0, halfIndex);
-        const secondHalfExperiments = experiments.slice(halfIndex);
 
         // Helper to render experiments table
         const renderExperimentsTableHTML = (expList, title = "List of Exercises") => {
             if (!expList || expList.length === 0) return '';
             return `
-                <div style="margin-top: 8px; margin-bottom: 8px; page-break-inside: avoid;">
-                    <h4 style="font-size: 9.5pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 4px 0; text-transform: uppercase;">${title}</h4>
+                <div style="margin-top: 4px; margin-bottom: 4px; page-break-inside: avoid;">
+                    <h4 style="font-size: 9pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 3px 0; text-transform: uppercase;">${title}</h4>
                     <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
                         <thead>
                             <tr style="font-weight: bold; font-family: Arial, sans-serif; background-color: #f2f2f2;">
-                                <th style="border: 1.5px solid #000; padding: 3px; width: 8%;">S.No.</th>
-                                <th style="border: 1.5px solid #000; padding: 3px; width: 67%; text-align: left;">List of Exercises</th>
-                                <th style="border: 1.5px solid #000; padding: 3px; width: 10%;">CO</th>
-                                <th style="border: 1.5px solid #000; padding: 3px; width: 15%;">RBT Level</th>
+                                <th style="border: 1.5px solid #000; padding: 2.5px; width: 8%;">S.No.</th>
+                                <th style="border: 1.5px solid #000; padding: 2.5px; width: 67%; text-align: left; padding-left: 6px;">List of Exercises</th>
+                                <th style="border: 1.5px solid #000; padding: 2.5px; width: 10%;">CO</th>
+                                <th style="border: 1.5px solid #000; padding: 2.5px; width: 15%;">RBT Level</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${expList.map(exp => `
                                 <tr>
                                     <td style="border: 1.5px solid #000; padding: 2px; text-align: center;">${exp.sNo || ''}</td>
-                                    <td style="border: 1.5px solid #000; padding: 2px; text-align: left; padding-left: 5px;">${exp.name || ''}</td>
+                                    <td style="border: 1.5px solid #000; padding: 2px 6px; text-align: left;">${exp.name || ''}</td>
                                     <td style="border: 1.5px solid #000; padding: 2px; text-align: center;">${exp.co || ''}</td>
                                     <td style="border: 1.5px solid #000; padding: 2px; text-align: center;">${exp.rbtLevel || 'Apply'}</td>
                                 </tr>
@@ -883,112 +1010,132 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             `;
         };
 
+        const pageNum1 = ++pageTracker.current;
+        const pageNum2 = ++pageTracker.current;
+
         return `
         <!-- Syllabus Subject Page 1: ${(subj.code || '').toUpperCase()} -->
-        <div class="page">
+        <div class="page syllabus-page">
             <div class="pdf-header pdf-header-inner">
                 <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">${degreePrefix ? degreePrefix.toUpperCase() : 'B.E.'} ${(deptName || '').toUpperCase()} (${regYear})</div>
+                <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 8px; font-size: 9pt; border: 1.5px solid #000; page-break-inside: avoid;">
-                <tr>
-                    <td rowspan="2" style="width: 18%; border: 1.5px solid #000; padding: 5px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt;">
-                        ${(subj.code || '').toUpperCase()}
-                    </td>
-                    <td rowspan="2" style="width: 58%; border: 1.5px solid #000; padding: 5px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt; text-transform: uppercase;">
-                        ${subj.title || ''}
-                        ${subtitleStr}
-                    </td>
-                    <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">L</td>
-                    <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">T</td>
-                    <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">P</td>
-                    <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">C</td>
-                </tr>
-                <tr>
-                    <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">${lValue}</td>
-                    <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">${tValue}</td>
-                    <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">${pValue}</td>
-                    <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold;">${cValue}</td>
-                </tr>
-                ${subj.isOpenElective ? '' : `
-                <tr>
-                    <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">Category</td>
-                    <td colspan="5" style="border: 1.5px solid #000; padding: 4px;">${categoryName}</td>
-                </tr>
-                `}
-                <tr>
-                    <td style="border: 1.5px solid #000; padding: 4px; font-weight: bold;">Pre requisites</td>
-                    <td colspan="5" style="border: 1.5px solid #000; padding: 4px; text-align: justify;">${prerequisites}</td>
-                </tr>
-            </table>
-
-            ${objectives.length > 0 ? `
-            <div class="section-container" style="margin-bottom: 8px; page-break-inside: avoid;">
-                <h3 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Course Objectives</h3>
-                <p style="font-size: 8.5pt; margin: 0 0 3px 0;">The course is intended to make the students to</p>
-                <ol style="margin: 0; padding-left: 18px;">
-                    ${objectives.map(obj => obj.trim() ? `<li style="margin-bottom: 2px; font-size: 8.5pt; text-align: justify;">${obj}</li>` : '').join('')}
-                </ol>
-            </div>
-            ` : ''}
-
-            ${outcomes.some(co => co.outcome && co.outcome.trim()) ? `
-            <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 8px; font-size: 8.5pt; border: 1.5px solid #000; page-break-inside: avoid;">
-                <thead>
+            <div class="syllabus-page-content" style="flex: 1 1 auto;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 6px; font-size: 9pt; border: 1.5px solid #000; page-break-inside: avoid;">
                     <tr>
-                        <th colspan="3" style="border: 1.5px solid #000; padding: 3px; text-align: center; font-weight: bold; font-family: Arial, sans-serif; text-transform: uppercase; font-size: 9pt;">Course Outcomes</th>
+                        <td rowspan="2" style="width: 18%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt;">
+                            ${(subj.code || '').toUpperCase()}
+                        </td>
+                        <td rowspan="2" style="width: 58%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt; text-transform: uppercase;">
+                            ${subj.title || ''}
+                            ${subtitleStr}
+                        </td>
+                        ${isInduction ? `
+                        <td rowspan="2" colspan="4" style="width: 24%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt; font-family: Arial, sans-serif;">
+                            2 WEEKS
+                        </td>
+                        ` : `
+                        <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">L</td>
+                        <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">T</td>
+                        <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">P</td>
+                        <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">C</td>
+                        `}
                     </tr>
+                    ${!isInduction ? `
                     <tr>
-                        <th colspan="3" style="border: 1.5px solid #000; padding: 3px; text-align: left; font-weight: normal; font-size: 8.5pt;">On successful completion of the course, students will be able</th>
+                        <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${lValue}</td>
+                        <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${tValue}</td>
+                        <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${pValue}</td>
+                        <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${cValue}</td>
                     </tr>
-                    <tr style="font-family: Arial, sans-serif; font-size: 8pt; font-weight: bold; text-align: center;">
-                        <th style="width: 12%; border: 1.5px solid #000; padding: 3px;">CO. No</th>
-                        <th style="width: 73%; border: 1.5px solid #000; padding: 3px; text-align: left;">Course Outcome</th>
-                        <th style="width: 15%; border: 1.5px solid #000; padding: 3px;">RBT Level</th>
+                    ` : ''}
+                    ${subj.isOpenElective ? '' : `
+                    <tr>
+                        <td style="border: 1.5px solid #000; padding: 3px 5px; font-weight: bold; font-size: 9pt;">Category</td>
+                        <td colspan="5" style="border: 1.5px solid #000; padding: 3px 5px; font-size: 9pt;">${categoryName}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    ${outcomes.map(co => co.outcome && co.outcome.trim() ? `
-                        <tr>
-                            <td style="border: 1.5px solid #000; padding: 3px; text-align: center; font-weight: bold;">${co.coNo}</td>
-                            <td style="border: 1.5px solid #000; padding: 3px; text-align: justify;">${co.outcome}</td>
-                            <td style="border: 1.5px solid #000; padding: 3px; text-align: center;">${co.rbtLevel || 'Apply'}</td>
-                        </tr>
-                    ` : '').join('')}
-                </tbody>
-            </table>
-            ` : ''}
+                    `}
+                    <tr>
+                        <td style="border: 1.5px solid #000; padding: 3px 5px; font-weight: bold; font-size: 9pt;">Pre requisites</td>
+                        <td colspan="5" style="border: 1.5px solid #000; padding: 3px 5px; text-align: justify; font-size: 9pt;">${prerequisites}</td>
+                    </tr>
+                </table>
 
-            <!-- Units or Exercises -->
-            <div style="margin-top: 6px; margin-bottom: 6px;">
-                ${isPurePractical
-                ? renderExperimentsTableHTML(firstHalfExperiments.length > 0 ? firstHalfExperiments : experiments, "List of Exercises")
-                : units.map((unit, uIdx) => {
-                    const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][uIdx] || (uIdx + 1)}`;
-                    const unitTitle = unit.title ? unit.title.toUpperCase() : '';
-                    const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t.trim() !== '').join(', ') : (unit.topics || '');
-
-                    return topicsStr ? `
-                            <div style="margin-bottom: 5px; text-align: justify; font-size: 8.5pt; line-height: 1.3; page-break-inside: avoid;">
-                                <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 8.5pt; margin-bottom: 1px;">
-                                    <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
-                                    <span>${unitPeriods} Periods</span>
-                                </div>
-                                <div style="font-size: 8.5pt; line-height: 1.3; text-align: justify;">
-                                    ${topicsStr}
-                                </div>
-                            </div>
-                        ` : '';
-                }).join('')}
-                
-                ${isTheoryCumPractical && experiments.length > 0 ? `
-                    ${renderExperimentsTableHTML(experiments, "List of Exercises / Experiments")}
+                ${objectives.length > 0 ? `
+                <div class="section-container" style="margin-bottom: 6px; page-break-inside: avoid;">
+                    <h3 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Course Objectives</h3>
+                    <p style="font-size: 9pt; margin: 0 0 2px 0;">The course is intended to make the students to</p>
+                    <ol style="margin: 0; padding-left: 18px;">
+                        ${objectives.map(obj => (obj && obj.trim()) ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;">${obj}</li>` : '').join('')}
+                    </ol>
+                </div>
                 ` : ''}
 
-                <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 8.5pt; margin-top: 5px; margin-bottom: 5px; border-top: 1px solid #ddd; padding-top: 3px;">
-                    TOTAL: ${totalPeriods} PERIODS
+                <!-- Units or Exercises -->
+                <div style="margin-top: 4px; margin-bottom: 4px;">
+                    ${isPractical && !isTheory ? `
+                        ${renderExperimentsTableHTML(experiments, "List of Exercises")}
+                    ` : units.map((unit, uIdx) => {
+            const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][uIdx] || (uIdx + 1)}`;
+            const unitTitle = unit.title ? unit.title.toUpperCase() : '';
+            const thisUnitPeriods = (unit.periods !== undefined && unit.periods !== null && String(unit.periods).trim() !== '') ? unit.periods : defaultUnitPeriods;
+            const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t && t.trim() !== '').join(', ') : (unit.topics || '');
+
+            return topicsStr ? `
+                                <div style="margin-bottom: 5px; text-align: justify; font-size: 9pt; line-height: 1.35; page-break-inside: avoid;">
+                                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
+                                        <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
+                                        <span>${thisUnitPeriods} Periods</span>
+                                    </div>
+                                    <div style="font-size: 9pt; line-height: 1.35; text-align: justify;">
+                                        ${topicsStr}
+                                    </div>
+                                </div>
+                            ` : '';
+        }).join('')}
+                    
+                    ${isTheoryCumPractical && experiments.length > 0 ? `
+                        ${renderExperimentsTableHTML(experiments, "List of Exercises / Experiments")}
+                    ` : ''}
+
+                    <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 9pt; margin-top: 4px; margin-bottom: 4px; border-top: 1px solid #ddd; padding-top: 2px;">
+                        ${isInduction ? 'TOTAL: 2 WEEKS' : `TOTAL: ${totalPeriods} PERIODS`}
+                    </div>
                 </div>
+
+                ${outcomes.some(co => (co && co.outcome && co.outcome.trim()) || (typeof co === 'string' && co.trim())) ? `
+                <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 4px; font-size: 8pt; border: 1.5px solid #000; page-break-inside: avoid;">
+                    <thead>
+                        <tr>
+                            <th colspan="3" style="border: 1.5px solid #000; padding: 2.5px; text-align: center; font-weight: bold; font-family: Arial, sans-serif; text-transform: uppercase; font-size: 8.5pt;">Course Outcomes</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" style="border: 1.5px solid #000; padding: 2px 4px; text-align: left; font-weight: normal; font-size: 8pt;">On successful completion of the course, students will be able to</th>
+                        </tr>
+                        <tr style="font-family: Arial, sans-serif; font-size: 7.5pt; font-weight: bold; text-align: center;">
+                            <th style="width: 12%; border: 1.5px solid #000; padding: 2px;">CO. No</th>
+                            <th style="width: 73%; border: 1.5px solid #000; padding: 2px; text-align: left; padding-left: 5px;">Course Outcome</th>
+                            <th style="width: 15%; border: 1.5px solid #000; padding: 2px;">RBT Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${outcomes.map(co => {
+            const coNo = co.coNo || (co.outcome ? co.outcome.slice(0, 3) : '');
+            const outcomeText = co.outcome || (typeof co === 'string' ? co : '');
+            const rbtLevel = co.rbtLevel || 'Apply';
+            if (!outcomeText || !outcomeText.trim()) return '';
+            return `
+                            <tr>
+                                <td style="border: 1.5px solid #000; padding: 1.5px 3px; text-align: center; font-weight: bold;">${coNo}</td>
+                                <td style="border: 1.5px solid #000; padding: 1.5px 5px; text-align: justify; line-height: 1.2;">${outcomeText}</td>
+                                <td style="border: 1.5px solid #000; padding: 1.5px 3px; text-align: center;">${rbtLevel}</td>
+                            </tr>
+                            `;
+        }).join('')}
+                    </tbody>
+                </table>
+                ` : ''}
             </div>
 
             <div class="pdf-footer pdf-footer-inner">
@@ -999,114 +1146,112 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         </div>
 
         <!-- Syllabus Subject Page 2: ${(subj.code || '').toUpperCase()} -->
-        <div class="page">
+        <div class="page syllabus-page">
             <div class="pdf-header pdf-header-inner">
                 <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">${degreePrefix ? degreePrefix.toUpperCase() : 'B.E.'} ${(deptName || '').toUpperCase()} (${regYear})</div>
+                <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
             </div>
 
-            ${isPurePractical && secondHalfExperiments.length > 0 ? `
-                ${renderExperimentsTableHTML(secondHalfExperiments, "List of Exercises (Contd.)")}
-            ` : ''}
+            <div class="syllabus-page-content" style="flex: 1 1 auto;">
+                ${(textbooks.length > 0 || references.length > 0 || webReferences.length > 0) ? `
+                <div class="section-container" style="margin-top: 4px; margin-bottom: 6px; page-break-inside: avoid;">
+                    ${textbooks.length > 0 ? `
+                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Text Book${textbooks.length > 1 ? 's' : ''}</h4>
+                    <ol style="margin: 0 0 4px 0; padding-left: 18px;">
+                        ${textbooks.map(tb => tb.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;">${tb}</li>` : '').join('')}
+                    </ol>
+                    ` : ''}
 
-            ${(textbooks.length > 0 || references.length > 0 || webReferences.length > 0) ? `
-            <div class="section-container" style="margin-top: 6px; margin-bottom: 8px; page-break-inside: avoid;">
-                ${textbooks.length > 0 ? `
-                <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 3px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Text Book</h4>
-                <ol style="margin: 0 0 6px 0; padding-left: 18px;">
-                    ${textbooks.map(tb => tb.trim() ? `<li style="margin-bottom: 2px; font-size: 8.5pt; text-align: justify;">${tb}</li>` : '').join('')}
-                </ol>
+                    ${references.length > 0 ? `
+                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">References Books</h4>
+                    <ol style="margin: 0 0 4px 0; padding-left: 18px;">
+                        ${references.map(ref => ref.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;">${ref}</li>` : '').join('')}
+                    </ol>
+                    ` : ''}
+
+                    ${webReferences.length > 0 ? `
+                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Additional / Web References</h4>
+                    <ol style="margin: 0; padding-left: 18px;">
+                        ${webReferences.map(wr => wr.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;"><a href="${wr}" style="color: #000; text-decoration: underline;">${wr}</a></li>` : '').join('')}
+                    </ol>
+                    ` : ''}
+                </div>
                 ` : ''}
 
-                ${references.length > 0 ? `
-                <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 3px 0; font-family: Arial, sans-serif; text-transform: uppercase;">References Books</h4>
-                <ol style="margin: 0 0 6px 0; padding-left: 18px;">
-                    ${references.map(ref => ref.trim() ? `<li style="margin-bottom: 2px; font-size: 8.5pt; text-align: justify;">${ref}</li>` : '').join('')}
-                </ol>
-                ` : ''}
+                <div style="font-size: 8pt; font-weight: bold; margin-top: 4px; margin-bottom: 2px; font-family: Arial, sans-serif; text-align: center;">
+                    Mapping of Course Outcomes (COs)with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
+                </div>
 
-                ${webReferences.length > 0 ? `
-                <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 3px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Additional / Web References Links</h4>
-                <ol style="margin: 0; padding-left: 18px;">
-                    ${webReferences.map(wr => wr.trim() ? `<li style="margin-bottom: 2px; font-size: 8.5pt; text-align: justify;"><a href="${wr}" style="color: #000; text-decoration: underline;">${wr}</a></li>` : '').join('')}
-                </ol>
-                ` : ''}
-            </div>
-            ` : ''}
-
-            <div style="font-size: 8.5pt; font-weight: bold; margin-top: 6px; margin-bottom: 3px; text-transform: uppercase; font-family: Arial, sans-serif; text-align: center;">
-                Mapping of Course Outcomes (COs) with Programme Outcomes (POs) Programme Specific Outcomes (PSOs)
-            </div>
-
-            <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 6px; font-size: 8pt; border: 1.5px solid #000; text-align: center; page-break-inside: avoid;">
-                <thead>
-                    <tr>
-                        <th rowspan="2" style="border: 1.5px solid #000; padding: 3px; width: 10%;">COs</th>
-                        <th colspan="${poCount}" style="border: 1.5px solid #000; padding: 3px;">POs</th>
-                        <th colspan="${psoCount}" style="border: 1.5px solid #000; padding: 3px;">PSOs</th>
-                    </tr>
-                    <tr>
-                        ${poList && poList.length > 0
-                        ? poList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 2px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
-                        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<th style="border: 1.5px solid #000; padding: 2px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
-                    }
-                        ${psoList && psoList.length > 0
-                        ? psoList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 2px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
-                        : [1, 2].map(n => `<th style="border: 1.5px solid #000; padding: 2px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
-                    }
-                    </tr>
-                </thead>
-                <tbody>
-                    ${coPoMapping.map(row => `
+                <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 4px; font-size: 7.5pt; border: 1.5px solid #000; text-align: center; page-break-inside: avoid;">
+                    <thead>
                         <tr>
-                            <td style="border: 1.5px solid #000; padding: 2px; font-weight: bold;">${row.coNo}</td>
-                            ${poList && poList.length > 0
-                            ? poList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 2px;">${row[`po${i + 1}`] || '-'}</td>`).join('')
-                            : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<td style="border: 1.5px solid #000; padding: 2px;">${row[`po${n}`] || '-'}</td>`).join('')
-                        }
-                            ${psoList && psoList.length > 0
-                            ? psoList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 2px;">${row[`pso${i + 1}`] || '-'}</td>`).join('')
-                            : [1, 2].map(n => `<td style="border: 1.5px solid #000; padding: 2px;">${row[`pso${n}`] || '-'}</td>`).join('')
-                        }
+                            <th rowspan="2" style="border: 1.5px solid #000; padding: 2px; width: 10%;">COs</th>
+                            <th colspan="${poCount}" style="border: 1.5px solid #000; padding: 2px;">POs</th>
+                            <th colspan="${psoCount}" style="border: 1.5px solid #000; padding: 2px;">PSOs</th>
                         </tr>
-                    `).join('')}
-                    <tr style="font-weight: bold; background-color: #f9f9f9;">
-                        <td style="border: 1.5px solid #000; padding: 2px;">Average</td>
-                        ${poList && poList.length > 0
-                        ? poList.map((_, i) => {
-                            const validValues = coPoMapping.map(r => Number(r[`po${i + 1}`])).filter(v => !isNaN(v) && v > 0);
-                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                            return `<td style="border: 1.5px solid #000; padding: 2px;">${avg}</td>`;
-                        }).join('')
-                        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => {
-                            const validValues = coPoMapping.map(r => Number(r[`po${n}`])).filter(v => !isNaN(v) && v > 0);
-                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                            return `<td style="border: 1.5px solid #000; padding: 2px;">${avg}</td>`;
-                        }).join('')
-                    }
-                        ${psoList && psoList.length > 0
-                        ? psoList.map((_, i) => {
-                            const validValues = coPoMapping.map(r => Number(r[`pso${i + 1}`])).filter(v => !isNaN(v) && v > 0);
-                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                            return `<td style="border: 1.5px solid #000; padding: 2px;">${avg}</td>`;
-                        }).join('')
-                        : [1, 2].map(n => {
-                            const validValues = coPoMapping.map(r => Number(r[`pso${n}`])).filter(v => !isNaN(v) && v > 0);
-                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                            return `<td style="border: 1.5px solid #000; padding: 2px;">${avg}</td>`;
-                        }).join('')
-                    }
-                    </tr>
-                </tbody>
-            </table>
-            <div style="display: flex; justify-content: space-between; font-size: 7.5pt; margin-top: 1px; margin-bottom: 4px;">
-                <span>3 - High</span>
-                <span>2 - Medium</span>
-                <span>1 - Low</span>
-                <span>"-" - No Correlation</span>
-            </div>
+                        <tr>
+                            ${poList && poList.length > 0
+                ? poList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${i + 1}</th>`).join('')
+                : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${n}</th>`).join('')
+            }
+                            ${psoList && psoList.length > 0
+                ? psoList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${i + 1}</th>`).join('')
+                : [1, 2, 3].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${n}</th>`).join('')
+            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${coPoMapping.map(row => `
+                            <tr>
+                                <td style="border: 1.5px solid #000; padding: 1.5px; font-weight: bold;">${row.coNo}</td>
+                                ${poList && poList.length > 0
+                    ? poList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`po${i + 1}`] || '-'}</td>`).join('')
+                    : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`po${n}`] || '-'}</td>`).join('')
+                }
+                                ${psoList && psoList.length > 0
+                    ? psoList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`pso${i + 1}`] || '-'}</td>`).join('')
+                    : [1, 2, 3].map(n => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`pso${n}`] || '-'}</td>`).join('')
+                }
+                            </tr>
+                        `).join('')}
+                        <tr style="font-weight: bold; background-color: #f9f9f9;">
+                            <td style="border: 1.5px solid #000; padding: 1.5px;">Average</td>
+                            ${poList && poList.length > 0
+                ? poList.map((_, i) => {
+                    const validValues = coPoMapping.map(r => Number(r[`po${i + 1}`])).filter(v => !isNaN(v) && v > 0);
+                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
+                }).join('')
+                : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => {
+                    const validValues = coPoMapping.map(r => Number(r[`po${n}`])).filter(v => !isNaN(v) && v > 0);
+                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
+                }).join('')
+            }
+                            ${psoList && psoList.length > 0
+                ? psoList.map((_, i) => {
+                    const validValues = coPoMapping.map(r => Number(r[`pso${i + 1}`])).filter(v => !isNaN(v) && v > 0);
+                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
+                }).join('')
+                : [1, 2, 3].map(n => {
+                    const validValues = coPoMapping.map(r => Number(r[`pso${n}`])).filter(v => !isNaN(v) && v > 0);
+                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
+                }).join('')
+            }
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="display: flex; justify-content: space-between; font-size: 7pt; margin-top: 1px; margin-bottom: 2px;">
+                    <span>3 - High</span>
+                    <span>2 - Medium</span>
+                    <span>1 - Low</span>
+                    <span>"-" - No Correlation</span>
+                </div>
 
-            ${renderAssessmentComponentsHTML(subj)}
+                ${renderAssessmentComponentsHTML(subj)}
+            </div>
 
             <div class="pdf-footer pdf-footer-inner">
                 <div class="footer-left">Passed in Board of Studies Meeting on ${bosMeetingDate}</div>
@@ -1137,8 +1282,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     const pageTracker = { current: 1 };
 
+    const isSH = (
+        (deptData?.slug || '').toLowerCase().includes('science') && (deptData?.slug || '').toLowerCase().includes('humanities')
+    ) || (
+            (deptData?.slug || '').toLowerCase() === 'sh' || (deptData?.slug || '').toLowerCase() === 's-and-h'
+        ) || (
+            (deptName || '').toLowerCase().includes('science') && (deptName || '').toLowerCase().includes('humanities')
+        ) || (
+            (deptName || '').toLowerCase().includes('science & humanities')
+        );
+
     let degreePrefix = "B.E.";
-    if (academicLevel === "PG") {
+    if (isSH) {
+        degreePrefix = "";
+    } else if (academicLevel === "PG") {
         degreePrefix = deptData.slug === 'master-of-business-administration' ? 'M.B.A.' : 'M.E.';
     } else {
         const techSlugs = [
@@ -1174,7 +1331,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     const getHeaderHTML = () => `
         <div class="pdf-header pdf-header-inner">
             <div class="left-col">EASA College of Engineering and Technology</div>
-            <div class="right-col">${degreePrefix} ${deptName.toUpperCase()} (${regYear})</div>
+            <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
         </div>
     `;
 
@@ -1192,7 +1349,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     // Helper to render semester table HTML
     const renderSemesterTableHTML = (semNum) => {
-        const subjectsForSem = semestersGrouped[semNum] || [];
+        const subjectsForSem = sortSubjectsByCode(semestersGrouped[semNum] || []);
         if (subjectsForSem.length === 0) return '';
 
         const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'THEORY' || (s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('LANGUAGE') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
@@ -1229,7 +1386,23 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         const semTotalCredits = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
 
         const renderCourseRows = (courseList) => {
-            return courseList.map(s => `
+            return sortSubjectsByCode(courseList).map(s => {
+                const isInduction = (s.title || '').toUpperCase().includes('INDUCTION') || (s.code || '').toUpperCase().includes('INDUCTION');
+                if (isInduction) {
+                    return `
+                    <tr>
+                        <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
+                        <td>${s.title}</td>
+                        <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'MC'}</td>
+                        <td class="center" colspan="4" style="font-weight: bold; font-family: Arial, sans-serif; font-size: 8pt; letter-spacing: 0.5px;">2 WEEKS</td>
+                        <td class="center" style="font-weight: bold;">0</td>
+                        <td class="center">-</td>
+                        <td class="center">-</td>
+                        <td class="center">-</td>
+                    </tr>
+                    `;
+                }
+                return `
                 <tr>
                     <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                     <td>${s.title}</td>
@@ -1243,7 +1416,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <td class="center">${s.ese !== undefined ? s.ese : 60}</td>
                     <td class="center">${s.total !== undefined ? s.total : 100}</td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         };
 
         return `
@@ -1294,20 +1468,6 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                             ${renderCourseRows(practicalCourses)}
                         ` : ''}
 
-                        ${languageElective1.length > 0 ? `
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – I</td>
-                            </tr>
-                            ${renderCourseRows(languageElective1)}
-                        ` : ''}
-
-                        ${languageElective2.length > 0 ? `
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">Language Elective – II</td>
-                            </tr>
-                            ${renderCourseRows(languageElective2)}
-                        ` : ''}
-
                         ${employabilityCourses.length > 0 ? `
                             <tr class="category-row">
                                 <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
@@ -1337,6 +1497,74 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                         </tr>
                     </tbody>
                 </table>
+
+                ${languageElective1.length > 0 ? `
+                <div style="margin-top: 12px; page-break-inside: avoid;">
+                    <table class="curriculum-table">
+                        <thead>
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 4px 8px; border: 1.5px solid #000; text-transform: uppercase;">
+                                    LANGUAGE ELECTIVE – I
+                                </td>
+                            </tr>
+                            <tr>
+                                <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif;">Course Code</th>
+                                <th rowSpan="2" style="width: 42%; font-size: 8pt; font-family: Arial, sans-serif;">Course</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
+                                <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
+                                <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
+                                <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                            </tr>
+                            <tr>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">T</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">P</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">CIA</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">ESE</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${renderCourseRows(languageElective1)}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
+
+                ${languageElective2.length > 0 ? `
+                <div style="margin-top: 12px; page-break-inside: avoid;">
+                    <table class="curriculum-table">
+                        <thead>
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 4px 8px; border: 1.5px solid #000; text-transform: uppercase;">
+                                    LANGUAGE ELECTIVE – II
+                                </td>
+                            </tr>
+                            <tr>
+                                <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif;">Course Code</th>
+                                <th rowSpan="2" style="width: 42%; font-size: 8pt; font-family: Arial, sans-serif;">Course</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
+                                <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
+                                <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
+                                <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                            </tr>
+                            <tr>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">T</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">P</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">CIA</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">ESE</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${renderCourseRows(languageElective2)}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
             </div>
         `;
     };
@@ -1357,11 +1585,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 font-size: 10pt;
             }
             
-            /* Apply consistent font size and family to all elements on content pages (page 2 onwards) except headers and footers */
-            .print-table .page *:not(.pdf-header):not(.pdf-header *):not(.pdf-footer):not(.pdf-footer *),
-            .page:not(:first-of-type) *:not(.pdf-header):not(.pdf-header *):not(.pdf-footer):not(.pdf-footer *) {
-                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif !important;
-                font-size: 10pt !important;
+            /* Apply consistent font family to all elements on content pages (page 2 onwards) except headers and footers */
+            .print-table .page,
+            .page {
+                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
             }
             
             /* Header and Footer styles (exempt from the content page font/size overrides) */
@@ -1690,7 +1917,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             @media print {
                 @page {
                     size: A4 portrait;
-                    margin: 12mm 15mm 15mm 15mm;
+                    margin: 12mm 15mm 12mm 15mm;
                 }
                 body {
                     -webkit-print-color-adjust: exact;
@@ -1704,8 +1931,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 }
                 .cover-page {
                     width: 100% !important;
-                    min-height: 255mm !important;
-                    height: 255mm !important;
+                    height: 260mm !important;
+                    max-height: 260mm !important;
                     margin: 0 !important;
                     padding: 0 !important;
                     box-sizing: border-box !important;
@@ -1715,10 +1942,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     break-after: page !important;
                     page-break-inside: avoid !important;
                     break-inside: avoid !important;
+                    overflow: hidden !important;
                 }
                 .page {
                     width: 100% !important;
                     min-height: 255mm !important;
+                    height: auto !important;
+                    max-height: none !important;
                     margin: 0 !important;
                     padding: 0 !important;
                     box-sizing: border-box !important;
@@ -1731,10 +1961,10 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     display: flex !important;
                     flex-direction: column !important;
                     justify-content: space-between !important;
+                    overflow: visible !important;
                 }
                 .syllabus-subject-block {
                     width: 100% !important;
-                    min-height: 255mm !important;
                     margin: 0 !important;
                     padding: 0 !important;
                     box-sizing: border-box !important;
@@ -1745,9 +1975,6 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     break-before: page !important;
                     page-break-after: auto !important;
                     break-after: auto !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                    justify-content: space-between !important;
                 }
                 .pdf-header,
                 .pdf-header-inner {
@@ -1795,7 +2022,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     <body>
         <!-- Preview Control Bar -->
         <div class="preview-bar no-print">
-            <div class="preview-title">Curriculum & Syllabus Preview - ${degreePrefix} ${deptName} (${regYear})</div>
+            <div class="preview-title">Curriculum & Syllabus Preview - ${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
             <div>
                 <button class="preview-btn btn-print" onclick="window.print()">Print / Save PDF</button>
                 <button class="preview-btn btn-close" onclick="window.close()">Close Preview</button>
@@ -1816,7 +2043,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <!-- 2. DEGREE & DEPARTMENT -->
                 <div style="margin: 40px 0; text-align: center;">
                     <h2 style="font-family: Arial, sans-serif; font-size: 24pt; font-weight: bold; line-height: 1.5; text-transform: uppercase; margin: 0; padding: 0 10px;">
-                        ${degreePrefix} ${deptName.toUpperCase()}
+                        ${degreePrefix ? `${degreePrefix} ` : ''}${deptName.toUpperCase()}
                     </h2>
                 </div>
 
@@ -1949,7 +2176,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     ${getHeaderHTML()}
                     ${index === 0 ? `
                     <div class="title-block" style="margin-top: 15px; margin-bottom: 20px;">
-                        <h1 style="font-size: 15pt; font-family: Arial, sans-serif;">${degreePrefix.toUpperCase()} ${deptName.toUpperCase()}</h1>
+                        <h1 style="font-size: 15pt; font-family: Arial, sans-serif;">${degreePrefix ? `${degreePrefix.toUpperCase()} ` : ''}${deptName.toUpperCase()}</h1>
                         <h2 style="font-size: 11pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.5; margin-top: 10px;">
                             REGULATION – ${regYear.replace('R-', '')}<br>
                             CHOICE BASED CREDIT SYSTEM<br>
@@ -1998,7 +2225,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     <tbody>
                         ${(() => {
                 return sortedVerticals.map(vertNum => {
-                    const subjectsForVert = verticalsGrouped[vertNum];
+                    const subjectsForVert = sortSubjectsByCode(verticalsGrouped[vertNum] || []);
                     const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
                     const romanNum = getRomanNumeral(vertNum);
 
@@ -2074,7 +2301,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 }, {});
                 const sortedOecDepts = Object.keys(oecsGrouped).sort();
                 return sortedOecDepts.map(deptName => {
-                    const deptSubjects = oecsGrouped[deptName];
+                    const deptSubjects = sortSubjectsByCode(oecsGrouped[deptName] || []);
                     return `
                     <tr style="background: #f9f9f9;">
                         <td colspan="10" style="font-weight: bold; text-align: center; font-size: 9.5pt; font-family: Arial, sans-serif; background-color: #f2f2f2; border: 1px solid #000; padding: 6px;">
@@ -2124,6 +2351,26 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     printWindow.document.close();
 };
 
+const STANDARD_CATEGORY_NAMES = [
+    'Humanities, Social Sciences and Management Course (HUM)',
+    'Basic Science Course (BSC)',
+    'Engineering Science Course (ESC)',
+    'Professional Core Course (PCC)',
+    'Professional Elective Course (PEC)',
+    'Open Elective Course (OEC)',
+    'Employability Enhancement Course (EEC)',
+    'Mandatory Course (MC)',
+    'Humanities and Social Sciences including Management Courses (HUM)',
+    'Basic Science Courses (BSC)',
+    'Engineering Science Courses (ESC)',
+    'Professional Core Courses (PCC)',
+    'Professional Elective Courses (PEC)',
+    'Open Elective Courses (OEC)',
+    'Employability Enhancement Courses (EEC)',
+    'Mandatory Courses (MC)',
+    'Audit Course (AC)'
+];
+
 const getDefaultCategoryName = (catType) => {
     const map = {
         'HUM': 'Humanities, Social Sciences and Management Course (HUM)',
@@ -2133,7 +2380,7 @@ const getDefaultCategoryName = (catType) => {
         'PEC': 'Professional Elective Course (PEC)',
         'OEC': 'Open Elective Course (OEC)',
         'EEC': 'Employability Enhancement Course (EEC)',
-        'MC': 'Mandatory Course (Non-Credit) (MC)'
+        'MC': 'Mandatory Course (MC)'
     };
     return map[catType] || catType || 'Professional Core Course (PCC)';
 };
@@ -2792,21 +3039,12 @@ const DepartmentManager = () => {
         const subj = data.subjects[originalIndex];
         setSelectedSyllabusSubjectIndex(originalIndex);
 
-        let prefilledMapping = (subj.coPoMapping && subj.coPoMapping.length > 0)
-            ? subj.coPoMapping.map(m => ({ ...m }))
-            : [];
-
-        if (prefilledMapping.length === 0) {
-            const coSource = (subj.outcomes && subj.outcomes.length > 0)
-                ? subj.outcomes.map((co, idx) => co.coNo || `CO ${idx + 1}`)
-                : ['CO 1', 'CO 2', 'CO 3', 'CO 4', 'CO 5'];
-            prefilledMapping = coSource.map(coNo => {
-                const mapObj = { coNo };
-                for (let i = 1; i <= (data.po?.length || 12); i++) mapObj[`po${i}`] = '-';
-                for (let i = 1; i <= (data.pso?.length || 2); i++) mapObj[`pso${i}`] = '-';
-                return mapObj;
-            });
-        }
+        const prefilledMapping = sanitizeCoPoMapping(
+            subj.coPoMapping,
+            subj.outcomes,
+            (data.po && data.po.length > 0) ? data.po.length : 11,
+            (data.pso && data.pso.length > 0) ? data.pso.length : 3
+        );
 
         // Prefill values - strictly clean, completely blank if not entered
         const prefilledSyllabus = {
@@ -2883,7 +3121,12 @@ const DepartmentManager = () => {
             textbooks: syllabusEditValue.textbooks.filter(t => t.trim() !== ''),
             references: syllabusEditValue.references.filter(r => r.trim() !== ''),
             webReferences: syllabusEditValue.webReferences ? syllabusEditValue.webReferences.filter(w => w.trim() !== '') : [],
-            coPoMapping: syllabusEditValue.coPoMapping
+            coPoMapping: sanitizeCoPoMapping(
+                syllabusEditValue.coPoMapping,
+                syllabusEditValue.outcomes,
+                (data.po && data.po.length > 0) ? data.po.length : 11,
+                (data.pso && data.pso.length > 0) ? data.pso.length : 3
+            )
         };
 
         const updatedSubjects = [...data.subjects];
@@ -3662,511 +3905,374 @@ const DepartmentManager = () => {
                     {/* Tab 6: Curriculum & Syllabus */}
                     {activeDeptTab === 'syllabus' && (
                         <div className="dept-section-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '1rem' }}>
-                            <h3 style={{ fontSize: '1.2rem', color: 'var(--primary)', margin: 0 }}>Syllabus Subjects</h3>
-                            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                                <button
-                                    onClick={() => {
-                                        setIsWordScanModalOpen(true);
-                                        setScannedWordData([]);
-                                        setWordScanError(null);
-                                    }}
-                                    className="btn"
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.5rem 1rem',
-                                        borderRadius: '6px',
-                                        fontSize: '0.85rem',
-                                        background: 'linear-gradient(135deg, #1e40af, #059669)',
-                                        color: 'white',
-                                        border: '1px solid rgba(255,255,255,0.15)',
-                                        boxShadow: '0 4px 12px rgba(5,150,105,0.25)',
-                                        fontWeight: '600',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <FaFileWord size={15} /> <FaFileExcel size={15} /> Auto-Scan Syllabus (Word / Excel)
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
-                                        exportCurriculumPDF({
-                                            ...data,
-                                            name: activeDeptObj ? activeDeptObj.name : 'Engineering Department',
-                                            slug: selectedDept
-                                        }, academicLevel, undefined, instVisionMission);
-                                    }}
-                                    className="btn btn-primary"
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.85rem' }}
-                                >
-                                    <FaFilePdf /> Export Official Curriculum PDF
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Add Subject Form */}
-                        <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
-                            <h4 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Add New Subject</h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Type</label>
-                                    <select
-                                        value={courseType}
-                                        onChange={e => setCourseType(e.target.value)}
-                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                <h3 style={{ fontSize: '1.2rem', color: 'var(--primary)', margin: 0 }}>Syllabus Subjects</h3>
+                                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <button
+                                        onClick={() => {
+                                            setIsWordScanModalOpen(true);
+                                            setScannedWordData([]);
+                                            setWordScanError(null);
+                                        }}
+                                        className="btn"
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            padding: '0.5rem 1rem',
+                                            borderRadius: '6px',
+                                            fontSize: '0.85rem',
+                                            background: 'linear-gradient(135deg, #1e40af, #059669)',
+                                            color: 'white',
+                                            border: '1px solid rgba(255,255,255,0.15)',
+                                            boxShadow: '0 4px 12px rgba(5,150,105,0.25)',
+                                            fontWeight: '600',
+                                            cursor: 'pointer'
+                                        }}
                                     >
-                                        <option value="semester">Semester Course</option>
-                                        <option value="professional_elective">Professional Elective (Vertical)</option>
-                                        <option value="open_elective">Open Elective Course</option>
-                                    </select>
-                                </div>
-                                {courseType === 'semester' && (
-                                    <div>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Semester</label>
-                                        <input type="number" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                    </div>
-                                )}
-                                {courseType === 'professional_elective' && (
-                                    <>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vertical</label>
-                                            <input type="number" placeholder="e.g. 1" value={newSubject.vertical || ''} onChange={e => setNewSubject({ ...newSubject, vertical: e.target.value === '' ? '' : Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vertical Name</label>
-                                            <input type="text" placeholder="e.g. Cloud Computing" value={newSubject.verticalName || ''} onChange={e => setNewSubject({ ...newSubject, verticalName: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                        </div>
-                                    </>
-                                )}
-                                {courseType === 'semester' && (
-                                    <>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
-                                            <select
-                                                value={newSubject.category}
-                                                onChange={e => setNewSubject({ ...newSubject, category: e.target.value })}
-                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                            >
-                                                <option value="THEORY">THEORY</option>
-                                                <option value="PRACTICAL">PRACTICAL</option>
-                                                <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
-                                                <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
-                                                <option value="MANDATORY COURSES">MANDATORY COURSES</option>
-                                                <option value="Language Elective – I">Language Elective – I</option>
-                                                <option value="Language Elective - II">Language Elective - II</option>
-                                                <option value="Electives for Honors Degree">Electives for Honors Degree</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category Type</label>
-                                            <select
-                                                value={newSubject.categoryType || 'HUM'}
-                                                onChange={e => setNewSubject({ ...newSubject, categoryType: e.target.value })}
-                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                            >
-                                                <option value="HUM">HUM</option>
-                                                <option value="BSC">BSC</option>
-                                                <option value="ESC">ESC</option>
-                                                <option value="PCC">PCC</option>
-                                                <option value="PEC">PEC</option>
-                                                <option value="OEC">OEC</option>
-                                                <option value="EEC">EEC</option>
-                                                <option value="MC">MC</option>
-                                            </select>
-                                        </div>
-                                    </>
-                                )}
-                                {courseType === 'open_elective' && (
-                                    <>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Offering Department</label>
-                                            <select
-                                                value={newSubject.offeringDept || ''}
-                                                onChange={e => setNewSubject({ ...newSubject, offeringDept: e.target.value })}
-                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                            >
-                                                <option value="">Select Offering Department</option>
-                                                {staticDepartments.map(dept => (
-                                                    <option key={dept.slug} value={dept.name}>{dept.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        {newSubject.offeringDept && (
-                                            <div>
-                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                                    {loadingOfferingSubjects ? 'Loading Courses...' : 'Select Course'}
-                                                </label>
-                                                <select
-                                                    value={newSubject.code || ''}
-                                                    onChange={e => {
-                                                        const selectedCode = e.target.value;
-                                                        if (!selectedCode) return;
-                                                        const selectedSubj = offeringDeptSubjects.find(s => s.code === selectedCode);
-                                                        if (selectedSubj) {
-                                                            setNewSubject(prev => ({
-                                                                ...prev,
-                                                                code: selectedSubj.code || '',
-                                                                title: selectedSubj.title || '',
-                                                                credits: selectedSubj.credits !== undefined ? selectedSubj.credits : 3,
-                                                                l: selectedSubj.l !== undefined ? selectedSubj.l : 0,
-                                                                t: selectedSubj.t !== undefined ? selectedSubj.t : 0,
-                                                                p: selectedSubj.p !== undefined ? selectedSubj.p : 0,
-                                                                contactPeriods: selectedSubj.contactPeriods !== undefined ? selectedSubj.contactPeriods : 0,
-                                                                cia: selectedSubj.cia !== undefined ? selectedSubj.cia : 40,
-                                                                ese: selectedSubj.ese !== undefined ? selectedSubj.ese : 60,
-                                                                total: selectedSubj.total !== undefined ? selectedSubj.total : 100,
-                                                                prerequisites: selectedSubj.prerequisites || '',
-                                                                categoryName: selectedSubj.categoryName || '',
-                                                                subtitle: selectedSubj.subtitle || '',
-                                                                objectives: selectedSubj.objectives || [],
-                                                                outcomes: selectedSubj.outcomes || [],
-                                                                units: selectedSubj.units || [],
-                                                                textbooks: selectedSubj.textbooks || [],
-                                                                references: selectedSubj.references || [],
-                                                                webReferences: selectedSubj.webReferences || [],
-                                                                coPoMapping: selectedSubj.coPoMapping || [],
-                                                                experiments: selectedSubj.experiments || [],
-                                                            }));
-                                                        }
-                                                    }}
-                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
-                                                >
-                                                    <option value="">-- Choose Course --</option>
-                                                    {offeringDeptSubjects.map(s => (
-                                                        <option key={s.code} value={s.code}>{s.code} - {s.title}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                                        {/* Inter-Department Master Course Bank Quick Selector */}
-                                        <div style={{ gridColumn: '1 / -1', marginBottom: '0.8rem', padding: '0.8rem 1rem', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(59, 130, 246, 0.08))', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '6px' }}>
-                                                <label style={{ fontSize: '0.85rem', color: '#a5b4fc', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
-                                                    ⚡ Shared Inter-Department Course Bank (Auto-Fill Full Syllabus, Units, L-T-P & Credits)
-                                                </label>
-                                                {loadingMasterCourses && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading Master Bank...</span>}
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                                                <select
-                                                    value={matchedMasterCourse ? matchedMasterCourse.code : ''}
-                                                    onChange={e => {
-                                                        const sel = e.target.value;
-                                                        if (sel) {
-                                                            applyMasterCourseToNewSubject(sel);
-                                                        } else {
-                                                            setMatchedMasterCourse(null);
-                                                        }
-                                                    }}
-                                                    style={{
-                                                        flex: 1, minWidth: '260px', padding: '0.6rem 0.8rem', borderRadius: '6px',
-                                                        background: 'var(--bg-main)', border: '1px solid rgba(99, 102, 241, 0.45)',
-                                                        color: 'white', outline: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '500'
-                                                    }}
-                                                >
-                                                    <option value="">-- Choose Existing Course to Auto-Fill Details ({masterCourses.length} available) --</option>
-                                                    {masterCourses.map(c => (
-                                                        <option key={c.code} value={c.code}>
-                                                            {c.code} - {c.title} (L-T-P: {c.l || 0}-{c.t || 0}-{c.p || 0}, C: {c.credits || 0}) • {c.sourceDeptName || 'Master Bank'}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                {matchedMasterCourse && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setMatchedMasterCourse(null);
-                                                            setNewSubject(prev => ({ ...prev, code: '', title: '', l: 0, t: 0, p: 0, credits: 3 }));
-                                                        }}
-                                                        style={{ padding: '0.5rem 0.9rem', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', color: '#fca5a5', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
-                                                    >
-                                                        Clear
-                                                    </button>
-                                                )}
-                                            </div>
-                                            {matchedMasterCourse && (
-                                                <div style={{ marginTop: '0.6rem', padding: '0.5rem 0.8rem', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '6px', fontSize: '0.8rem', color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                    <FaCheckCircle color="#10b981" />
-                                                    <span><strong>Linked with {matchedMasterCourse.code}:</strong> Title, Category, Credits ({matchedMasterCourse.credits}), L-T-P ({matchedMasterCourse.l}-{matchedMasterCourse.t}-{matchedMasterCourse.p}), 5 Syllabus Units, Course Outcomes, and Textbooks auto-loaded!</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Code (Type or Pick from Suggestions)</label>
-                                            <input
-                                                type="text"
-                                                list="master-course-codes-list"
-                                                value={newSubject.code}
-                                                onChange={e => {
-                                                    const val = e.target.value.toUpperCase();
-                                                    setNewSubject(prev => ({ ...prev, code: val }));
-                                                    applyMasterCourseToNewSubject(val);
-                                                }}
-                                                placeholder="e.g. HS3151 or CS3251"
-                                                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }}
-                                            />
-                                            <datalist id="master-course-codes-list">
-                                                {masterCourses.map(c => (
-                                                    <option key={c.code} value={c.code}>
-                                                        {c.title} • ({c.sourceDeptName || 'Master Bank'})
-                                                    </option>
-                                                ))}
-                                            </datalist>
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Title</label>
-                                            <input type="text" value={newSubject.title} onChange={e => setNewSubject({ ...newSubject, title: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Credits</label>
-                                            <input type="number" value={newSubject.credits} onChange={e => setNewSubject({ ...newSubject, credits: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
-                                        </div>
-                                    </div>
-
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1rem', marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                                        <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>L</label><input type="number" value={newSubject.l} onChange={e => { const val = e.target.value; updateNewSubjectField('l', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                        <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>T</label><input type="number" value={newSubject.t} onChange={e => { const val = e.target.value; updateNewSubjectField('t', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                        <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>P</label><input type="number" value={newSubject.p} onChange={e => { const val = e.target.value; updateNewSubjectField('p', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                        <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Periods</label><input type="number" value={newSubject.contactPeriods} readOnly style={{ width: '100%', padding: '0.4rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed' }} /></div>
-                                        <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>CIA</label><input type="number" min="0" max="100" value={newSubject.cia} onChange={e => { const val = e.target.value; updateNewSubjectField('cia', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                        <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ESE</label><input type="number" min="0" max="100" value={newSubject.ese} onChange={e => { const val = e.target.value; updateNewSubjectField('ese', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
-                                        <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total</label><input type="number" value={newSubject.total} readOnly style={{ width: '100%', padding: '0.4rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed' }} /></div>
-                                    </div>
-
-                                    <button onClick={handleAddSubject} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'fit-content' }}>
-                                        <FaPlus /> Add Subject
+                                        <FaFileWord size={15} /> <FaFileExcel size={15} /> Auto-Scan Syllabus (Word / Excel)
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
+                                            exportCurriculumPDF({
+                                                ...data,
+                                                name: activeDeptObj ? activeDeptObj.name : 'Engineering Department',
+                                                slug: selectedDept
+                                            }, academicLevel, undefined, instVisionMission);
+                                        }}
+                                        className="btn btn-primary"
+                                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.85rem' }}
+                                    >
+                                        <FaFilePdf /> Export Official Curriculum PDF
                                     </button>
                                 </div>
+                            </div>
 
-                        {/* List of Subjects */}
-                        {(data.subjects || []).length === 0 ? (
-                            <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '1rem' }}>No subjects defined yet.</p>
-                        ) : (
-                            <div style={{ marginBottom: '2rem' }}>
-                                {(() => {
-                                    const subjectsWithIndex = (data.subjects || []).map((subj, idx) => ({ ...subj, originalIndex: idx }));
-
-                                    // Group semesters (excluding verticals and open electives)
-                                    const semestersGrouped = subjectsWithIndex.filter(s => !s.vertical && !s.isOpenElective).reduce((acc, subj) => {
-                                        const sem = subj.semester || 1;
-                                        if (!acc[sem]) acc[sem] = [];
-                                        acc[sem].push(subj);
-                                        return acc;
-                                    }, {});
-                                    const sortedSemesters = Object.keys(semestersGrouped).sort((a, b) => Number(a) - Number(b));
-
-                                    // Group verticals
-                                    const verticalsGrouped = subjectsWithIndex.filter(s => s.vertical).reduce((acc, subj) => {
-                                        const vert = subj.vertical;
-                                        if (!acc[vert]) acc[vert] = [];
-                                        acc[vert].push(subj);
-                                        return acc;
-                                    }, {});
-                                    const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => Number(a) - Number(b));
-
-                                    return (
+                            {/* Add Subject Form */}
+                            <div style={{ background: 'var(--bg-section)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
+                                <h4 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Add New Subject</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Type</label>
+                                        <select
+                                            value={courseType}
+                                            onChange={e => setCourseType(e.target.value)}
+                                            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                        >
+                                            <option value="semester">Semester Course</option>
+                                            <option value="professional_elective">Professional Elective (Vertical)</option>
+                                            <option value="open_elective">Open Elective Course</option>
+                                        </select>
+                                    </div>
+                                    {courseType === 'semester' && (
+                                        <div>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Semester</label>
+                                            <input type="number" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                        </div>
+                                    )}
+                                    {courseType === 'professional_elective' && (
                                         <>
-                                            {/* Semester Tables */}
-                                            {sortedSemesters.map(semNum => {
-                                                const subjectsForSem = semestersGrouped[semNum];
-                                                const categoriesGrouped = subjectsForSem.reduce((acc, subj) => {
-                                                    let cat = subj.category || 'THEORY';
-                                                    const cUpper = String(cat).toUpperCase().trim();
-                                                    const typeUpper = String(subj.categoryType || '').toUpperCase().trim();
-                                                    if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED') || (Number(subj.l || 0) > 0 && Number(subj.p || 0) > 0 && !cUpper.includes('THEORY') && !cUpper.includes('PRACTICAL'))) cat = 'THEORY CUM PRACTICAL';
-                                                    else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR' || (typeUpper === 'PCC' && Number(subj.l || 0) === 0 && Number(subj.p || 0) > 0)) cat = 'PRACTICAL';
-                                                    else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC') || typeUpper === 'EEC') cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
-                                                    else if (cUpper.includes('MANDATORY') || cUpper.includes('MC') || typeUpper === 'MC') cat = 'MANDATORY COURSES';
-                                                    else if (cUpper.includes('LANGUAGE') && (cUpper.includes('I') || cUpper.includes('1'))) cat = 'Language Elective – I';
-                                                    else if (cUpper.includes('LANGUAGE') && (cUpper.includes('II') || cUpper.includes('2'))) cat = 'Language Elective - II';
-                                                    else if (cUpper.includes('HONOR')) cat = 'Electives for Honors Degree';
-                                                    else cat = 'THEORY';
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vertical</label>
+                                                <input type="number" placeholder="e.g. 1" value={newSubject.vertical || ''} onChange={e => setNewSubject({ ...newSubject, vertical: e.target.value === '' ? '' : Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vertical Name</label>
+                                                <input type="text" placeholder="e.g. Cloud Computing" value={newSubject.verticalName || ''} onChange={e => setNewSubject({ ...newSubject, verticalName: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                            </div>
+                                        </>
+                                    )}
+                                    {courseType === 'semester' && (
+                                        <>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
+                                                <select
+                                                    value={newSubject.category}
+                                                    onChange={e => setNewSubject({ ...newSubject, category: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                >
+                                                    <option value="THEORY">THEORY</option>
+                                                    <option value="PRACTICAL">PRACTICAL</option>
+                                                    <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
+                                                    <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
+                                                    <option value="MANDATORY COURSES">MANDATORY COURSES</option>
+                                                    <option value="Language Elective – I">Language Elective – I</option>
+                                                    <option value="Language Elective - II">Language Elective - II</option>
+                                                    <option value="Electives for Honors Degree">Electives for Honors Degree</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category Type</label>
+                                                <select
+                                                    value={newSubject.categoryType || 'HUM'}
+                                                    onChange={e => setNewSubject({ ...newSubject, categoryType: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                >
+                                                    <option value="HUM">HUM</option>
+                                                    <option value="BSC">BSC</option>
+                                                    <option value="ESC">ESC</option>
+                                                    <option value="PCC">PCC</option>
+                                                    <option value="PEC">PEC</option>
+                                                    <option value="OEC">OEC</option>
+                                                    <option value="EEC">EEC</option>
+                                                    <option value="MC">MC</option>
+                                                </select>
+                                            </div>
+                                        </>
+                                    )}
+                                    {courseType === 'open_elective' && (
+                                        <>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Offering Department</label>
+                                                <select
+                                                    value={newSubject.offeringDept || ''}
+                                                    onChange={e => setNewSubject({ ...newSubject, offeringDept: e.target.value })}
+                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                >
+                                                    <option value="">Select Offering Department</option>
+                                                    {staticDepartments.map(dept => (
+                                                        <option key={dept.slug} value={dept.name}>{dept.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            {newSubject.offeringDept && (
+                                                <div>
+                                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                                        {loadingOfferingSubjects ? 'Loading Courses...' : 'Select Course'}
+                                                    </label>
+                                                    <select
+                                                        value={newSubject.code || ''}
+                                                        onChange={e => {
+                                                            const selectedCode = e.target.value;
+                                                            if (!selectedCode) return;
+                                                            const selectedSubj = offeringDeptSubjects.find(s => s.code === selectedCode);
+                                                            if (selectedSubj) {
+                                                                setNewSubject(prev => ({
+                                                                    ...prev,
+                                                                    code: selectedSubj.code || '',
+                                                                    title: selectedSubj.title || '',
+                                                                    credits: selectedSubj.credits !== undefined ? selectedSubj.credits : 3,
+                                                                    l: selectedSubj.l !== undefined ? selectedSubj.l : 0,
+                                                                    t: selectedSubj.t !== undefined ? selectedSubj.t : 0,
+                                                                    p: selectedSubj.p !== undefined ? selectedSubj.p : 0,
+                                                                    contactPeriods: selectedSubj.contactPeriods !== undefined ? selectedSubj.contactPeriods : 0,
+                                                                    cia: selectedSubj.cia !== undefined ? selectedSubj.cia : 40,
+                                                                    ese: selectedSubj.ese !== undefined ? selectedSubj.ese : 60,
+                                                                    total: selectedSubj.total !== undefined ? selectedSubj.total : 100,
+                                                                    prerequisites: selectedSubj.prerequisites || '',
+                                                                    categoryName: selectedSubj.categoryName || '',
+                                                                    subtitle: selectedSubj.subtitle || '',
+                                                                    objectives: selectedSubj.objectives || [],
+                                                                    outcomes: selectedSubj.outcomes || [],
+                                                                    units: selectedSubj.units || [],
+                                                                    textbooks: selectedSubj.textbooks || [],
+                                                                    references: selectedSubj.references || [],
+                                                                    webReferences: selectedSubj.webReferences || [],
+                                                                    coPoMapping: selectedSubj.coPoMapping || [],
+                                                                    experiments: selectedSubj.experiments || [],
+                                                                }));
+                                                            }
+                                                        }}
+                                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                                    >
+                                                        <option value="">-- Choose Course --</option>
+                                                        {offeringDeptSubjects.map(s => (
+                                                            <option key={s.code} value={s.code}>{s.code} - {s.title}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                    {/* Inter-Department Master Course Bank Quick Selector */}
+                                    <div style={{ gridColumn: '1 / -1', marginBottom: '0.8rem', padding: '0.8rem 1rem', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(59, 130, 246, 0.08))', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '6px' }}>
+                                            <label style={{ fontSize: '0.85rem', color: '#a5b4fc', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                                                ⚡ Shared Inter-Department Course Bank (Auto-Fill Full Syllabus, Units, L-T-P & Credits)
+                                            </label>
+                                            {loadingMasterCourses && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading Master Bank...</span>}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                            <select
+                                                value={matchedMasterCourse ? matchedMasterCourse.code : ''}
+                                                onChange={e => {
+                                                    const sel = e.target.value;
+                                                    if (sel) {
+                                                        applyMasterCourseToNewSubject(sel);
+                                                    } else {
+                                                        setMatchedMasterCourse(null);
+                                                    }
+                                                }}
+                                                style={{
+                                                    flex: 1, minWidth: '260px', padding: '0.6rem 0.8rem', borderRadius: '6px',
+                                                    background: 'var(--bg-main)', border: '1px solid rgba(99, 102, 241, 0.45)',
+                                                    color: 'white', outline: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '500'
+                                                }}
+                                            >
+                                                <option value="">-- Choose Existing Course to Auto-Fill Details ({masterCourses.length} available) --</option>
+                                                {masterCourses.map(c => (
+                                                    <option key={c.code} value={c.code}>
+                                                        {c.code} - {c.title} (L-T-P: {c.l || 0}-{c.t || 0}-{c.p || 0}, C: {c.credits || 0}) • {c.sourceDeptName || 'Master Bank'}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {matchedMasterCourse && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setMatchedMasterCourse(null);
+                                                        setNewSubject(prev => ({ ...prev, code: '', title: '', l: 0, t: 0, p: 0, credits: 3 }));
+                                                    }}
+                                                    style={{ padding: '0.5rem 0.9rem', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', color: '#fca5a5', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
+                                                >
+                                                    Clear
+                                                </button>
+                                            )}
+                                        </div>
+                                        {matchedMasterCourse && (
+                                            <div style={{ marginTop: '0.6rem', padding: '0.5rem 0.8rem', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '6px', fontSize: '0.8rem', color: '#6ee7b7', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                <FaCheckCircle color="#10b981" />
+                                                <span><strong>Linked with {matchedMasterCourse.code}:</strong> Title, Category, Credits ({matchedMasterCourse.credits}), L-T-P ({matchedMasterCourse.l}-{matchedMasterCourse.t}-{matchedMasterCourse.p}), 5 Syllabus Units, Course Outcomes, and Textbooks auto-loaded!</span>
+                                            </div>
+                                        )}
+                                    </div>
 
-                                                    if (!acc[cat]) acc[cat] = [];
-                                                    acc[cat].push({ ...subj, category: cat });
-                                                    return acc;
-                                                }, {});
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Code (Type or Pick from Suggestions)</label>
+                                        <input
+                                            type="text"
+                                            list="master-course-codes-list"
+                                            value={newSubject.code}
+                                            onChange={e => {
+                                                const val = e.target.value.toUpperCase();
+                                                setNewSubject(prev => ({ ...prev, code: val }));
+                                                applyMasterCourseToNewSubject(val);
+                                            }}
+                                            placeholder="e.g. HS3151 or CS3251"
+                                            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }}
+                                        />
+                                        <datalist id="master-course-codes-list">
+                                            {masterCourses.map(c => (
+                                                <option key={c.code} value={c.code}>
+                                                    {c.title} • ({c.sourceDeptName || 'Master Bank'})
+                                                </option>
+                                            ))}
+                                        </datalist>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Title</label>
+                                        <input type="text" value={newSubject.title} onChange={e => setNewSubject({ ...newSubject, title: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Credits</label>
+                                        <input type="number" value={newSubject.credits} onChange={e => setNewSubject({ ...newSubject, credits: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
+                                    </div>
+                                </div>
 
-                                                return (
-                                                    <div key={`sem-${semNum}`} style={{ marginBottom: '2rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
-                                                        <h4 style={{ fontSize: '1.2rem', color: 'var(--primary)', marginBottom: '1.2rem', textAlign: 'center', fontWeight: 'bold' }}>
-                                                            SEMESTER {semNum}
-                                                        </h4>
-                                                        <div style={{ width: '100%' }}>
-                                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
-                                                                <thead style={{ background: 'transparent' }}>
-                                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '12%' }}>Course Code</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '28%' }}>Course Title</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Category</th>
-                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '9%' }}>Periods / Week</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Contact Periods</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>Credit</th>
-                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '14%' }}>Marks</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '16%' }}>Action</th>
-                                                                    </tr>
-                                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {Object.entries(categoriesGrouped).map(([categoryName, categorySubjects], catIdx) => (
-                                                                        <React.Fragment key={catIdx}>
-                                                                            <tr>
-                                                                                <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                                                                                    {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
-                                                                                </td>
-                                                                            </tr>
-                                                                            {categorySubjects.map((subj, subjIdx) => {
-                                                                                const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
-                                                                                const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
-                                                                                return (
-                                                                                <tr key={subjIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                                                                                        <div>{subj.code}</div>
-                                                                                        {!isCourseCreator && (
-                                                                                            <span
-                                                                                                title={`Course created by ${creatorName}. Shared in read-only mode.`}
-                                                                                                style={{
-                                                                                                    display: 'inline-flex',
-                                                                                                    alignItems: 'center',
-                                                                                                    gap: '3px',
-                                                                                                    fontSize: '0.68rem',
-                                                                                                    padding: '1px 5px',
-                                                                                                    borderRadius: '4px',
-                                                                                                    background: 'rgba(99, 102, 241, 0.15)',
-                                                                                                    color: '#a5b4fc',
-                                                                                                    border: '1px solid rgba(99, 102, 241, 0.3)',
-                                                                                                    marginTop: '3px',
-                                                                                                    fontWeight: 'normal'
-                                                                                                }}
-                                                                                            >
-                                                                                                <FaLock size={7} /> {creatorName || 'Shared'}
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
-                                                                                        <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                            <button
-                                                                                                onClick={() => handleStartManageSyllabus(subj.originalIndex)}
-                                                                                                className={isCourseCreator ? "btn btn-primary" : "btn"}
-                                                                                                style={{
-                                                                                                    padding: '0.3rem 0.5rem',
-                                                                                                    display: 'inline-flex',
-                                                                                                    alignItems: 'center',
-                                                                                                    justifyContent: 'center',
-                                                                                                    gap: '0.25rem',
-                                                                                                    fontSize: '0.75rem',
-                                                                                                    whiteSpace: 'nowrap',
-                                                                                                    background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
-                                                                                                    border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
-                                                                                                    color: isCourseCreator ? undefined : '#c7d2fe'
-                                                                                                }}
-                                                                                                title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
-                                                                                            >
-                                                                                                {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
-                                                                                            </button>
-                                                                                            <button
-                                                                                                onClick={() => handleStartEditSubject(subj.originalIndex)}
-                                                                                                className="btn"
-                                                                                                style={{
-                                                                                                    padding: '0.3rem 0.45rem',
-                                                                                                    background: 'var(--bg-main)',
-                                                                                                    border: '1px solid var(--glass-border)',
-                                                                                                    color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
-                                                                                                    display: 'inline-flex',
-                                                                                                    alignItems: 'center',
-                                                                                                    justifyContent: 'center'
-                                                                                                }}
-                                                                                                title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
-                                                                                            >
-                                                                                                <FaEdit size={11} />
-                                                                                            </button>
-                                                                                            <button
-                                                                                                onClick={() => handleDeleteSubject(subj.originalIndex)}
-                                                                                                className="btn btn-danger"
-                                                                                                style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                                                title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
-                                                                                            >
-                                                                                                <FaTrash size={11} />
-                                                                                            </button>
-                                                                                        </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1rem', marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                                    <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>L</label><input type="number" value={newSubject.l} onChange={e => { const val = e.target.value; updateNewSubjectField('l', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                    <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>T</label><input type="number" value={newSubject.t} onChange={e => { const val = e.target.value; updateNewSubjectField('t', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                    <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>P</label><input type="number" value={newSubject.p} onChange={e => { const val = e.target.value; updateNewSubjectField('p', val === '' ? '' : Math.max(0, Number(val))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                    <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Periods</label><input type="number" value={newSubject.contactPeriods} readOnly style={{ width: '100%', padding: '0.4rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed' }} /></div>
+                                    <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>CIA</label><input type="number" min="0" max="100" value={newSubject.cia} onChange={e => { const val = e.target.value; updateNewSubjectField('cia', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                    <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ESE</label><input type="number" min="0" max="100" value={newSubject.ese} onChange={e => { const val = e.target.value; updateNewSubjectField('ese', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }} style={{ width: '100%', padding: '0.4rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} /></div>
+                                    <div><label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total</label><input type="number" value={newSubject.total} readOnly style={{ width: '100%', padding: '0.4rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed' }} /></div>
+                                </div>
+
+                                <button onClick={handleAddSubject} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'fit-content' }}>
+                                    <FaPlus /> Add Subject
+                                </button>
+                            </div>
+
+                            {/* List of Subjects */}
+                            {(data.subjects || []).length === 0 ? (
+                                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '1rem' }}>No subjects defined yet.</p>
+                            ) : (
+                                <div style={{ marginBottom: '2rem' }}>
+                                    {(() => {
+                                        const subjectsWithIndex = (data.subjects || []).map((subj, idx) => ({ ...subj, originalIndex: idx }));
+
+                                        // Group semesters (excluding verticals and open electives)
+                                        const semestersGrouped = subjectsWithIndex.filter(s => !s.vertical && !s.isOpenElective).reduce((acc, subj) => {
+                                            const sem = subj.semester || 1;
+                                            if (!acc[sem]) acc[sem] = [];
+                                            acc[sem].push(subj);
+                                            return acc;
+                                        }, {});
+                                        const sortedSemesters = Object.keys(semestersGrouped).sort((a, b) => Number(a) - Number(b));
+
+                                        // Group verticals
+                                        const verticalsGrouped = subjectsWithIndex.filter(s => s.vertical).reduce((acc, subj) => {
+                                            const vert = subj.vertical;
+                                            if (!acc[vert]) acc[vert] = [];
+                                            acc[vert].push(subj);
+                                            return acc;
+                                        }, {});
+                                        const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => Number(a) - Number(b));
+
+                                        return (
+                                            <>
+                                                {/* Semester Tables */}
+                                                {sortedSemesters.map(semNum => {
+                                                    const subjectsForSem = semestersGrouped[semNum];
+                                                    const categoriesGrouped = subjectsForSem.reduce((acc, subj) => {
+                                                        let cat = subj.category || 'THEORY';
+                                                        const cUpper = String(cat).toUpperCase().trim();
+                                                        const typeUpper = String(subj.categoryType || '').toUpperCase().trim();
+                                                        if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED') || (Number(subj.l || 0) > 0 && Number(subj.p || 0) > 0 && !cUpper.includes('THEORY') && !cUpper.includes('PRACTICAL'))) cat = 'THEORY CUM PRACTICAL';
+                                                        else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR' || (typeUpper === 'PCC' && Number(subj.l || 0) === 0 && Number(subj.p || 0) > 0)) cat = 'PRACTICAL';
+                                                        else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC') || typeUpper === 'EEC') cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
+                                                        else if (cUpper.includes('MANDATORY') || cUpper.includes('MC') || typeUpper === 'MC') cat = 'MANDATORY COURSES';
+                                                        else if (cUpper.includes('LANGUAGE') && (cUpper.includes('I') || cUpper.includes('1'))) cat = 'Language Elective – I';
+                                                        else if (cUpper.includes('LANGUAGE') && (cUpper.includes('II') || cUpper.includes('2'))) cat = 'Language Elective - II';
+                                                        else if (cUpper.includes('HONOR')) cat = 'Electives for Honors Degree';
+                                                        else cat = 'THEORY';
+
+                                                        if (!acc[cat]) acc[cat] = [];
+                                                        acc[cat].push({ ...subj, category: cat });
+                                                        return acc;
+                                                    }, {});
+
+                                                    return (
+                                                        <div key={`sem-${semNum}`} style={{ marginBottom: '2rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
+                                                            <h4 style={{ fontSize: '1.2rem', color: 'var(--primary)', marginBottom: '1.2rem', textAlign: 'center', fontWeight: 'bold' }}>
+                                                                SEMESTER {semNum}
+                                                            </h4>
+                                                            <div style={{ width: '100%' }}>
+                                                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
+                                                                    <thead style={{ background: 'transparent' }}>
+                                                                        <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '12%' }}>Course Code</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '28%' }}>Course Title</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Category</th>
+                                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '9%' }}>Periods / Week</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Contact Periods</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>Credit</th>
+                                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '14%' }}>Marks</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '16%' }}>Action</th>
+                                                                        </tr>
+                                                                        <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {Object.entries(categoriesGrouped).map(([categoryName, categorySubjects], catIdx) => (
+                                                                            <React.Fragment key={catIdx}>
+                                                                                <tr>
+                                                                                    <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                                                                                        {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
                                                                                     </td>
                                                                                 </tr>
-                                                                                );
-                                                                            })}
-                                                                        </React.Fragment>
-                                                                    ))}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-
-                                            {/* Single Professional Electives / Vertical Table */}
-                                            {sortedVerticals.length > 0 && (
-                                                <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
-                                                    <h4 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                                                        Professional Elective Courses
-                                                    </h4>
-                                                    <div style={{ width: '100%' }}>
-                                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
-                                                            <thead style={{ background: 'transparent' }}>
-                                                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
-                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Contact Periods</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
-                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Action</th>
-                                                                </tr>
-                                                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {(() => {
-                                                                    return sortedVerticals.map(vertNum => {
-                                                                        const subjectsForVert = verticalsGrouped[vertNum];
-                                                                        const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
-                                                                        const romanNum = getRomanNumeral(vertNum);
-
-                                                                        return (
-                                                                            <React.Fragment key={`vert-${vertNum}`}>
-                                                                                <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                                                                    <td colSpan="11" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.9rem' }}>
-                                                                                        Vertical {romanNum}: {verticalName}
-                                                                                    </td>
-                                                                                </tr>
-                                                                                {subjectsForVert.map((subj, subjIdx) => {
+                                                                                {sortSubjectsByCode(categorySubjects).map((subj, subjIdx) => {
                                                                                     const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
                                                                                     const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
+                                                                                    const isInduction = (subj.title || subj.name || '').toUpperCase().includes('INDUCTION') || (subj.code || '').toUpperCase().includes('INDUCTION');
                                                                                     return (
                                                                                         <tr key={subjIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
@@ -4193,14 +4299,23 @@ const DepartmentManager = () => {
                                                                                                 )}
                                                                                             </td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.categoryType}</td>
+                                                                                            {isInduction ? (
+                                                                                                <td colSpan={4} style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                                                                                                    2 WEEKS
+                                                                                                </td>
+                                                                                            ) : (
+                                                                                                <>
+                                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                                                </>
+                                                                                            )}
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{isInduction ? 0 : subj.credits}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.cia}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.ese}</td>
+                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.total}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
                                                                                                 <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
                                                                                                     <button
@@ -4252,167 +4367,304 @@ const DepartmentManager = () => {
                                                                                     );
                                                                                 })}
                                                                             </React.Fragment>
-                                                                        );
-                                                                    });
-                                                                })()}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            )}
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
 
-                                            {/* Open Elective Courses Table */}
-                                            {subjectsWithIndex.some(s => s.isOpenElective) && (
-                                                <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
-                                                    <h4 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                                                        Open Elective Courses
-                                                    </h4>
-                                                    <div style={{ width: '100%' }}>
-                                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
-                                                            <thead style={{ background: 'transparent' }}>
-                                                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '45%' }}>Course Title</th>
-                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Contact Periods</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>Credit</th>
-                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '12%' }}>Marks</th>
-                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Action</th>
-                                                                </tr>
-                                                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
-                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {(() => {
-                                                                    const oecsGrouped = subjectsWithIndex.filter(s => s.isOpenElective).reduce((acc, subj) => {
-                                                                        const dept = (subj.offeringDept && subj.offeringDept !== 'Other Departments') ? subj.offeringDept : (deptData?.name || selectedDeptObj?.name || 'Biomedical Engineering');
-                                                                        if (!acc[dept]) acc[dept] = [];
-                                                                        acc[dept].push(subj);
-                                                                        return acc;
-                                                                    }, {});
-                                                                    const sortedOecDepts = Object.keys(oecsGrouped).sort();
-                                                                    return sortedOecDepts.map(deptName => {
-                                                                        const deptSubjects = oecsGrouped[deptName];
-                                                                        return (
-                                                                            <React.Fragment key={`oec-dept-${deptName}`}>
-                                                                                <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                                                                    <td colSpan={11} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
-                                                                                        {deptName}
-                                                                                    </td>
-                                                                                </tr>
-                                                                                {deptSubjects.map((subj, idx) => {
-                                                                                    const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
-                                                                                    const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
-                                                                                    return (
-                                                                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                                                                                                <div>{subj.code}</div>
-                                                                                                {!isCourseCreator && (
-                                                                                                    <span
-                                                                                                        title={`Course created by ${creatorName}. Shared in read-only mode.`}
-                                                                                                        style={{
-                                                                                                            display: 'inline-flex',
-                                                                                                            alignItems: 'center',
-                                                                                                            gap: '3px',
-                                                                                                            fontSize: '0.68rem',
-                                                                                                            padding: '1px 5px',
-                                                                                                            borderRadius: '4px',
-                                                                                                            background: 'rgba(99, 102, 241, 0.15)',
-                                                                                                            color: '#a5b4fc',
-                                                                                                            border: '1px solid rgba(99, 102, 241, 0.3)',
-                                                                                                            marginTop: '3px',
-                                                                                                            fontWeight: 'normal'
-                                                                                                        }}
-                                                                                                    >
-                                                                                                        <FaLock size={7} /> {creatorName || 'Shared'}
-                                                                                                    </span>
-                                                                                                )}
-                                                                                            </td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
-                                                                                                <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                                    <button
-                                                                                                        onClick={() => handleStartManageSyllabus(subj.originalIndex)}
-                                                                                                        className={isCourseCreator ? "btn btn-primary" : "btn"}
-                                                                                                        style={{
-                                                                                                            padding: '0.3rem 0.5rem',
-                                                                                                            display: 'inline-flex',
-                                                                                                            alignItems: 'center',
-                                                                                                            justifyContent: 'center',
-                                                                                                            gap: '0.25rem',
-                                                                                                            fontSize: '0.75rem',
-                                                                                                            whiteSpace: 'nowrap',
-                                                                                                            background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
-                                                                                                            border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
-                                                                                                            color: isCourseCreator ? undefined : '#c7d2fe'
-                                                                                                        }}
-                                                                                                        title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
-                                                                                                    >
-                                                                                                        {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
-                                                                                                    </button>
-                                                                                                    <button
-                                                                                                        onClick={() => handleStartEditSubject(subj.originalIndex)}
-                                                                                                        className="btn"
-                                                                                                        style={{
-                                                                                                            padding: '0.3rem 0.45rem',
-                                                                                                            background: 'var(--bg-main)',
-                                                                                                            border: '1px solid var(--glass-border)',
-                                                                                                            color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
-                                                                                                            display: 'inline-flex',
-                                                                                                            alignItems: 'center',
-                                                                                                            justifyContent: 'center'
-                                                                                                        }}
-                                                                                                        title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
-                                                                                                    >
-                                                                                                        <FaEdit size={11} />
-                                                                                                    </button>
-                                                                                                    <button
-                                                                                                        onClick={() => handleDeleteSubject(subj.originalIndex)}
-                                                                                                        className="btn btn-danger"
-                                                                                                        style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                                                        title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
-                                                                                                    >
-                                                                                                        <FaTrash size={11} />
-                                                                                                    </button>
-                                                                                                </div>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    );
-                                                                                })}
-                                                                            </React.Fragment>
-                                                                        );
-                                                                    });
-                                                                })()}
-                                                            </tbody>
-                                                        </table>
+                                                {/* Single Professional Electives / Vertical Table */}
+                                                {sortedVerticals.length > 0 && (
+                                                    <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
+                                                        <h4 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                            Professional Elective Courses
+                                                        </h4>
+                                                        <div style={{ width: '100%' }}>
+                                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
+                                                                <thead style={{ background: 'transparent' }}>
+                                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
+                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Contact Periods</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
+                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Action</th>
+                                                                    </tr>
+                                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {(() => {
+                                                                        return sortedVerticals.map(vertNum => {
+                                                                            const subjectsForVert = sortSubjectsByCode(verticalsGrouped[vertNum] || []);
+                                                                            const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
+                                                                            const romanNum = getRomanNumeral(vertNum);
+
+                                                                            return (
+                                                                                <React.Fragment key={`vert-${vertNum}`}>
+                                                                                    <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                                                                        <td colSpan="11" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.9rem' }}>
+                                                                                            Vertical {romanNum}: {verticalName}
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    {subjectsForVert.map((subj, subjIdx) => {
+                                                                                        const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
+                                                                                        const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
+                                                                                        return (
+                                                                                            <tr key={subjIdx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                                                                                    <div>{subj.code}</div>
+                                                                                                    {!isCourseCreator && (
+                                                                                                        <span
+                                                                                                            title={`Course created by ${creatorName}. Shared in read-only mode.`}
+                                                                                                            style={{
+                                                                                                                display: 'inline-flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                gap: '3px',
+                                                                                                                fontSize: '0.68rem',
+                                                                                                                padding: '1px 5px',
+                                                                                                                borderRadius: '4px',
+                                                                                                                background: 'rgba(99, 102, 241, 0.15)',
+                                                                                                                color: '#a5b4fc',
+                                                                                                                border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                                                                                marginTop: '3px',
+                                                                                                                fontWeight: 'normal'
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            <FaLock size={7} /> {creatorName || 'Shared'}
+                                                                                                        </span>
+                                                                                                    )}
+                                                                                                </td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
+                                                                                                    <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
+                                                                                                        <button
+                                                                                                            onClick={() => handleStartManageSyllabus(subj.originalIndex)}
+                                                                                                            className={isCourseCreator ? "btn btn-primary" : "btn"}
+                                                                                                            style={{
+                                                                                                                padding: '0.3rem 0.5rem',
+                                                                                                                display: 'inline-flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                justifyContent: 'center',
+                                                                                                                gap: '0.25rem',
+                                                                                                                fontSize: '0.75rem',
+                                                                                                                whiteSpace: 'nowrap',
+                                                                                                                background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
+                                                                                                                border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
+                                                                                                                color: isCourseCreator ? undefined : '#c7d2fe'
+                                                                                                            }}
+                                                                                                            title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
+                                                                                                        >
+                                                                                                            {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
+                                                                                                        </button>
+                                                                                                        <button
+                                                                                                            onClick={() => handleStartEditSubject(subj.originalIndex)}
+                                                                                                            className="btn"
+                                                                                                            style={{
+                                                                                                                padding: '0.3rem 0.45rem',
+                                                                                                                background: 'var(--bg-main)',
+                                                                                                                border: '1px solid var(--glass-border)',
+                                                                                                                color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
+                                                                                                                display: 'inline-flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                justifyContent: 'center'
+                                                                                                            }}
+                                                                                                            title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
+                                                                                                        >
+                                                                                                            <FaEdit size={11} />
+                                                                                                        </button>
+                                                                                                        <button
+                                                                                                            onClick={() => handleDeleteSubject(subj.originalIndex)}
+                                                                                                            className="btn btn-danger"
+                                                                                                            style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                                                            title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
+                                                                                                        >
+                                                                                                            <FaTrash size={11} />
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        );
+                                                                                    })}
+                                                                                </React.Fragment>
+                                                                            );
+                                                                        });
+                                                                    })()}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
-                                            {renderCreditDistributionTable(data.subjects)}
-                                        </>
-                                    );
-                                })()
-                                }
-                            </div>
-                        )}
-                    </div>
-                )}
-            </>
-        )}
+                                                )}
+
+                                                {/* Open Elective Courses Table */}
+                                                {subjectsWithIndex.some(s => s.isOpenElective) && (
+                                                    <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
+                                                        <h4 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                            Open Elective Courses
+                                                        </h4>
+                                                        <div style={{ width: '100%' }}>
+                                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
+                                                                <thead style={{ background: 'transparent' }}>
+                                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '45%' }}>Course Title</th>
+                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Contact Periods</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>Credit</th>
+                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '12%' }}>Marks</th>
+                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Action</th>
+                                                                    </tr>
+                                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
+                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {(() => {
+                                                                        const oecsGrouped = subjectsWithIndex.filter(s => s.isOpenElective).reduce((acc, subj) => {
+                                                                            const dept = (subj.offeringDept && subj.offeringDept !== 'Other Departments') ? subj.offeringDept : (deptData?.name || selectedDeptObj?.name || 'Biomedical Engineering');
+                                                                            if (!acc[dept]) acc[dept] = [];
+                                                                            acc[dept].push(subj);
+                                                                            return acc;
+                                                                        }, {});
+                                                                        const sortedOecDepts = Object.keys(oecsGrouped).sort();
+                                                                        return sortedOecDepts.map(deptName => {
+                                                                            const deptSubjects = sortSubjectsByCode(oecsGrouped[deptName] || []);
+                                                                            return (
+                                                                                <React.Fragment key={`oec-dept-${deptName}`}>
+                                                                                    <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                                                                        <td colSpan={11} style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
+                                                                                            {deptName}
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    {deptSubjects.map((subj, idx) => {
+                                                                                        const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
+                                                                                        const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
+                                                                                        return (
+                                                                                            <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                                                                                    <div>{subj.code}</div>
+                                                                                                    {!isCourseCreator && (
+                                                                                                        <span
+                                                                                                            title={`Course created by ${creatorName}. Shared in read-only mode.`}
+                                                                                                            style={{
+                                                                                                                display: 'inline-flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                gap: '3px',
+                                                                                                                fontSize: '0.68rem',
+                                                                                                                padding: '1px 5px',
+                                                                                                                borderRadius: '4px',
+                                                                                                                background: 'rgba(99, 102, 241, 0.15)',
+                                                                                                                color: '#a5b4fc',
+                                                                                                                border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                                                                                marginTop: '3px',
+                                                                                                                fontWeight: 'normal'
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            <FaLock size={7} /> {creatorName || 'Shared'}
+                                                                                                        </span>
+                                                                                                    )}
+                                                                                                </td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{subj.credits}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
+                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
+                                                                                                    <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
+                                                                                                        <button
+                                                                                                            onClick={() => handleStartManageSyllabus(subj.originalIndex)}
+                                                                                                            className={isCourseCreator ? "btn btn-primary" : "btn"}
+                                                                                                            style={{
+                                                                                                                padding: '0.3rem 0.5rem',
+                                                                                                                display: 'inline-flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                justifyContent: 'center',
+                                                                                                                gap: '0.25rem',
+                                                                                                                fontSize: '0.75rem',
+                                                                                                                whiteSpace: 'nowrap',
+                                                                                                                background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
+                                                                                                                border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
+                                                                                                                color: isCourseCreator ? undefined : '#c7d2fe'
+                                                                                                            }}
+                                                                                                            title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
+                                                                                                        >
+                                                                                                            {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
+                                                                                                        </button>
+                                                                                                        <button
+                                                                                                            onClick={() => handleStartEditSubject(subj.originalIndex)}
+                                                                                                            className="btn"
+                                                                                                            style={{
+                                                                                                                padding: '0.3rem 0.45rem',
+                                                                                                                background: 'var(--bg-main)',
+                                                                                                                border: '1px solid var(--glass-border)',
+                                                                                                                color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
+                                                                                                                display: 'inline-flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                justifyContent: 'center'
+                                                                                                            }}
+                                                                                                            title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
+                                                                                                        >
+                                                                                                            <FaEdit size={11} />
+                                                                                                        </button>
+                                                                                                        <button
+                                                                                                            onClick={() => handleDeleteSubject(subj.originalIndex)}
+                                                                                                            className="btn btn-danger"
+                                                                                                            style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                                                            title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
+                                                                                                        >
+                                                                                                            <FaTrash size={11} />
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        );
+                                                                                    })}
+                                                                                </React.Fragment>
+                                                                            );
+                                                                        });
+                                                                    })()}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {renderCreditDistributionTable(data.subjects)}
+                                            </>
+                                        );
+                                    })()
+                                    }
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </>
+            )}
 
             {/* Edit Subject Modal */}
             {/* Edit Subject Modal */}
@@ -4421,266 +4673,266 @@ const DepartmentManager = () => {
                 const creatorName = editingSubjectValue.creatorDept ? getDeptDisplayName(editingSubjectValue.creatorDept) : '';
 
                 return (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(15, 23, 42, 0.85)', zIndex: 99999,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: '2rem', backdropFilter: 'blur(8px)'
-                }}>
                     <div style={{
-                        background: 'var(--bg-card)', border: '1px solid var(--primary)',
-                        borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '650px',
-                        maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem',
-                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(15, 23, 42, 0.85)', zIndex: 99999,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: '2rem', backdropFilter: 'blur(8px)'
                     }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
-                            <div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)', margin: 0 }}>Edit Subject</h3>
-                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                    {isCreator ? `Creator Department: ${getDeptDisplayName(selectedDept)}` : `Shared from: ${creatorName || 'Master Bank'} (Core Details Locked)`}
-                                </span>
-                            </div>
-                            <button onClick={handleCancelEditSubject} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}><FaTimes /></button>
-                        </div>
-
-                        {!isCreator && (
-                            <div style={{
-                                padding: '0.85rem 1rem',
-                                background: 'rgba(234, 179, 8, 0.12)',
-                                border: '1px solid rgba(234, 179, 8, 0.35)',
-                                borderRadius: '8px',
-                                color: '#fef08a',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.75rem',
-                                fontSize: '0.85rem'
-                            }}>
-                                <FaLock size={16} style={{ color: '#facc15', flexShrink: 0 }} />
+                        <div style={{
+                            background: 'var(--bg-card)', border: '1px solid var(--primary)',
+                            borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '650px',
+                            maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem',
+                            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
                                 <div>
-                                    <strong style={{ color: '#ffffff' }}>Course Data Owned by {creatorName}</strong>
-                                    <p style={{ margin: '0.2rem 0 0', fontSize: '0.78rem', color: '#cbd5e1' }}>
-                                        Course Code, Title, and L-T-P-Credits are managed by <strong>{creatorName}</strong> and cannot be edited by other departments. You can only adjust the semester or elective category placement within your department's curriculum.
-                                    </p>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)', margin: 0 }}>Edit Subject</h3>
+                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                        {isCreator ? `Creator Department: ${getDeptDisplayName(selectedDept)}` : `Shared from: ${creatorName || 'Master Bank'} (Core Details Locked)`}
+                                    </span>
                                 </div>
+                                <button onClick={handleCancelEditSubject} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}><FaTimes /></button>
                             </div>
-                        )}
 
-                        {/* Inter-Department Master Course Bank Quick Selector */}
-                        {isCreator && (
-                            <div style={{ padding: '0.8rem 1rem', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(59, 130, 246, 0.08))', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '6px' }}>
-                                    <label style={{ fontSize: '0.85rem', color: '#a5b4fc', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
-                                        ⚡ Sync / Auto-Fill from Inter-Department Course Bank
-                                    </label>
+                            {!isCreator && (
+                                <div style={{
+                                    padding: '0.85rem 1rem',
+                                    background: 'rgba(234, 179, 8, 0.12)',
+                                    border: '1px solid rgba(234, 179, 8, 0.35)',
+                                    borderRadius: '8px',
+                                    color: '#fef08a',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    fontSize: '0.85rem'
+                                }}>
+                                    <FaLock size={16} style={{ color: '#facc15', flexShrink: 0 }} />
+                                    <div>
+                                        <strong style={{ color: '#ffffff' }}>Course Data Owned by {creatorName}</strong>
+                                        <p style={{ margin: '0.2rem 0 0', fontSize: '0.78rem', color: '#cbd5e1' }}>
+                                            Course Code, Title, and L-T-P-Credits are managed by <strong>{creatorName}</strong> and cannot be edited by other departments. You can only adjust the semester or elective category placement within your department's curriculum.
+                                        </p>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                                    <select
+                            )}
+
+                            {/* Inter-Department Master Course Bank Quick Selector */}
+                            {isCreator && (
+                                <div style={{ padding: '0.8rem 1rem', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(59, 130, 246, 0.08))', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '6px' }}>
+                                        <label style={{ fontSize: '0.85rem', color: '#a5b4fc', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                                            ⚡ Sync / Auto-Fill from Inter-Department Course Bank
+                                        </label>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <select
+                                            value={editingSubjectValue.code || ''}
+                                            onChange={e => {
+                                                const sel = e.target.value;
+                                                if (sel) {
+                                                    applyMasterCourseToEditingSubject(sel);
+                                                }
+                                            }}
+                                            style={{
+                                                flex: 1, minWidth: '240px', padding: '0.6rem 0.8rem', borderRadius: '6px',
+                                                background: 'var(--bg-main)', border: '1px solid rgba(99, 102, 241, 0.45)',
+                                                color: 'white', outline: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '500'
+                                            }}
+                                        >
+                                            <option value="">-- Choose Course from Master Bank to Auto-Sync ({masterCourses.length} available) --</option>
+                                            {masterCourses.map(c => (
+                                                <option key={c.code} value={c.code}>
+                                                    {c.code} - {c.title} (L-T-P: {c.l || 0}-{c.t || 0}-{c.p || 0}, C: {c.credits || 0}) • {c.sourceDeptName || 'Master Bank'}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Subject Fields */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                                {/* Course Code */}
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Code {!isCreator && '🔒'}</label>
+                                    <input
+                                        type="text"
+                                        list="master-course-codes-list"
                                         value={editingSubjectValue.code || ''}
+                                        disabled={!isCreator}
                                         onChange={e => {
-                                            const sel = e.target.value;
-                                            if (sel) {
-                                                applyMasterCourseToEditingSubject(sel);
+                                            const val = e.target.value.toUpperCase();
+                                            updateEditingSubjectField('code', val);
+                                            const found = masterCourses.find(c => c.code?.toUpperCase() === val);
+                                            if (found) {
+                                                applyMasterCourseToEditingSubject(found);
                                             }
                                         }}
-                                        style={{
-                                            flex: 1, minWidth: '240px', padding: '0.6rem 0.8rem', borderRadius: '6px',
-                                            background: 'var(--bg-main)', border: '1px solid rgba(99, 102, 241, 0.45)',
-                                            color: 'white', outline: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '500'
-                                        }}
-                                    >
-                                        <option value="">-- Choose Course from Master Bank to Auto-Sync ({masterCourses.length} available) --</option>
-                                        {masterCourses.map(c => (
-                                            <option key={c.code} value={c.code}>
-                                                {c.code} - {c.title} (L-T-P: {c.l || 0}-{c.t || 0}-{c.p || 0}, C: {c.credits || 0}) • {c.sourceDeptName || 'Master Bank'}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        placeholder="e.g. HS3151"
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                    />
                                 </div>
-                            </div>
-                        )}
 
-                        {/* Subject Fields */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                            {/* Course Code */}
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Code {!isCreator && '🔒'}</label>
-                                <input
-                                    type="text"
-                                    list="master-course-codes-list"
-                                    value={editingSubjectValue.code || ''}
-                                    disabled={!isCreator}
-                                    onChange={e => {
-                                        const val = e.target.value.toUpperCase();
-                                        updateEditingSubjectField('code', val);
-                                        const found = masterCourses.find(c => c.code?.toUpperCase() === val);
-                                        if (found) {
-                                            applyMasterCourseToEditingSubject(found);
-                                        }
-                                    }}
-                                    placeholder="e.g. HS3151"
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                />
-                            </div>
-
-                            {/* Course Title */}
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Title {!isCreator && '🔒'}</label>
-                                <input
-                                    type="text"
-                                    value={editingSubjectValue.title || ''}
-                                    disabled={!isCreator}
-                                    onChange={e => updateEditingSubjectField('title', e.target.value)}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                />
-                            </div>
-
-                            {/* L-T-P-Credits-ContactPeriods */}
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>L (Lecture periods) {!isCreator && '🔒'}</label>
-                                <input
-                                    type="number"
-                                    disabled={!isCreator}
-                                    value={editingSubjectValue.l === undefined ? '' : editingSubjectValue.l}
-                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('l', val === '' ? '' : Math.max(0, Number(val))); }}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>T (Tutorial periods) {!isCreator && '🔒'}</label>
-                                <input
-                                    type="number"
-                                    disabled={!isCreator}
-                                    value={editingSubjectValue.t === undefined ? '' : editingSubjectValue.t}
-                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('t', val === '' ? '' : Math.max(0, Number(val))); }}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>P (Practical periods) {!isCreator && '🔒'}</label>
-                                <input
-                                    type="number"
-                                    disabled={!isCreator}
-                                    value={editingSubjectValue.p === undefined ? '' : editingSubjectValue.p}
-                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('p', val === '' ? '' : Math.max(0, Number(val))); }}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Total Contact Periods</label>
-                                <input type="number" value={editingSubjectValue.contactPeriods === undefined ? '' : editingSubjectValue.contactPeriods} readOnly style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed', outline: 'none' }} />
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Credits {!isCreator && '🔒'}</label>
-                                <input
-                                    type="number"
-                                    step="any"
-                                    disabled={!isCreator}
-                                    value={editingSubjectValue.credits === undefined ? '' : editingSubjectValue.credits}
-                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('credits', val === '' ? '' : Number(val)); }}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                />
-                            </div>
-
-                            {/* Category and Category Type */}
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category</label>
-                                <select value={editingSubjectValue.category || 'THEORY'} onChange={e => updateEditingSubjectField('category', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
-                                    <option value="THEORY">THEORY</option>
-                                    <option value="PRACTICAL">PRACTICAL</option>
-                                    <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
-                                    <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
-                                    <option value="MANDATORY COURSES">MANDATORY COURSES</option>
-                                    <option value="Language Elective – I">Language Elective – I</option>
-                                    <option value="Language Elective - II">Language Elective - II</option>
-                                    <option value="Electives for Honors Degree">Electives for Honors Degree</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category Type</label>
-                                <select value={editingSubjectValue.categoryType || 'HUM'} onChange={e => updateEditingSubjectField('categoryType', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
-                                    <option value="HUM">HUM</option>
-                                    <option value="BSC">BSC</option>
-                                    <option value="ESC">ESC</option>
-                                    <option value="PCC">PCC</option>
-                                    <option value="PEC">PEC</option>
-                                    <option value="OEC">OEC</option>
-                                    <option value="EEC">EEC</option>
-                                    <option value="MC">MC</option>
-                                </select>
-                            </div>
-
-                            {/* CIA, ESE, Total Marks */}
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>CIA Marks {!isCreator && '🔒'}</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    disabled={!isCreator}
-                                    value={editingSubjectValue.cia === undefined ? '' : editingSubjectValue.cia}
-                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('cia', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>ESE Marks {!isCreator && '🔒'}</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    disabled={!isCreator}
-                                    value={editingSubjectValue.ese === undefined ? '' : editingSubjectValue.ese}
-                                    onChange={e => { const val = e.target.value; updateEditingSubjectField('ese', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }}
-                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Total Marks</label>
-                                <input type="number" value={editingSubjectValue.total === undefined ? '' : editingSubjectValue.total} readOnly style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed', outline: 'none' }} />
-                            </div>
-
-                            {/* Semester Course Type fields */}
-                            {!editingSubjectValue.vertical && !editingSubjectValue.isOpenElective && (
+                                {/* Course Title */}
                                 <div>
-                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Semester</label>
-                                    <input type="number" value={editingSubjectValue.semester || 1} onChange={e => updateEditingSubjectField('semester', Number(e.target.value))} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Course Title {!isCreator && '🔒'}</label>
+                                    <input
+                                        type="text"
+                                        value={editingSubjectValue.title || ''}
+                                        disabled={!isCreator}
+                                        onChange={e => updateEditingSubjectField('title', e.target.value)}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                    />
                                 </div>
-                            )}
 
-                            {/* Professional Elective Course Type fields */}
-                            {editingSubjectValue.vertical && (
-                                <>
-                                    <div>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Vertical</label>
-                                        <input type="number" value={editingSubjectValue.vertical || ''} onChange={e => updateEditingSubjectField('vertical', e.target.value === '' ? '' : Number(e.target.value))} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
-                                    </div>
-                                    <div style={{ gridColumn: 'span 2' }}>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Vertical Name</label>
-                                        <input type="text" value={editingSubjectValue.verticalName || ''} onChange={e => updateEditingSubjectField('verticalName', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
-                                    </div>
-                                </>
-                            )}
+                                {/* L-T-P-Credits-ContactPeriods */}
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>L (Lecture periods) {!isCreator && '🔒'}</label>
+                                    <input
+                                        type="number"
+                                        disabled={!isCreator}
+                                        value={editingSubjectValue.l === undefined ? '' : editingSubjectValue.l}
+                                        onChange={e => { const val = e.target.value; updateEditingSubjectField('l', val === '' ? '' : Math.max(0, Number(val))); }}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>T (Tutorial periods) {!isCreator && '🔒'}</label>
+                                    <input
+                                        type="number"
+                                        disabled={!isCreator}
+                                        value={editingSubjectValue.t === undefined ? '' : editingSubjectValue.t}
+                                        onChange={e => { const val = e.target.value; updateEditingSubjectField('t', val === '' ? '' : Math.max(0, Number(val))); }}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>P (Practical periods) {!isCreator && '🔒'}</label>
+                                    <input
+                                        type="number"
+                                        disabled={!isCreator}
+                                        value={editingSubjectValue.p === undefined ? '' : editingSubjectValue.p}
+                                        onChange={e => { const val = e.target.value; updateEditingSubjectField('p', val === '' ? '' : Math.max(0, Number(val))); }}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Total Contact Periods</label>
+                                    <input type="number" value={editingSubjectValue.contactPeriods === undefined ? '' : editingSubjectValue.contactPeriods} readOnly style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed', outline: 'none' }} />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Credits {!isCreator && '🔒'}</label>
+                                    <input
+                                        type="number"
+                                        step="any"
+                                        disabled={!isCreator}
+                                        value={editingSubjectValue.credits === undefined ? '' : editingSubjectValue.credits}
+                                        onChange={e => { const val = e.target.value; updateEditingSubjectField('credits', val === '' ? '' : Number(val)); }}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                    />
+                                </div>
 
-                            {/* Open Elective Course Type fields */}
-                            {editingSubjectValue.isOpenElective && (
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Offering Department</label>
-                                    <select value={editingSubjectValue.offeringDept || ''} onChange={e => updateEditingSubjectField('offeringDept', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
-                                        <option value="">Select Offering Department</option>
-                                        {staticDepartments.map(dept => (
-                                            <option key={dept.slug} value={dept.name}>{dept.name}</option>
-                                        ))}
+                                {/* Category and Category Type */}
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category</label>
+                                    <select value={editingSubjectValue.category || 'THEORY'} onChange={e => updateEditingSubjectField('category', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
+                                        <option value="THEORY">THEORY</option>
+                                        <option value="PRACTICAL">PRACTICAL</option>
+                                        <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
+                                        <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
+                                        <option value="MANDATORY COURSES">MANDATORY COURSES</option>
+                                        <option value="Language Elective – I">Language Elective – I</option>
+                                        <option value="Language Elective - II">Language Elective - II</option>
+                                        <option value="Electives for Honors Degree">Electives for Honors Degree</option>
                                     </select>
                                 </div>
-                            )}
-                        </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category Type</label>
+                                    <select value={editingSubjectValue.categoryType || 'HUM'} onChange={e => updateEditingSubjectField('categoryType', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
+                                        <option value="HUM">HUM</option>
+                                        <option value="BSC">BSC</option>
+                                        <option value="ESC">ESC</option>
+                                        <option value="PCC">PCC</option>
+                                        <option value="PEC">PEC</option>
+                                        <option value="OEC">OEC</option>
+                                        <option value="EEC">EEC</option>
+                                        <option value="MC">MC</option>
+                                    </select>
+                                </div>
 
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: '0.5rem' }}>
-                            <button onClick={handleCancelEditSubject} className="btn" style={{ padding: '0.6rem 1.2rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}>Cancel</button>
-                            <button onClick={handleSaveEditSubject} className="btn btn-primary" style={{ padding: '0.6rem 1.2rem' }}>Save Changes</button>
+                                {/* CIA, ESE, Total Marks */}
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>CIA Marks {!isCreator && '🔒'}</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        disabled={!isCreator}
+                                        value={editingSubjectValue.cia === undefined ? '' : editingSubjectValue.cia}
+                                        onChange={e => { const val = e.target.value; updateEditingSubjectField('cia', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>ESE Marks {!isCreator && '🔒'}</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        disabled={!isCreator}
+                                        value={editingSubjectValue.ese === undefined ? '' : editingSubjectValue.ese}
+                                        onChange={e => { const val = e.target.value; updateEditingSubjectField('ese', val === '' ? '' : Math.min(100, Math.max(0, Number(val)))); }}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Total Marks</label>
+                                    <input type="number" value={editingSubjectValue.total === undefined ? '' : editingSubjectValue.total} readOnly style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', color: '#aaa', cursor: 'not-allowed', outline: 'none' }} />
+                                </div>
+
+                                {/* Semester Course Type fields */}
+                                {!editingSubjectValue.vertical && !editingSubjectValue.isOpenElective && (
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Semester</label>
+                                        <input type="number" value={editingSubjectValue.semester || 1} onChange={e => updateEditingSubjectField('semester', Number(e.target.value))} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                    </div>
+                                )}
+
+                                {/* Professional Elective Course Type fields */}
+                                {editingSubjectValue.vertical && (
+                                    <>
+                                        <div>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Vertical</label>
+                                            <input type="number" value={editingSubjectValue.vertical || ''} onChange={e => updateEditingSubjectField('vertical', e.target.value === '' ? '' : Number(e.target.value))} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                        </div>
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Vertical Name</label>
+                                            <input type="text" value={editingSubjectValue.verticalName || ''} onChange={e => updateEditingSubjectField('verticalName', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }} />
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Open Elective Course Type fields */}
+                                {editingSubjectValue.isOpenElective && (
+                                    <div style={{ gridColumn: 'span 2' }}>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Offering Department</label>
+                                        <select value={editingSubjectValue.offeringDept || ''} onChange={e => updateEditingSubjectField('offeringDept', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
+                                            <option value="">Select Offering Department</option>
+                                            {staticDepartments.map(dept => (
+                                                <option key={dept.slug} value={dept.name}>{dept.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', marginTop: '0.5rem' }}>
+                                <button onClick={handleCancelEditSubject} className="btn" style={{ padding: '0.6rem 1.2rem', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'var(--text-main)' }}>Cancel</button>
+                                <button onClick={handleSaveEditSubject} className="btn btn-primary" style={{ padding: '0.6rem 1.2rem' }}>Save Changes</button>
+                            </div>
                         </div>
                     </div>
-                </div>
                 );
             })()}
 
@@ -4784,14 +5036,38 @@ const DepartmentManager = () => {
                                             </div>
                                             <div>
                                                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category Full Name {!isCreator && '🔒'}</label>
-                                                <input
-                                                    type="text"
+                                                <select
                                                     disabled={!isCreator}
-                                                    value={syllabusEditValue.categoryName}
+                                                    value={syllabusEditValue.categoryName || ''}
                                                     onChange={e => setSyllabusEditValue({ ...syllabusEditValue, categoryName: e.target.value })}
-                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                                    placeholder="e.g. Humanities, Social Sciences and Management Course (HUM)"
-                                                />
+                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
+                                                >
+                                                    <option value="">-- Select Category Full Name --</option>
+                                                    {syllabusEditValue.categoryName && !STANDARD_CATEGORY_NAMES.includes(syllabusEditValue.categoryName) && (
+                                                        <option value={syllabusEditValue.categoryName}>{syllabusEditValue.categoryName} (Current)</option>
+                                                    )}
+                                                    <optgroup label="Standard Singular">
+                                                        <option value="Humanities, Social Sciences and Management Course (HUM)">Humanities, Social Sciences and Management Course (HUM)</option>
+                                                        <option value="Basic Science Course (BSC)">Basic Science Course (BSC)</option>
+                                                        <option value="Engineering Science Course (ESC)">Engineering Science Course (ESC)</option>
+                                                        <option value="Professional Core Course (PCC)">Professional Core Course (PCC)</option>
+                                                        <option value="Professional Elective Course (PEC)">Professional Elective Course (PEC)</option>
+                                                        <option value="Open Elective Course (OEC)">Open Elective Course (OEC)</option>
+                                                        <option value="Employability Enhancement Course (EEC)">Employability Enhancement Course (EEC)</option>
+                                                        <option value="Mandatory Course (MC)">Mandatory Course (MC)</option>
+                                                    </optgroup>
+                                                    <optgroup label="Anna University Plural Format">
+                                                        <option value="Humanities and Social Sciences including Management Courses (HUM)">Humanities and Social Sciences including Management Courses (HUM)</option>
+                                                        <option value="Basic Science Courses (BSC)">Basic Science Courses (BSC)</option>
+                                                        <option value="Engineering Science Courses (ESC)">Engineering Science Courses (ESC)</option>
+                                                        <option value="Professional Core Courses (PCC)">Professional Core Courses (PCC)</option>
+                                                        <option value="Professional Elective Courses (PEC)">Professional Elective Courses (PEC)</option>
+                                                        <option value="Open Elective Courses (OEC)">Open Elective Courses (OEC)</option>
+                                                        <option value="Employability Enhancement Courses (EEC)">Employability Enhancement Courses (EEC)</option>
+                                                        <option value="Mandatory Courses (MC)">Mandatory Courses (MC)</option>
+                                                        <option value="Audit Course (AC)">Audit Course (AC)</option>
+                                                    </optgroup>
+                                                </select>
                                             </div>
                                         </div>
 
@@ -4887,7 +5163,7 @@ const DepartmentManager = () => {
                                         </div>
 
                                         <div>
-                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Outcomes (COs) {!isCreator && '🔒'}</h4>
+                                            <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', fontWeight: 'bold' }}>Course Outcomes (COs){!isCreator && '🔒'}</h4>
                                             <div style={{ overflowX: 'auto' }}>
                                                 <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
                                                     <thead>
@@ -4909,14 +5185,14 @@ const DepartmentManager = () => {
                                                                         onChange={e => {
                                                                             const oldCoNo = co.coNo;
                                                                             const newOutcomes = [...syllabusEditValue.outcomes];
-                                                                            newOutcomes[idx].coNo = e.target.value;
-                                                                            const newMapping = (syllabusEditValue.coPoMapping || []).map((m, i) => {
-                                                                                if (m.coNo === oldCoNo || i === idx) {
-                                                                                    return { ...m, coNo: e.target.value };
-                                                                                }
-                                                                                return m;
-                                                                            });
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes, coPoMapping: newMapping });
+                                                                            newOutcomes[idx] = { ...newOutcomes[idx], coNo: e.target.value };
+                                                                            const updatedMapping = sanitizeCoPoMapping(
+                                                                                syllabusEditValue.coPoMapping,
+                                                                                newOutcomes,
+                                                                                (data.po && data.po.length > 0) ? data.po.length : 11,
+                                                                                (data.pso && data.pso.length > 0) ? data.pso.length : 3
+                                                                            );
+                                                                            setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes, coPoMapping: updatedMapping });
                                                                         }}
                                                                         style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', fontWeight: 'bold', cursor: !isCreator ? 'not-allowed' : 'text' }}
                                                                     />
@@ -4927,7 +5203,7 @@ const DepartmentManager = () => {
                                                                         value={co.outcome}
                                                                         onChange={e => {
                                                                             const newOutcomes = [...syllabusEditValue.outcomes];
-                                                                            newOutcomes[idx].outcome = e.target.value;
+                                                                            newOutcomes[idx] = { ...newOutcomes[idx], outcome: e.target.value };
                                                                             setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
                                                                         }}
                                                                         style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', minHeight: '55px', resize: 'vertical', cursor: !isCreator ? 'not-allowed' : 'text' }}
@@ -4939,7 +5215,7 @@ const DepartmentManager = () => {
                                                                         value={co.rbtLevel}
                                                                         onChange={e => {
                                                                             const newOutcomes = [...syllabusEditValue.outcomes];
-                                                                            newOutcomes[idx].rbtLevel = e.target.value;
+                                                                            newOutcomes[idx] = { ...newOutcomes[idx], rbtLevel: e.target.value };
                                                                             setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes });
                                                                         }}
                                                                         style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'pointer' }}
@@ -4953,10 +5229,14 @@ const DepartmentManager = () => {
                                                                     <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center', verticalAlign: 'top' }}>
                                                                         <button
                                                                             onClick={() => {
-                                                                                const removedCo = syllabusEditValue.outcomes[idx];
                                                                                 const newOutcomes = syllabusEditValue.outcomes.filter((_, i) => i !== idx);
-                                                                                const newMapping = (syllabusEditValue.coPoMapping || []).filter((m, i) => m.coNo !== removedCo?.coNo && i !== idx);
-                                                                                setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes, coPoMapping: newMapping });
+                                                                                const updatedMapping = sanitizeCoPoMapping(
+                                                                                    syllabusEditValue.coPoMapping,
+                                                                                    newOutcomes,
+                                                                                    (data.po && data.po.length > 0) ? data.po.length : 11,
+                                                                                    (data.pso && data.pso.length > 0) ? data.pso.length : 3
+                                                                                );
+                                                                                setSyllabusEditValue({ ...syllabusEditValue, outcomes: newOutcomes, coPoMapping: updatedMapping });
                                                                             }}
                                                                             className="btn btn-danger"
                                                                             style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
@@ -4981,7 +5261,7 @@ const DepartmentManager = () => {
                                                         type="text"
                                                         id="newCoNoInput"
                                                         placeholder="CO No"
-                                                        defaultValue={`CO${syllabusEditValue.outcomes.length + 1}`}
+                                                        defaultValue={`CO ${syllabusEditValue.outcomes.length + 1}`}
                                                         style={{ padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
                                                     />
                                                     <textarea
@@ -5005,21 +5285,25 @@ const DepartmentManager = () => {
                                                             const rbtSelect = document.getElementById('newOutcomeRbtSelect');
                                                             if (coNoInput && outcomeInput && rbtSelect && outcomeInput.value.trim()) {
                                                                 const newCo = {
-                                                                    coNo: coNoInput.value.trim() || `CO${syllabusEditValue.outcomes.length + 1}`,
+                                                                    coNo: coNoInput.value.trim() || `CO ${syllabusEditValue.outcomes.length + 1}`,
                                                                     outcome: outcomeInput.value.trim(),
                                                                     rbtLevel: rbtSelect.value
                                                                 };
-                                                                const newMapRow = { coNo: newCo.coNo };
-                                                                for (let i = 1; i <= (data.po?.length || 12); i++) newMapRow[`po${i}`] = '-';
-                                                                for (let i = 1; i <= (data.pso?.length || 2); i++) newMapRow[`pso${i}`] = '-';
+                                                                const updatedOutcomes = [...syllabusEditValue.outcomes, newCo];
+                                                                const updatedMapping = sanitizeCoPoMapping(
+                                                                    syllabusEditValue.coPoMapping,
+                                                                    updatedOutcomes,
+                                                                    (data.po && data.po.length > 0) ? data.po.length : 11,
+                                                                    (data.pso && data.pso.length > 0) ? data.pso.length : 3
+                                                                );
 
                                                                 setSyllabusEditValue({
                                                                     ...syllabusEditValue,
-                                                                    outcomes: [...syllabusEditValue.outcomes, newCo],
-                                                                    coPoMapping: [...(syllabusEditValue.coPoMapping || []), newMapRow]
+                                                                    outcomes: updatedOutcomes,
+                                                                    coPoMapping: updatedMapping
                                                                 });
                                                                 outcomeInput.value = '';
-                                                                coNoInput.value = `CO${syllabusEditValue.outcomes.length + 2}`;
+                                                                coNoInput.value = `CO ${updatedOutcomes.length + 1}`;
                                                             }
                                                         }}
                                                         className="btn btn-primary"
@@ -5043,131 +5327,166 @@ const DepartmentManager = () => {
                                 )}
 
                                 {activeSyllabusTab === 'units' && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                        <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>Unit-wise Syllabus {!isCreator && '🔒'}</h4>
-                                        <div style={{ overflowX: 'auto' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)' }}>
-                                                <thead>
-                                                    <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit No</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', width: '33%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit Title</th>
-                                                        <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Topics (One topic per line)</th>
-                                                        {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '10%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {syllabusEditValue.units.map((unit, idx) => (
-                                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
-                                                                <input
-                                                                    type="text"
-                                                                    disabled={!isCreator}
-                                                                    value={unit.unitNo}
-                                                                    onChange={e => {
-                                                                        const newUnits = [...syllabusEditValue.units];
-                                                                        newUnits[idx].unitNo = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                    }}
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', fontWeight: 'bold', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                                                />
-                                                            </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
-                                                                <input
-                                                                    type="text"
-                                                                    disabled={!isCreator}
-                                                                    value={unit.title}
-                                                                    onChange={e => {
-                                                                        const newUnits = [...syllabusEditValue.units];
-                                                                        newUnits[idx].title = e.target.value;
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                    }}
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                                                />
-                                                            </td>
-                                                            <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
-                                                                <textarea
-                                                                    disabled={!isCreator}
-                                                                    value={unit.topics.join('\n')}
-                                                                    onChange={e => {
-                                                                        const newUnits = [...syllabusEditValue.units];
-                                                                        newUnits[idx].topics = e.target.value.split('\n');
-                                                                        setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                    }}
-                                                                    placeholder="Enter topics, one per line..."
-                                                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', minHeight: '80px', resize: 'vertical', fontSize: '0.85rem', cursor: !isCreator ? 'not-allowed' : 'text' }}
-                                                                />
-                                                            </td>
-                                                            {isCreator && (
-                                                                <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top', textAlign: 'center' }}>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            const newUnits = syllabusEditValue.units.filter((_, i) => i !== idx);
-                                                                            setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
-                                                                        }}
-                                                                        className="btn btn-danger"
-                                                                        style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                    >
-                                                                        <FaTrash />
-                                                                    </button>
-                                                                </td>
-                                                            )}
-                                                        </tr>
-                                                    ))}
-                                                    {syllabusEditValue.units.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan={isCreator ? 4 : 3} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No units defined.</td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        {isCreator && (
-                                            <div style={{ display: 'grid', gridTemplateColumns: '15% 35% 40% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                                                <input
-                                                    type="text"
-                                                    id="newUnitNoInput"
-                                                    placeholder="Unit No"
-                                                    defaultValue={`UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`}
-                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
-                                                />
-                                                <input
-                                                    type="text"
-                                                    id="newUnitTitleInput"
-                                                    placeholder="Unit Title (e.g. INTRODUCTION)..."
-                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
-                                                />
-                                                <textarea
-                                                    id="newUnitTopicsInput"
-                                                    placeholder="Enter topics, one per line..."
-                                                    style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical', fontSize: '0.85rem' }}
-                                                />
-                                                <button
-                                                    onClick={() => {
-                                                        const unitNoInput = document.getElementById('newUnitNoInput');
-                                                        const titleInput = document.getElementById('newUnitTitleInput');
-                                                        const topicsInput = document.getElementById('newUnitTopicsInput');
-                                                        if (unitNoInput && titleInput && topicsInput && (titleInput.value.trim() || topicsInput.value.trim())) {
-                                                            const newUnit = {
-                                                                unitNo: unitNoInput.value.trim() || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`,
-                                                                title: titleInput.value.trim(),
-                                                                topics: topicsInput.value.trim().split('\n').filter(t => t.trim() !== '')
-                                                            };
-                                                            setSyllabusEditValue({
-                                                                ...syllabusEditValue,
-                                                                units: [...syllabusEditValue.units, newUnit]
-                                                            });
-                                                            titleInput.value = '';
-                                                            topicsInput.value = '';
-                                                            unitNoInput.value = `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length + 1] || (syllabusEditValue.units.length + 2)}`;
-                                                        }
-                                                    }}
-                                                    className="btn btn-primary"
-                                                    style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
-                                                >
-                                                    <FaPlus />
-                                                </button>
-                                            </div>
-                                        )}
+                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                         <h4 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.2rem', fontWeight: 'bold' }}>Unit-wise Syllabus {!isCreator && '🔒'}</h4>
+                                         <div style={{ overflowX: 'auto' }}>
+                                             <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--glass-border)' }}>
+                                                 <thead>
+                                                     <tr style={{ background: 'rgba(255, 255, 255, 0.05)', textAlign: 'left', borderBottom: '1px solid var(--glass-border)' }}>
+                                                         <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit No</th>
+                                                         <th style={{ padding: '0.6rem 0.75rem', width: '28%', color: 'var(--text-main)', fontWeight: 'bold' }}>Unit Title</th>
+                                                         <th style={{ padding: '0.6rem 0.75rem', width: '12%', color: 'var(--text-main)', fontWeight: 'bold' }}>Total Periods</th>
+                                                         <th style={{ padding: '0.6rem 0.75rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Topics (One topic per line)</th>
+                                                         {isCreator && <th style={{ padding: '0.6rem 0.75rem', width: '8%', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>Action</th>}
+                                                     </tr>
+                                                 </thead>
+                                                 <tbody>
+                                                     {syllabusEditValue.units.map((unit, idx) => (
+                                                         <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                 <input
+                                                                     type="text"
+                                                                     disabled={!isCreator}
+                                                                     value={unit.unitNo}
+                                                                     onChange={e => {
+                                                                         const newUnits = [...syllabusEditValue.units];
+                                                                         newUnits[idx].unitNo = e.target.value;
+                                                                         setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                     }}
+                                                                     style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', fontWeight: 'bold', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                                                 />
+                                                             </td>
+                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                 <input
+                                                                     type="text"
+                                                                     disabled={!isCreator}
+                                                                     value={unit.title}
+                                                                     onChange={e => {
+                                                                         const newUnits = [...syllabusEditValue.units];
+                                                                         newUnits[idx].title = e.target.value;
+                                                                         setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                     }}
+                                                                     style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                                                 />
+                                                             </td>
+                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                 <input
+                                                                     type="text"
+                                                                     disabled={!isCreator}
+                                                                     placeholder="e.g. 9"
+                                                                     value={unit.periods !== undefined && unit.periods !== null ? unit.periods : ''}
+                                                                     onChange={e => {
+                                                                         const newUnits = [...syllabusEditValue.units];
+                                                                         newUnits[idx].periods = e.target.value;
+                                                                         setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                     }}
+                                                                     style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                                                 />
+                                                             </td>
+                                                             <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top' }}>
+                                                                 <textarea
+                                                                     disabled={!isCreator}
+                                                                     value={unit.topics.join('\n')}
+                                                                     onChange={e => {
+                                                                         const newUnits = [...syllabusEditValue.units];
+                                                                         newUnits[idx].topics = e.target.value.split('\n');
+                                                                         setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                     }}
+                                                                     placeholder="Enter topics, one per line..."
+                                                                     style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: !isCreator ? 'rgba(255,255,255,0.04)' : 'var(--bg-main)', border: '1px solid var(--glass-border)', color: !isCreator ? '#94a3b8' : 'white', outline: 'none', minHeight: '80px', resize: 'vertical', fontSize: '0.85rem', cursor: !isCreator ? 'not-allowed' : 'text' }}
+                                                                 />
+                                                             </td>
+                                                             {isCreator && (
+                                                                 <td style={{ padding: '0.5rem 0.75rem', verticalAlign: 'top', textAlign: 'center' }}>
+                                                                     <button
+                                                                         onClick={() => {
+                                                                             const newUnits = syllabusEditValue.units.filter((_, i) => i !== idx);
+                                                                             setSyllabusEditValue({ ...syllabusEditValue, units: newUnits });
+                                                                         }}
+                                                                         className="btn btn-danger"
+                                                                         style={{ padding: '0.4rem 0.6rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                     >
+                                                                         <FaTrash />
+                                                                     </button>
+                                                                 </td>
+                                                             )}
+                                                         </tr>
+                                                     ))}
+                                                     {syllabusEditValue.units.length === 0 && (
+                                                         <tr>
+                                                             <td colSpan={isCreator ? 5 : 4} style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>No units defined.</td>
+                                                         </tr>
+                                                     )}
+                                                 </tbody>
+                                             </table>
+                                         </div>
+                                         {syllabusEditValue.units.length > 0 && (
+                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px', border: '1px solid var(--glass-border)' }}>
+                                                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                                     Total Units: <strong style={{ color: 'white' }}>{syllabusEditValue.units.length}</strong>
+                                                 </span>
+                                                 <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 'bold' }}>
+                                                     TOTAL PERIODS: {syllabusEditValue.units.reduce((acc, u) => acc + (Number(u.periods) || 9), 0)} PERIODS
+                                                 </span>
+                                             </div>
+                                         )}
+                                         {isCreator && (
+                                             <div style={{ display: 'grid', gridTemplateColumns: '12% 28% 12% 38% 10%', gap: '0.5rem', alignItems: 'flex-start', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                                                 <input
+                                                     type="text"
+                                                     id="newUnitNoInput"
+                                                     placeholder="Unit No"
+                                                     defaultValue={`UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`}
+                                                     style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', fontWeight: 'bold' }}
+                                                 />
+                                                 <input
+                                                     type="text"
+                                                     id="newUnitTitleInput"
+                                                     placeholder="Unit Title (e.g. INTRODUCTION)..."
+                                                     style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                 />
+                                                 <input
+                                                     type="text"
+                                                     id="newUnitPeriodsInput"
+                                                     placeholder="Periods (e.g. 9)"
+                                                     defaultValue="9"
+                                                     style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
+                                                 />
+                                                 <textarea
+                                                     id="newUnitTopicsInput"
+                                                     placeholder="Enter topics, one per line..."
+                                                     style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', minHeight: '38px', resize: 'vertical', fontSize: '0.85rem' }}
+                                                 />
+                                                 <button
+                                                     onClick={() => {
+                                                         const unitNoInput = document.getElementById('newUnitNoInput');
+                                                         const titleInput = document.getElementById('newUnitTitleInput');
+                                                         const periodsInput = document.getElementById('newUnitPeriodsInput');
+                                                         const topicsInput = document.getElementById('newUnitTopicsInput');
+                                                         if (unitNoInput && titleInput && topicsInput && (titleInput.value.trim() || topicsInput.value.trim())) {
+                                                             const newUnit = {
+                                                                 unitNo: unitNoInput.value.trim() || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI'][syllabusEditValue.units.length] || (syllabusEditValue.units.length + 1)}`,
+                                                                 title: titleInput.value.trim(),
+                                                                 periods: periodsInput ? periodsInput.value.trim() : '9',
+                                                                 topics: topicsInput.value.trim().split('\n').filter(t => t.trim() !== '')
+                                                             };
+                                                             setSyllabusEditValue({
+                                                                 ...syllabusEditValue,
+                                                                 units: [...syllabusEditValue.units, newUnit]
+                                                             });
+                                                             titleInput.value = '';
+                                                             topicsInput.value = '';
+                                                             if (periodsInput) periodsInput.value = '9';
+                                                             unitNoInput.value = `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][syllabusEditValue.units.length + 1] || (syllabusEditValue.units.length + 2)}`;
+                                                         }
+                                                     }}
+                                                     className="btn btn-primary"
+                                                     style={{ width: '100%', padding: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '38px' }}
+                                                 >
+                                                     <FaPlus />
+                                                 </button>
+                                             </div>
+                                         )}
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
                                             <button
                                                 onClick={() => setActiveSyllabusTab(showExercisesTab ? 'experiments' : 'textbooks-references')}
@@ -5595,7 +5914,7 @@ const DepartmentManager = () => {
                                 {activeSyllabusTab === 'co-po-mapping' && (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                         <h4 style={{ fontSize: '1rem', color: 'var(--primary)', fontWeight: 'bold' }}>
-                                            Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs) {!isCreator && '🔒'}
+                                            Mapping of Course Outcomes (COs)with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs) {!isCreator && '🔒'}
                                         </h4>
                                         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                                             Select correlation levels: <strong>3</strong> (High), <strong>2</strong> (Medium), <strong>1</strong> (Low), or <strong>-</strong> (No Correlation).
@@ -5605,38 +5924,29 @@ const DepartmentManager = () => {
                                                 <thead>
                                                     <tr style={{ background: 'rgba(255, 255, 255, 0.05)', borderBottom: '1px solid var(--glass-border)' }}>
                                                         <th style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold', minWidth: '80px' }}>COs</th>
-                                                        {Array.from({ length: data.po?.length || 12 }).map((_, i) => (
-                                                             <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PO{i + 1}</th>
+                                                        {Array.from({ length: (data.po && data.po.length > 0) ? data.po.length : 11 }).map((_, i) => (
+                                                            <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PO{i + 1}</th>
                                                         ))}
-                                                        {Array.from({ length: data.pso?.length || 2 }).map((_, i) => (
+                                                        {Array.from({ length: (data.pso && data.pso.length > 0) ? data.pso.length : 3 }).map((_, i) => (
                                                             <th key={i} style={{ padding: '0.6rem 0.5rem', color: 'var(--text-main)', fontWeight: 'bold' }}>PSO{i + 1}</th>
                                                         ))}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {(() => {
-                                                        const mappingRows = (syllabusEditValue.coPoMapping && syllabusEditValue.coPoMapping.length > 0)
-                                                            ? syllabusEditValue.coPoMapping
-                                                            : (syllabusEditValue.outcomes && syllabusEditValue.outcomes.length > 0
-                                                                ? syllabusEditValue.outcomes.map((co, idx) => {
-                                                                    const mapObj = { coNo: co.coNo || `CO ${idx + 1}` };
-                                                                    for (let i = 1; i <= (data.po?.length || 12); i++) mapObj[`po${i}`] = '-';
-                                                                    for (let i = 1; i <= (data.pso?.length || 2); i++) mapObj[`pso${i}`] = '-';
-                                                                    return mapObj;
-                                                                })
-                                                                : [1, 2, 3, 4, 5].map(num => {
-                                                                    const mapObj = { coNo: `CO ${num}` };
-                                                                    for (let i = 1; i <= (data.po?.length || 12); i++) mapObj[`po${i}`] = '-';
-                                                                    for (let i = 1; i <= (data.pso?.length || 2); i++) mapObj[`pso${i}`] = '-';
-                                                                    return mapObj;
-                                                                }));
+                                                        const mappingRows = sanitizeCoPoMapping(
+                                                            syllabusEditValue.coPoMapping,
+                                                            syllabusEditValue.outcomes,
+                                                            (data.po && data.po.length > 0) ? data.po.length : 11,
+                                                            (data.pso && data.pso.length > 0) ? data.pso.length : 3
+                                                        );
 
                                                         return (
                                                             <>
                                                                 {mappingRows.map((row, rIdx) => (
                                                                     <tr key={rIdx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                                                                         <td style={{ padding: '0.5rem 0.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{row.coNo}</td>
-                                                                        {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
+                                                                        {Array.from({ length: (data.po && data.po.length > 0) ? data.po.length : 11 }).map((_, i) => {
                                                                             const key = `po${i + 1}`;
                                                                             return (
                                                                                 <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
@@ -5657,7 +5967,7 @@ const DepartmentManager = () => {
                                                                                 </td>
                                                                             );
                                                                         })}
-                                                                        {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
+                                                                        {Array.from({ length: (data.pso && data.pso.length > 0) ? data.pso.length : 3 }).map((_, i) => {
                                                                             const key = `pso${i + 1}`;
                                                                             return (
                                                                                 <td key={i} style={{ padding: '0.3rem 0.2rem' }}>
@@ -5683,13 +5993,13 @@ const DepartmentManager = () => {
                                                                 {/* Calculated Average Row */}
                                                                 <tr style={{ background: 'rgba(255, 255, 255, 0.02)', fontWeight: 'bold', borderTop: '2px solid var(--glass-border)' }}>
                                                                     <td style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>Average</td>
-                                                                    {Array.from({ length: data.po?.length || 12 }).map((_, i) => {
+                                                                    {Array.from({ length: (data.po && data.po.length > 0) ? data.po.length : 11 }).map((_, i) => {
                                                                         const key = `po${i + 1}`;
                                                                         const values = mappingRows.map(row => row[key]).filter(v => v && v !== '-').map(Number);
                                                                         const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
                                                                         return <td key={i} style={{ padding: '0.5rem 0.5rem', color: 'var(--primary)' }}>{avg}</td>;
                                                                     })}
-                                                                    {Array.from({ length: data.pso?.length || 2 }).map((_, i) => {
+                                                                    {Array.from({ length: (data.pso && data.pso.length > 0) ? data.pso.length : 3 }).map((_, i) => {
                                                                         const key = `pso${i + 1}`;
                                                                         const values = mappingRows.map(row => row[key]).filter(v => v && v !== '-').map(Number);
                                                                         const avg = values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(1).replace('.0', '') : '-';
@@ -6400,17 +6710,16 @@ const DepartmentManager = () => {
                                     : dialogState.type === 'success'
                                         ? '#10b981'
                                         : '#818cf8',
-                            border: `1px solid ${
-                                dialogState.type === 'danger' ? 'rgba(239, 68, 68, 0.35)'
+                            border: `1px solid ${dialogState.type === 'danger' ? 'rgba(239, 68, 68, 0.35)'
                                 : dialogState.type === 'warning' ? 'rgba(245, 158, 11, 0.35)'
-                                : dialogState.type === 'success' ? 'rgba(16, 185, 129, 0.35)'
-                                : 'rgba(99, 102, 241, 0.35)'
-                            }`
+                                    : dialogState.type === 'success' ? 'rgba(16, 185, 129, 0.35)'
+                                        : 'rgba(99, 102, 241, 0.35)'
+                                }`
                         }}>
                             {dialogState.type === 'danger' ? <FaExclamationTriangle />
                                 : dialogState.type === 'warning' ? <FaExclamationTriangle />
-                                : dialogState.type === 'success' ? <FaCheckCircle />
-                                : <FaInfoCircle />}
+                                    : dialogState.type === 'success' ? <FaCheckCircle />
+                                        : <FaInfoCircle />}
                         </div>
 
                         <div>
