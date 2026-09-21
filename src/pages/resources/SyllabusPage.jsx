@@ -307,6 +307,22 @@ const renderCreditDistributionTable = (subjects) => {
 };
 
 const formatDeptHeaderTitle = (degreePrefix, deptName, regYear) => {
+    const rawDept = String(deptName || '').trim();
+    const rawDeptLower = rawDept.toLowerCase();
+    const reg = regYear || 'R-2026';
+
+    if (
+        rawDeptLower.includes('science and humanities') ||
+        rawDeptLower.includes('science & humanities') ||
+        rawDeptLower.includes('sciences and humanities') ||
+        (rawDeptLower.includes('science') && rawDeptLower.includes('humanities')) ||
+        rawDeptLower === 's&h' ||
+        rawDeptLower === 'sh' ||
+        rawDeptLower === 'science-and-humanities'
+    ) {
+        return `B.E. / B.Tech. Programmes (${reg})`;
+    }
+
     let cleanPrefix = (degreePrefix || '').trim();
     if (cleanPrefix) {
         const upper = cleanPrefix.toUpperCase().replace(/\./g, '');
@@ -335,7 +351,6 @@ const formatDeptHeaderTitle = (degreePrefix, deptName, regYear) => {
     };
 
     const formattedDept = formatTitleCase(deptName || '');
-    const reg = regYear || 'R-2023';
     return `${cleanPrefix ? `${cleanPrefix} ` : ''}${formattedDept} (${reg})`.trim();
 };
 
