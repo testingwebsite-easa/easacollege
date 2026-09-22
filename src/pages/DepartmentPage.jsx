@@ -2625,6 +2625,42 @@ const DepartmentPage = () => {
                                 </div>
                             )}
 
+                            {/* Course Outcomes (COs) */}
+                            {selectedSubjectModal.courseOutcomes && selectedSubjectModal.courseOutcomes.length > 0 && (
+                                <div style={{ marginBottom: '2rem' }}>
+                                    <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.75rem' }}>
+                                        Course Outcomes (COs) & Cognitive Domains:
+                                    </h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        {selectedSubjectModal.courseOutcomes.map((co, coIdx) => (
+                                            <div
+                                                key={coIdx}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    padding: '0.75rem 1rem',
+                                                    background: 'var(--bg-section)',
+                                                    borderRadius: '10px',
+                                                    border: '1px solid var(--glass-border)',
+                                                    gap: '1rem'
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    <span style={{ fontWeight: '900', color: 'var(--secondary)', fontSize: '0.85rem' }}>
+                                                        {co.coNo || `CO${coIdx + 1}`}
+                                                    </span>
+                                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                                                        {co.outcome || co.text}
+                                                    </span>
+                                                </div>
+                                                {getRbtBadge(co.rbtLevel || co.level)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Units Outline */}
                             <div style={{ marginBottom: '2rem' }}>
                                 <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '1rem' }}>
@@ -2661,42 +2697,6 @@ const DepartmentPage = () => {
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Course Outcomes (COs)*/}
-                            {selectedSubjectModal.courseOutcomes && selectedSubjectModal.courseOutcomes.length > 0 && (
-                                <div style={{ marginBottom: '2rem' }}>
-                                    <h4 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--secondary)', marginBottom: '0.75rem' }}>
-                                        Course Outcomes (COs)& Cognitive Domains:
-                                    </h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                        {selectedSubjectModal.courseOutcomes.map((co, coIdx) => (
-                                            <div
-                                                key={coIdx}
-                                                style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'space-between',
-                                                    padding: '0.75rem 1rem',
-                                                    background: 'var(--bg-section)',
-                                                    borderRadius: '10px',
-                                                    border: '1px solid var(--glass-border)',
-                                                    gap: '1rem'
-                                                }}
-                                            >
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                    <span style={{ fontWeight: '900', color: 'var(--secondary)', fontSize: '0.85rem' }}>
-                                                        {co.coNo || `CO${coIdx + 1}`}
-                                                    </span>
-                                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
-                                                        {co.outcome || co.text}
-                                                    </span>
-                                                </div>
-                                                {getRbtBadge(co.rbtLevel || co.level)}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Textbooks & References */}
                             {((selectedSubjectModal.textBooks && selectedSubjectModal.textBooks.length > 0) ||

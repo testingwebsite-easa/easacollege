@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaFilePdf, FaBook, FaBookOpen, FaFileWord, FaFileExcel, FaCloudUploadAlt, FaUpload, FaCheckCircle, FaSpinner, FaExclamationTriangle, FaListAlt, FaLock, FaInfoCircle, FaBullseye, FaGraduationCap, FaLightbulb, FaChartBar, FaCalendarAlt } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaFilePdf, FaBook, FaBookOpen, FaFileWord, FaFileExcel, FaCloudUploadAlt, FaUpload, FaCheckCircle, FaSpinner, FaExclamationTriangle, FaListAlt, FaLock, FaInfoCircle, FaBullseye, FaGraduationCap, FaLightbulb, FaChartBar, FaCalendarAlt, FaPrint } from 'react-icons/fa';
 import { departments as staticDepartments } from '../data/departmentsData';
 import { getDetailedSyllabusForSubject, SYLLABUS_DATA } from '../data/syllabusData';
 import { parseWordSyllabusClient } from '../utils/wordSyllabusParser';
@@ -974,7 +974,9 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         const tVal = Number(tValue) || 0;
         const pVal = Number(pValue) || 0;
         const contactHrs = lVal + tVal + pVal;
-        const defaultUnitPeriods = contactHrs > 0 ? contactHrs * 3 : 9;
+        // Subject Type Checks
+        const isInduction = (subj.title || '').toUpperCase().includes('INDUCTION') || (subj.code || '').toUpperCase().includes('INDUCTION');
+        const defaultUnitPeriods = isInduction ? 0 : (contactHrs > 0 ? contactHrs * 3 : 9);
 
         let calculatedTotalPeriods = 0;
         let hasCustomUnitPeriods = false;
@@ -988,8 +990,6 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         });
         const totalPeriods = (hasCustomUnitPeriods && calculatedTotalPeriods > 0) ? calculatedTotalPeriods : (defaultUnitPeriods * (units.length || 5));
 
-        // Subject Type Checks
-        const isInduction = (subj.title || '').toUpperCase().includes('INDUCTION') || (subj.code || '').toUpperCase().includes('INDUCTION');
         const categoryUpper = (subj.category || '').toUpperCase();
         const isPractical = categoryUpper.includes('PRACTICAL') || categoryUpper.includes('LAB');
         const isTheory = categoryUpper.includes('THEORY');
@@ -1087,38 +1087,6 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 </div>
                 ` : ''}
 
-                <!-- Units or Exercises -->
-                <div style="margin-top: 4px; margin-bottom: 4px;">
-                    ${isPractical && !isTheory ? `
-                        ${renderExperimentsTableHTML(experiments, "List of Exercises")}
-                    ` : units.map((unit, uIdx) => {
-            const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][uIdx] || (uIdx + 1)}`;
-            const unitTitle = unit.title ? unit.title.toUpperCase() : '';
-            const thisUnitPeriods = (unit.periods !== undefined && unit.periods !== null && String(unit.periods).trim() !== '') ? unit.periods : defaultUnitPeriods;
-            const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t && t.trim() !== '').join(', ') : (unit.topics || '');
-
-            return topicsStr ? `
-                                <div style="margin-bottom: 5px; text-align: justify; font-size: 9pt; line-height: 1.35; page-break-inside: avoid;">
-                                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
-                                        <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
-                                        <span>${thisUnitPeriods} Periods</span>
-                                    </div>
-                                    <div style="font-size: 9pt; line-height: 1.35; text-align: justify;">
-                                        ${topicsStr}
-                                    </div>
-                                </div>
-                            ` : '';
-        }).join('')}
-                    
-                    ${isTheoryCumPractical && experiments.length > 0 ? `
-                        ${renderExperimentsTableHTML(experiments, "List of Exercises / Experiments")}
-                    ` : ''}
-
-                    <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 9pt; margin-top: 4px; margin-bottom: 4px; border-top: 1px solid #ddd; padding-top: 2px;">
-                        ${isInduction ? 'TOTAL: 2 WEEKS' : `TOTAL: ${totalPeriods} PERIODS`}
-                    </div>
-                </div>
-
                 ${outcomes.some(co => (co && co.outcome && co.outcome.trim()) || (typeof co === 'string' && co.trim())) ? `
                 <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 4px; font-size: 8pt; border: 1.5px solid #000; page-break-inside: avoid;">
                     <thead>
@@ -1130,7 +1098,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                         </tr>
                         <tr style="font-family: Arial, sans-serif; font-size: 7.5pt; font-weight: bold; text-align: center;">
                             <th style="width: 12%; border: 1.5px solid #000; padding: 2px;">CO. No</th>
-                            <th style="width: 73%; border: 1.5px solid #000; padding: 2px; text-align: left; padding-left: 5px;">Course Outcome</th>
+                            <th style="width: 73%; border: 1.5px solid #000; padding: 2px; text-align: center;">Course Outcomes</th>
                             <th style="width: 15%; border: 1.5px solid #000; padding: 2px;">RBT Level</th>
                         </tr>
                     </thead>
@@ -1151,6 +1119,38 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                     </tbody>
                 </table>
                 ` : ''}
+
+                <!-- Units or Exercises -->
+                <div style="margin-top: 4px; margin-bottom: 4px;">
+                    ${isPractical && !isTheory ? `
+                        ${renderExperimentsTableHTML(experiments, "List of Exercises")}
+                    ` : units.map((unit, uIdx) => {
+            const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][uIdx] || (uIdx + 1)}`;
+            const unitTitle = unit.title ? unit.title.toUpperCase() : '';
+            const thisUnitPeriods = (unit.periods !== undefined && unit.periods !== null && String(unit.periods).trim() !== '') ? unit.periods : defaultUnitPeriods;
+            const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t && t.trim() !== '').join(', ') : (unit.topics || '');
+
+            return topicsStr ? `
+                                <div style="margin-bottom: 5px; text-align: justify; font-size: 9pt; line-height: 1.35; page-break-inside: avoid;">
+                                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
+                                        <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
+                                        ${isInduction ? '' : `<span>${thisUnitPeriods} Periods</span>`}
+                                    </div>
+                                    <div style="font-size: 9pt; line-height: 1.35; text-align: justify;">
+                                        ${topicsStr}
+                                    </div>
+                                </div>
+                            ` : '';
+        }).join('')}
+                    
+                    ${isTheoryCumPractical && experiments.length > 0 ? `
+                        ${renderExperimentsTableHTML(experiments, "List of Exercises / Experiments")}
+                    ` : ''}
+
+                    <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 9pt; margin-top: 4px; margin-bottom: 4px; border-top: 1px solid #ddd; padding-top: 2px;">
+                        ${isInduction ? 'TOTAL: 2 WEEKS' : `TOTAL: ${totalPeriods} PERIODS`}
+                    </div>
+                </div>
             </div>
 
             <div class="pdf-footer pdf-footer-inner">
@@ -2364,6 +2364,236 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     const printWindow = window.open('', '_blank');
     printWindow.document.write(htmlContent);
     printWindow.document.close();
+};
+
+const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) => {
+    if (!subj) return;
+
+    const deptName = (subj.offeringDept && subj.offeringDept !== 'Other Departments') ? subj.offeringDept : (deptData?.name || "Engineering Department");
+    let regYear = regYearInput || deptData?.regulation;
+    if (!regYear && subj.code) {
+        const match = subj.code.match(/\d{2}/);
+        if (match) {
+            regYear = `R-20${match[0]}`;
+        }
+    }
+    if (!regYear) regYear = "R-2023";
+
+    const pageTracker = { current: 0 };
+
+    const isSH = (
+        (deptData?.slug || '').toLowerCase().includes('science') && (deptData?.slug || '').toLowerCase().includes('humanities')
+    ) || (
+        (deptData?.slug || '').toLowerCase() === 'sh' || (deptData?.slug || '').toLowerCase() === 's-and-h'
+    ) || (
+        (deptName || '').toLowerCase().includes('science') && (deptName || '').toLowerCase().includes('humanities')
+    ) || (
+        (deptName || '').toLowerCase().includes('science & humanities')
+    );
+
+    let degreePrefix = "B.E.";
+    if (isSH) {
+        degreePrefix = "";
+    } else if (academicLevel === "PG") {
+        degreePrefix = deptData?.slug === 'master-of-business-administration' ? 'M.B.A.' : 'M.E.';
+    } else {
+        const techSlugs = [
+            'artificial-intelligence-and-data-science',
+            'information-technology',
+            'artificial-intelligence-and-machine-learning',
+            'computer-science-and-engineering-cyber-security'
+        ];
+        degreePrefix = techSlugs.includes(deptData?.slug || '') ? 'B.Tech.' : 'B.E.';
+    }
+
+    const bosMeetingDate = (deptData && deptData.bosMeetingDate) ? deptData.bosMeetingDate : "04.09.2023";
+    const acMeetingDate = (deptData && deptData.acMeetingDate) ? deptData.acMeetingDate : "23.09.2023";
+
+    const detailedSyllabiHTML = getDetailedSyllabiHTML([subj], regYear, pageTracker, bosMeetingDate, acMeetingDate, deptData?.po, deptData?.pso, degreePrefix, deptName);
+
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Syllabus - ${(subj.code || '').toUpperCase()}: ${subj.title || ''}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
+                font-size: 10pt;
+                line-height: 1.4;
+                color: #000;
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            .page {
+                position: relative;
+                box-sizing: border-box;
+                page-break-after: always;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                min-height: 280mm;
+            }
+            .page:last-child {
+                page-break-after: avoid;
+            }
+            .pdf-header {
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                border-bottom: 1px solid #000;
+                padding-bottom: 3px;
+                margin-bottom: 6px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: bold;
+            }
+            .pdf-footer {
+                font-family: Arial, sans-serif;
+                font-size: 7.5pt;
+                border-top: 1px solid #000;
+                padding-top: 3px;
+                margin-top: 4px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .footer-center {
+                font-weight: bold;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            @media screen {
+                body {
+                    background: #f3f4f6;
+                    padding: 40px 0;
+                    margin: 0;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .page {
+                    background: #fff;
+                    width: 210mm;
+                    min-height: 297mm;
+                    margin: 20px auto;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                    padding: 12mm 15mm;
+                    box-sizing: border-box;
+                    position: relative;
+                }
+                .preview-bar {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 56px;
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(8px);
+                    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 0 24px;
+                    z-index: 9999;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                }
+                .preview-title {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #1f2937;
+                }
+                .preview-btn {
+                    padding: 8px 16px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    border: none;
+                    outline: none;
+                }
+                .btn-print {
+                    background: #2563eb;
+                    color: #fff;
+                    margin-right: 8px;
+                }
+                .btn-print:hover {
+                    background: #1d4ed8;
+                }
+                .btn-close {
+                    background: #f3f4f6;
+                    color: #4b5563;
+                    border: 1px solid #d1d5db;
+                }
+                .btn-close:hover {
+                    background: #e5e7eb;
+                    color: #1f2937;
+                }
+            }
+            @media print {
+                @page {
+                    size: A4 portrait;
+                    margin: 8mm 12mm 8mm 12mm;
+                }
+                body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                    background: #fff !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+                .preview-bar {
+                    display: none !important;
+                }
+                .page {
+                    width: 100% !important;
+                    min-height: 280mm !important;
+                    padding: 0 !important;
+                    box-shadow: none !important;
+                    margin: 0 !important;
+                    border: none !important;
+                    page-break-after: always;
+                }
+                .page:last-child {
+                    page-break-after: avoid;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="preview-bar">
+            <div class="preview-title">Syllabus Preview - ${(subj.code || '').toUpperCase()}: ${subj.title || ''}</div>
+            <div>
+                <button class="preview-btn btn-print" onclick="window.print()">Print / Save PDF</button>
+                <button class="preview-btn btn-close" onclick="window.close()">Close Preview</button>
+            </div>
+        </div>
+        ${detailedSyllabiHTML}
+    </body>
+    </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        printWindow.focus();
+    } else {
+        alert("Please allow popups for this site to preview and print the syllabus PDF.");
+    }
 };
 
 const STANDARD_CATEGORY_NAMES = [
@@ -4353,6 +4583,30 @@ const DepartmentManager = () => {
                                                                                                         {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
                                                                                                     </button>
                                                                                                     <button
+                                                                                                        onClick={() => {
+                                                                                                            const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
+                                                                                                            exportSubjectSyllabusPDF(subj, {
+                                                                                                                ...(data || {}),
+                                                                                                                name: activeDeptObj ? activeDeptObj.name : (data?.name || 'Engineering Department'),
+                                                                                                                slug: selectedDept
+                                                                                                            }, academicLevel);
+                                                                                                        }}
+                                                                                                        className="btn"
+                                                                                                        style={{
+                                                                                                            padding: '0.3rem 0.45rem',
+                                                                                                            background: 'rgba(16, 185, 129, 0.15)',
+                                                                                                            border: '1px solid rgba(16, 185, 129, 0.4)',
+                                                                                                            color: '#6ee7b7',
+                                                                                                            display: 'inline-flex',
+                                                                                                            alignItems: 'center',
+                                                                                                            justifyContent: 'center',
+                                                                                                            cursor: 'pointer'
+                                                                                                        }}
+                                                                                                        title="Print Subject Syllabus PDF"
+                                                                                                    >
+                                                                                                        <FaPrint size={11} />
+                                                                                                    </button>
+                                                                                                    <button
                                                                                                         onClick={() => handleStartEditSubject(subj.originalIndex)}
                                                                                                         className="btn"
                                                                                                         style={{
@@ -4488,6 +4742,30 @@ const DepartmentManager = () => {
                                                                                                             title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
                                                                                                         >
                                                                                                             {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
+                                                                                                        </button>
+                                                                                                        <button
+                                                                                                            onClick={() => {
+                                                                                                            const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
+                                                                                                            exportSubjectSyllabusPDF(subj, {
+                                                                                                                ...(data || {}),
+                                                                                                                name: activeDeptObj ? activeDeptObj.name : (data?.name || 'Engineering Department'),
+                                                                                                                slug: selectedDept
+                                                                                                            }, academicLevel);
+                                                                                                        }}
+                                                                                                            className="btn"
+                                                                                                            style={{
+                                                                                                                padding: '0.3rem 0.45rem',
+                                                                                                                background: 'rgba(16, 185, 129, 0.15)',
+                                                                                                                border: '1px solid rgba(16, 185, 129, 0.4)',
+                                                                                                                color: '#6ee7b7',
+                                                                                                                display: 'inline-flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                justifyContent: 'center',
+                                                                                                                cursor: 'pointer'
+                                                                                                            }}
+                                                                                                            title="Print Subject Syllabus PDF"
+                                                                                                        >
+                                                                                                            <FaPrint size={11} />
                                                                                                         </button>
                                                                                                         <button
                                                                                                             onClick={() => handleStartEditSubject(subj.originalIndex)}
@@ -4630,6 +4908,30 @@ const DepartmentManager = () => {
                                                                                                             title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
                                                                                                         >
                                                                                                             {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
+                                                                                                        </button>
+                                                                                                        <button
+                                                                                                            onClick={() => {
+                                                                                                            const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
+                                                                                                            exportSubjectSyllabusPDF(subj, {
+                                                                                                                ...(data || {}),
+                                                                                                                name: activeDeptObj ? activeDeptObj.name : (data?.name || 'Engineering Department'),
+                                                                                                                slug: selectedDept
+                                                                                                            }, academicLevel);
+                                                                                                        }}
+                                                                                                            className="btn"
+                                                                                                            style={{
+                                                                                                                padding: '0.3rem 0.45rem',
+                                                                                                                background: 'rgba(16, 185, 129, 0.15)',
+                                                                                                                border: '1px solid rgba(16, 185, 129, 0.4)',
+                                                                                                                color: '#6ee7b7',
+                                                                                                                display: 'inline-flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                justifyContent: 'center',
+                                                                                                                cursor: 'pointer'
+                                                                                                            }}
+                                                                                                            title="Print Subject Syllabus PDF"
+                                                                                                        >
+                                                                                                            <FaPrint size={11} />
                                                                                                         </button>
                                                                                                         <button
                                                                                                             onClick={() => handleStartEditSubject(subj.originalIndex)}
@@ -4974,7 +5276,7 @@ const DepartmentManager = () => {
                             boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
                             color: 'white'
                         }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                                 <div>
                                     <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         Manage Syllabus: {syllabusEditValue.code} - {syllabusEditValue.title}

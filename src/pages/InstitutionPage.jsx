@@ -57,7 +57,7 @@ function InstitutionPage() {
     }, []);
 
     const keyStats = [
-        { label: "Established Legacy", value: "2008", unit: "EST.", icon: <FaCalendarAlt />, desc: "16+ Years of Technical Excellence" },
+        { label: "Established Legacy", value: "2008", unit: "EST.", icon: <FaCalendarAlt />, desc: "19+ Years of Technical Excellence" },
         { label: "Smart Green Campus", value: "25+", unit: "ACRES", icon: <FaLeaf />, desc: "Eco-friendly, modern learning ecosystem" },
         { label: "Expert Faculty", value: "150+", unit: "MENTORS", icon: <FaUsers />, desc: "Ph.D. holders & seasoned industry experts" },
         { label: "Placement Track Record", value: "96%", unit: "SUCCESS", icon: <FaChartLine />, desc: "Placements with top global MNCs" }
@@ -826,7 +826,7 @@ function InstitutionPage() {
                             viewport={{ once: true }}
                             style={{ fontSize: '0.85rem', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--secondary)', display: 'block', marginBottom: '1rem' }}
                         >
-                            Journey of 16+ Years
+                            Journey of 19+ Years
                         </motion.span>
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}

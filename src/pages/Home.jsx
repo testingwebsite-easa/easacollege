@@ -3,12 +3,16 @@ import SEO from '../components/SEO'
 import { useLocation } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { HeroCarousel } from '../components/HeroCarousel'
+import { HeroQuickStats } from '../components/HeroQuickStats'
+import { LuxuryMarquee } from '../components/LuxuryMarquee'
 import AboutSection from '../components/AboutSection'
+import { AccreditationsBar } from '../components/AccreditationsBar'
 import Footer from '../components/Footer'
 import useScrollAnimation from '../hooks/useScrollAnimation'
 
 const ProgramsSection = lazy(() => import('../components/ProgramsSection'))
 const PlacementSection = lazy(() => import('../components/PlacementSection'))
+const LuxuryExperienceGallery = lazy(() => import('../components/LuxuryExperienceGallery'))
 const GalleryCarousel = lazy(() => import('../components/GalleryCarousel'))
 const NewsEventsSection = lazy(() => import('../components/NewsEventsSection'))
 const FacultyStats = lazy(() => import('../components/FacultyStats'))
@@ -37,11 +41,15 @@ function Home() {
             />
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
             <HeroCarousel onApplyClick={() => setShowAdmissionForm(true)} />
+            <HeroQuickStats />
+            <LuxuryMarquee />
             <AboutSection />
+            <AccreditationsBar />
             
             <Suspense fallback={<div style={{ minHeight: '100px' }} />}>
                 <ProgramsSection />
                 <PlacementSection />
+                <LuxuryExperienceGallery />
                 <GalleryCarousel />
                 <NewsEventsSection />
                 <FacultyStats />

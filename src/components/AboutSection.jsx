@@ -17,7 +17,7 @@ const AboutSection = () => {
                 { icon: <FaGraduationCap />, title: "Autonomous Curriculum", desc: "Agile, industry-integrated learning modules." },
                 { icon: <FaUniversity />, title: "25-Acre Smart Campus", desc: "High-tech research facilities and smart classrooms." }
             ],
-            badge: "ESTD. 2008 • 16+ YRS",
+            badge: "ESTD. 2008 • 19+ YRS",
             stat: "96% Placement Success"
         },
         {
