@@ -349,6 +349,29 @@ export const getDetailedSyllabusForSubject = (courseCode, courseTitle) => {
         ];
     }
 
+    if (code.toUpperCase().includes("INDUCTION") || (title && title.toLowerCase().includes("induction")) || code.toUpperCase() === "U26MC101") {
+        return [
+            {
+                unit: "UNIT I",
+                title: "LIST OF ACTIVITIES",
+                topics: [
+                    "Journey and Milestones of ECET,",
+                    "Guidelines for Code of Conduct and Examination Procedures in the Autonomous System ,",
+                    "Expert Lectures, Interaction Sessions, and Motivational Talks by Distinguished Personalities, Alumni, Employers, and Industry Professionals,",
+                    "Placement and Higher Studies,",
+                    "Campus Orientation and Department Introduction: Interaction with HoDs, Senior Students, and Department Associations,",
+                    "Universal Human Values Modules: Understanding Aspirations and Concerns, Developing Self-Management Skills, Building Relationships, and Connecting with Social and Natural Environments,",
+                    "Mental Health, Wellness, and Self-Care Orientation,",
+                    "Life Skills for Engineers,",
+                    "Orientation on Various Chapters, Cells, Clubs, and Event Activities,",
+                    "Orientation Programme on POSH Awareness, Drug-Free Campus Initiatives , and Anti-Ragging Regulations,",
+                    "Physical Wellness Programme: Sports, Games, and Yoga Activities,",
+                    "Community Outreach Visits and Local Area Exploration"
+                ]
+            }
+        ];
+    }
+
     // Generic fallback for any other course
     return [
         {

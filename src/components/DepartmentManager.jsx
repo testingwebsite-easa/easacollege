@@ -1026,7 +1026,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         };
 
         const pageNum1 = ++pageTracker.current;
-        const pageNum2 = ++pageTracker.current;
+        const pageNum2 = isInduction ? null : ++pageTracker.current;
 
         return `
         <!-- Syllabus Subject Page 1: ${(subj.code || '').toUpperCase()} -->
@@ -1038,6 +1038,30 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
             <div class="syllabus-page-content" style="flex: 1 1 auto;">
                 <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 6px; font-size: 9pt; border: 1.5px solid #000; page-break-inside: avoid;">
+                    ${isInduction ? `
+                    <tr>
+                        <td style="width: 22%; border: 1.5px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt;">
+                            ${(subj.code || 'U26MC101').toUpperCase()}
+                        </td>
+                        <td style="width: 58%; border: 1.5px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle;">
+                            <div style="font-weight: bold; font-size: 9.5pt; text-transform: uppercase;">${subj.title || 'INDUCTION PROGRAMME'}</div>
+                            <div style="font-size: 8.5pt; font-weight: normal; margin-top: 2px;">${subtitleStr ? subtitleStr.replace(/^\s*[-•]\s*/, '') : '(COMMON TO ALL B.E./B.TECH.. PROGRAMMES)'}</div>
+                        </td>
+                        <td style="width: 20%; border: 1.5px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; font-family: Arial, sans-serif;">
+                            <div style="font-size: 8.5pt; font-weight: bold; text-transform: uppercase; margin-bottom: 2px;">Duration</div>
+                            <div style="font-weight: bold; font-size: 9.5pt;">2 WEEKS</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1.5px solid #000; padding: 4px 6px; font-weight: bold; font-size: 9pt; text-align: center;">Category</td>
+                        <td style="border: 1.5px solid #000; padding: 4px 6px; font-size: 9pt;">${categoryName || 'Mandatory Course (MC)'}</td>
+                        <td style="border: 1.5px solid #000; padding: 4px 6px;"></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1.5px solid #000; padding: 4px 6px; font-weight: bold; font-size: 9pt;">Pre requisites</td>
+                        <td colspan="2" style="border: 1.5px solid #000; padding: 4px 6px; font-size: 9pt;">${prerequisites || 'Nil'}</td>
+                    </tr>
+                    ` : `
                     <tr>
                         <td rowspan="2" style="width: 18%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt;">
                             ${(subj.code || '').toUpperCase()}
@@ -1046,25 +1070,17 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                             ${subj.title || ''}
                             ${subtitleStr}
                         </td>
-                        ${isInduction ? `
-                        <td rowspan="2" colspan="4" style="width: 24%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt; font-family: Arial, sans-serif;">
-                            2 WEEKS
-                        </td>
-                        ` : `
                         <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">L</td>
                         <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">T</td>
                         <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">P</td>
                         <td style="width: 6%; border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">C</td>
-                        `}
                     </tr>
-                    ${!isInduction ? `
                     <tr>
                         <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${lValue}</td>
                         <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${tValue}</td>
                         <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${pValue}</td>
                         <td style="border: 1.5px solid #000; padding: 2px; text-align: center; font-weight: bold; font-size: 9pt;">${cValue}</td>
                     </tr>
-                    ` : ''}
                     ${subj.isOpenElective ? '' : `
                     <tr>
                         <td style="border: 1.5px solid #000; padding: 3px 5px; font-weight: bold; font-size: 9pt;">Category</td>
@@ -1075,11 +1091,12 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                         <td style="border: 1.5px solid #000; padding: 3px 5px; font-weight: bold; font-size: 9pt;">Pre requisites</td>
                         <td colspan="5" style="border: 1.5px solid #000; padding: 3px 5px; text-align: justify; font-size: 9pt;">${prerequisites}</td>
                     </tr>
+                    `}
                 </table>
 
                 ${objectives.length > 0 ? `
                 <div class="section-container" style="margin-bottom: 6px; page-break-inside: avoid;">
-                    <h3 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Course Objectives</h3>
+                    <h3 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">COURSE OBJECTIVES</h3>
                     <p style="font-size: 9pt; margin: 0 0 2px 0;">The course is intended to make the students to</p>
                     <ol style="margin: 0; padding-left: 18px;">
                         ${objectives.map(obj => (obj && obj.trim()) ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;">${obj}</li>` : '').join('')}
@@ -1087,7 +1104,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 </div>
                 ` : ''}
 
-                ${outcomes.some(co => (co && co.outcome && co.outcome.trim()) || (typeof co === 'string' && co.trim())) ? `
+                ${(!isInduction && outcomes.some(co => (co && co.outcome && co.outcome.trim()) || (typeof co === 'string' && co.trim()))) ? `
                 <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 4px; font-size: 8pt; border: 1.5px solid #000; page-break-inside: avoid;">
                     <thead>
                         <tr>
@@ -1120,6 +1137,32 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 </table>
                 ` : ''}
 
+                ${isInduction ? `
+                <div style="margin-top: 6px; margin-bottom: 6px;">
+                    ${units.map((unit, uIdx) => {
+                        const topicsArr = Array.isArray(unit.topics) 
+                            ? unit.topics.filter(t => t && t.trim() !== '')
+                            : (typeof unit.topics === 'string' ? unit.topics.split('\n').filter(t => t.trim() !== '') : []);
+                        const unitHeader = unit.title ? `${unit.unitNo || 'UNIT I'}: ${unit.title.toUpperCase()}` : 'UNIT I: LIST OF ACTIVITIES:';
+                        return `
+                        <div style="margin-bottom: 6px; text-align: justify; font-size: 9pt; line-height: 1.4; page-break-inside: avoid;">
+                            <div style="font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 4px;">
+                                ${unitHeader.endsWith(':') ? unitHeader : unitHeader + ':'}
+                            </div>
+                            <ol style="margin: 0; padding-left: 20px; line-height: 1.45;">
+                                ${topicsArr.map(topic => {
+                                    const cleanedTopic = topic.replace(/^\\d+[\\.\\)]\\s*/, '');
+                                    return `<li style="margin-bottom: 3px; text-align: justify; font-size: 9pt;">${cleanedTopic}</li>`;
+                                }).join('')}
+                            </ol>
+                        </div>
+                        `;
+                    }).join('')}
+                    <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 9pt; margin-top: 8px; margin-bottom: 4px; border-top: 1px solid #ddd; padding-top: 4px;">
+                        TOTAL: 2 WEEKS
+                    </div>
+                </div>
+                ` : `
                 <!-- Units or Exercises -->
                 <div style="margin-top: 4px; margin-bottom: 4px;">
                     ${isPractical && !isTheory ? `
@@ -1134,7 +1177,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                                 <div style="margin-bottom: 5px; text-align: justify; font-size: 9pt; line-height: 1.35; page-break-inside: avoid;">
                                     <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 2px;">
                                         <span>${unitNo.toUpperCase()}: ${unitTitle}</span>
-                                        ${isInduction ? '' : `<span>${thisUnitPeriods} Periods</span>`}
+                                        <span>${thisUnitPeriods} Periods</span>
                                     </div>
                                     <div style="font-size: 9pt; line-height: 1.35; text-align: justify;">
                                         ${topicsStr}
@@ -1148,9 +1191,10 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                     ` : ''}
 
                     <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 9pt; margin-top: 4px; margin-bottom: 4px; border-top: 1px solid #ddd; padding-top: 2px;">
-                        ${isInduction ? 'TOTAL: 2 WEEKS' : `TOTAL: ${totalPeriods} PERIODS`}
+                        TOTAL: ${totalPeriods} PERIODS
                     </div>
                 </div>
+                `}
             </div>
 
             <div class="pdf-footer pdf-footer-inner">
@@ -1160,6 +1204,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             </div>
         </div>
 
+        ${isInduction ? '' : `
         <!-- Syllabus Subject Page 2: ${(subj.code || '').toUpperCase()} -->
         <div class="page syllabus-page">
             <div class="pdf-header pdf-header-inner">
@@ -1255,7 +1300,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                     return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
                 }).join('')
             }
-                        </tr>
+                            </tr>
                     </tbody>
                 </table>
                 <div style="display: flex; justify-content: space-between; font-size: 7pt; margin-top: 1px; margin-bottom: 2px;">
@@ -1274,6 +1319,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 <div class="footer-right">Approved in Academic Council Meeting on ${acMeetingDate}</div>
             </div>
         </div>
+        `}
         `;
     }).join('');
 };
@@ -2633,6 +2679,15 @@ const getDefaultCategoryName = (catType) => {
 const getDefaultObjectives = (code, title) => {
     const codeUpper = (code || '').toUpperCase();
     const titleLower = (title || '').toLowerCase();
+    if (codeUpper.includes('INDUCTION') || titleLower.includes('induction') || codeUpper === 'U26MC101') {
+        return [
+            "To adapt to the new collegiate environment and transition smoothly into engineering education.",
+            "To understand institutional ethos, code of conduct, autonomous examination procedures and regulations.",
+            "To build healthy relationships and self-management skills through universal human values.",
+            "To emphasize mental health, physical wellness, yoga, sports and emotional well-being.",
+            "To provide exposure to institutional clubs, professional chapters, and community outreach exploration."
+        ];
+    }
     if (codeUpper.startsWith('HS') || titleLower.includes('english')) {
         return [
             "Improve the communicative competence of learners",
