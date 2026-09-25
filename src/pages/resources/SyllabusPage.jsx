@@ -564,10 +564,10 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
             <table class="curriculum-table">
                 <thead>
                     <tr>
-                        <th rowSpan="2" style="width: 50%; font-size: 8pt; font-family: Arial, sans-serif; text-align: left; vertical-align: middle;">Subject Area</th>
-                        <th colSpan="8" style="font-size: 8pt; font-family: Arial, sans-serif; text-align: center; padding: 3px;">Credits per Semester</th>
-                        <th rowSpan="2" style="width: 14%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits Total</th>
-                        <th rowSpan="2" style="width: 8%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">%</th>
+                        <th rowSpan="2" style="width: 50%; font-size: 9pt; font-family: Arial, sans-serif; text-align: left; vertical-align: middle;">Subject Area</th>
+                        <th colSpan="8" style="font-size: 9pt; font-family: Arial, sans-serif; text-align: center; padding: 3px;">Credits per Semester</th>
+                        <th rowSpan="2" style="width: 14%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credits Total</th>
+                        <th rowSpan="2" style="width: 8%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">%</th>
                     </tr>
                     <tr>
                         ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'].map(num => `<th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 3px; text-align: center;">${num}</th>`).join('')}
@@ -683,8 +683,8 @@ const renderAssessmentComponentsHTML = (subj) => {
     if (catUpper.includes('MC') || catUpper.includes('MANDATORY') || titleUpper.includes('MANDATORY')) {
         return `
         <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">MANDATORY COURSE</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">MANDATORY COURSE</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
                         <th colspan="2" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 50%;">Continuous Internal Assessment (100)</th>
@@ -713,8 +713,8 @@ const renderAssessmentComponentsHTML = (subj) => {
     if (titleUpper.includes('MINI PROJECT') || catUpper.includes('MINI PROJECT')) {
         return `
         <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Mini Project*</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Mini Project*</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
                         <th colspan="4" style="border: 1.5px solid #000; padding: 2.5px 3px;">Continuous assessment (100 Marks)</th>
@@ -738,7 +738,7 @@ const renderAssessmentComponentsHTML = (subj) => {
                     </tr>
                 </tbody>
             </table>
-            <div style="font-size: 7pt; font-style: italic; margin-top: 2px; margin-bottom: 2px; text-align: left;">*Internal mode only</div>
+            <div style="font-size: 7.5pt; font-style: italic; margin-top: 2px; margin-bottom: 2px; text-align: left;">*Internal mode only</div>
         </div>
         `;
     }
@@ -747,8 +747,8 @@ const renderAssessmentComponentsHTML = (subj) => {
     if (titleUpper.includes('PROJECT WORK') || titleUpper.includes('INTERNSHIP CUM PROJECT') || titleUpper.includes('FINAL YEAR PROJECT') || (titleUpper.includes('PROJECT') && !titleUpper.includes('MINI'))) {
         return `
         <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Project Work / Internship cum project work</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Project Work / Internship cum project work</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
                         <th colspan="3" style="border: 1.5px solid #000; padding: 2.5px 3px; width: 45%;">Continuous Assessment (60 Marks)</th>
@@ -788,8 +788,8 @@ const renderAssessmentComponentsHTML = (subj) => {
     if (titleUpper.includes('INTERNSHIP') || catUpper.includes('INTERNSHIP')) {
         return `
         <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Internship</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">Internship</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
                         <th colspan="4" style="border: 1.5px solid #000; padding: 2.5px 3px;">Final assessment (100 Marks)</th>
@@ -821,9 +821,9 @@ const renderAssessmentComponentsHTML = (subj) => {
     if ((lVal > 0 && pVal > 0) || catUpper.includes('THEORY CUM PRACTICAL') || catUpper.includes('THEORY WITH PRACTICAL')) {
         return `
         <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY WITH PRACTICAL COURSES</div>
-            <div style="text-align: center; font-size: 7.5pt; font-weight: bold; margin-bottom: 4px; font-family: Arial, sans-serif;">L T P C : ${lVal} ${tVal} ${pVal} ${cVal}</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7pt; text-align: center;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY WITH PRACTICAL COURSES</div>
+            <div style="text-align: center; font-size: 8.5pt; font-weight: bold; margin-bottom: 4px; font-family: Arial, sans-serif;">L T P C : ${lVal} ${tVal} ${pVal} ${cVal}</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
                         <th style="border: 1.5px solid #000; padding: 2px 3px; width: 22%;">Assessment Components</th>
@@ -871,7 +871,7 @@ const renderAssessmentComponentsHTML = (subj) => {
                         <td style="border: 1.5px solid #000; padding: 2px 3px;">9</td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 6.5pt; line-height: 1.2;">
+                        <td colspan="3" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7pt; line-height: 1.2;">
                             Attendance (80-84%–1, 85-88%–2, 89-92%–3, 93-96%–4, 97-100%–5 Marks)
                         </td>
                         <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
@@ -894,9 +894,9 @@ const renderAssessmentComponentsHTML = (subj) => {
     if ((lVal === 0 && pVal > 0) || catUpper.includes('PRACTICAL') || catUpper.includes('LAB')) {
         return `
         <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
-            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">PRACTICAL COURSES</div>
-            <div style="text-align: center; font-size: 7.5pt; font-weight: bold; margin-bottom: 4px; font-family: Arial, sans-serif;">L T P C : ${lVal} ${tVal} ${pVal} ${cVal}</div>
-            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7pt; text-align: center;">
+            <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 2px; font-family: Arial, sans-serif; text-transform: uppercase;">PRACTICAL COURSES</div>
+            <div style="text-align: center; font-size: 8.5pt; font-weight: bold; margin-bottom: 4px; font-family: Arial, sans-serif;">L T P C : ${lVal} ${tVal} ${pVal} ${cVal}</div>
+            <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; text-align: center;">
                 <thead>
                     <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
                         <th style="border: 1.5px solid #000; padding: 2px 3px; width: 40%;">Assessment Components</th>
@@ -921,7 +921,7 @@ const renderAssessmentComponentsHTML = (subj) => {
                         <td style="border: 1.5px solid #000; padding: 2px 3px;">15</td>
                     </tr>
                     <tr>
-                        <td colspan="1" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 6.5pt; line-height: 1.2;">
+                        <td colspan="1" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7pt; line-height: 1.2;">
                             Attendance (80-84%–1, 85-88%–2, 89-92%–3, 93-96%–4, 97-100%–5 Marks)
                         </td>
                         <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
@@ -942,8 +942,8 @@ const renderAssessmentComponentsHTML = (subj) => {
     // 7. THEORY COURSES (Default)
     return `
     <div style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
-        <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 8.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY COURSES</div>
-        <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 7.5pt; text-align: center;">
+        <div style="font-weight: bold; text-align: center; text-decoration: underline; font-size: 9.5pt; margin-bottom: 4px; font-family: Arial, sans-serif; text-transform: uppercase;">THEORY COURSES</div>
+        <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; text-align: center;">
             <thead>
                 <tr style="font-weight: bold; background-color: #f2f2f2; font-family: Arial, sans-serif;">
                     <th style="border: 1.5px solid #000; padding: 2px 3px; width: 22%;">Assessment Components</th>
@@ -961,7 +961,7 @@ const renderAssessmentComponentsHTML = (subj) => {
                     <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
                     <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
                     <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
-                    <td style="border: 1.5px solid #000; padding: 2px 3px;">12.25</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">12.5</td>
                     <td rowspan="2" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">25</td>
                     <td rowspan="4" style="border: 1.5px solid #000; padding: 2px 3px; vertical-align: middle; font-weight: bold;">60</td>
                 </tr>
@@ -970,17 +970,17 @@ const renderAssessmentComponentsHTML = (subj) => {
                     <td style="border: 1.5px solid #000; padding: 2px 3px;">3 hours</td>
                     <td style="border: 1.5px solid #000; padding: 2px 3px;">2.5 units</td>
                     <td style="border: 1.5px solid #000; padding: 2px 3px;">100</td>
-                    <td style="border: 1.5px solid #000; padding: 2px 3px;">12.25</td>
+                    <td style="border: 1.5px solid #000; padding: 2px 3px;">12.5</td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7pt; line-height: 1.2;">
+                    <td colspan="4" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
                         Objective Test/Online Quiz, Assignment / Case study/ Seminar/Tutorial, Role Play, Poster Presentation, Group Discussions, Oral Presentation, Mini Project etc., (5 marks during CIAT I and 5 marks during CIAT II)
                     </td>
                     <td style="border: 1.5px solid #000; padding: 2px 3px;">10</td>
                     <td style="border: 1.5px solid #000; padding: 2px 3px; font-weight: bold;">10</td>
                 </tr>
                 <tr>
-                    <td colspan="4" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7pt; line-height: 1.2;">
+                    <td colspan="4" style="border: 1.5px solid #000; padding: 2px 3px; text-align: left; font-size: 7.5pt; line-height: 1.25;">
                         Attendance (80-84% – 1 Mark, 85-88% – 2 Marks, 89-92%- 3 Marks, 93-96% – 4 Marks, 97-100% – 5 Marks)
                     </td>
                     <td style="border: 1.5px solid #000; padding: 2px 3px;">5</td>
@@ -1128,7 +1128,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             return `
                 <div style="margin-top: 4px; margin-bottom: 4px; page-break-inside: avoid;">
                     <h4 style="font-size: 9pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 3px 0; text-transform: uppercase;">${title}</h4>
-                    <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 8pt; text-align: center;">
+                    <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; text-align: center;">
                         <thead>
                             <tr style="font-weight: bold; font-family: Arial, sans-serif; background-color: #f2f2f2;">
                                 <th style="border: 1.5px solid #000; padding: 2.5px; width: 8%;">S.No.</th>
@@ -1232,13 +1232,13 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 ` : ''}
 
                 ${(!isInduction && outcomes.some(co => (co && co.outcome && co.outcome.trim()) || (typeof co === 'string' && co.trim()))) ? `
-                <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 4px; font-size: 8pt; border: 1.5px solid #000; page-break-inside: avoid;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 14px; font-size: 9pt; border: 1.5px solid #000; page-break-inside: avoid;">
                     <thead>
                         <tr>
                             <th colspan="3" style="border: 1.5px solid #000; padding: 2.5px; text-align: center; font-weight: bold; font-family: Arial, sans-serif; text-transform: uppercase; font-size: 8.5pt;">Course Outcomes</th>
                         </tr>
                         <tr>
-                            <th colspan="3" style="border: 1.5px solid #000; padding: 2px 4px; text-align: left; font-weight: normal; font-size: 8pt;">On successful completion of the course, students will be able to</th>
+                            <th colspan="3" style="border: 1.5px solid #000; padding: 2px 4px; text-align: left; font-weight: normal; font-size: 9pt;">On successful completion of the course, students will be able to</th>
                         </tr>
                         <tr style="font-family: Arial, sans-serif; font-size: 7.5pt; font-weight: bold; text-align: center;">
                             <th style="width: 12%; border: 1.5px solid #000; padding: 2px;">CO. No</th>
@@ -1267,31 +1267,31 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 ${isInduction ? `
                 <div style="margin-top: 6px; margin-bottom: 6px;">
                     ${units.map((unit, uIdx) => {
-                        const topicsArr = Array.isArray(unit.topics) 
-                            ? unit.topics.filter(t => t && t.trim() !== '')
-                            : (typeof unit.topics === 'string' ? unit.topics.split('\n').filter(t => t.trim() !== '') : []);
-                        const unitHeader = unit.title ? `${unit.unitNo || 'UNIT I'}: ${unit.title.toUpperCase()}` : 'UNIT I: LIST OF ACTIVITIES:';
-                        return `
+            const topicsArr = Array.isArray(unit.topics)
+                ? unit.topics.filter(t => t && t.trim() !== '')
+                : (typeof unit.topics === 'string' ? unit.topics.split('\n').filter(t => t.trim() !== '') : []);
+            const unitHeader = unit.title ? `${unit.unitNo || 'UNIT I'}: ${unit.title.toUpperCase()}` : 'UNIT I: LIST OF ACTIVITIES:';
+            return `
                         <div style="margin-bottom: 6px; text-align: justify; font-size: 9pt; line-height: 1.4; page-break-inside: avoid;">
                             <div style="font-weight: bold; font-family: Arial, sans-serif; font-size: 9.5pt; margin-bottom: 4px;">
                                 ${unitHeader.endsWith(':') ? unitHeader : unitHeader + ':'}
                             </div>
                             <ol style="margin: 0; padding-left: 20px; line-height: 1.45;">
                                 ${topicsArr.map(topic => {
-                                    const cleanedTopic = topic.replace(/^\\d+[\\.\\)]\\s*/, '');
-                                    return `<li style="margin-bottom: 3px; text-align: justify; font-size: 9pt;">${cleanedTopic}</li>`;
-                                }).join('')}
+                const cleanedTopic = topic.replace(/^\\d+[\\.\\)]\\s*/, '');
+                return `<li style="margin-bottom: 3px; text-align: justify; font-size: 9pt;">${cleanedTopic}</li>`;
+            }).join('')}
                             </ol>
                         </div>
                         `;
-                    }).join('')}
+        }).join('')}
                     <div style="text-align: right; font-weight: bold; font-family: Arial, sans-serif; font-size: 9pt; margin-top: 8px; margin-bottom: 4px; border-top: 1px solid #ddd; padding-top: 4px;">
                         TOTAL: 2 WEEKS
                     </div>
                 </div>
                 ` : `
                 <!-- Units or Exercises -->
-                <div style="margin-top: 4px; margin-bottom: 4px;">
+                <div style="margin-top: 8px; margin-bottom: 4px;">
                     ${isPractical && !isTheory ? `
                         ${renderExperimentsTableHTML(experiments, "List of Exercises")}
                     ` : units.map((unit, uIdx) => {
@@ -1343,94 +1343,94 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 ${(textbooks.length > 0 || references.length > 0 || webReferences.length > 0) ? `
                 <div class="section-container" style="margin-top: 4px; margin-bottom: 6px; page-break-inside: avoid;">
                     ${textbooks.length > 0 ? `
-                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Text Book${textbooks.length > 1 ? 's' : ''}</h4>
+                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Text Book${textbooks.length > 1 ? 's' : ''}</h4>
                     <ol style="margin: 0 0 4px 0; padding-left: 18px;">
-                        ${textbooks.map(tb => tb.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;">${tb}</li>` : '').join('')}
+                        ${textbooks.map(tb => tb.trim() ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;">${tb}</li>` : '').join('')}
                     </ol>
                     ` : ''}
 
                     ${references.length > 0 ? `
-                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">References Books</h4>
+                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">References Books</h4>
                     <ol style="margin: 0 0 4px 0; padding-left: 18px;">
-                        ${references.map(ref => ref.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;">${ref}</li>` : '').join('')}
+                        ${references.map(ref => ref.trim() ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;">${ref}</li>` : '').join('')}
                     </ol>
                     ` : ''}
 
                     ${webReferences.length > 0 ? `
-                    <h4 style="font-size: 8.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Additional / Web References</h4>
+                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Additional / Web References</h4>
                     <ol style="margin: 0; padding-left: 18px;">
-                        ${webReferences.map(wr => wr.trim() ? `<li style="margin-bottom: 2px; font-size: 8pt; line-height: 1.3; text-align: justify;"><a href="${wr}" style="color: #000; text-decoration: underline;">${wr}</a></li>` : '').join('')}
+                        ${webReferences.map(wr => wr.trim() ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;"><a href="${wr}" style="color: #000; text-decoration: underline;">${wr}</a></li>` : '').join('')}
                     </ol>
                     ` : ''}
                 </div>
                 ` : ''}
 
-                <div style="font-size: 8pt; font-weight: bold; margin-top: 4px; margin-bottom: 2px; font-family: Arial, sans-serif; text-align: center;">
-                    Mapping of Course Outcomes (COs)with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
+                <div style="font-size: 8.5pt; font-weight: bold; margin-top: 4px; margin-bottom: 2px; font-family: Arial, sans-serif; text-align: center; text-transform: uppercase;">
+                    Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
                 </div>
 
-                <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 4px; font-size: 7.5pt; border: 1.5px solid #000; text-align: center; page-break-inside: avoid;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 4px; font-size: 9pt; border: 1.5px solid #000; text-align: center; page-break-inside: avoid;">
                     <thead>
-                        <tr>
-                            <th rowspan="2" style="border: 1.5px solid #000; padding: 2px; width: 10%;">COs</th>
-                            <th colspan="${poCount}" style="border: 1.5px solid #000; padding: 2px;">POs</th>
-                            <th colspan="${psoCount}" style="border: 1.5px solid #000; padding: 2px;">PSOs</th>
+                        <tr style="background-color: #f2f2f2; font-family: Arial, sans-serif;">
+                            <th rowspan="2" style="border: 1.5px solid #000; padding: 2px; width: 10%; font-size: 9pt;">COs</th>
+                            <th colspan="${poCount}" style="border: 1.5px solid #000; padding: 2px; font-size: 9pt;">POs</th>
+                            <th colspan="${psoCount}" style="border: 1.5px solid #000; padding: 2px; font-size: 9pt;">PSOs</th>
                         </tr>
-                        <tr>
+                        <tr style="background-color: #f2f2f2; font-family: Arial, sans-serif;">
                             ${poList && poList.length > 0
-                ? poList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${i + 1}</th>`).join('')
-                : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${n}</th>`).join('')
-            }
+                    ? poList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
+                    : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
+                }
                             ${psoList && psoList.length > 0
-                ? psoList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${i + 1}</th>`).join('')
-                : [1, 2, 3].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7pt;">${n}</th>`).join('')
-            }
+                    ? psoList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
+                    : [1, 2, 3].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
+                }
                         </tr>
                     </thead>
                     <tbody>
                         ${coPoMapping.map(row => `
                             <tr>
-                                <td style="border: 1.5px solid #000; padding: 1.5px; font-weight: bold;">${row.coNo}</td>
+                                <td style="border: 1.5px solid #000; padding: 1.5px; font-weight: bold; font-size: 9pt;">${row.coNo}</td>
                                 ${poList && poList.length > 0
-                    ? poList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`po${i + 1}`] || '-'}</td>`).join('')
-                    : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`po${n}`] || '-'}</td>`).join('')
-                }
+                        ? poList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`po${i + 1}`] || '-'}</td>`).join('')
+                        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`po${n}`] || '-'}</td>`).join('')
+                    }
                                 ${psoList && psoList.length > 0
-                    ? psoList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`pso${i + 1}`] || '-'}</td>`).join('')
-                    : [1, 2, 3].map(n => `<td style="border: 1.5px solid #000; padding: 1px;">${row[`pso${n}`] || '-'}</td>`).join('')
-                }
+                        ? psoList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`pso${i + 1}`] || '-'}</td>`).join('')
+                        : [1, 2, 3].map(n => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`pso${n}`] || '-'}</td>`).join('')
+                    }
                             </tr>
                         `).join('')}
                         <tr style="font-weight: bold; background-color: #f9f9f9;">
-                            <td style="border: 1.5px solid #000; padding: 1.5px;">Average</td>
+                            <td style="border: 1.5px solid #000; padding: 1.5px; font-size: 9pt;">Average</td>
                             ${poList && poList.length > 0
-                ? poList.map((_, i) => {
-                    const validValues = coPoMapping.map(r => Number(r[`po${i + 1}`])).filter(v => !isNaN(v) && v > 0);
-                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
-                }).join('')
-                : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => {
-                    const validValues = coPoMapping.map(r => Number(r[`po${n}`])).filter(v => !isNaN(v) && v > 0);
-                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
-                }).join('')
-            }
+                    ? poList.map((_, i) => {
+                        const validValues = coPoMapping.map(r => Number(r[`po${i + 1}`])).filter(v => !isNaN(v) && v > 0);
+                        const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                        return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
+                    }).join('')
+                    : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => {
+                        const validValues = coPoMapping.map(r => Number(r[`po${n}`])).filter(v => !isNaN(v) && v > 0);
+                        const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                        return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
+                    }).join('')
+                }
                             ${psoList && psoList.length > 0
-                ? psoList.map((_, i) => {
-                    const validValues = coPoMapping.map(r => Number(r[`pso${i + 1}`])).filter(v => !isNaN(v) && v > 0);
-                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
-                }).join('')
-                : [1, 2, 3].map(n => {
-                    const validValues = coPoMapping.map(r => Number(r[`pso${n}`])).filter(v => !isNaN(v) && v > 0);
-                    const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                    return `<td style="border: 1.5px solid #000; padding: 1px;">${avg}</td>`;
-                }).join('')
-            }
+                    ? psoList.map((_, i) => {
+                        const validValues = coPoMapping.map(r => Number(r[`pso${i + 1}`])).filter(v => !isNaN(v) && v > 0);
+                        const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                        return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
+                    }).join('')
+                    : [1, 2, 3].map(n => {
+                        const validValues = coPoMapping.map(r => Number(r[`pso${n}`])).filter(v => !isNaN(v) && v > 0);
+                        const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                        return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
+                    }).join('')
+                }
                             </tr>
                     </tbody>
                 </table>
-                <div style="display: flex; justify-content: space-between; font-size: 7pt; margin-top: 1px; margin-bottom: 2px;">
+                <div style="display: flex; justify-content: space-between; font-size: 7.5pt; margin-top: 1px; margin-bottom: 2px;">
                     <span>3 - High</span>
                     <span>2 - Medium</span>
                     <span>1 - Low</span>
@@ -1583,7 +1583,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                         <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
                         <td>${s.title}</td>
                         <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'MC'}</td>
-                        <td class="center" colspan="4" style="font-weight: bold; font-family: Arial, sans-serif; font-size: 8pt; letter-spacing: 0.5px;">2 WEEKS</td>
+                        <td class="center" colspan="4" style="font-weight: bold; font-family: Arial, sans-serif; font-size: 9pt; letter-spacing: 0.5px;">2 WEEKS</td>
                         <td class="center" style="font-weight: bold;">0</td>
                         <td class="center">-</td>
                         <td class="center">-</td>
@@ -1611,20 +1611,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
         return `
             <div style="page-break-inside: avoid; margin-bottom: 25px;">
-                <h3 style="font-size: 10pt; font-weight: bold; text-align: center; margin-bottom: 8px; font-family: Arial, sans-serif;">
+                <h3 style="font-size: 9pt; font-weight: bold; text-align: center; margin-bottom: 8px; font-family: Arial, sans-serif;">
                     SEMESTER ${semNum}
                 </h3>
                 
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif;">Course Code</th>
-                            <th rowSpan="2" style="width: 42%; font-size: 8pt; font-family: Arial, sans-serif;">Course</th>
-                            <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
-                            <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
-                            <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                            <th rowSpan="2" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif;">Course Code</th>
+                            <th rowSpan="2" style="width: 42%; font-size: 9pt; font-family: Arial, sans-serif;">Course</th>
+                            <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Category</th>
+                            <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
+                            <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
+                            <th rowSpan="2" style="width: 5%; font-size: 9pt; font-family: Arial, sans-serif;">Credit</th>
+                            <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
                         </tr>
                         <tr>
                             <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
@@ -1697,13 +1697,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                 </td>
                             </tr>
                             <tr>
-                                <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif;">Course Code</th>
-                                <th rowSpan="2" style="width: 42%; font-size: 8pt; font-family: Arial, sans-serif;">Course</th>
-                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
-                                <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
-                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                                <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
-                                <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                                <th rowSpan="2" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif;">Course Code</th>
+                                <th rowSpan="2" style="width: 42%; font-size: 9pt; font-family: Arial, sans-serif;">Course</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Category</th>
+                                <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
+                                <th rowSpan="2" style="width: 5%; font-size: 9pt; font-family: Arial, sans-serif;">Credit</th>
+                                <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
                             </tr>
                             <tr>
                                 <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
@@ -1731,13 +1731,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                 </td>
                             </tr>
                             <tr>
-                                <th rowSpan="2" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif;">Course Code</th>
-                                <th rowSpan="2" style="width: 42%; font-size: 8pt; font-family: Arial, sans-serif;">Course</th>
-                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Category</th>
-                                <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
-                                <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                                <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif;">Credit</th>
-                                <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                                <th rowSpan="2" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif;">Course Code</th>
+                                <th rowSpan="2" style="width: 42%; font-size: 9pt; font-family: Arial, sans-serif;">Course</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Category</th>
+                                <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
+                                <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
+                                <th rowSpan="2" style="width: 5%; font-size: 9pt; font-family: Arial, sans-serif;">Credit</th>
+                                <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
                             </tr>
                             <tr>
                                 <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
@@ -1771,7 +1771,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             /* Default typography with full Tamil Unicode font fallback */
             body {
                 font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
-                font-size: 10pt;
+                font-size: 9pt;
             }
             
             /* Apply consistent font family to all elements on content pages (page 2 onwards) except headers and footers */
@@ -2395,12 +2395,12 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 15%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
-                            <th rowSpan="2" style="width: 43%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
-                            <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 7%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
-                            <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
+                            <th rowSpan="2" style="width: 15%; font-size: 9pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
+                            <th rowSpan="2" style="width: 43%; font-size: 9pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
+                            <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
+                            <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
+                            <th rowSpan="2" style="width: 7%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
+                            <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
                         </tr>
                         <tr>
                             <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">L</th>
@@ -2464,12 +2464,12 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 15%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
-                            <th rowSpan="2" style="width: 51%; font-size: 8pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
-                            <th colSpan="3" style="width: 12%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
-                            <th colSpan="3" style="width: 13%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
+                            <th rowSpan="2" style="width: 15%; font-size: 9pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
+                            <th rowSpan="2" style="width: 51%; font-size: 9pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
+                            <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
+                            <th rowSpan="2" style="width: 9%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
+                            <th rowSpan="2" style="width: 5%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
+                            <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
                         </tr>
                         <tr>
                             <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">L</th>
@@ -2563,12 +2563,12 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
     const isSH = (
         (deptData?.slug || '').toLowerCase().includes('science') && (deptData?.slug || '').toLowerCase().includes('humanities')
     ) || (
-        (deptData?.slug || '').toLowerCase() === 'sh' || (deptData?.slug || '').toLowerCase() === 's-and-h'
-    ) || (
-        (deptName || '').toLowerCase().includes('science') && (deptName || '').toLowerCase().includes('humanities')
-    ) || (
-        (deptName || '').toLowerCase().includes('science & humanities')
-    );
+            (deptData?.slug || '').toLowerCase() === 'sh' || (deptData?.slug || '').toLowerCase() === 's-and-h'
+        ) || (
+            (deptName || '').toLowerCase().includes('science') && (deptName || '').toLowerCase().includes('humanities')
+        ) || (
+            (deptName || '').toLowerCase().includes('science & humanities')
+        );
 
     let degreePrefix = "B.E.";
     if (isSH) {
@@ -2602,7 +2602,7 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
         <style>
             body {
                 font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
-                font-size: 10pt;
+                font-size: 9pt;
                 line-height: 1.4;
                 color: #000;
                 margin: 0;
@@ -2625,28 +2625,38 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
                 page-break-after: avoid;
             }
             .pdf-header {
-                font-family: Arial, sans-serif;
-                font-size: 8pt;
-                border-bottom: 1px solid #000;
-                padding-bottom: 3px;
-                margin-bottom: 6px;
+                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif !important;
+                font-size: 9.5pt !important;
+                border-bottom: 1.5px solid #000;
+                padding-bottom: 4px;
+                margin-bottom: 8px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                font-weight: bold;
+                font-weight: bold !important;
+                font-style: italic !important;
+            }
+            .pdf-header, .pdf-header * {
+                font-style: italic !important;
+                font-weight: bold !important;
             }
             .pdf-footer {
-                font-family: Arial, sans-serif;
-                font-size: 7.5pt;
+                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif !important;
+                font-size: 9pt !important;
                 border-top: 1px solid #000;
-                padding-top: 3px;
+                padding-top: 4px;
                 margin-top: 4px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                font-style: italic !important;
             }
-            .footer-center {
-                font-weight: bold;
+            .pdf-footer, .pdf-footer * {
+                font-style: italic !important;
+            }
+            .pdf-footer .footer-center, .pdf-footer .footer-center * {
+                font-style: normal !important;
+                font-weight: bold !important;
             }
             table {
                 width: 100%;
