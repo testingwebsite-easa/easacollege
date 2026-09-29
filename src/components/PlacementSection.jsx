@@ -39,7 +39,7 @@ const PlacementSection = () => {
 
     return (
         <section id="placement-section" style={{
-            padding: '6rem 0',
+            padding: '3.5rem 0',
             background: 'var(--bg-dark)',
             color: 'var(--text-main)',
             position: 'relative',
@@ -57,7 +57,7 @@ const PlacementSection = () => {
             }}></div>
 
             <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-                <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                     <motion.span
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -156,6 +156,137 @@ const PlacementSection = () => {
                     ))}
                 </div>
 
+                {/* 2. Our Strategic Hiring Partners (Moved above Comprehensive Training) */}
+                <div style={{
+                    margin: '3.5rem 0',
+                    background: 'var(--bg-dark)',
+                    padding: '3rem 0',
+                    borderTop: '1px solid var(--glass-border)',
+                    borderBottom: '1px solid var(--glass-border)'
+                }}>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <motion.h4
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            style={{
+                                fontSize: '1.2rem',
+                                fontWeight: '800',
+                                textTransform: 'uppercase',
+                                letterSpacing: '4px',
+                                color: 'var(--text-main)',
+                                marginBottom: '0.8rem'
+                            }}
+                        >
+                            Our Strategic Hiring Partners
+                        </motion.h4>
+                        <div style={{ width: '60px', height: '4px', background: 'var(--secondary)', margin: '0 auto' }}></div>
+                    </div>
+
+                    <div className="partners-scroller">
+                        <style>{`
+                            .partners-scroller {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 2.5rem;
+                                overflow: hidden;
+                                position: relative;
+                            }
+                            .scroll-track {
+                                display: flex;
+                                gap: 3rem;
+                                width: max-content;
+                                padding: 10px 0;
+                            }
+                            .animate-left {
+                                animation: scroll-left 40s linear infinite;
+                            }
+                            .animate-right {
+                                animation: scroll-right 40s linear infinite;
+                            }
+                            @keyframes scroll-left {
+                                0% { transform: translateX(0); }
+                                100% { transform: translateX(-50%); }
+                            }
+                            @keyframes scroll-right {
+                                0% { transform: translateX(-50%); }
+                                100% { transform: translateX(0); }
+                            }
+                            .partner-card {
+                                width: 200px;
+                                height: 90px;
+                                background: transparent;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                padding: 0.8rem;
+                            }
+                            .partner-card img {
+                                width: 100%;
+                                height: 100%;
+                                object-fit: contain;
+                                filter: brightness(0) invert(1);
+                            }
+                            [data-theme="light"] .partner-card img {
+                                filter: brightness(0);
+                            }
+                            .scroller-fade {
+                                position: absolute;
+                                top: 0;
+                                bottom: 0;
+                                width: 150px;
+                                z-index: 2;
+                                pointer-events: none;
+                            }
+                            .scroller-fade-left {
+                                left: 0;
+                                background: linear-gradient(to right, var(--bg-dark), transparent);
+                            }
+                            .scroller-fade-right {
+                                right: 0;
+                                background: linear-gradient(to left, var(--bg-dark), transparent);
+                            }
+                        `}</style>
+
+                        <div className="scroller-fade scroller-fade-left"></div>
+                        <div className="scroller-fade scroller-fade-right"></div>
+
+                        {/* Row 1: Right to Left */}
+                        <div className="scroll-track animate-left">
+                            {row1.length > 0 && [...row1, ...row1].map((company, index) => (
+                                <div key={`left-${index}`} className="partner-card">
+                                    <img
+                                        src={company.logo}
+                                        alt={company.name}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'contain'
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Row 2: Left to Right */}
+                        <div className="scroll-track animate-right">
+                            {row2.length > 0 && [...row2, ...row2].map((company, index) => (
+                                <div key={`right-${index}`} className="partner-card">
+                                    <img
+                                        src={company.logo}
+                                        alt={company.name}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'contain'
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Comprehensive Training */}
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -177,7 +308,7 @@ const PlacementSection = () => {
                             <img
                                 src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1000"
                                 alt="Placement Training"
-                                style={{ width: '100%', height: '500px', objectFit: 'cover' }}
+                                style={{ width: '100%', height: '460px', objectFit: 'cover' }}
                             />
                             <div style={{
                                 position: 'absolute',
@@ -255,135 +386,6 @@ const PlacementSection = () => {
                                 View Success Stories
                             </a>
                         </motion.div>
-                    </div>
-                </div>
-            </div>
-
-            <div style={{
-                marginTop: '8rem',
-                background: 'var(--bg-dark)',
-                padding: '6rem 0',
-                borderTop: '1px solid var(--glass-border)',
-                borderBottom: '1px solid var(--glass-border)'
-            }}>
-                <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                    <motion.h4
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        style={{
-                            fontSize: '1.2rem',
-                            fontWeight: '800',
-                            textTransform: 'uppercase',
-                            letterSpacing: '4px',
-                            color: 'var(--text-main)',
-                            marginBottom: '1rem'
-                        }}
-                    >
-                        Our Strategic Hiring Partners
-                    </motion.h4>
-                    <div style={{ width: '60px', height: '4px', background: 'var(--secondary)', margin: '0 auto' }}></div>
-                </div>
-
-                <div className="partners-scroller">
-                    <style>{`
-                        .partners-scroller {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 3rem;
-                            overflow: hidden;
-                            position: relative;
-                        }
-                        .scroll-track {
-                            display: flex;
-                            gap: 3rem;
-                            width: max-content;
-                            padding: 10px 0;
-                        }
-                        .animate-left {
-                            animation: scroll-left 40s linear infinite;
-                        }
-                        .animate-right {
-                            animation: scroll-right 40s linear infinite;
-                        }
-                        @keyframes scroll-left {
-                            0% { transform: translateX(0); }
-                            100% { transform: translateX(-50%); }
-                        }
-                        @keyframes scroll-right {
-                            0% { transform: translateX(-50%); }
-                            100% { transform: translateX(0); }
-                        }
-                        .partner-card {
-                            width: 200px;
-                            height: 100px;
-                            background: transparent;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            padding: 1rem;
-                        }
-                        .partner-card img {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: contain;
-                            filter: brightness(0) invert(1);
-                        }
-                        [data-theme="light"] .partner-card img {
-                            filter: brightness(0);
-                        }
-                        .scroller-fade {
-                            position: absolute;
-                            top: 0;
-                            bottom: 0;
-                            width: 150px;
-                            z-index: 2;
-                            pointer-events: none;
-                        }
-                        .scroller-fade-left {
-                            left: 0;
-                            background: linear-gradient(to right, var(--bg-dark), transparent);
-                        }
-                        .scroller-fade-right {
-                            right: 0;
-                            background: linear-gradient(to left, var(--bg-dark), transparent);
-                        }
-                    `}</style>
-
-                    <div className="scroller-fade scroller-fade-left"></div>
-                    <div className="scroller-fade scroller-fade-right"></div>
-
-                    {/* Row 1: Right to Left */}
-                    <div className="scroll-track animate-left">
-                        {row1.length > 0 && [...row1, ...row1].map((company, index) => (
-                            <div key={`left-${index}`} className="partner-card">
-                                <img
-                                    src={company.logo}
-                                    alt={company.name}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'contain'
-                                    }}
-                                />
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Row 2: Left to Right */}
-                    <div className="scroll-track animate-right">
-                        {row2.length > 0 && [...row2, ...row2].map((company, index) => (
-                            <div key={`right-${index}`} className="partner-card">
-                                <img
-                                    src={company.logo}
-                                    alt={company.name}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'contain'
-                                    }}
-                                />
-                            </div>
-                        ))}
                     </div>
                 </div>
             </div>

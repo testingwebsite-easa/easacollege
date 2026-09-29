@@ -3659,6 +3659,7 @@ const DepartmentPage = () => {
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
 
             <GlobalHero
+                pageKey={department.slug || department.id || id}
                 title={department.name}
                 defaultTitle={department.name}
                 defaultSubtitle="Excellence in Engineering, Management and Professional Leadership"

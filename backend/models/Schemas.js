@@ -11,9 +11,18 @@ const NewsEventSchema = new mongoose.Schema({
     date: String,
     category: String,
     desc: String,
-    pdf_url: String
+    description: String,
+    content: String,
+    venue: String,
+    time: String,
+    badge: String,
+    isFeatured: { type: Boolean, default: false },
+    link: String,
+    pdf_url: String,
+    createdAt: { type: Date, default: Date.now }
 });
 NewsEventSchema.index({ category: 1 });
+NewsEventSchema.index({ isFeatured: 1 });
 
 const HeroSlideSchema = new mongoose.Schema({
     image: String,

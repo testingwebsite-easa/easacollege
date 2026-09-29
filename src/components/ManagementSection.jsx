@@ -7,21 +7,59 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
     const [loading, setLoading] = React.useState(true);
 
     useEffect(() => {
-        const url = category
-            ? `${API_BASE_URL}/api/management-team?category=${category}`
-            : `${API_BASE_URL}/api/management-team`;
+        const fetchTeam = async () => {
+            try {
+                const url = category
+                    ? `${API_BASE_URL}/api/management-team?category=${category}`
+                    : `${API_BASE_URL}/api/management-team`;
 
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                const filteredData = Array.isArray(data)
-                    ? data.filter(m => m.category !== 'principal' && !m.designation?.toLowerCase().includes('principal'))
-                    : [];
-                const limitedData = (!category || isStatic) ? filteredData.slice(0, 5) : filteredData;
+                const res = await fetch(url);
+                const data = await res.json();
+                let teamList = Array.isArray(data) ? [...data] : [];
+
+                // Check if principal is already in the list
+                const hasPrincipal = teamList.some(m => 
+                    m.category === 'principal' || 
+                    m.designation?.toLowerCase().includes('principal') ||
+                    m.name?.toLowerCase().includes('principal')
+                );
+
+                // If not filtered to a single subcategory and principal is missing, fetch principal
+                if (!hasPrincipal && (!category || category === 'management' || category === 'leadership')) {
+                    try {
+                        const pRes = await fetch(`${API_BASE_URL}/api/management-team?category=principal`);
+                        const pData = await pRes.json();
+                        if (Array.isArray(pData) && pData.length > 0) {
+                            teamList.push(pData[0]);
+                        } else {
+                            // Default Principal entry if not populated yet
+                            teamList.push({
+                                name: "Dr. Z. Robert Kennedy",
+                                designation: "PRINCIPAL",
+                                image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+                                category: "principal"
+                            });
+                        }
+                    } catch (e) {
+                        teamList.push({
+                            name: "Dr. Z. Robert Kennedy",
+                            designation: "PRINCIPAL",
+                            image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+                            category: "principal"
+                        });
+                    }
+                }
+
+                const limitedData = (!category || isStatic) ? teamList.slice(0, 5) : teamList;
                 setManagementTeam(limitedData);
-            })
-            .catch(err => console.error("Error fetching management team:", err))
-            .finally(() => setLoading(false));
+            } catch (err) {
+                console.error("Error fetching management team:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTeam();
     }, [category, isStatic]);
 
     const isScrolling = false;
@@ -134,6 +172,11 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
                                         <img
                                             src={member.image_url}
                                             alt={member.name}
+                                            style={
+                                                member.name?.toLowerCase().includes('sujatha') || member.category === 'chairperson'
+                                                    ? { objectPosition: 'center 35%', transform: 'scale(1.12)' }
+                                                    : {}
+                                            }
                                             onError={(e) => {
                                                 e.target.onerror = null;
                                                 e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=3E3E7E&color=fff&size=300`;

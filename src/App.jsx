@@ -84,7 +84,6 @@ const FoodCourtPage = lazy(() => import('./pages/FoodCourtPage'));
 const CafeteriaPage = lazy(() => import('./pages/CafeteriaPage'));
 const IqacAboutPage = lazy(() => import('./pages/IqacAboutPage'));
 const IqacCommitteePage = lazy(() => import('./pages/IqacCommitteePage'));
-import PopupAlert from './components/PopupAlert';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 const ProfessionalChaptersPage = lazy(() => import('./pages/ProfessionalChaptersPage'));
@@ -119,7 +118,6 @@ function App() {
         <ToastProvider>
           <LoadingBar />
           <Router>
-            <PopupAlert />
             <ScrollToTop />
             <Suspense fallback={<div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}><div className="loading-spinner" /></div>}>
           <Routes>

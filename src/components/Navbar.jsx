@@ -148,8 +148,8 @@ const NAV_ITEMS = [
     {
         title: 'GALLERY',
         children: [
-            { title: 'Photo Gallery', href: '/gallery' },
-            { title: 'Video Gallery', href: '/video-gallery' },
+            { title: 'Photo Gallery', href: '/gallery?tab=photos' },
+            { title: 'Video Gallery', href: '/gallery?tab=videos' },
             { title: 'Virtual Tour', href: '/virtual-tour' }
         ]
     },

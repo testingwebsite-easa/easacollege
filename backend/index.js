@@ -859,9 +859,16 @@ app.post('/api/news-events', verifyToken, async (req, res) => {
         const item = new NewsEvent({
             title: title.trim(),
             image: image || '',
-            date: new Date(date),
+            date: date ? String(date) : new Date().toISOString().split('T')[0],
             category: category || 'General',
-            desc: desc || '',
+            desc: desc || req.body.description || '',
+            description: req.body.description || desc || '',
+            content: req.body.content || desc || '',
+            venue: req.body.venue || '',
+            time: req.body.time || '',
+            badge: req.body.badge || '',
+            isFeatured: req.body.isFeatured || false,
+            link: req.body.link || '',
             pdf_url: req.body.pdf_url || ''
         });
 
@@ -905,9 +912,16 @@ app.put('/api/news-events/:id', verifyToken, async (req, res) => {
         const updateData = {
             title: req.body.title || existingItem.title,
             image: req.body.image !== undefined ? req.body.image : existingItem.image,
-            date: req.body.date ? new Date(req.body.date) : existingItem.date,
+            date: req.body.date ? String(req.body.date) : existingItem.date,
             category: req.body.category || existingItem.category,
-            desc: req.body.desc !== undefined ? req.body.desc : existingItem.desc,
+            desc: req.body.desc !== undefined ? req.body.desc : (req.body.description !== undefined ? req.body.description : existingItem.desc),
+            description: req.body.description !== undefined ? req.body.description : existingItem.description,
+            content: req.body.content !== undefined ? req.body.content : existingItem.content,
+            venue: req.body.venue !== undefined ? req.body.venue : existingItem.venue,
+            time: req.body.time !== undefined ? req.body.time : existingItem.time,
+            badge: req.body.badge !== undefined ? req.body.badge : existingItem.badge,
+            isFeatured: req.body.isFeatured !== undefined ? req.body.isFeatured : existingItem.isFeatured,
+            link: req.body.link !== undefined ? req.body.link : existingItem.link,
             pdf_url: req.body.pdf_url !== undefined ? req.body.pdf_url : existingItem.pdf_url
         };
 
@@ -3564,6 +3578,154 @@ app.delete('/api/video-gallery/:id', async (req, res) => {
         res.status(500).json({ error: "Failed to delete video" });
     }
 });
+
+// ==================== YOUTUBE DATA API v3 INTEGRATION ====================
+let youtubeCache = {
+    data: null,
+    lastFetched: 0,
+    ttl: 30 * 60 * 1000 // 30 minutes in-memory caching
+};
+
+const extractYouTubeIdFromUrl = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : url;
+};
+
+app.get('/api/youtube/videos', async (req, res) => {
+    const limit = parseInt(req.query.limit) || 6;
+    const now = Date.now();
+
+    // If cache is fresh, serve from memory
+    if (youtubeCache.data && (now - youtubeCache.lastFetched < youtubeCache.ttl)) {
+        return res.json({
+            success: true,
+            source: "cache",
+            channel: "@EASACollegeOfficial",
+            videos: youtubeCache.data.slice(0, limit)
+        });
+    }
+
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    const channelHandle = process.env.YOUTUBE_CHANNEL_HANDLE || 'EASACollegeOfficial';
+    const channelId = process.env.YOUTUBE_CHANNEL_ID;
+
+    try {
+        let uploadsPlaylistId = null;
+
+        if (apiKey) {
+            // Step 1: Resolve Channel / Uploads Playlist ID
+            if (channelId) {
+                if (channelId.startsWith('UC')) {
+                    uploadsPlaylistId = 'UU' + channelId.slice(2);
+                } else {
+                    const chanRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`);
+                    const chanData = await chanRes.json();
+                    if (chanData.items && chanData.items.length > 0) {
+                        uploadsPlaylistId = chanData.items[0].contentDetails?.relatedPlaylists?.uploads;
+                    }
+                }
+            }
+
+            if (!uploadsPlaylistId) {
+                const cleanHandle = channelHandle.replace(/^@/, '');
+                const handleRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails,snippet&forHandle=${cleanHandle}&key=${apiKey}`);
+                const handleData = await handleRes.json();
+                if (handleData.items && handleData.items.length > 0) {
+                    uploadsPlaylistId = handleData.items[0].contentDetails?.relatedPlaylists?.uploads;
+                } else {
+                    const userRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails,snippet&forUsername=${cleanHandle}&key=${apiKey}`);
+                    const userData = await userRes.json();
+                    if (userData.items && userData.items.length > 0) {
+                        uploadsPlaylistId = userData.items[0].contentDetails?.relatedPlaylists?.uploads;
+                    }
+                }
+            }
+
+            // Step 2: Fetch playlist items from the uploads playlist
+            if (uploadsPlaylistId) {
+                const playlistRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=24&playlistId=${uploadsPlaylistId}&key=${apiKey}`);
+                const playlistData = await playlistRes.json();
+
+                if (playlistData.items && playlistData.items.length > 0) {
+                    const formattedVideos = playlistData.items
+                        .filter(item => item.snippet?.resourceId?.videoId)
+                        .map(item => {
+                            const vidId = item.snippet.resourceId.videoId;
+                            const thumbs = item.snippet.thumbnails || {};
+                            const thumbUrl = thumbs.maxres?.url || thumbs.high?.url || thumbs.medium?.url || `https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
+                            return {
+                                id: vidId,
+                                title: item.snippet.title || "EASA College Video",
+                                thumbnail: thumbUrl,
+                                publishedAt: item.snippet.publishedAt || new Date().toISOString(),
+                                url: `https://www.youtube.com/watch?v=${vidId}`,
+                                description: item.snippet.description || ""
+                            };
+                        });
+
+                    youtubeCache.data = formattedVideos;
+                    youtubeCache.lastFetched = now;
+
+                    return res.json({
+                        success: true,
+                        source: "youtube_api",
+                        channel: "@EASACollegeOfficial",
+                        videos: formattedVideos.slice(0, limit)
+                    });
+                }
+            }
+        }
+
+        // Graceful DB Fallback if YouTube API credentials aren't accessible or API returns empty
+        const dbVideos = await VideoGallery.find().sort({ createdAt: -1 }).limit(limit);
+        if (dbVideos && dbVideos.length > 0) {
+            const fallbackList = dbVideos.map(v => {
+                const ytId = extractYouTubeIdFromUrl(v.url) || v._id;
+                return {
+                    id: ytId,
+                    title: v.title || "EASA College Highlight",
+                    thumbnail: v.thumbnail || `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+                    publishedAt: v.createdAt || new Date().toISOString(),
+                    url: v.url || `https://www.youtube.com/@EASACollegeOfficial`,
+                    description: v.description || ""
+                };
+            });
+            return res.json({
+                success: true,
+                source: "database_fallback",
+                channel: "@EASACollegeOfficial",
+                videos: fallbackList
+            });
+        }
+
+        return res.json({
+            success: true,
+            source: "channel_direct",
+            channel: "@EASACollegeOfficial",
+            videos: []
+        });
+
+    } catch (err) {
+        console.error("YouTube API endpoint error:", err.message);
+        if (youtubeCache.data) {
+            return res.json({
+                success: true,
+                source: "stale_cache",
+                channel: "@EASACollegeOfficial",
+                videos: youtubeCache.data.slice(0, limit)
+            });
+        }
+        return res.json({
+            success: false,
+            error: "Unable to retrieve videos from YouTube API",
+            channel: "@EASACollegeOfficial",
+            videos: []
+        });
+    }
+});
+
 
 // ==================== GRIEVANCE APIs ====================
 app.get('/api/grievances', async (req, res) => {

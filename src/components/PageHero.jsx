@@ -2,8 +2,10 @@ import React, { useState, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { FaUniversity, FaAward } from 'react-icons/fa';
 import missionBg from '../assets/mission-bg.webp'; // Fallback or default
+import { getDomainHeroImage } from '../utils/domainHeroImages';
 
-const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
+const PageHero = ({ title, subtitle, backgroundImage }) => {
+    const effectiveBg = getDomainHeroImage('', title, backgroundImage);
     const { scrollY } = useScroll();
     const heroRef = useRef(null);
     const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
@@ -51,7 +53,7 @@ const PageHero = ({ title, subtitle, backgroundImage = missionBg }) => {
                     left: '-5%',
                     width: '110%',
                     height: '110%',
-                    backgroundImage: `linear-gradient(to bottom, rgba(10, 15, 29, 0.85) 0%, rgba(10, 15, 29, 0.75) 60%, #0a0f1d 100%), url(${backgroundImage})`,
+                    backgroundImage: `linear-gradient(to bottom, rgba(10, 15, 29, 0.85) 0%, rgba(10, 15, 29, 0.75) 60%, #0a0f1d 100%), url(${effectiveBg})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundAttachment: 'fixed',

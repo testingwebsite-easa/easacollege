@@ -111,7 +111,7 @@ const ProgramsSection = () => {
     };
 
     return (
-        <section className="programs-section" id="courses-offered" style={{ padding: '5rem 1.5rem', background: 'var(--bg-main)', position: 'relative', overflow: 'hidden' }}>
+        <section className="programs-section" id="courses-offered" style={{ padding: '3.5rem 1.5rem', background: 'var(--bg-main)', position: 'relative', overflow: 'hidden' }}>
             {/* Background Ambient Glows */}
             <div style={{
                 position: 'absolute',
@@ -128,7 +128,7 @@ const ProgramsSection = () => {
             <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
                 
                 {/* Section Header */}
-                <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -261,10 +261,6 @@ const ProgramsSection = () => {
                                             </span>
                                         </div>
 
-                                        <p className="course-card-desc">
-                                            {program.description}
-                                        </p>
-
                                         {/* Explore Button */}
                                         <div className="course-card-footer">
                                             <Link
@@ -358,7 +354,7 @@ const ProgramsSection = () => {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
-                    min-height: 470px;
+                    min-height: 370px;
                     position: relative;
                 }
 

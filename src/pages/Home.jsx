@@ -12,14 +12,10 @@ import useScrollAnimation from '../hooks/useScrollAnimation'
 
 const ProgramsSection = lazy(() => import('../components/ProgramsSection'))
 const PlacementSection = lazy(() => import('../components/PlacementSection'))
-const LuxuryExperienceGallery = lazy(() => import('../components/LuxuryExperienceGallery'))
-const GalleryCarousel = lazy(() => import('../components/GalleryCarousel'))
+const ForeignLanguageSection = lazy(() => import('../components/ForeignLanguageSection'))
 const NewsEventsSection = lazy(() => import('../components/NewsEventsSection'))
-const FacultyStats = lazy(() => import('../components/FacultyStats'))
-const LifeAtEASASection = lazy(() => import('../components/LifeAtEASASection'))
-const AdviceSection = lazy(() => import('../components/AdviceSection'))
+const HomeGalleryButton = lazy(() => import('../components/HomeGalleryButton'))
 const ManagementSection = lazy(() => import('../components/ManagementSection'))
-const AdmissionCTA = lazy(() => import('../components/AdmissionCTA'))
 const AdmissionForm = lazy(() => import('../components/AdmissionForm'))
 
 function Home() {
@@ -45,16 +41,13 @@ function Home() {
             <LuxuryMarquee />
             <AboutSection />
             <AccreditationsBar />
-            
+
             <Suspense fallback={<div style={{ minHeight: '100px' }} />}>
-                <ProgramsSection />
                 <PlacementSection />
-                <LuxuryExperienceGallery />
-                <GalleryCarousel />
+                <ForeignLanguageSection />
                 <NewsEventsSection />
-                <FacultyStats />
-                <LifeAtEASASection />
-                <AdviceSection />
+                <HomeGalleryButton />
+                <ProgramsSection />
                 <ManagementSection isStatic={true} />
                 <AdmissionForm
                     isOpen={showAdmissionForm}

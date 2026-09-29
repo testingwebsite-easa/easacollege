@@ -280,7 +280,7 @@ const AdminDashboard = () => {
     const [sessionForm, setSessionForm] = useState({ title: '', startDate: '', endDate: '', status: 'Upcoming', description: '' });
     const [heroForm, setHeroForm] = useState({ image: '', mobileImage: '', title: '', subtitle: '', titleColor: '#ffffff', subtitleColor: '#ffffff', buttonBgColor: '#1B2A6B', buttonTextColor: '#ffffff' });
     const [programForm, setProgramForm] = useState({ title: '', subtitle: '', description: '', image: '', color: '' });
-    const [newsForm, setNewsForm] = useState({ image: '', title: '', date: '', category: '', desc: '', pdf_url: '' });
+    const [newsForm, setNewsForm] = useState({ image: '', title: '', date: '', time: '', venue: '', category: 'News', desc: '', content: '', pdf_url: '' });
     const [placementForm, setPlacementForm] = useState({ name: '', logo: '', row: 1 });
     const [galleryEventForm, setGalleryEventForm] = useState({ eventName: '', date: '', photos: '[]', shortDescription: '' });
     const [facultyStatForm, setFacultyStatForm] = useState({ value: '', label: '' });
@@ -1459,7 +1459,7 @@ const AdminDashboard = () => {
                             border: '1px solid var(--glass-border)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                                <h2>{editingItem ? `Edit ${activeTab}` : `Add New ${activeTab}`}</h2>
+                                <h2>{editingItem ? `Edit ${activeTab === 'news' ? 'News / Event' : activeTab}` : `Add New ${activeTab === 'news' ? 'News / Event' : activeTab}`}</h2>
                                 <button onClick={closeModal} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
                             </div>
 
@@ -1548,17 +1548,55 @@ const AdminDashboard = () => {
                             )}
 
                             {activeTab === 'news' && (
-                                <form onSubmit={(e) => handleGenericSubmit(e, newsForm, setNewsForm, '/api/news-events', setNewsEvents, { image: '', title: '', date: '', category: '', desc: '', pdf_url: '' })} style={{ display: 'grid', gap: '1rem' }}>
-                                    {renderInput('Title', 'title', newsForm.title, e => setNewsForm({ ...newsForm, title: e.target.value }))}
-                                    {renderInput('Date', 'date', newsForm.date, e => setNewsForm({ ...newsForm, date: e.target.value }), 'date')}
-                                    {renderInput('Category', 'category', newsForm.category, e => setNewsForm({ ...newsForm, category: e.target.value }))}
+                                <form onSubmit={(e) => handleGenericSubmit(e, newsForm, setNewsForm, '/api/news-events', setNewsEvents, { image: '', title: '', date: '', time: '', venue: '', category: 'News', desc: '', content: '', pdf_url: '' })} style={{ display: 'grid', gap: '1rem' }}>
+                                    {renderInput('Announcement Title *', 'title', newsForm.title, e => setNewsForm({ ...newsForm, title: e.target.value }), 'text', true, 'e.g. National Level AI Hackathon 2026')}
+                                    
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        {renderInput('Date *', 'date', newsForm.date, e => setNewsForm({ ...newsForm, date: e.target.value }), 'date', true)}
+                                        {renderInput('Time (Optional)', 'time', newsForm.time, e => setNewsForm({ ...newsForm, time: e.target.value }), 'text', false, 'e.g. 09:30 AM')}
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category <span style={{ color: 'red' }}>*</span></label>
+                                            <select
+                                                className="custom-select"
+                                                value={newsForm.category || 'News'}
+                                                onChange={e => setNewsForm({ ...newsForm, category: e.target.value })}
+                                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none' }}
+                                                required
+                                            >
+                                                <option value="News">News (Campus Updates & Highlights)</option>
+                                                <option value="Circular">Circular (Academic & Exam Notices)</option>
+                                                <option value="Event">Event (Fests, Hackathons & Workshops)</option>
+                                                <option value="Placement">Placement (Recruitment Drives & Stats)</option>
+                                            </select>
+                                        </div>
+
+                                        {renderInput('Venue / Location (Optional)', 'venue', newsForm.venue, e => setNewsForm({ ...newsForm, venue: e.target.value }), 'text', false, 'e.g. EASA Tech Park / Auditorium')}
+                                    </div>
+
                                     <div>
-                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Event Image</label>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Event / News Image (Optional)</label>
                                         <ImageUpload value={newsForm.image} onUpload={(url) => setNewsForm({ ...newsForm, image: url })} />
                                     </div>
-                                    {renderInput('PDF/Link URL (Optional)', 'pdf_url', newsForm.pdf_url, e => setNewsForm({ ...newsForm, pdf_url: e.target.value }), 'text', false)}
-                                    {renderInput('Description', 'desc', newsForm.desc, e => setNewsForm({ ...newsForm, desc: e.target.value }))}
-                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update' : 'Add'}</button>
+
+                                    {renderInput('Short Summary (For Ticker & Cards) *', 'desc', newsForm.desc, e => setNewsForm({ ...newsForm, desc: e.target.value }), 'text', true, 'Brief summary shown in feed...')}
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Full Content / Details (Optional)</label>
+                                        <textarea
+                                            value={newsForm.content || ''}
+                                            onChange={e => setNewsForm({ ...newsForm, content: e.target.value })}
+                                            placeholder="Detailed information displayed in popup when clicked..."
+                                            rows={3}
+                                            style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)', outline: 'none', resize: 'vertical' }}
+                                        />
+                                    </div>
+
+                                    {renderInput('PDF Document / Attachment URL (Optional)', 'pdf_url', newsForm.pdf_url, e => setNewsForm({ ...newsForm, pdf_url: e.target.value }), 'text', false, 'https://example.com/circular.pdf')}
+
+                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>{editingItem ? 'Update News / Event' : 'Add News / Event'}</button>
                                 </form>
                             )}
 
@@ -3179,7 +3217,7 @@ const AdminDashboard = () => {
                                     <div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                             <h2>News & Events</h2>
-                                            <button onClick={() => { setEditingItem(null); setNewsForm({ image: '', title: '', date: '', category: '', desc: '', pdf_url: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add News/Event</button>
+                                            <button onClick={() => { setEditingItem(null); setNewsForm({ image: '', title: '', date: '', time: '', venue: '', category: 'News', desc: '', content: '', pdf_url: '' }); setShowModal(true); }} style={{ background: 'white', color: 'black', padding: '0.5rem 1rem', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>+ Add News/Event</button>
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
                                             {newsEvents.map(item => (
