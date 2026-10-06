@@ -14,6 +14,8 @@ import {
     FaUsers,
     FaShieldAlt
 } from 'react-icons/fa';
+import aicteIdeaLabLogo from '../assets/aicte-idea-lab.png';
+import about1Img from '../assets/about1.jpg';
 
 const STORY_CHAPTERS = [
     {
@@ -39,7 +41,7 @@ const STORY_CHAPTERS = [
         ],
         quote: '“We don’t just teach engineering; we ignite curiosity, build character, and empower students to solve real-world challenges.”',
         quoteAuthor: 'EASA Academic Advisory Board',
-        image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1000&q=80',
+        image: about1Img,
         primaryCta: { label: 'Explore Our Heritage', link: '/institution' },
         secondaryCta: { label: 'Campus Life & Facilities', link: '/campus-life' }
     },
@@ -93,7 +95,7 @@ const STORY_CHAPTERS = [
         ],
         quote: '“Every student at EASA has access to open-ended labs 24/7 to design, build, test, and patent their inventions.”',
         quoteAuthor: 'Director of Innovation & Research',
-        image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1000&q=80',
+        image: aicteIdeaLabLogo,
         primaryCta: { label: 'Discover Innovation Hub', link: '/research' },
         secondaryCta: { label: 'View IDEA Lab Facilities', link: '/idea-lab' }
     },
@@ -263,9 +265,9 @@ const AboutSection = () => {
                                         key={currentStory.id}
                                         src={currentStory.image}
                                         alt={currentStory.title}
-                                        className="portal-photo"
-                                        initial={{ opacity: 0, scale: 1.08 }}
-                                        animate={{ opacity: 1, scale: 1 }}
+                                        className={`portal-photo ${currentStory.id === 'innovation' ? 'portal-photo-idealab' : ''}`}
+                                        initial={{ opacity: 0, scale: currentStory.id === 'innovation' ? 1.45 : 1.08 }}
+                                        animate={{ opacity: 1, scale: currentStory.id === 'innovation' ? 1.36 : 1 }}
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.35 }}
                                     />
@@ -275,11 +277,23 @@ const AboutSection = () => {
 
                             {/* Floating Campus Geography Tag */}
                             <div className="portal-floating-tag">
-                                <FaMapMarkerAlt className="portal-geo-icon" />
-                                <div>
-                                    <h5 className="portal-geo-title">Navakkarai, Coimbatore</h5>
-                                    <span className="portal-geo-sub">NH-47 Palakkad Highway, TN</span>
-                                </div>
+                                {currentStory.id === 'innovation' ? (
+                                    <>
+                                        <FaMicrochip className="portal-geo-icon" style={{ color: '#FCCA26' }} />
+                                        <div>
+                                            <h5 className="portal-geo-title">AICTE IDEA Superlab</h5>
+                                            <span className="portal-geo-sub">₹1.2 Crore Prototyping Sandbox</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaMapMarkerAlt className="portal-geo-icon" />
+                                        <div>
+                                            <h5 className="portal-geo-title">Navakkarai, Coimbatore</h5>
+                                            <span className="portal-geo-sub">NH-47 Palakkad Highway, TN</span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -684,7 +698,16 @@ const AboutSection = () => {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                    object-position: center;
                     display: block;
+                }
+
+                .portal-photo-idealab {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center;
+                    transform-origin: center center;
                 }
 
                 .portal-photo-glass-glare {

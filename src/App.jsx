@@ -123,6 +123,10 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/professional-chapters" element={<ProfessionalChaptersPage />} />
+            <Route path="/iirs" element={<ProfessionalChaptersPage defaultChapter="iirs" />} />
+            <Route path="/iirs-isro" element={<ProfessionalChaptersPage defaultChapter="iirs" />} />
+            <Route path="/page/iirs" element={<ProfessionalChaptersPage defaultChapter="iirs" />} />
+            <Route path="/page/professional-chapters" element={<ProfessionalChaptersPage />} />
             <Route path="/mission-vision" element={<MissionPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/admin/login" element={<LoginPage />} />

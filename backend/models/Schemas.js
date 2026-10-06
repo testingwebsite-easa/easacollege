@@ -54,6 +54,24 @@ const GalleryImageSchema = new mongoose.Schema({
     department: String // LINK TO DEPARTMENT
 });
 
+const InstagramMediaSchema = new mongoose.Schema({
+    shortcode: { type: String, required: true }, // e.g. DdVSGwViZH2
+    mediaType: { type: String, default: 'reel', enum: ['reel', 'post'] },
+    title: { type: String, default: '' },
+    caption: { type: String, default: '' },
+    thumbnail: { type: String, default: '' },
+    likes: { type: String, default: '' },
+    views: { type: String, default: '' },
+    comments: { type: String, default: '' },
+    audioTrack: { type: String, default: 'Original Audio - easacollege' },
+    category: { type: String, default: 'Campus Life' },
+    date: { type: String, default: '' },
+    location: { type: String, default: 'EASA College of Engineering and Technology, Coimbatore' },
+    url: { type: String, default: '' },
+    order: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now }
+});
+
 const PlacementPartnerSchema = new mongoose.Schema({
     name: String,
     logo: String,
@@ -766,5 +784,23 @@ module.exports = {
             }]
         }],
         updatedAt: { type: Date, default: Date.now }
-    }))
+    })),
+    InstagramMedia: mongoose.model('InstagramMedia', new mongoose.Schema({
+        mediaId: { type: String, unique: true, sparse: true },
+        shortcode: { type: String, index: true },
+        mediaType: { type: String, enum: ['IMAGE', 'VIDEO', 'CAROUSEL_ALBUM', 'REEL'], default: 'IMAGE' },
+        mediaUrl: String,
+        thumbnailUrl: String,
+        permalink: String,
+        caption: String,
+        likes: { type: String, default: '100+' },
+        comments: { type: String, default: '10+' },
+        views: { type: String, default: '1.2K' },
+        category: { type: String, default: 'Campus Life' },
+        audioTrack: { type: String, default: 'Original Audio • easacollege' },
+        duration: { type: String, default: '0:30' },
+        timestamp: { type: Date, default: Date.now },
+        isReel: { type: Boolean, default: false },
+        isActive: { type: Boolean, default: true }
+    }, { timestamps: true }))
 };

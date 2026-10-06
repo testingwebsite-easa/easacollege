@@ -148,19 +148,17 @@ const ForeignLanguageSection = () => {
                                     <span>{lang.package}</span>
                                 </div>
 
-                                {/* Animated Two-Door Open + Glass Reflection Button */}
+                                {/* Simple High-Visibility Glass Effect Button */}
                                 <button
                                     type="button"
-                                    className="door-glass-btn"
+                                    className="cfl-glass-btn"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setSelectedLanguage(lang);
                                     }}
                                     aria-label={`View syllabus for ${lang.name}`}
                                 >
-                                    <span className="door door-left" />
-                                    <span className="door door-right" />
-                                    <span className="glass-shine" />
+                                    <span className="cfl-glass-shine" />
                                     <span className="btn-content-inner">
                                         <span>View Syllabus &amp; Recruiters</span>
                                         <FaArrowRight size={10} className="btn-arrow-glide" />
@@ -268,10 +266,8 @@ const ForeignLanguageSection = () => {
                                 </div>
 
                                 <div className="cfl-modal-footer">
-                                    <a href="/higher-education" className="door-glass-btn" style={{ background: selectedLanguage.color }}>
-                                        <span className="door door-left" />
-                                        <span className="door door-right" />
-                                        <span className="glass-shine" />
+                                    <a href="/higher-education" className="cfl-glass-btn modal-apply-btn" style={{ background: selectedLanguage.color }}>
+                                        <span className="cfl-glass-shine" />
                                         <span className="btn-content-inner">
                                             <span>Apply for 2026 Language Batch</span>
                                             <FaExternalLinkAlt size={11} className="btn-arrow-glide" />
@@ -471,117 +467,96 @@ const ForeignLanguageSection = () => {
                 }
 
                 /* =========================================================
-                   TWO-DOOR OPEN & GLASS SHINE BUTTON ANIMATION
+                   CLEAN & HIGH-VISIBILITY GLASS EFFECT BUTTON
                    ========================================================= */
-                .door-glass-btn {
+                .cfl-glass-btn {
                     position: relative;
                     overflow: hidden;
                     border-radius: 24px;
-                    background: linear-gradient(135deg, #1B2A6B 0%, #2563eb 50%, #FCCA26 100%);
-                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    background: linear-gradient(135deg, rgba(27, 42, 107, 0.95) 0%, rgba(37, 99, 235, 0.95) 100%);
+                    border: 1px solid rgba(255, 255, 255, 0.28);
                     cursor: pointer;
                     padding: 0;
-                    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 4px 14px rgba(27, 42, 107, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35);
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
                     width: 100%;
-                    min-height: 38px;
+                    min-height: 40px;
                     text-decoration: none;
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
                 }
 
-                /* Sliding Double Doors */
-                .door-glass-btn .door {
+                /* Subtle Glass Shimmer Sheen */
+                .cfl-glass-btn .cfl-glass-shine {
                     position: absolute;
                     top: 0;
-                    bottom: 0;
-                    width: 50.5%;
-                    z-index: 1;
-                    background: #0f172a;
-                    transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease;
-                }
-
-                .door-glass-btn .door-left {
-                    left: 0;
-                    border-right: 1px solid rgba(255, 255, 255, 0.12);
-                    transform-origin: left center;
-                }
-
-                .door-glass-btn .door-right {
-                    right: 0;
-                    border-left: 1px solid rgba(255, 255, 255, 0.12);
-                    transform-origin: right center;
-                }
-
-                /* Hover on Button OR Hover on Parent Card Triggers Door Open */
-                .door-glass-btn:hover .door-left,
-                .cfl-card:hover .door-left {
-                    transform: translateX(-100%);
-                    opacity: 0.2;
-                }
-
-                .door-glass-btn:hover .door-right,
-                .cfl-card:hover .door-right {
-                    transform: translateX(100%);
-                    opacity: 0.2;
-                }
-
-                /* Glass Sheen / Reflection Beam */
-                .door-glass-btn .glass-shine {
-                    position: absolute;
-                    top: -50%;
-                    left: -75%;
-                    width: 50%;
-                    height: 200%;
+                    left: -100%;
+                    width: 60%;
+                    height: 100%;
                     background: linear-gradient(
                         90deg,
                         rgba(255, 255, 255, 0) 0%,
-                        rgba(255, 255, 255, 0.5) 50%,
+                        rgba(255, 255, 255, 0.38) 50%,
                         rgba(255, 255, 255, 0) 100%
                     );
-                    transform: rotate(25deg);
-                    z-index: 3;
+                    transform: skewX(-20deg);
                     pointer-events: none;
-                    transition: left 0.75s ease;
+                    transition: left 0.6s ease;
+                    z-index: 1;
                 }
 
-                .door-glass-btn:hover .glass-shine,
-                .cfl-card:hover .glass-shine {
-                    left: 130%;
+                .cfl-glass-btn:hover .cfl-glass-shine,
+                .cfl-card:hover .cfl-glass-btn .cfl-glass-shine {
+                    left: 140%;
                 }
 
-                /* Inner Text & Icon */
+                /* High-Contrast Clear Text & Icon */
                 .btn-content-inner {
                     position: relative;
                     z-index: 2;
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 7px;
+                    gap: 8px;
                     width: 100%;
                     height: 100%;
-                    padding: 0.6rem 0.9rem;
+                    padding: 0.65rem 1rem;
                     color: #ffffff;
-                    font-size: 0.75rem;
+                    font-size: 0.78rem;
                     font-weight: 800;
                     letter-spacing: 0.3px;
-                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
                 }
 
                 .btn-arrow-glide {
-                    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    transition: transform 0.25s ease;
                 }
 
-                .door-glass-btn:hover .btn-arrow-glide,
-                .cfl-card:hover .btn-arrow-glide {
-                    transform: translateX(4px) scale(1.15);
-                }
-
-                .door-glass-btn:hover {
-                    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5), 0 0 12px rgba(252, 202, 38, 0.4);
-                    border-color: rgba(252, 202, 38, 0.7);
+                /* Button & Card Hover State */
+                .cfl-glass-btn:hover,
+                .cfl-card:hover .cfl-glass-btn {
+                    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #3b82f6 100%);
+                    border-color: rgba(252, 202, 38, 0.65);
+                    box-shadow: 0 6px 22px rgba(37, 99, 235, 0.45), 0 0 12px rgba(252, 202, 38, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
                     transform: translateY(-2px);
+                }
+
+                .cfl-glass-btn:hover .btn-arrow-glide,
+                .cfl-card:hover .cfl-glass-btn .btn-arrow-glide {
+                    transform: translateX(4px);
+                }
+
+                .cfl-glass-btn.modal-apply-btn {
+                    min-height: 44px;
+                }
+
+                .cfl-glass-btn.modal-apply-btn:hover {
+                    filter: brightness(1.12);
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
                 }
 
                 /* Bottom Strip */

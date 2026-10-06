@@ -10,6 +10,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import GlobalHero from '../components/GlobalHero';
 import SEO from '../components/SEO';
+import aicteIdeaLabLogo from '../assets/aicte-idea-lab.png';
 
 const IdeaLabPage = () => {
     const [showAdmissionForm, setShowAdmissionForm] = useState(false);
@@ -268,21 +269,51 @@ const IdeaLabPage = () => {
                         padding: '3rem',
                         border: '1px solid var(--glass-border)',
                         boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
-                        marginBottom: '4rem'
+                        marginBottom: '4rem',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto',
+                        gap: '2.5rem',
+                        alignItems: 'center'
                     }}
                 >
-                    <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.4rem 1.2rem', borderRadius: '50px', fontSize: '0.9rem', fontWeight: '700', marginBottom: '1rem' }}>
-                        AICTE Initiative
+                    <div>
+                        <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.4rem 1.2rem', borderRadius: '50px', fontSize: '0.9rem', fontWeight: '700', marginBottom: '1rem' }}>
+                            AICTE Initiative
+                        </div>
+                        <h2 style={{ fontSize: '2.4rem', fontWeight: '800', marginBottom: '1.5rem', color: 'var(--text-main)' }}>
+                            Innovation Ecosystem at EASA
+                        </h2>
+                        <p style={{ fontSize: '1.15rem', lineHeight: '1.8', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                            The <strong>AICTE-IDEA (Idea Development, Evaluation & Application) Lab</strong> at EASA College of Engineering and Technology is a state-of-the-art innovation ecosystem established under the initiative of the All India Council for Technical Education (AICTE).
+                        </p>
+                        <p style={{ fontSize: '1.15rem', lineHeight: '1.8', color: 'var(--text-muted)', margin: 0 }}>
+                            The IDEA Lab is envisioned as a dynamic platform that promotes innovation, experiential learning, design thinking, and entrepreneurship, enabling students and faculty to transform ideas into viable products and real-world solutions through collaborative, hands-on engagement.
+                        </p>
                     </div>
-                    <h2 style={{ fontSize: '2.4rem', fontWeight: '800', marginBottom: '1.5rem', color: 'var(--text-main)' }}>
-                        Innovation Ecosystem at EASA
-                    </h2>
-                    <p style={{ fontSize: '1.15rem', lineHeight: '1.8', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-                        The <strong>AICTE-IDEA (Idea Development, Evaluation & Application) Lab</strong> at EASA College of Engineering and Technology is a state-of-the-art innovation ecosystem established under the initiative of the All India Council for Technical Education (AICTE).
-                    </p>
-                    <p style={{ fontSize: '1.15rem', lineHeight: '1.8', color: 'var(--text-muted)' }}>
-                        The IDEA Lab is envisioned as a dynamic platform that promotes innovation, experiential learning, design thinking, and entrepreneurship, enabling students and faculty to transform ideas into viable products and real-world solutions through collaborative, hands-on engagement.
-                    </p>
+
+                    <div style={{
+                        background: '#ffffff',
+                        padding: '1.5rem',
+                        borderRadius: '20px',
+                        border: '1px solid var(--glass-border)',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.06)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '180px',
+                        maxWidth: '220px'
+                    }}>
+                        <img
+                            src={aicteIdeaLabLogo}
+                            alt="AICTE IDEA Lab Logo"
+                            style={{
+                                width: '100%',
+                                height: 'auto',
+                                maxHeight: '180px',
+                                objectFit: 'contain'
+                            }}
+                        />
+                    </div>
                 </motion.div>
 
                 {/* Vision & Mission */}

@@ -23,7 +23,7 @@ const {
     Enquiry, TickerAlert, LibraryData, Scholarship, PopupAlert, PlacementPage,
     VideoGallery, Grievance, VirtualTour, PageHero, Sport, Moment, Advice,
     FestPage, User, ProgramOutcome, Counseling, StartupPitch, PacFeedback,
-    PartnerConnect, NewsletterSubscriber, DepartmentLab
+    PartnerConnect, NewsletterSubscriber, DepartmentLab, InstagramMedia
 } = require('./models/Schemas');
 console.log("FestPage Check:", FestPage);
 
@@ -435,10 +435,64 @@ const {
     sustainabilityData,
     communityOutreachData,
     scholarshipsData,
-    placementPageData,
-    sportsData,
     resourcesData
 } = require('./data');
+
+// --- Instagram Media Endpoints ---
+app.get('/api/instagram-media', async (req, res) => {
+    try {
+        let items = [];
+        if (isConnected) {
+            items = await InstagramMedia.find().sort({ order: 1, createdAt: -1 });
+        }
+        res.json(items);
+    } catch (err) {
+        console.error("Fetch Instagram media error:", err);
+        res.status(500).json({ error: "Failed to fetch Instagram media" });
+    }
+});
+
+app.post('/api/instagram-media', verifyToken, async (req, res) => {
+    try {
+        const { shortcode, mediaType, title, caption, thumbnail, likes, views, comments, audioTrack, category, date, url, order } = req.body;
+        if (!shortcode) return res.status(400).json({ error: "Instagram Shortcode or Reel ID required" });
+
+        const cleanShortcode = String(shortcode).replace(/https?:\/\/(www\.)?instagram\.com\/(p|reel|reels)\/([^\/?#&]+).*/, '$3').trim();
+        const finalUrl = url || `https://www.instagram.com/reel/${cleanShortcode}/`;
+
+        const newMedia = new InstagramMedia({
+            shortcode: cleanShortcode,
+            mediaType: mediaType || 'reel',
+            title: title || 'EASA College Reel',
+            caption: caption || '',
+            thumbnail: thumbnail || 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop',
+            likes: likes || '1.2K',
+            views: views || '25K',
+            comments: comments || '45',
+            audioTrack: audioTrack || 'Original Audio - easacollege',
+            category: category || 'Campus Life',
+            date: date || 'Recent',
+            url: finalUrl,
+            order: order || 0
+        });
+
+        await newMedia.save();
+        res.json({ success: true, data: newMedia });
+    } catch (err) {
+        console.error("Save Instagram media error:", err);
+        res.status(500).json({ error: "Failed to save Instagram media" });
+    }
+});
+
+app.delete('/api/instagram-media/:id', verifyToken, async (req, res) => {
+    try {
+        await InstagramMedia.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Delete Instagram media error:", err);
+        res.status(500).json({ error: "Failed to delete Instagram media" });
+    }
+});
 
 // Seed Initial Admin User
 
@@ -4442,15 +4496,98 @@ app.get('/api/newsletter', async (req, res) => {
     }
 });
 
-app.delete('/api/newsletter/:id', async (req, res) => {
-    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+// ==================== INSTAGRAM LIVE FEED & META SYNC ENDPOINTS ====================
+async function syncInstagramMedia() {
+    const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+    const accountId = process.env.INSTAGRAM_ACCOUNT_ID;
+
+    if (!accessToken || !accountId) {
+        return { success: false, message: "INSTAGRAM_ACCESS_TOKEN or INSTAGRAM_ACCOUNT_ID is not configured in .env" };
+    }
+
     try {
-        await NewsletterSubscriber.findByIdAndDelete(req.params.id);
-        res.json({ message: "Deleted successfully" });
+        const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
+        const url = `https://graph.facebook.com/v19.0/${accountId}/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp,like_count,comments_count&limit=25&access_token=${accessToken}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error("Meta Graph API Error:", data.error);
+            return { success: false, error: data.error.message };
+        }
+
+        if (Array.isArray(data.data)) {
+            for (const item of data.data) {
+                // Extract shortcode from permalink (e.g. instagram.com/p/SHORTCODE/ or /reel/SHORTCODE/)
+                let shortcode = '';
+                if (item.permalink) {
+                    const match = item.permalink.match(/\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+                    if (match && match[1]) shortcode = match[1];
+                }
+
+                const isReel = item.media_type === 'VIDEO' || (item.permalink && item.permalink.includes('/reel/'));
+                
+                await InstagramMedia.findOneAndUpdate(
+                    { mediaId: item.id },
+                    {
+                        mediaId: item.id,
+                        shortcode: shortcode || item.id,
+                        mediaType: isReel ? 'REEL' : (item.media_type || 'IMAGE'),
+                        mediaUrl: item.media_url || item.thumbnail_url,
+                        thumbnailUrl: item.thumbnail_url || item.media_url,
+                        permalink: item.permalink,
+                        caption: item.caption || '',
+                        likes: item.like_count ? `${item.like_count.toLocaleString()}` : '1.2K',
+                        comments: item.comments_count ? `${item.comments_count.toLocaleString()}` : '85',
+                        timestamp: item.timestamp ? new Date(item.timestamp) : new Date(),
+                        isReel: isReel,
+                        isActive: true
+                    },
+                    { upsert: true, new: true }
+                );
+            }
+        }
+        return { success: true, count: data.data ? data.data.length : 0 };
     } catch (err) {
-        res.status(500).json({ error: "Failed to delete subscriber" });
+        console.error("Instagram sync error:", err);
+        return { success: false, error: err.message };
+    }
+}
+
+// Auto-sync every 30 minutes if token is configured
+if (process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_ACCOUNT_ID) {
+    setInterval(syncInstagramMedia, 30 * 60 * 1000);
+}
+
+app.get('/api/instagram/feed', async (req, res) => {
+    if (!isConnected) return res.json({ posts: [], reels: [] });
+    try {
+        const posts = await InstagramMedia.find({ isActive: true, isReel: false }).sort({ timestamp: -1 }).limit(12);
+        const reels = await InstagramMedia.find({ isActive: true, isReel: true }).sort({ timestamp: -1 }).limit(12);
+        res.json({ posts, reels });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch Instagram feed" });
     }
 });
+
+app.post('/api/instagram/sync', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    const result = await syncInstagramMedia();
+    res.json(result);
+});
+
+app.post('/api/instagram/item', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const item = new InstagramMedia(req.body);
+        await item.save();
+        res.status(201).json(item);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to create Instagram item" });
+    }
+});
+
 
 
 // Serve frontend build if present

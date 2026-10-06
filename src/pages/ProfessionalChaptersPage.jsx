@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaChevronRight, FaStar, FaUsers, FaArrowRight, FaLaptopCode, FaMicrochip,
     FaGlobe, FaSearch, FaCogs, FaPhoneAlt, FaDownload, FaEnvelope,
     FaGraduationCap, FaTrophy, FaBookReader, FaCalendarAlt, FaImages,
-    FaUserTie, FaCheckCircle, FaRocket, FaLightbulb, FaEye, FaBullseye, FaFilePdf
+    FaUserTie, FaCheckCircle, FaRocket, FaLightbulb, FaEye, FaBullseye, FaFilePdf,
+    FaSatelliteDish, FaLayerGroup, FaCertificate, FaExternalLinkAlt, FaAward,
+    FaMapMarkedAlt, FaChalkboardTeacher, FaAtom, FaShieldAlt
 } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
 
-const ProfessionalChaptersPage = () => {
+const ProfessionalChaptersPage = ({ defaultChapter }) => {
+    const [searchParams] = useSearchParams();
+    const location = useLocation();
+
     const chapters = [
         {
             id: 'csi',
@@ -72,17 +78,19 @@ const ProfessionalChaptersPage = () => {
         {
             id: 'iirs',
             name: 'IIRS',
-            fullName: 'IIRS Outreach Cell',
-            description: 'The IIRS Outreach Cell aims to promote awareness and knowledge in remote sensing, GIS, GPS, and geospatial technologies. In association with the Indian Institute of Remote Sensing (ISRO), the cell provides learners with opportunities to gain exposure to cutting-edge space and geospatial applications through training and online programs.',
+            fullName: 'IIRS-ISRO Outreach Nodal Centre',
+            description: 'The IIRS-ISRO Outreach Programme is a premium distance-learning initiative by the Indian Institute of Remote Sensing (IIRS), a constituent unit of the Indian Space Research Organisation (ISRO). Established to bridge the gap between cutting-edge space technology and mainstream academia, the program utilizes state-of-the-art internet and satellite communication tools (such as the E-CLASS platform) to deliver live, interactive, and self-paced digital courses. It primarily targets students, faculty, and researchers across universities to build a robust pool of skilled manpower in geospatial technologies.',
             activities: [
-                'Participation in IIRS–ISRO online courses and certification programs',
-                'Workshops and webinars on Remote Sensing, GIS, and Geospatial Technologies',
-                'Awareness programs on space technology and its applications',
-                'Project-based learning and case study discussions',
-                'Expert talks by scientists and industry professionals',
-                'Promotion of research and innovation in geospatial domains'
+                'Live IIRS Outreach Courses & Certification Programs',
+                'Technical Assessment Tests & E-CLASS Satellite Broadcast Sessions',
+                'Short-term Workshops on Advanced Space Science Applications',
+                'ISRO START (Space Science and Technology Awareness Training)',
+                'Hands-on GIS & Remote Sensing Practical Labs (QGIS, SAGA, Google Earth Engine)',
+                'Expert Webinars and Live Q&A Panels with ISRO Scientists',
+                'Faculty Development Programs (FDPs) in Geospatial Disciplines',
+                'Defense & Industry Geospatial Expert Guest Lectures'
             ],
-            icon: <FaSearch />,
+            icon: <FaSatelliteDish />,
             color: '#9b59b6'
         },
         {
@@ -133,11 +141,27 @@ const ProfessionalChaptersPage = () => {
         }
     ];
 
-    const [activeSection, setActiveSection] = useState(chapters[0].id);
+    const initialChapter = defaultChapter || searchParams.get('chapter') || (location.pathname.includes('iirs') ? 'iirs' : chapters[0].id);
+    const [activeSection, setActiveSection] = useState(initialChapter);
     const [ieeeSubTab, setIeeeSubTab] = useState('all');
-    const activeChapter = chapters.find(c => c.id === activeSection);
+    const [iirsSubTab, setIirsSubTab] = useState('all');
 
-    // IEEE specific detailed datasets
+    useEffect(() => {
+        const param = searchParams.get('chapter');
+        if (param && chapters.some(c => c.id === param.toLowerCase())) {
+            setActiveSection(param.toLowerCase());
+        } else if (defaultChapter && chapters.some(c => c.id === defaultChapter)) {
+            setActiveSection(defaultChapter);
+        } else if (location.pathname.includes('iirs')) {
+            setActiveSection('iirs');
+        }
+    }, [searchParams, defaultChapter, location.pathname]);
+
+    const activeChapter = chapters.find(c => c.id === activeSection) || chapters[0];
+
+    // ==========================================
+    // IEEE Specialized Datasets
+    // ==========================================
     const ieeeNavTabs = [
         { id: 'all', label: 'All Overview' },
         { id: 'about', label: 'About & Vision' },
@@ -228,11 +252,240 @@ const ProfessionalChaptersPage = () => {
 
     const showIeeeSub = (tabId) => ieeeSubTab === 'all' || ieeeSubTab === tabId;
 
+    // ==========================================
+    // IIRS-ISRO Specialized Datasets
+    // ==========================================
+    const iirsNavTabs = [
+        { id: 'all', label: 'All Overview' },
+        { id: 'about', label: 'About & Vision' },
+        { id: 'objectives', label: 'Objectives' },
+        { id: 'coordinators', label: 'Coordinators' },
+        { id: 'activities', label: 'Activities & Outreach' },
+        { id: 'achievements', label: 'Achievements' },
+        { id: 'benefits', label: 'Student Benefits' },
+        { id: 'gallery', label: 'Gallery Glimpses' },
+        { id: 'resources', label: 'Resources & Links' },
+        { id: 'contact', label: 'Contact Details' }
+    ];
+
+    const iirsObjectives = [
+        'To act as an official institutional hub for the Indian Institute of Remote Sensing (IIRS) and ISRO Distance Learning initiatives.',
+        'To bridge the gap between academia and advanced space technology by facilitating students and faculty access to live online courses, webinars, and workshops.',
+        'To strengthen capacity building in the core areas of Remote Sensing, Geographic Information Systems (GIS), Global Navigation Satellite Systems (GNSS), and Geo-computation.',
+        'To support and guide students through specialized programs like the ISRO Space Science and Technology Awareness Training (START).',
+        'To foster research capabilities, technological awareness, and career readiness among students in space science applications and earth observation technologies.'
+    ];
+
+    const iirsStudentBenefits = [
+        {
+            title: 'Direct Expert Guidance',
+            desc: 'Opportunity to attend live, interactive classroom sessions and technical demonstrations led by distinguished ISRO scientists and IIRS field experts.',
+            icon: <FaSatelliteDish />,
+            accent: '#9b59b6'
+        },
+        {
+            title: 'Official ISRO/IIRS Certification',
+            desc: 'Eligible students earn verifiable institutional course certificates directly from IIRS-ISRO upon fulfilling attendance criteria and passing online examinations.',
+            icon: <FaCertificate />,
+            accent: '#2ecc71'
+        },
+        {
+            title: 'Cutting-Edge Technical Skills',
+            desc: 'Gain foundational and specialized expertise in high-demand domains like Remote Sensing (RS), Geographic Information Systems (GIS), Global Navigation Satellite Systems (GNSS), and Drone/UAV data analysis.',
+            icon: <FaLayerGroup />,
+            accent: '#3498db'
+        },
+        {
+            title: 'Cost-Free Learning Resources',
+            desc: 'Access to premium digital study materials, open-source software tools, recorded video archives, and course handouts completely free of cost.',
+            icon: <FaBookReader />,
+            accent: '#e67e22'
+        },
+        {
+            title: 'Career & Research Advancement',
+            desc: 'Significantly upgrades a student’s technical profile, paving the way for advanced academic research, space-industry internships, and strategic placements in government and private geospatial sectors.',
+            icon: <FaRocket />,
+            accent: '#e74c3c'
+        }
+    ];
+
+    const iirsActivitiesCategories = [
+        {
+            title: 'Live IIRS Outreach Courses',
+            badge: 'ISRO E-CLASS',
+            icon: <FaLaptopCode />,
+            color: '#9b59b6',
+            items: [
+                'Enrolling students in real-time certification programs directly broadcasted by IIRS-ISRO.',
+                'Facilitating technical assessment tests and managing institutional attendance for final certification.'
+            ]
+        },
+        {
+            title: 'Workshops & Awareness Camps',
+            badge: 'Hands-on',
+            icon: <FaAtom />,
+            color: '#3498db',
+            items: [
+                'Organizing short-term technical workshops on advanced space science applications.',
+                'Collaborating with regional institutes to host community-level space technology awareness camps.'
+            ]
+        },
+        {
+            title: 'Webinars & Interactive Panels',
+            badge: 'Live Streaming',
+            icon: <FaGlobe />,
+            color: '#2ecc71',
+            items: [
+                'Hosting expert-led digital seminars on trending space tech developments and satellite missions.',
+                'Streaming live interactive question-and-answer panels featuring premier ISRO scientists.'
+            ]
+        },
+        {
+            title: 'Training Programs & FDPs',
+            badge: 'ISRO START',
+            icon: <FaGraduationCap />,
+            color: '#e67e22',
+            items: [
+                'Conducting dedicated student sessions under the ISRO START (Space Science and Technology Awareness Training) initiative.',
+                'Organizing faculty development programs (FDPs) to upgrade academic teaching standards in geospatial fields.'
+            ]
+        },
+        {
+            title: 'Guest Lectures & Industry Connect',
+            badge: 'Expert Talks',
+            icon: <FaUserTie />,
+            color: '#f1c40f',
+            items: [
+                'Inviting external core industrial professionals and defense geospatial experts for technical talks.',
+                'Hosting alumni who are working in drone technology and space start-ups to share field experiences.'
+            ]
+        },
+        {
+            title: 'Hands-on GIS & Remote Sensing Labs',
+            badge: 'Practical Labs',
+            icon: <FaMapMarkedAlt />,
+            color: '#e74c3c',
+            items: [
+                'Running practical laboratory sessions using open-source platforms like QGIS, SAGA, and Google Earth Engine.',
+                'Guiding students through real-time satellite data downloading, image processing, and digital map creation.'
+            ]
+        }
+    ];
+
+    const iirsAchievementsList = [
+        {
+            metric: '8+',
+            title: 'Core Digital Courses Completed',
+            desc: 'Successfully facilitated and concluded 8+ core digital certification courses since establishment in 2023. Curated curriculum completions spanning GIS foundations, global navigation systems, and advanced remote sensing analytics.',
+            icon: <FaAward />,
+            color: '#9b59b6'
+        },
+        {
+            metric: '120+',
+            title: 'Official ISRO Certificates Earned',
+            desc: 'More than 120+ official IIRS-ISRO student completion certificates processed and distributed. Achieved a consistent high passing rate on the final online assessment examinations conducted by IIRS.',
+            icon: <FaCertificate />,
+            color: '#2ecc71'
+        },
+        {
+            metric: '250+',
+            title: 'Student Participants Enrolled',
+            desc: 'Enrolled a total of 250+ student participants across multiple technical branches, led actively by the Department of Agricultural Engineering. Sustained a commendable 85%+ overall attendance record during live interactive satellite broadcasting sessions (E-CLASS platform).',
+            icon: <FaUsers />,
+            color: '#3498db'
+        },
+        {
+            metric: 'Active',
+            title: 'Recognized Nodal Centre',
+            desc: 'Recognized formally as an Active Nodal Centre by the Indian Institute of Remote Sensing (IIRS), ISRO Dehradun. Received appreciation certificates for the Faculty Coordinator for promoting geospatial literacy and space tech disciplines in the region.',
+            icon: <FaTrophy />,
+            color: '#f1c40f'
+        }
+    ];
+
+    const iirsGalleryItems = [
+        {
+            category: 'Event Photos',
+            icon: <FaImages />,
+            color: '#9b59b6',
+            items: [
+                'Inauguration ceremony of the IIRS-ISRO Nodal Centre Chapter at EASA College.',
+                'Active student gatherings during the national space awareness programs and START training events.'
+            ]
+        },
+        {
+            category: 'Course Screenshots & Labs',
+            icon: <FaLaptopCode />,
+            color: '#3498db',
+            items: [
+                'Live interactive streaming sessions on the IIRS E-CLASS online platform.',
+                'Group laboratory visuals showing students using open-source QGIS software during hands-on practicals.'
+            ]
+        },
+        {
+            category: 'Certificate Distribution',
+            icon: <FaAward />,
+            color: '#2ecc71',
+            items: [
+                'Official presentation of IIRS-ISRO certificates to students by the Principal and Head of Department.',
+                'Group photograph of certified student candidates alongside Faculty Coordinator Dr. K. RAJAPRIAN.'
+            ]
+        }
+    ];
+
+    const iirsResourcePortals = [
+        {
+            title: 'Course Calendar & Schedules',
+            portalName: 'IIRS EDUSAT News Portal',
+            desc: 'Track active digital schedules, module dates, and upcoming space science program streams via the official IIRS EDUSAT News Portal. Access real-time timetables for live interactive sessions broadcasted under the comprehensive geospatial course tracks.',
+            link: 'https://www.iirs.gov.in/EDUSAT-News',
+            badge: 'Live Schedules',
+            icon: <FaCalendarAlt />,
+            actionLabel: 'View Course Calendar'
+        },
+        {
+            title: 'Online Registration Guidelines',
+            portalName: 'IIRS Online Registration Form',
+            desc: 'Complete student enrollment requests exclusively using the formal IIRS Online Registration Form. Select "EASA College of Engineering and Technology" as the designated institutional Nodal Centre to ensure systematic profile verification, assignment monitoring, and internal coordinate approvals.',
+            link: 'https://isrolms.iirs.gov.in/edusatregistration/',
+            badge: 'Nodal Centre: EASA',
+            icon: <FaCheckCircle />,
+            actionLabel: 'Open Registration Form'
+        },
+        {
+            title: 'Course Brochures & Curriculum',
+            portalName: 'ISRO LMS Resource Portal',
+            desc: 'Download official curriculum syllabi, structural modules, and prerequisite system guidelines directly through the ISRO LMS Resource Portal. Review core criteria for attendance, technical assignments, and final certification exam parameters.',
+            link: 'https://isrolms.iirs.gov.in/edusatregistration/course_calendar/Course_Brochure_189.pdf',
+            badge: 'PDF Download',
+            icon: <FaFilePdf />,
+            actionLabel: 'Download Course Brochure'
+        },
+        {
+            title: 'Live Virtual Classroom',
+            portalName: 'ISRO E-Class Platform',
+            desc: 'Connect to daily live learning programs, video workspaces, and lecture archives via the high-performance ISRO E-Class interactive platform for enrolled students and registered nodal coordinators.',
+            link: 'https://eclass.iirs.gov.in/',
+            badge: 'Classroom Login',
+            icon: <FaSatelliteDish />,
+            actionLabel: 'Launch E-Class Portal'
+        },
+        {
+            title: 'Main Institutional Domain',
+            portalName: 'Indian Institute of Remote Sensing (IIRS)',
+            desc: 'Access full institutional announcements, research directives, academic initiatives, satellite datasets, and space program updates via the primary Indian Institute of Remote Sensing (IIRS - ISRO Dehradun) website.',
+            link: 'https://www.iirs.gov.in/',
+            badge: 'Official Portal',
+            icon: <FaGlobe />,
+            actionLabel: 'Visit IIRS Website'
+        }
+    ];
+
     return (
         <div className="professional-chapters-page" style={{ background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)' }}>
             <SEO
                 title="Professional Chapters | EASA College"
-                description="Explore the various professional chapters at EASA College of Engineering and Technology, including CSI, IEEE, ICTACT, and more."
+                description="Explore the various professional chapters at EASA College of Engineering and Technology, including IIRS (ISRO Outreach), IEEE, CSI, ICTACT, QCFI, and YUVA."
             />
 
             <Navbar />
@@ -240,18 +493,22 @@ const ProfessionalChaptersPage = () => {
             <GlobalHero
                 pageKey="professional-chapters"
                 defaultTitle="PROFESSIONAL CHAPTERS"
-                defaultSubtitle="EXCELLENCE THROUGH EMPOWERMENT"
+                defaultSubtitle="EXCELLENCE THROUGH EMPOWERMENT & SPACE SCIENCE OUTREACH"
             />
 
             <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '5rem 2rem', display: 'grid', gridTemplateColumns: '320px 1fr', gap: '4rem' }}>
                 <aside style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
                     <div style={{ background: 'var(--bg-card)', borderRadius: '24px', border: '1px solid var(--glass-border)', padding: '1.5rem', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)' }}>Chapters</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)' }}>Chapters & Outreach Cells</div>
                         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {chapters.map(chapter => (
                                 <button
                                     key={chapter.id}
-                                    onClick={() => setActiveSection(chapter.id)}
+                                    onClick={() => {
+                                        setActiveSection(chapter.id);
+                                        if (chapter.id === 'iirs') setIirsSubTab('all');
+                                        if (chapter.id === 'ieee') setIeeeSubTab('all');
+                                    }}
                                     className={`nav-btn ${activeSection === chapter.id ? 'active' : ''}`}
                                     style={{
                                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -262,7 +519,12 @@ const ProfessionalChaptersPage = () => {
                                         fontWeight: '700', fontSize: '1rem'
                                     }}
                                 >
-                                    <span>{chapter.name}</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                        <span style={{ fontSize: '1.1rem', opacity: activeSection === chapter.id ? 1 : 0.7 }}>
+                                            {chapter.icon}
+                                        </span>
+                                        <span>{chapter.name}</span>
+                                    </div>
                                     {activeSection === chapter.id && <FaChevronRight size={12} />}
                                 </button>
                             ))}
@@ -286,20 +548,688 @@ const ProfessionalChaptersPage = () => {
                         >
                             {/* Chapter Header */}
                             <div style={{ marginBottom: '2.5rem' }}>
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ type: 'spring', stiffness: 200 }}
-                                    style={{ fontSize: '4rem', color: 'var(--secondary)', marginBottom: '1rem', display: 'inline-block' }}
-                                >
-                                    {activeChapter.icon}
-                                </motion.div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: 'spring', stiffness: 200 }}
+                                        style={{ fontSize: '3.8rem', color: activeChapter.color || 'var(--secondary)', display: 'inline-block' }}
+                                    >
+                                        {activeChapter.icon}
+                                    </motion.div>
+
+                                    {activeSection === 'iirs' && (
+                                        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                                            <span style={{
+                                                background: 'rgba(155, 89, 182, 0.15)',
+                                                color: '#a855f7',
+                                                border: '1px solid rgba(155, 89, 182, 0.3)',
+                                                padding: '0.45rem 1rem',
+                                                borderRadius: '30px',
+                                                fontWeight: '800',
+                                                fontSize: '0.85rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.4rem'
+                                            }}>
+                                                <FaRocket size={12} /> ISRO Distance Learning Hub
+                                            </span>
+                                            <span style={{
+                                                background: 'rgba(46, 204, 113, 0.15)',
+                                                color: '#2ecc71',
+                                                border: '1px solid rgba(46, 204, 113, 0.3)',
+                                                padding: '0.45rem 1rem',
+                                                borderRadius: '30px',
+                                                fontWeight: '800',
+                                                fontSize: '0.85rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.4rem'
+                                            }}>
+                                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2ecc71', display: 'inline-block', boxShadow: '0 0 8px #2ecc71' }}></span>
+                                                Active Nodal Centre (Est. 2023)
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <h1 style={{ fontSize: '3.2rem', fontWeight: '900', margin: '0 0 0.5rem 0', lineHeight: '1.1', color: 'var(--text-main)' }}>{activeChapter.name}</h1>
                                 <p style={{ fontSize: '1.3rem', color: 'var(--secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px' }}>{activeChapter.fullName}</p>
                             </div>
 
-                            {/* IEEE Specialized Comprehensive Layout */}
-                            {activeSection === 'ieee' ? (
+                            {/* ============================================================== */}
+                            {/* IIRS SPECIALIZED FULL-FEATURED COMPREHENSIVE VIEW */}
+                            {/* ============================================================== */}
+                            {activeSection === 'iirs' ? (
+                                <div>
+                                    {/* Internal Sub-Navigation for IIRS */}
+                                    <div style={{
+                                        display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2.5rem',
+                                        padding: '0.8rem', background: 'var(--bg-section)', borderRadius: '20px',
+                                        border: '1px solid var(--glass-border)'
+                                    }}>
+                                        {iirsNavTabs.map(tab => (
+                                            <button
+                                                key={tab.id}
+                                                onClick={() => setIirsSubTab(tab.id)}
+                                                style={{
+                                                    padding: '0.6rem 1.1rem', borderRadius: '12px', border: 'none',
+                                                    fontSize: '0.86rem', fontWeight: '700', cursor: 'pointer',
+                                                    transition: 'all 0.3s ease',
+                                                    background: iirsSubTab === tab.id ? 'var(--secondary)' : 'transparent',
+                                                    color: iirsSubTab === tab.id ? 'var(--bg-dark)' : 'var(--text-muted)'
+                                                }}
+                                            >
+                                                {tab.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Quick Info Strip */}
+                                    <div style={{
+                                        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                        gap: '1.2rem', marginBottom: '2.5rem'
+                                    }}>
+                                        <div style={{ background: 'var(--bg-section)', padding: '1.3rem 1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                            <div style={{ fontSize: '0.78rem', color: 'var(--secondary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Chapter / Cell</div>
+                                            <div style={{ fontSize: '1.15rem', fontWeight: '900', color: 'var(--text-main)', marginTop: '0.3rem' }}>IIRS Outreach Cell</div>
+                                        </div>
+                                        <div style={{ background: 'var(--bg-section)', padding: '1.3rem 1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                            <div style={{ fontSize: '0.78rem', color: 'var(--secondary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Established Year</div>
+                                            <div style={{ fontSize: '1.15rem', fontWeight: '900', color: 'var(--text-main)', marginTop: '0.3rem' }}>2023</div>
+                                        </div>
+                                        <div style={{ background: 'var(--bg-section)', padding: '1.3rem 1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                            <div style={{ fontSize: '0.78rem', color: 'var(--secondary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Nodal Centre</div>
+                                            <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)', marginTop: '0.3rem' }}>EASA College of Engg. & Tech.</div>
+                                        </div>
+                                        <div style={{ background: 'var(--bg-section)', padding: '1.3rem 1.5rem', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
+                                            <div style={{ fontSize: '0.78rem', color: 'var(--secondary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Department Lead</div>
+                                            <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-main)', marginTop: '0.3rem' }}>Agricultural Engineering</div>
+                                        </div>
+                                    </div>
+
+                                    {/* -------------------------------------------------------- */}
+                                    {/* CONDENSED FOCUSED ALL OVERVIEW TAB */}
+                                    {/* -------------------------------------------------------- */}
+                                    {iirsSubTab === 'all' && (
+                                        <div style={{ marginBottom: '2rem' }}>
+                                            {/* Executive Overview Highlight Card */}
+                                            <div className="card-3d-subtle" style={{
+                                                background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(155, 89, 182, 0.08) 100%)',
+                                                padding: '2.5rem', borderRadius: '28px', border: '1px solid var(--glass-border)',
+                                                marginBottom: '2.5rem', boxShadow: '0 20px 40px rgba(0,0,0,0.04)'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1rem' }}>
+                                                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>
+                                                        <FaGlobe />
+                                                    </div>
+                                                    <div>
+                                                        <h3 style={{ fontSize: '1.8rem', fontWeight: '900', margin: 0, color: 'var(--text-main)' }}>
+                                                            Overview & Core Mandate
+                                                        </h3>
+                                                        <span style={{ fontSize: '0.85rem', color: 'var(--secondary)', fontWeight: '700' }}>
+                                                            Indian Institute of Remote Sensing (IIRS - ISRO) Nodal Centre
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <p style={{ fontSize: '1.12rem', lineHeight: '1.8', color: 'var(--text-muted)', margin: '0 0 2rem 0' }}>
+                                                    The <strong>IIRS-ISRO Outreach Programme</strong> at EASA College of Engineering and Technology (Est. 2023) serves as an official institutional distance-learning hub connecting students and faculty with the <strong>Indian Space Research Organisation (ISRO)</strong>. Utilizing satellite and digital broadcasting via the E-CLASS platform, the centre delivers live courses, hands-on GIS workshops, and the ISRO START initiative to build skilled manpower in geospatial technologies and satellite earth observation.
+                                                </p>
+
+                                                {/* Key Metrics Strip */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1.8rem' }}>
+                                                    <div style={{ background: 'var(--bg-card)', padding: '1.2rem', borderRadius: '16px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                                                        <div style={{ fontSize: '2rem', fontWeight: '900', color: '#9b59b6' }}>8+</div>
+                                                        <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Courses Completed</div>
+                                                    </div>
+                                                    <div style={{ background: 'var(--bg-card)', padding: '1.2rem', borderRadius: '16px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                                                        <div style={{ fontSize: '2rem', fontWeight: '900', color: '#2ecc71' }}>120+</div>
+                                                        <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Certificates Earned</div>
+                                                    </div>
+                                                    <div style={{ background: 'var(--bg-card)', padding: '1.2rem', borderRadius: '16px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                                                        <div style={{ fontSize: '2rem', fontWeight: '900', color: '#3498db' }}>250+</div>
+                                                        <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Participants Enrolled</div>
+                                                    </div>
+                                                    <div style={{ background: 'var(--bg-card)', padding: '1.2rem', borderRadius: '16px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                                                        <div style={{ fontSize: '2rem', fontWeight: '900', color: '#f1c40f' }}>85%+</div>
+                                                        <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-muted)', marginTop: '0.2rem' }}>E-CLASS Attendance</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Vision & Mission Summary Cards */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                                                <div className="card-3d-subtle" style={{ background: 'var(--bg-section)', padding: '1.8rem', borderRadius: '22px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
+                                                        <FaEye style={{ color: '#9b59b6', fontSize: '1.4rem' }} />
+                                                        <h4 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Vision</h4>
+                                                    </div>
+                                                    <p style={{ fontSize: '0.98rem', lineHeight: '1.6', color: 'var(--text-muted)', margin: 0 }}>
+                                                        To empower academic institutions by mainstreaming advanced space technology and satellite applications into higher education, fostering a self-reliant nation with top-tier scientific capabilities.
+                                                    </p>
+                                                </div>
+
+                                                <div className="card-3d-subtle" style={{ background: 'var(--bg-section)', padding: '1.8rem', borderRadius: '22px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
+                                                        <FaBullseye style={{ color: '#2ecc71', fontSize: '1.4rem' }} />
+                                                        <h4 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Mission</h4>
+                                                    </div>
+                                                    <p style={{ fontSize: '0.98rem', lineHeight: '1.6', color: 'var(--text-muted)', margin: 0 }}>
+                                                        To continuously strengthen academia through accessible online learning platforms, providing comprehensive, high-quality technical education in space sciences, earth observation data, and remote sensing tools.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Core Focus Domains & Coordinators Snapshot */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                                                {/* Technical Pillars */}
+                                                <div className="card-3d-subtle" style={{ background: 'var(--bg-section)', padding: '1.8rem', borderRadius: '22px', border: '1px solid var(--glass-border)' }}>
+                                                    <h4 style={{ fontSize: '1.2rem', fontWeight: '800', margin: '0 0 1rem 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                        <FaLayerGroup style={{ color: 'var(--secondary)' }} /> Core Technical Domains
+                                                    </h4>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
+                                                        {['Remote Sensing (RS)', 'Geographic Info Systems (GIS)', 'Global Navigation (GNSS)', 'Drone / UAV Data', 'ISRO START Training', 'QGIS & Earth Engine'].map((tag, tIdx) => (
+                                                            <span key={tIdx} style={{
+                                                                padding: '0.45rem 0.9rem', borderRadius: '12px',
+                                                                background: 'var(--bg-card)', border: '1px solid var(--glass-border)',
+                                                                fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)'
+                                                            }}>
+                                                                {tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Coordinator Snapshot */}
+                                                <div className="card-3d-subtle" style={{ background: 'var(--bg-section)', padding: '1.8rem', borderRadius: '22px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                                    <div>
+                                                        <h4 style={{ fontSize: '1.2rem', fontWeight: '800', margin: '0 0 0.8rem 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                                            <FaUserTie style={{ color: '#9b59b6' }} /> Faculty In-Charge
+                                                        </h4>
+                                                        <div style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-main)' }}>Dr. K. RAJAPRIAN</div>
+                                                        <div style={{ fontSize: '0.88rem', color: 'var(--secondary)', fontWeight: '700' }}>Associate Professor, Agricultural Engineering</div>
+                                                        <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Student Coordinator: SANTHOSH G (President, 2nd Yr Agri)</div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', paddingTop: '0.8rem', borderTop: '1px solid var(--glass-border)', fontSize: '0.88rem' }}>
+                                                        <a href="mailto:rajapriyan.k@ecetonline.com" style={{ color: 'var(--secondary)', textDecoration: 'none', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                            <FaEnvelope /> Email
+                                                        </a>
+                                                        <a href="tel:+917397626874" style={{ color: 'var(--text-main)', textDecoration: 'none', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                            <FaPhoneAlt /> +91 73976 26874
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Quick Official Portal Links Bar */}
+                                            <div style={{ background: 'var(--bg-section)', padding: '1.6rem 2rem', borderRadius: '22px', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                                                <div>
+                                                    <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-main)' }}>Official IIRS-ISRO Portals</div>
+                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Quick access to live courses, LMS registration, and calendar</div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                                                    <a href="https://isrolms.iirs.gov.in/edusatregistration/" target="_blank" rel="noopener noreferrer" style={{ padding: '0.6rem 1.1rem', borderRadius: '12px', background: 'var(--secondary)', color: 'var(--bg-dark)', fontWeight: '800', fontSize: '0.88rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span>Student Registration</span>
+                                                        <FaExternalLinkAlt size={10} />
+                                                    </a>
+                                                    <a href="https://eclass.iirs.gov.in/" target="_blank" rel="noopener noreferrer" style={{ padding: '0.6rem 1.1rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', fontWeight: '700', fontSize: '0.88rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span>E-Class Login</span>
+                                                        <FaExternalLinkAlt size={10} />
+                                                    </a>
+                                                    <a href="https://www.iirs.gov.in/EDUSAT-News" target="_blank" rel="noopener noreferrer" style={{ padding: '0.6rem 1.1rem', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', fontWeight: '700', fontSize: '0.88rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span>Course Calendar</span>
+                                                        <FaExternalLinkAlt size={10} />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* -------------------------------------------------------- */}
+                                    {/* DETAILED SUB-TAB VIEWS */}
+                                    {/* -------------------------------------------------------- */}
+
+                                    {/* About IIRS-ISRO Outreach Section */}
+                                    {iirsSubTab === 'about' && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <FaGlobe style={{ color: '#9b59b6' }} /> Introduction to IIRS-ISRO Outreach Programme
+                                            </h3>
+                                            <p style={{ fontSize: '1.12rem', lineHeight: '1.8', color: 'var(--text-muted)', marginBottom: '2.5rem' }}>
+                                                The <strong>IIRS-ISRO Outreach Programme</strong> is a premium distance-learning initiative by the <strong>Indian Institute of Remote Sensing (IIRS)</strong>, a constituent unit of the <strong>Indian Space Research Organisation (ISRO)</strong>. Established to bridge the gap between cutting-edge space technology and mainstream academia, the program utilizes state-of-the-art internet and satellite communication tools (such as the E-CLASS platform) to deliver live, interactive, and self-paced digital courses. It primarily targets students, faculty, and researchers across universities to build a robust pool of skilled manpower in geospatial technologies.
+                                            </p>
+
+                                            {/* Vision & Mission Cards Grid */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
+                                                <div className="card-3d-subtle" style={{ background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(155, 89, 182, 0.05) 100%)', padding: '2.2rem', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1rem' }}>
+                                                        <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                                                            <FaEye />
+                                                        </div>
+                                                        <h4 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Vision</h4>
+                                                    </div>
+                                                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-muted)', margin: 0 }}>
+                                                        To empower academic institutions by mainstreaming advanced space technology and satellite applications into higher education, fostering a self-reliant nation equipped with top-tier scientific and technological capabilities.
+                                                    </p>
+                                                </div>
+
+                                                <div className="card-3d-subtle" style={{ background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(46, 204, 113, 0.05) 100%)', padding: '2.2rem', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1rem' }}>
+                                                        <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                                                            <FaBullseye />
+                                                        </div>
+                                                        <h4 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>Mission</h4>
+                                                    </div>
+                                                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-muted)', margin: 0 }}>
+                                                        To continuously strengthen academia and user segments through accessible online learning platforms, providing comprehensive, high-quality technical education in space sciences, earth observation data, and remote sensing tools.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Objectives */}
+                                    {iirsSubTab === 'objectives' && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                                                <FaLightbulb style={{ color: 'var(--secondary)', fontSize: '1.8rem' }} />
+                                                <h3 style={{ fontSize: '1.8rem', fontWeight: '900', margin: 0, color: 'var(--text-main)' }}>Centre Objectives</h3>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                {iirsObjectives.map((obj, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="card-3d-subtle"
+                                                        style={{
+                                                            display: 'flex', alignItems: 'flex-start', gap: '1.2rem',
+                                                            background: 'var(--bg-section)', padding: '1.3rem 1.6rem',
+                                                            borderRadius: '18px', border: '1px solid var(--glass-border)',
+                                                            transition: 'all 0.3s ease'
+                                                        }}
+                                                    >
+                                                        <div style={{
+                                                            width: '32px', height: '32px', borderRadius: '50%',
+                                                            background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            fontWeight: '900', fontSize: '0.9rem', flexShrink: 0
+                                                        }}>
+                                                            {idx + 1}
+                                                        </div>
+                                                        <span style={{ fontSize: '1.02rem', fontWeight: '600', color: 'var(--text-main)', lineHeight: '1.6' }}>
+                                                            {obj}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Coordinators Section */}
+                                    {iirsSubTab === 'coordinators' && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1.8rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <FaUsers style={{ color: '#9b59b6' }} /> Faculty & Student Coordinators
+                                            </h3>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+                                                {/* Faculty Coordinator Card */}
+                                                <div
+                                                    className="card-3d-subtle"
+                                                    style={{
+                                                        background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(155, 89, 182, 0.08) 100%)',
+                                                        padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--glass-border)',
+                                                        boxShadow: '0 15px 35px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+                                                    }}
+                                                >
+                                                    <div>
+                                                        <div style={{
+                                                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                                            background: 'rgba(155, 89, 182, 0.15)', color: '#a855f7',
+                                                            padding: '0.4rem 0.9rem', borderRadius: '50px', fontSize: '0.78rem',
+                                                            fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '1.2rem'
+                                                        }}>
+                                                            <FaUserTie /> Faculty Coordinator
+                                                        </div>
+                                                        <h4 style={{ fontSize: '1.7rem', fontWeight: '900', margin: '0 0 0.4rem 0', color: 'var(--text-main)' }}>
+                                                            Dr. K. RAJAPRIAN
+                                                        </h4>
+                                                        <p style={{ fontSize: '1rem', fontWeight: '800', color: '#9b59b6', margin: '0 0 0.4rem 0', textTransform: 'uppercase' }}>
+                                                            ASSOCIATE PROFESSOR
+                                                        </p>
+                                                        <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: '0 0 1.8rem 0', fontWeight: '600' }}>
+                                                            Department of Agricultural Engineering<br />
+                                                            EASA College of Engineering and Technology
+                                                        </p>
+                                                    </div>
+
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1.4rem' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                                                            <FaEnvelope style={{ color: '#9b59b6' }} />
+                                                            <a href="mailto:rajapriyan.k@ecetonline.com" style={{ color: 'var(--text-main)', textDecoration: 'none', fontWeight: '600' }}>
+                                                                rajapriyan.k@ecetonline.com
+                                                            </a>
+                                                        </div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                                                            <FaPhoneAlt style={{ color: '#9b59b6' }} />
+                                                            <a href="tel:+917397626874" style={{ color: 'var(--text-main)', textDecoration: 'none', fontWeight: '700' }}>
+                                                                +91 73976 26874
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Student Coordinator Card */}
+                                                <div
+                                                    className="card-3d-subtle"
+                                                    style={{
+                                                        background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(52, 152, 219, 0.08) 100%)',
+                                                        padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--glass-border)',
+                                                        boxShadow: '0 15px 35px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+                                                    }}
+                                                >
+                                                    <div>
+                                                        <div style={{
+                                                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                                            background: 'rgba(52, 152, 219, 0.15)', color: '#38bdf8',
+                                                            padding: '0.4rem 0.9rem', borderRadius: '50px', fontSize: '0.78rem',
+                                                            fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '1.2rem'
+                                                        }}>
+                                                            <FaGraduationCap /> Student Coordinator
+                                                        </div>
+                                                        <h4 style={{ fontSize: '1.7rem', fontWeight: '900', margin: '0 0 0.4rem 0', color: 'var(--text-main)' }}>
+                                                            SANTHOSH G
+                                                        </h4>
+                                                        <div style={{ display: 'inline-block', background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71', padding: '0.25rem 0.75rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '800', marginBottom: '0.8rem' }}>
+                                                            Position: President
+                                                        </div>
+                                                        <p style={{ fontSize: '1rem', fontWeight: '700', color: '#3498db', margin: '0 0 0.4rem 0' }}>
+                                                            2ND YEAR / 3RD SEMESTER
+                                                        </p>
+                                                        <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', margin: '0 0 1.8rem 0', fontWeight: '600' }}>
+                                                            Department of Agricultural Engineering<br />
+                                                            EASA College of Engineering and Technology
+                                                        </p>
+                                                    </div>
+
+                                                    <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1.4rem' }}>
+                                                        <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                                                            Responsible for student onboarding, course attendance coordination, and laboratory peer facilitation.
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Activities & Outreach Section */}
+                                    {iirsSubTab === 'activities' && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+                                                <div>
+                                                    <div style={{ fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--secondary)', marginBottom: '0.3rem' }}>
+                                                        IIRS-ISRO Outreach Centre
+                                                    </div>
+                                                    <h3 style={{ fontSize: '1.8rem', fontWeight: '900', margin: 0, color: 'var(--text-main)' }}>
+                                                        Outreach Initiatives & Technical Activities
+                                                    </h3>
+                                                </div>
+                                                <span style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#a855f7', border: '1px solid rgba(155, 89, 182, 0.3)', padding: '0.4rem 1rem', borderRadius: '20px', fontWeight: '700', fontSize: '0.85rem' }}>
+                                                    6 Active Tracks
+                                                </span>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.8rem' }}>
+                                                {iirsActivitiesCategories.map((act, idx) => (
+                                                    <motion.div
+                                                        key={idx}
+                                                        whileHover={{ y: -4, borderColor: act.color }}
+                                                        className="card-3d-subtle"
+                                                        style={{
+                                                            background: 'var(--bg-section)', padding: '2rem', borderRadius: '22px',
+                                                            border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column',
+                                                            justifyContent: 'space-between', gap: '1.2rem', transition: 'all 0.3s ease'
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem' }}>
+                                                                <div style={{ width: '46px', height: '46px', borderRadius: '14px', background: `${act.color}22`, color: act.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>
+                                                                    {act.icon}
+                                                                </div>
+                                                                <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '0.3rem 0.75rem', borderRadius: '50px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: 'var(--secondary)' }}>
+                                                                    {act.badge}
+                                                                </span>
+                                                            </div>
+                                                            <h4 style={{ fontSize: '1.25rem', fontWeight: '800', margin: '0 0 1rem 0', color: 'var(--text-main)' }}>
+                                                                {act.title}
+                                                            </h4>
+                                                            <ul style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', color: 'var(--text-muted)', fontSize: '0.96rem', lineHeight: '1.6' }}>
+                                                                {act.items.map((it, iIdx) => (
+                                                                    <li key={iIdx}>{it}</li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Achievements Section */}
+                                    {iirsSubTab === 'achievements' && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.8rem' }}>
+                                                <FaTrophy style={{ color: '#f1c40f', fontSize: '1.8rem' }} />
+                                                <h3 style={{ fontSize: '1.8rem', fontWeight: '900', margin: 0, color: 'var(--text-main)' }}>Achievements & Recognition</h3>
+                                            </div>
+
+                                            {/* Key Metrics Stats Grid */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                                                {iirsAchievementsList.map((ach, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="card-3d-subtle"
+                                                        style={{
+                                                            background: 'linear-gradient(135deg, var(--bg-section) 0%, rgba(255,255,255,0.02) 100%)',
+                                                            padding: '2rem', borderRadius: '24px', border: '1px solid var(--glass-border)',
+                                                            display: 'flex', flexDirection: 'column', gap: '0.8rem'
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                            <div style={{ fontSize: '2.8rem', fontWeight: '900', color: ach.color, lineHeight: '1' }}>
+                                                                {ach.metric}
+                                                            </div>
+                                                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${ach.color}22`, color: ach.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                                                                {ach.icon}
+                                                            </div>
+                                                        </div>
+                                                        <h4 style={{ fontSize: '1.15rem', fontWeight: '800', margin: '0.2rem 0 0 0', color: 'var(--text-main)' }}>
+                                                            {ach.title}
+                                                        </h4>
+                                                        <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.6' }}>
+                                                            {ach.desc}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Student Benefits Section */}
+                                    {iirsSubTab === 'benefits' && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.8rem' }}>
+                                                <FaRocket style={{ color: '#e74c3c', fontSize: '1.8rem' }} />
+                                                <h3 style={{ fontSize: '1.8rem', fontWeight: '900', margin: 0, color: 'var(--text-main)' }}>Benefits for Students</h3>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                                {iirsStudentBenefits.map((b, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="card-3d-subtle"
+                                                        style={{
+                                                            background: 'var(--bg-section)', padding: '2rem', borderRadius: '22px',
+                                                            border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column',
+                                                            gap: '0.8rem', transition: 'all 0.3s ease'
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem', marginBottom: '0.4rem' }}>
+                                                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${b.accent}22`, color: b.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                                                                {b.icon}
+                                                            </div>
+                                                            <h4 style={{ fontSize: '1.2rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>
+                                                                {idx + 1}. {b.title}
+                                                            </h4>
+                                                        </div>
+                                                        <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.7' }}>
+                                                            {b.desc}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Gallery Glimpses */}
+                                    {iirsSubTab === 'gallery' && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.8rem' }}>
+                                                <FaImages style={{ color: '#9b59b6', fontSize: '1.8rem' }} />
+                                                <h3 style={{ fontSize: '1.8rem', fontWeight: '900', margin: 0, color: 'var(--text-main)' }}>Gallery & Event Glimpses</h3>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.8rem' }}>
+                                                {iirsGalleryItems.map((g, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="card-3d-subtle"
+                                                        style={{
+                                                            background: 'var(--bg-section)', padding: '2rem', borderRadius: '24px',
+                                                            border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column',
+                                                            justifyContent: 'space-between', gap: '1.2rem'
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.2rem' }}>
+                                                                <div style={{ width: '46px', height: '46px', borderRadius: '14px', background: `${g.color}22`, color: g.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem' }}>
+                                                                    {g.icon}
+                                                                </div>
+                                                                <h4 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>
+                                                                    {g.category}
+                                                                </h4>
+                                                            </div>
+                                                            <ul style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.7rem', color: 'var(--text-muted)', fontSize: '0.96rem', lineHeight: '1.6' }}>
+                                                                {g.items.map((item, iIdx) => (
+                                                                    <li key={iIdx}>{item}</li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                        <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--secondary)', fontSize: '0.85rem', fontWeight: '700' }}>
+                                                            <span>IIRS Nodal Gallery</span>
+                                                            <FaChevronRight size={10} />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Resources & Portal Links */}
+                                    {iirsSubTab === 'resources' && (
+                                        <div style={{ marginBottom: '3.5rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.8rem' }}>
+                                                <FaDownload style={{ color: 'var(--secondary)', fontSize: '1.8rem' }} />
+                                                <h3 style={{ fontSize: '1.8rem', fontWeight: '900', margin: 0, color: 'var(--text-main)' }}>Resources & Official Portals</h3>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.8rem' }}>
+                                                {iirsResourcePortals.map((res, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="card-3d-subtle"
+                                                        style={{
+                                                            background: 'var(--bg-section)', padding: '2rem', borderRadius: '24px',
+                                                            border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column',
+                                                            justifyContent: 'space-between', gap: '1.5rem', transition: 'all 0.3s ease'
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                                                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                                                                    {res.icon}
+                                                                </div>
+                                                                <span style={{ fontSize: '0.75rem', fontWeight: '800', padding: '0.3rem 0.75rem', borderRadius: '50px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)', color: '#a855f7' }}>
+                                                                    {res.badge}
+                                                                </span>
+                                                            </div>
+                                                            <h4 style={{ fontSize: '1.3rem', fontWeight: '800', margin: '0 0 0.3rem 0', color: 'var(--text-main)' }}>
+                                                                {res.title}
+                                                            </h4>
+                                                            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--secondary)', marginBottom: '0.8rem' }}>
+                                                                {res.portalName}
+                                                            </div>
+                                                            <p style={{ fontSize: '0.94rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.6' }}>
+                                                                {res.desc}
+                                                            </p>
+                                                        </div>
+
+                                                        <a
+                                                            href={res.link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            style={{
+                                                                background: 'var(--bg-card)', padding: '0.9rem 1.4rem', borderRadius: '14px',
+                                                                border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center',
+                                                                justifyContent: 'space-between', textDecoration: 'none', color: 'var(--secondary)',
+                                                                fontWeight: '700', fontSize: '0.92rem', transition: 'all 0.3s ease'
+                                                            }}
+                                                        >
+                                                            <span>{res.actionLabel}</span>
+                                                            <FaExternalLinkAlt size={12} />
+                                                        </a>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Contact Section */}
+                                    {iirsSubTab === 'contact' && (
+                                        <div>
+                                            <h3 style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '1.8rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <FaPhoneAlt style={{ color: '#9b59b6' }} /> Contact Details & Institutional Node
+                                            </h3>
+                                            <div style={{ background: 'var(--bg-section)', padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+                                                <h4 style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--secondary)', marginBottom: '0.8rem' }}>
+                                                    IIRS-ISRO Outreach Nodal Centre
+                                                </h4>
+                                                <p style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: '700', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+                                                    Department of Agricultural Engineering<br />
+                                                    EASA College of Engineering and Technology<br />
+                                                    NH-47, Palakkad Main Road, Navakkarai (PO), Coimbatore - 641 105, Tamil Nadu
+                                                </p>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', fontSize: '1.05rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
+                                                        <FaUserTie style={{ color: '#9b59b6' }} />
+                                                        <span>Coordinator: <strong style={{ color: 'var(--text-main)' }}>Dr. K. RAJAPRIAN</strong> (Associate Professor)</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
+                                                        <FaEnvelope style={{ color: '#9b59b6' }} />
+                                                        <a href="mailto:rajapriyan.k@ecetonline.com" style={{ color: 'var(--secondary)', textDecoration: 'none', fontWeight: '700' }}>rajapriyan.k@ecetonline.com</a>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
+                                                        <FaPhoneAlt style={{ color: '#9b59b6' }} />
+                                                        <a href="tel:+917397626874" style={{ color: 'var(--text-main)', textDecoration: 'none', fontWeight: '700' }}>+91 73976 26874</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : activeSection === 'ieee' ? (
+                                /* ============================================================== */
+                                /* IEEE Specialized Comprehensive Layout */
+                                /* ============================================================== */
                                 <div>
                                     {/* Internal Sub-Navigation for IEEE */}
                                     <div style={{
@@ -613,7 +1543,7 @@ const ProfessionalChaptersPage = () => {
                                                         style={{
                                                             background: 'var(--bg-section)', padding: '1.4rem 1.8rem', borderRadius: '20px',
                                                             border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center',
-                                                            justify: 'space-between', textDecoration: 'none', transition: 'all 0.3s ease'
+                                                            justifyContent: 'space-between', textDecoration: 'none', transition: 'all 0.3s ease'
                                                         }}
                                                     >
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -887,4 +1817,3 @@ const ProfessionalChaptersPage = () => {
 };
 
 export default ProfessionalChaptersPage;
-

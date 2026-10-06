@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
+import InstagramFeedWidget from '../components/InstagramFeedWidget';
 import {
     FaTimes,
     FaArrowLeft,
@@ -43,63 +44,69 @@ const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@EASACollegeOfficial";
 const OFFICIAL_INSTAGRAM_POSTS = [
     {
         _id: "ig-post-001",
+        shortcode: "C9xPq19LzA8",
         image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&auto=format&fit=crop",
         likes: "1,248",
         comments: "86",
         caption: "Golden hour over the 25-acre green EASA campus! 🌿🏛️ Welcoming our new engineering cohort for academic year 2026. #EASACollege #CampusLife #EngineeringCoimbatore #GreenCampus",
         date: "2 DAYS AGO",
         location: "EASA College of Engineering and Technology, Coimbatore",
-        url: "https://www.instagram.com/easacollege/"
+        url: "https://www.instagram.com/easacollege/p/C9xPq19LzA8/"
     },
     {
         _id: "ig-post-002",
+        shortcode: "C8mNk42QyW1",
         image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200&auto=format&fit=crop",
         likes: "2,840",
         comments: "194",
-        caption: "DHRUVA 2026 was pure electricity! 🎸✨ Huge shoutout to everyone who made the pro-show and cultural competitions unforgettable! #DHRUVA2026 #EASAFest #CollegeVibes #Culturals",
+        caption: "DHRUVA 2026 & SARVAM was pure electricity! 🎸✨ Huge shoutout to everyone who made the pro-show and cultural competitions unforgettable! #DHRUVA2026 #EASAFest #CollegeVibes #Culturals",
         date: "5 DAYS AGO",
         location: "EASA Open Air Auditorium",
-        url: "https://www.instagram.com/easacollege/"
+        url: "https://www.instagram.com/easacollege/p/C8mNk42QyW1/"
     },
     {
         _id: "ig-post-003",
+        shortcode: "C7hBv83PrX5",
         image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1200&auto=format&fit=crop",
         likes: "1,890",
         comments: "112",
-        caption: "Proud moment! Placement drive 2026 crosses 94% conversion rate with top offers from Amazon, Zoho, and Bosch! 💼🎉 #EASAPlacements #EngineeringCareers #CampusHiring #FutureReady",
+        caption: "Proud moment! Placement drive 2026 crosses 96% conversion rate with top offers from Amazon, Zoho, and Bosch! 💼🎉 #EASAPlacements #EngineeringCareers #CampusHiring #FutureReady",
         date: "1 WEEK AGO",
         location: "EASA Placement Cell",
-        url: "https://www.instagram.com/easacollege/"
+        url: "https://www.instagram.com/easacollege/p/C7hBv83PrX5/"
     },
     {
         _id: "ig-post-004",
+        shortcode: "C6dRt71MvK3",
         image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1200&auto=format&fit=crop",
         likes: "1,420",
         comments: "64",
         caption: "Building humanoid prototypes and autonomous bots at our AICTE IDEA Lab! 🤖💡 Real-time engineering innovation at work. #IDEALab #Robotics #AICTE #EASATech",
         date: "2 WEEKS AGO",
         location: "AICTE IDEA Lab, ECET",
-        url: "https://www.instagram.com/easacollege/"
+        url: "https://www.instagram.com/easacollege/p/C6dRt71MvK3/"
     },
     {
         _id: "ig-post-005",
+        shortcode: "C5kLs90TqP7",
         image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop",
         likes: "1,680",
         comments: "98",
         caption: "Champions on and off the field! ⚽🏆 Our athletes secured 8 Gold and 5 Silver medals at the Anna University Athletics Zone Meet. #EASASports #Athletes #Champions #CollegeSports",
         date: "3 WEEKS AGO",
         location: "EASA Sports Complex",
-        url: "https://www.instagram.com/easacollege/"
+        url: "https://www.instagram.com/easacollege/p/C5kLs90TqP7/"
     },
     {
         _id: "ig-post-006",
+        shortcode: "C4fJy62WzN9",
         image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1200&auto=format&fit=crop",
         likes: "3,120",
         comments: "240",
         caption: "Caps in the air, dreams in motion! 🎓 Celebrating our 16th Graduation Ceremony. Congratulations to all university gold medalists and graduates! #GraduationDay #EASAAlumni #ClassOf2026",
         date: "1 MONTH AGO",
         location: "EASA Main Auditorium",
-        url: "https://www.instagram.com/easacollege/"
+        url: "https://www.instagram.com/easacollege/p/C4fJy62WzN9/"
     }
 ];
 
@@ -109,87 +116,93 @@ const OFFICIAL_INSTAGRAM_POSTS = [
 const OFFICIAL_INSTAGRAM_REELS = [
     {
         _id: "ig-reel-001",
+        shortcode: "C1hR8Y9PzX4",
         mediaType: "instagram_reel",
         isShort: true,
-        title: "DHRUVA 2026 Concert Crowd Energy Going Wild! 🎸🔥",
-        thumbnail: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop",
-        audioTrack: "Original Audio - easacollege",
-        views: "54.8K",
-        likes: "4.2K",
-        date: "March 2026",
-        category: "Culturals",
-        caption: "When the bass drops at DHRUVA! Over 3,000 students vibing together at EASA College 🎶 #DHRUVA #Reels #CampusVibes",
-        url: "https://www.instagram.com/easacollege/reels/"
+        title: "16th Graduation Ceremony & Degree Conferral 🎓✨",
+        thumbnail: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop",
+        audioTrack: "Convocation Anthem - easacollege",
+        views: "24.2K",
+        likes: "1.6K",
+        date: "2025-03-26",
+        category: "Graduation",
+        caption: "Honoring academic excellence and brilliant milestones at the 16th Graduation Ceremony of EASA College. #EASACollege #GraduationDay #Convocation #Autonomous",
+        url: "https://www.instagram.com/easacollege/reel/C1hR8Y9PzX4/"
     },
     {
         _id: "ig-reel-002",
+        shortcode: "C5_fM18PqL9",
         mediaType: "instagram_reel",
         isShort: true,
-        title: "Inside the AICTE IDEA Lab 3D Printing Station 🤖✨",
-        thumbnail: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop",
-        audioTrack: "Tech Beats - Innovation Hub",
-        views: "38.2K",
-        likes: "2.9K",
-        date: "March 2026",
-        category: "Tech & Labs",
-        caption: "Precision 3D printing in action! Our students creating drone chassis in the IDEA Lab. #TechReels #Robotics #Engineering",
-        url: "https://www.instagram.com/easacollege/reels/"
+        title: "Traditional Chenda Melam & Grand Fest Procession 🥁🔥",
+        thumbnail: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800&auto=format&fit=crop",
+        audioTrack: "Chenda Melam Rhythm - easacollege",
+        views: "52.6K",
+        likes: "4.8K",
+        date: "2025-03-21",
+        category: "Culturals",
+        caption: "Thunderous beats of Chenda Melam echoing across the EASA sports quadrangle! Pure festival spirit & vibrant energy. #EASAFest #ChendaMelam #Sarvam26 #CampusVibes",
+        url: "https://www.instagram.com/easacollege/reel/C5_fM18PqL9/"
     },
     {
         _id: "ig-reel-003",
+        shortcode: "C3qNkK4PrY2",
         mediaType: "instagram_reel",
         isShort: true,
-        title: "Campus Tour in 30 Seconds! Green & High-Tech 🌴🏢",
-        thumbnail: "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=800&auto=format&fit=crop",
-        audioTrack: "Trending Summer - easacollege",
-        views: "72.4K",
-        likes: "6.1K",
-        date: "February 2026",
-        category: "Campus Life",
-        caption: "Take a fast drone ride through classrooms, cafeteria, and sports grounds of EASA College Coimbatore! #CampusTour #CollegeLife",
-        url: "https://www.instagram.com/easacollege/reels/"
+        title: "SARVAM 26 & Thai Uthsavam Massive Crowd Energy 🌟🎉",
+        thumbnail: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop",
+        audioTrack: "Trending Festive - easacollege",
+        views: "68.1K",
+        likes: "5.9K",
+        date: "2025-02-14",
+        category: "Culturals",
+        caption: "Thousands of students uniting for Thai Uthsavam & Sarvam 26 celebrations with music, colors, and memories! #Sarvam26 #ThaiUthsavam #EASAEvents",
+        url: "https://www.instagram.com/easacollege/reel/C3qNkK4PrY2/"
     },
     {
         _id: "ig-reel-004",
+        shortcode: "C2mGqY3LqS1",
         mediaType: "instagram_reel",
         isShort: true,
-        title: "Placement Celebration: 24 LPA Dream Package Secured! 🎉💼",
-        thumbnail: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=800&auto=format&fit=crop",
-        audioTrack: "Celebration Beat - Success",
-        views: "64.1K",
-        likes: "5.4K",
-        date: "February 2026",
-        category: "Placements",
-        caption: "Big cheers for our final year star securing the highest CTC at the 2026 recruitment drive! #Placements #SuccessStory",
-        url: "https://www.instagram.com/easacollege/reels/"
+        title: "AICTE IDEA Lab: 3D Prototyping & Student Inventions 🤖💡",
+        thumbnail: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop",
+        audioTrack: "Tech Beats - Innovation Hub",
+        views: "34.4K",
+        likes: "2.9K",
+        date: "2025-01-25",
+        category: "Tech & Labs",
+        caption: "From ideas to prototypes! Watch students engineer automated robotics and drone chassis in our ₹1.2 Cr AICTE IDEA Lab. #IDEALab #EngineeringInnovation #Robotics #AICTE",
+        url: "https://www.instagram.com/easacollege/reel/C2mGqY3LqS1/"
     },
     {
         _id: "ig-reel-005",
+        shortcode: "C0fK2L9MxW8",
         mediaType: "instagram_reel",
         isShort: true,
-        title: "Championship Winning Last-Minute Goal! ⚽🏆",
-        thumbnail: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop",
-        audioTrack: "Stadium Roar - Sports",
-        views: "41.9K",
-        likes: "3.7K",
-        date: "January 2026",
-        category: "Sports",
-        caption: "Unreal strike to seal the zonal football trophy for EASA College! #Football #Goal #CollegeChampions",
-        url: "https://www.instagram.com/easacollege/reels/"
+        title: "Placement Drive 2026: Elite Offers from Amazon, Bosch & Zoho 💼🚀",
+        thumbnail: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=800&auto=format&fit=crop",
+        audioTrack: "Celebration Beat - Success",
+        views: "45.8K",
+        likes: "3.8K",
+        date: "2025-01-18",
+        category: "Placements",
+        caption: "Record placements in motion! Big congratulations to our final-year engineers placed in tier-1 MNCs and global firms. #EASAPlacements #CareerSuccess #AutonomousAdvantage",
+        url: "https://www.instagram.com/easacollege/reel/C0fK2L9MxW8/"
     },
     {
         _id: "ig-reel-006",
+        shortcode: "DdVSGwViZH2",
         mediaType: "instagram_reel",
         isShort: true,
-        title: "Hackathon Midnight 3:00 AM Coding Energy 💻⚡",
-        thumbnail: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
-        audioTrack: "Lo-Fi Beats - Code Grind",
-        views: "49.3K",
-        likes: "4.1K",
-        date: "January 2026",
-        category: "Tech & Labs",
-        caption: "36 hours of non-stop code, debug, and pizza at the EASA National AI Hackathon! #Hackathon #DevLife #Coding",
-        url: "https://www.instagram.com/easacollege/reels/"
+        title: "Anna University Athletics Zone Champions 🏆⚽",
+        thumbnail: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop",
+        audioTrack: "Stadium Roar - Sports",
+        views: "32.5K",
+        likes: "2.9K",
+        date: "2025-01-10",
+        category: "Sports",
+        caption: "Dominating the sports arena with 8 Gold medals and the Championship cup! Proud champions of EASA College. #EASASports #AnnaUniversity #ZoneChampions",
+        url: "https://www.instagram.com/easacollege/reel/DdVSGwViZH2/"
     }
 ];
 
@@ -284,19 +297,19 @@ const GalleryPage = () => {
     const tabParam = searchParams.get('tab');
     const [activeTab, setActiveTab] = useState(tabParam === 'videos' ? 'videos' : 'photos');
 
-    // Photos Session: 'instagram' or 'albums'
-    const [photosSubView, setPhotosSubView] = useState('instagram'); // 'instagram' | 'albums'
+    // Photos Session: 'albums' or 'moments'
+    const [photosSubView, setPhotosSubView] = useState('albums'); // 'albums' | 'moments'
     const [events, setEvents] = useState([]);
+    const [customInstagramMedia, setCustomInstagramMedia] = useState([]);
+    const [liveInstagramPosts, setLiveInstagramPosts] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [likedPosts, setLikedPosts] = useState({});
 
-    // Videos Session State: 'ALL' | 'REELS' | 'YOUTUBE'
-    const [videoMediaFilter, setVideoMediaFilter] = useState('ALL');
+    // Videos Session State: Filter by Category & Search
     const [selectedCategory, setSelectedCategory] = useState('ALL');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedVideo, setSelectedVideo] = useState(null);
-    const [selectedReel, setSelectedReel] = useState(null);
+    const [selectedMedia, setSelectedMedia] = useState(null);
 
     // Synchronize tab state with query param
     useEffect(() => {
@@ -313,7 +326,7 @@ const GalleryPage = () => {
         setSearchParams({ tab });
     };
 
-    // Fetch Photo Albums
+    // Fetch Photo Albums and Live Instagram Media from Backend
     useEffect(() => {
         window.scrollTo(0, 0);
         fetch(`${API_BASE_URL}/api/gallery-events`)
@@ -326,11 +339,33 @@ const GalleryPage = () => {
             .catch(err => {
                 console.error("Error fetching gallery events:", err);
             });
+
+        // Fetch Live Instagram Posts for photo moments
+        fetch(`${API_BASE_URL}/api/instagram/feed`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && Array.isArray(data.posts) && data.posts.length > 0) {
+                    const mappedPosts = data.posts.map(item => ({
+                        _id: item._id || item.mediaId,
+                        shortcode: item.shortcode,
+                        image: item.mediaUrl || item.thumbnailUrl,
+                        likes: item.likes || '1.2K',
+                        comments: item.comments || '85',
+                        caption: item.caption || '',
+                        location: 'EASA College of Engineering and Technology',
+                        url: item.permalink || `https://www.instagram.com/p/${item.shortcode}/`
+                    }));
+                    setLiveInstagramPosts(mappedPosts);
+                }
+            })
+            .catch(err => {
+                console.error("Error fetching Instagram feed:", err);
+            });
     }, []);
 
     // Lock body scroll when any modal is open
     useEffect(() => {
-        if (selectedImage || selectedVideo || selectedReel) {
+        if (selectedImage || selectedMedia) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
@@ -338,9 +373,9 @@ const GalleryPage = () => {
         return () => {
             document.body.style.overflow = '';
         };
-    }, [selectedImage, selectedVideo, selectedReel]);
+    }, [selectedImage, selectedMedia]);
 
-    // Toggle Instagram Post Like Heart Animation
+    // Toggle Post Like Heart Animation
     const toggleLikePost = (postId) => {
         setLikedPosts(prev => ({
             ...prev,
@@ -348,27 +383,25 @@ const GalleryPage = () => {
         }));
     };
 
-    // Filtered Videos & Reels
-    const combinedVideoMedia = [
-        ...OFFICIAL_INSTAGRAM_REELS,
-        ...OFFICIAL_YOUTUBE_MEDIA
+    // Merge Curated and Live Photo Moments
+    const allPhotoMoments = [
+        ...liveInstagramPosts,
+        ...customInstagramMedia.filter(m => m.mediaType === 'post'),
+        ...OFFICIAL_INSTAGRAM_POSTS
     ];
 
-    const filteredVideoMedia = combinedVideoMedia.filter(item => {
-        const matchesType =
-            videoMediaFilter === 'ALL' ||
-            (videoMediaFilter === 'REELS' && item.mediaType === 'instagram_reel') ||
-            (videoMediaFilter === 'YOUTUBE' && item.mediaType === 'youtube_video');
+    // Official YouTube Videos List (No Reels)
+    const combinedVideoMedia = OFFICIAL_YOUTUBE_MEDIA;
 
+    const filteredVideoMedia = combinedVideoMedia.filter(item => {
         const matchesCat = selectedCategory === 'ALL' || item.category === selectedCategory;
 
         const matchesSearch =
             searchQuery.trim() === '' ||
             item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.caption && item.caption.toLowerCase().includes(searchQuery.toLowerCase())) ||
             (item.desc && item.desc.toLowerCase().includes(searchQuery.toLowerCase()));
 
-        return matchesType && matchesCat && matchesSearch;
+        return matchesCat && matchesSearch;
     });
 
     const videoCategories = ['ALL', ...new Set(combinedVideoMedia.map(v => v.category).filter(Boolean))];
@@ -376,19 +409,19 @@ const GalleryPage = () => {
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', overflowX: 'hidden', color: 'var(--text-main)', position: 'relative' }}>
             <SEO
-                title={activeTab === 'videos' ? "Official Video Gallery, Reels & YouTube | EASA College" : "Instagram Posts & Photo Gallery | EASA College"}
-                description="Explore EASA College campus life with official Instagram posts, Instagram reels, photo albums, and YouTube highlights."
+                title={activeTab === 'videos' ? "Official Video Gallery & YouTube Broadcasts | EASA College" : "Campus Photo Albums & Moments | EASA College"}
+                description="Explore EASA College campus life with official photo albums, campus captures, and YouTube broadcasts."
             />
             <Navbar />
 
             <GlobalHero
                 pageKey={selectedEvent ? `gallery-${selectedEvent._id}` : (activeTab === 'videos' ? "video-gallery" : "gallery")}
-                defaultTitle={selectedEvent ? selectedEvent.eventName : (activeTab === 'videos' ? "Reels & Video Gallery" : "Instagram Posts & Photos")}
+                defaultTitle={selectedEvent ? selectedEvent.eventName : (activeTab === 'videos' ? "Official Video Gallery" : "Campus Photo Gallery")}
                 defaultSubtitle={selectedEvent
                     ? new Date(selectedEvent.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
                     : (activeTab === 'videos'
-                        ? "Watch Instagram Reels, student shorts, and official YouTube broadcasts from @easacollege & @EASACollegeOfficial."
-                        : "Experience campus moments and student life through our official Instagram feed @easacollege.")}
+                        ? "Watch official campus tours, seminars, graduation broadcasts, and student innovations from @EASACollegeOfficial."
+                        : "Browse campus photo albums, annual fests, technical events, and memorable student moments.")}
                 defaultImage={selectedEvent && selectedEvent.photos?.length > 0
                     ? selectedEvent.photos[0].src
                     : OFFICIAL_INSTAGRAM_POSTS[0].image}
@@ -402,21 +435,21 @@ const GalleryPage = () => {
                         <button
                             type="button"
                             onClick={() => handleTabChange('photos')}
-                            className={`gallery-nav-pill insta-pill ${activeTab === 'photos' ? 'active' : ''}`}
+                            className={`gallery-nav-pill photo-pill ${activeTab === 'photos' ? 'active' : ''}`}
                         >
-                            <FaInstagram className="pill-icon ig-gradient-icon" />
-                            <span>Instagram Posts & Photos</span>
-                            <span className="pill-badge ig-badge">{OFFICIAL_INSTAGRAM_POSTS.length}</span>
+                            <FaImages className="pill-icon photo-icon" />
+                            <span>Photo Gallery & Albums</span>
+                            <span className="pill-badge photo-badge">{events.length + allPhotoMoments.length}</span>
                         </button>
 
                         <button
                             type="button"
                             onClick={() => handleTabChange('videos')}
-                            className={`gallery-nav-pill reels-pill ${activeTab === 'videos' ? 'active' : ''}`}
+                            className={`gallery-nav-pill yt-nav-pill ${activeTab === 'videos' ? 'active' : ''}`}
                         >
-                            <FaVideo className="pill-icon reels-icon" />
-                            <span>Instagram Reels & Videos</span>
-                            <span className="pill-badge reels-badge">{combinedVideoMedia.length}</span>
+                            <FaYoutube className="pill-icon yt-icon" />
+                            <span>YouTube Video Gallery</span>
+                            <span className="pill-badge yt-badge">{combinedVideoMedia.length}</span>
                         </button>
                     </div>
                 </div>
@@ -427,57 +460,11 @@ const GalleryPage = () => {
                 {activeTab === 'photos' && (
                     <div className="photos-session-content">
 
-                        {/* INSTAGRAM PROFILE SPOTLIGHT HEADER */}
-                        <div className="instagram-profile-banner">
-                            <div className="ig-banner-backdrop" />
-                            <div className="ig-banner-content">
-                                <div className="ig-avatar-ring">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=200&auto=format&fit=crop"
-                                        alt="EASA College"
-                                        className="ig-avatar-img"
-                                    />
-                                </div>
 
-                                <div className="ig-profile-info">
-                                    <div className="ig-handle-row">
-                                        <h2 className="ig-handle-text">easacollege</h2>
-                                        <FaCheckCircle className="ig-verified-icon" title="Verified College Profile" />
-                                        <span className="ig-official-tag">Official Feed</span>
-                                    </div>
-                                    <h3 className="ig-fullname">EASA College of Engineering and Technology</h3>
-                                    <p className="ig-bio">
-                                        🎓 Top Autonomous Engineering College in Coimbatore <br />
-                                        💡 AICTE IDEA Lab • High Placements • Vibrant Campus Life
-                                    </p>
-                                </div>
 
-                                <div className="ig-action-col">
-                                    <a
-                                        href={INSTAGRAM_PROFILE_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="ig-follow-btn"
-                                    >
-                                        <FaInstagram size={17} />
-                                        <span>Follow on Instagram</span>
-                                        <FaExternalLinkAlt size={10} style={{ marginLeft: '4px' }} />
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* SUB-VIEW SWITCHER: INSTAGRAM POSTS vs ALBUMS */}
+                        {/* SUB-VIEW SWITCHER: ALBUMS vs LIVE INSTAGRAM FEED */}
                         <div className="photos-sub-switcher-row">
                             <div className="sub-switcher-group">
-                                <button
-                                    type="button"
-                                    onClick={() => { setPhotosSubView('instagram'); setSelectedEvent(null); }}
-                                    className={`sub-switcher-btn ${photosSubView === 'instagram' ? 'active' : ''}`}
-                                >
-                                    <FaInstagram size={14} />
-                                    <span>Instagram Posts Feed</span>
-                                </button>
                                 <button
                                     type="button"
                                     onClick={() => setPhotosSubView('albums')}
@@ -486,103 +473,21 @@ const GalleryPage = () => {
                                     <FaImages size={14} />
                                     <span>Campus Photo Albums ({events.length})</span>
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={() => { setPhotosSubView('moments'); setSelectedEvent(null); }}
+                                    className={`sub-switcher-btn ${photosSubView === 'moments' ? 'active' : ''}`}
+                                >
+                                    <FaInstagram size={14} />
+                                    <span>Live Instagram Feed (@easacollege)</span>
+                                </button>
                             </div>
                         </div>
 
-                        {/* A. INSTAGRAM POSTS FEED */}
-                        {photosSubView === 'instagram' && (
-                            <div className="instagram-posts-grid">
-                                {OFFICIAL_INSTAGRAM_POSTS.map((post, idx) => (
-                                    <motion.div
-                                        key={post._id || idx}
-                                        initial={{ opacity: 0, y: 25 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ duration: 0.45, delay: (idx % 3) * 0.08 }}
-                                        className="instagram-post-card"
-                                    >
-                                        {/* Post Header */}
-                                        <div className="ig-post-header">
-                                            <div className="ig-post-author">
-                                                <div className="ig-small-avatar">
-                                                    <FaInstagram />
-                                                </div>
-                                                <div className="ig-author-meta">
-                                                    <div className="ig-author-handle-row">
-                                                        <span className="ig-card-handle">easacollege</span>
-                                                        <FaCheckCircle size={10} className="ig-verified-mini" />
-                                                    </div>
-                                                    <span className="ig-card-location">{post.location}</span>
-                                                </div>
-                                            </div>
-                                            <a
-                                                href={post.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="ig-post-ext-link"
-                                                title="Open in Instagram"
-                                            >
-                                                <FaInstagram size={16} />
-                                            </a>
-                                        </div>
-
-                                        {/* Post Image with Lightbox click */}
-                                        <div
-                                            className="ig-post-image-box"
-                                            onClick={() => setSelectedImage({ src: post.image, caption: post.caption })}
-                                        >
-                                            <img
-                                                src={post.image}
-                                                alt={post.caption}
-                                                className="ig-post-img"
-                                                loading="lazy"
-                                            />
-                                            <div className="ig-post-image-overlay">
-                                                <span className="view-full-badge">Click to View Full Size</span>
-                                            </div>
-                                        </div>
-
-                                        {/* Post Actions Bar */}
-                                        <div className="ig-post-actions-bar">
-                                            <div className="ig-left-actions">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => toggleLikePost(post._id)}
-                                                    className={`ig-action-icon-btn ${likedPosts[post._id] ? 'liked' : ''}`}
-                                                    aria-label="Like Post"
-                                                >
-                                                    {likedPosts[post._id] ? <FaHeart className="heart-filled" /> : <FaRegHeart />}
-                                                </button>
-                                                <button type="button" className="ig-action-icon-btn" aria-label="Comment">
-                                                    <FaComment />
-                                                </button>
-                                                <a
-                                                    href={post.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="ig-action-icon-btn"
-                                                    title="Share Post"
-                                                >
-                                                    <FaShareAlt />
-                                                </a>
-                                            </div>
-                                            <button type="button" className="ig-action-icon-btn" aria-label="Bookmark">
-                                                <FaBookmark />
-                                            </button>
-                                        </div>
-
-                                        {/* Likes Count & Caption */}
-                                        <div className="ig-post-footer">
-                                            <div className="ig-likes-count">
-                                                <span>{likedPosts[post._id] ? '1,249 likes' : `${post.likes} likes`}</span>
-                                            </div>
-                                            <p className="ig-caption-text">
-                                                <strong>easacollege</strong> {post.caption}
-                                            </p>
-                                            <span className="ig-post-time">{post.date}</span>
-                                        </div>
-                                    </motion.div>
-                                ))}
+                        {/* A. LIVE INSTAGRAM FEED (SOCIABLEKIT WIDGET) */}
+                        {photosSubView === 'moments' && (
+                            <div className="live-instagram-widget-section">
+                                <InstagramFeedWidget embedId="25719657" />
                             </div>
                         )}
 
@@ -672,88 +577,61 @@ const GalleryPage = () => {
                 )}
 
                 {/* =========================================================
-                    VIDEOS SESSION: INSTAGRAM REELS & YOUTUBE VIDEOS
+                    VIDEOS SESSION: OFFICIAL YOUTUBE VIDEO GALLERY
                    ========================================================= */}
                 {activeTab === 'videos' && (
                     <div className="videos-session-content">
 
-                        {/* REELS & YOUTUBE SPOTLIGHT BANNER */}
-                        <div className="reels-hub-banner">
-                            <div className="reels-banner-backdrop" />
+                        {/* YOUTUBE SPOTLIGHT BANNER */}
+                        <div className="reels-hub-banner yt-hub-banner">
+                            <div className="reels-banner-backdrop yt-banner-backdrop" />
                             <div className="reels-banner-content">
-                                <div className="reels-avatar-box">
-                                    <FaVideo className="reels-banner-icon" />
+                                <div className="reels-avatar-box yt-avatar-box">
+                                    <FaYoutube className="reels-banner-icon yt-banner-icon" />
                                 </div>
 
                                 <div className="reels-channel-info">
-                                    <div className="reels-badge-tag">
-                                        <span className="reels-live-dot" />
-                                        <span>INSTAGRAM REELS & YOUTUBE BROADCASTS</span>
+                                    <div className="reels-badge-tag yt-badge-tag">
+                                        <span className="reels-live-dot" style={{ background: '#EF4444' }} />
+                                        <span>OFFICIAL YOUTUBE BROADCASTS</span>
                                     </div>
-                                    <h2 className="reels-channel-title">EASA Media & Video Hub</h2>
+                                    <h2 className="reels-channel-title">EASA Official Video Gallery</h2>
                                     <p className="reels-channel-handle">
-                                        <span>@easacollege (Reels)</span>
+                                        <span>@EASACollegeOfficial</span>
                                         <span className="handle-dot">•</span>
-                                        <span>@EASACollegeOfficial (YouTube)</span>
+                                        <span>Watch campus tours, seminars, graduation & cultural fests</span>
                                     </p>
                                 </div>
 
                                 <div className="reels-channel-actions">
                                     <a
-                                        href={INSTAGRAM_REELS_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="ig-reels-btn"
-                                    >
-                                        <FaInstagram size={17} />
-                                        <span>Watch Reels on Instagram</span>
-                                        <FaExternalLinkAlt size={10} style={{ marginLeft: '4px' }} />
-                                    </a>
-
-                                    <a
                                         href={YOUTUBE_CHANNEL_URL}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="yt-subscribe-btn-sm"
+                                        style={{ padding: '0.8rem 1.6rem', fontSize: '0.92rem' }}
                                     >
-                                        <FaYoutube size={16} />
-                                        <span>YouTube Channel</span>
+                                        <FaYoutube size={18} />
+                                        <span>Subscribe on YouTube</span>
+                                        <FaExternalLinkAlt size={11} style={{ marginLeft: '4px' }} />
                                     </a>
                                 </div>
                             </div>
                         </div>
 
-                        {/* MEDIA FORMAT SWITCHER: ALL / INSTAGRAM REELS / YOUTUBE */}
+                        {/* CATEGORY & SEARCH FILTER BAR */}
                         <div className="media-format-toggle-bar">
-                            <div className="format-pills-wrap">
-                                <button
-                                    type="button"
-                                    onClick={() => setVideoMediaFilter('ALL')}
-                                    className={`format-pill-btn ${videoMediaFilter === 'ALL' ? 'active' : ''}`}
-                                >
-                                    <span>All Video Media</span>
-                                    <span className="fbadge">{combinedVideoMedia.length}</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setVideoMediaFilter('REELS')}
-                                    className={`format-pill-btn reels-pill-btn ${videoMediaFilter === 'REELS' ? 'active' : ''}`}
-                                >
-                                    <FaInstagram size={14} className="reels-ig-icon" />
-                                    <span>Instagram Reels (9:16)</span>
-                                    <span className="fbadge reels-count">{OFFICIAL_INSTAGRAM_REELS.length}</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setVideoMediaFilter('YOUTUBE')}
-                                    className={`format-pill-btn yt-pill-btn ${videoMediaFilter === 'YOUTUBE' ? 'active' : ''}`}
-                                >
-                                    <FaYoutube size={14} className="yt-pill-icon" />
-                                    <span>YouTube Videos</span>
-                                    <span className="fbadge">{OFFICIAL_YOUTUBE_MEDIA.length}</span>
-                                </button>
+                            <div className="video-category-pills-row" style={{ margin: 0, padding: 0 }}>
+                                {videoCategories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        type="button"
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`vcat-pill ${selectedCategory === cat ? 'active' : ''}`}
+                                    >
+                                        {cat === 'ALL' ? 'All Videos' : cat}
+                                    </button>
+                                ))}
                             </div>
 
                             {/* Search Box */}
@@ -761,7 +639,7 @@ const GalleryPage = () => {
                                 <FaSearch className="vsearch-icon" />
                                 <input
                                     type="text"
-                                    placeholder="Search reels & videos..."
+                                    placeholder="Search YouTube videos..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="vsearch-input"
@@ -778,262 +656,138 @@ const GalleryPage = () => {
                             </div>
                         </div>
 
-                        {/* CATEGORY FILTER PILLS */}
-                        <div className="video-category-pills-row">
-                            {videoCategories.map(cat => (
-                                <button
-                                    key={cat}
-                                    type="button"
-                                    onClick={() => setSelectedCategory(cat)}
-                                    className={`vcat-pill ${selectedCategory === cat ? 'active' : ''}`}
-                                >
-                                    {cat === 'ALL' ? 'All Categories' : cat}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* 1. INSTAGRAM REELS (9:16 VERTICAL CARDS) */}
-                        {filteredVideoMedia.some(v => v.mediaType === 'instagram_reel') && (videoMediaFilter === 'ALL' || videoMediaFilter === 'REELS') && (
-                            <div className="reels-section-block">
-                                <div className="section-head-bar">
-                                    <div className="head-left">
-                                        <div className="reels-badge-icon-box">
-                                            <FaInstagram size={16} />
-                                        </div>
-                                        <div>
-                                            <h3 className="section-title">Official Instagram Reels</h3>
-                                            <p className="section-sub">Trending 9:16 campus highlights, fest celebrations & student life @easacollege</p>
-                                        </div>
+                        {/* YOUTUBE VIDEO SHOWCASE GRID */}
+                        <div className="unified-video-section">
+                            <div className="section-head-bar">
+                                <div className="head-left">
+                                    <div className="unified-badge-icon-box" style={{ background: '#DC2626', color: '#FFFFFF', borderColor: '#EF4444' }}>
+                                        <FaYoutube size={20} />
                                     </div>
-                                    <a
-                                        href={INSTAGRAM_REELS_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="view-all-reels-link"
-                                    >
-                                        <span>View on Instagram</span>
-                                        <FaExternalLinkAlt size={10} />
-                                    </a>
-                                </div>
-
-                                <div className="reels-cards-grid">
-                                    {filteredVideoMedia.filter(v => v.mediaType === 'instagram_reel').map((reel, idx) => (
-                                        <motion.div
-                                            key={reel._id || idx}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true }}
-                                            transition={{ duration: 0.4, delay: (idx % 4) * 0.06 }}
-                                            whileHover={{ y: -8, scale: 1.02 }}
-                                            onClick={() => setSelectedReel(reel)}
-                                            className="instagram-reel-card"
-                                        >
-                                            <div className="reel-thumb-wrap">
-                                                <img
-                                                    src={reel.thumbnail}
-                                                    alt={reel.title}
-                                                    className="reel-thumb-img"
-                                                    loading="lazy"
-                                                />
-                                                <div className="reel-gradient-overlay" />
-
-                                                {/* Top Reels Badge */}
-                                                <div className="reel-top-badge">
-                                                    <FaInstagram size={11} className="reel-ig-badge-icon" />
-                                                    <span>Reels</span>
-                                                </div>
-
-                                                {/* Audio Track Tag */}
-                                                <div className="reel-audio-tag">
-                                                    <FaBolt size={9} style={{ color: '#fdbc12', marginRight: '4px' }} />
-                                                    <span>{reel.audioTrack}</span>
-                                                </div>
-
-                                                {/* Bottom Meta */}
-                                                <div className="reel-bottom-meta">
-                                                    <span className="reel-views">
-                                                        <FaEye size={10} style={{ marginRight: '4px' }} />
-                                                        {reel.views}
-                                                    </span>
-                                                    <span className="reel-likes">
-                                                        <FaHeart size={10} style={{ color: '#EF4444', marginRight: '4px' }} />
-                                                        {reel.likes}
-                                                    </span>
-                                                </div>
-
-                                                {/* Play Button Overlay */}
-                                                <div className="reel-play-hover-overlay">
-                                                    <div className="reel-play-circle">
-                                                        <FaPlay size={15} className="play-triangle" />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="reel-info-box">
-                                                <h4 className="reel-title" title={reel.title}>{reel.title}</h4>
-                                                <span className="reel-date">{reel.date}</span>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 2. YOUTUBE VIDEOS (16:9) */}
-                        {filteredVideoMedia.some(v => v.mediaType === 'youtube_video') && (videoMediaFilter === 'ALL' || videoMediaFilter === 'YOUTUBE') && (
-                            <div className="youtube-videos-section-block">
-                                <div className="section-head-bar">
-                                    <div className="head-left">
-                                        <div className="yt-badge-icon-box">
-                                            <FaYoutube size={16} />
-                                        </div>
-                                        <div>
-                                            <h3 className="section-title">Official YouTube Broadcasts</h3>
-                                            <p className="section-sub">Campus drone tours, tech inaugurations, placements & annual fest broadcasts</p>
-                                        </div>
+                                    <div>
+                                        <h3 className="section-title">Campus YouTube Video Broadcasts</h3>
+                                        <p className="section-sub">
+                                            Showing {filteredVideoMedia.length} videos • Click any video to play directly in-site
+                                        </p>
                                     </div>
+                                </div>
+                                <div className="head-channel-links">
                                     <a
                                         href={YOUTUBE_CHANNEL_URL}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="view-all-reels-link"
+                                        className="channel-badge-link yt-link"
                                     >
-                                        <span>YouTube Channel</span>
-                                        <FaExternalLinkAlt size={10} />
+                                        <FaYoutube size={14} />
+                                        <span>@EASACollegeOfficial</span>
                                     </a>
                                 </div>
+                            </div>
 
-                                <div className="videos-cards-grid">
-                                    {filteredVideoMedia.filter(v => v.mediaType === 'youtube_video').map((video, idx) => (
+                            {filteredVideoMedia.length === 0 ? (
+                                <div className="no-media-empty-state">
+                                    <FaSearch size={32} style={{ color: '#64748B', marginBottom: '1rem' }} />
+                                    <h3>No Videos Found</h3>
+                                    <p>No videos match your search term "{searchQuery}" or selected category.</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setSearchQuery(''); setSelectedCategory('ALL'); }}
+                                        className="reset-filters-btn"
+                                    >
+                                        Reset Filters
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="unified-video-grid">
+                                    {filteredVideoMedia.map((item, idx) => (
                                         <motion.div
-                                            key={video._id || idx}
-                                            initial={{ opacity: 0, y: 25 }}
+                                            key={item._id || idx}
+                                            initial={{ opacity: 0, y: 22 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
-                                            transition={{ duration: 0.45, delay: (idx % 3) * 0.08 }}
-                                            whileHover={{ y: -6 }}
-                                            onClick={() => setSelectedVideo(video)}
-                                            className="youtube-video-card"
+                                            transition={{ duration: 0.4, delay: (idx % 6) * 0.05 }}
+                                            whileHover={{ y: -7 }}
+                                            onClick={() => setSelectedMedia(item)}
+                                            className="unified-media-card youtube-card-type"
                                         >
-                                            <div className="vcard-thumb-wrap">
-                                                <img src={video.thumbnail} alt={video.title} className="vcard-thumb-img" />
-                                                <div className="vcard-thumb-shade" />
-                                                {video.duration && (
-                                                    <div className="vcard-duration-badge">
+                                            {/* Media Poster Container */}
+                                            <div className="media-card-poster-wrap aspect-video">
+                                                <img
+                                                    src={item.thumbnail}
+                                                    alt={item.title}
+                                                    className="media-card-poster-img"
+                                                    loading="lazy"
+                                                />
+                                                <div className="media-poster-overlay" />
+
+                                                {/* Platform Badge */}
+                                                <div className="media-platform-badge yt-badge">
+                                                    <FaYoutube size={11} />
+                                                    <span>YouTube Video</span>
+                                                </div>
+
+                                                {/* Duration Tag */}
+                                                {item.duration && (
+                                                    <div className="media-duration-tag">
                                                         <FaClock size={9} style={{ marginRight: '3px' }} />
-                                                        <span>{video.duration}</span>
+                                                        <span>{item.duration}</span>
                                                     </div>
                                                 )}
-                                                <span className="vcard-cat-pill">{video.category}</span>
-                                                <div className="vcard-play-overlay">
-                                                    <div className="yt-play-button-circle">
-                                                        <FaPlay size={16} className="play-triangle" />
+
+                                                {/* Hover Play Button */}
+                                                <div className="media-hover-play-layer">
+                                                    <div className="media-play-glow-circle yt-glow">
+                                                        <FaPlay size={16} className="play-triangle-center" />
                                                     </div>
+                                                    <span className="media-tap-play-hint">Watch Video</span>
+                                                </div>
+
+                                                {/* Bottom stats row inside poster */}
+                                                <div className="media-poster-bottom-stats">
+                                                    {item.views && (
+                                                        <span className="stat-pill">
+                                                            <FaEye size={10} style={{ marginRight: '3px' }} />
+                                                            {item.views}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            <div className="vcard-body">
-                                                <h3 className="vcard-title">{video.title}</h3>
-                                                <p className="vcard-desc">{video.desc}</p>
-                                                <div className="vcard-footer">
-                                                    <span className="vcard-date"><FaCalendarAlt size={10} style={{ color: '#fdbc12', marginRight: '4px' }} />{video.date}</span>
-                                                    <span className="vcard-watch-link"><FaPlay size={9} /><span>Watch Video</span></span>
+                                            {/* Media Information & Details Body */}
+                                            <div className="media-card-info-body">
+                                                <div className="media-meta-head">
+                                                    <span className="media-cat-badge">{item.category}</span>
+                                                    <span className="media-date-text">
+                                                        <FaCalendarAlt size={10} style={{ color: '#fdbc12', marginRight: '4px' }} />
+                                                        {item.date}
+                                                    </span>
+                                                </div>
+
+                                                <h4 className="media-card-title" title={item.title}>{item.title}</h4>
+                                                
+                                                <p className="media-card-desc">
+                                                    {item.desc}
+                                                </p>
+
+                                                <div className="media-card-action-bar">
+                                                    <span className="media-play-trigger-text" style={{ color: '#EF4444' }}>
+                                                        <FaPlay size={9} />
+                                                        <span>Watch Video</span>
+                                                    </span>
+                                                    <span className="media-source-handle">
+                                                        @EASACollege
+                                                    </span>
                                                 </div>
                                             </div>
                                         </motion.div>
                                     ))}
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
                     </div>
                 )}
 
             </div>
-
-            {/* =========================================================
-                INSTAGRAM REEL MODAL VIEWER
-               ========================================================= */}
-            {typeof document !== 'undefined' && createPortal(
-                <AnimatePresence>
-                    {selectedReel && (
-                        <div
-                            className="instagram-reel-modal-backdrop"
-                            onClick={() => setSelectedReel(null)}
-                            role="dialog"
-                            aria-modal="true"
-                        >
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="reel-modal-shade"
-                            />
-
-                            <motion.div
-                                initial={{ scale: 0.92, opacity: 0, y: 20 }}
-                                animate={{ scale: 1, opacity: 1, y: 0 }}
-                                exit={{ scale: 0.92, opacity: 0, y: 20 }}
-                                transition={{ type: "spring", damping: 26, stiffness: 220 }}
-                                className="instagram-reel-dialog"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                {/* Reel Header */}
-                                <div className="reel-dialog-header">
-                                    <div className="reel-dialog-brand">
-                                        <FaInstagram className="reel-ig-brand-icon" size={18} />
-                                        <span className="reel-dialog-handle">@easacollege</span>
-                                        <FaCheckCircle size={10} className="ig-verified-mini" />
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedReel(null)}
-                                        className="reel-dialog-close"
-                                    >
-                                        <FaTimes size={14} />
-                                    </button>
-                                </div>
-
-                                {/* Reel Preview Frame */}
-                                <div className="reel-dialog-frame">
-                                    <img
-                                        src={selectedReel.thumbnail}
-                                        alt={selectedReel.title}
-                                        className="reel-dialog-img"
-                                    />
-                                    <div className="reel-dialog-overlay-content">
-                                        <div className="reel-dialog-audio-pill">
-                                            <FaBolt size={10} />
-                                            <span>{selectedReel.audioTrack}</span>
-                                        </div>
-                                        <h3 className="reel-dialog-title">{selectedReel.title}</h3>
-                                        <p className="reel-dialog-caption">{selectedReel.caption}</p>
-                                    </div>
-                                </div>
-
-                                {/* Reel Footer Action */}
-                                <div className="reel-dialog-footer">
-                                    <div className="reel-stats-col">
-                                        <span><FaEye size={12} /> {selectedReel.views} views</span>
-                                        <span><FaHeart size={12} style={{ color: '#EF4444' }} /> {selectedReel.likes} likes</span>
-                                    </div>
-                                    <a
-                                        href={selectedReel.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="reel-open-btn"
-                                    >
-                                        <FaInstagram size={15} />
-                                        <span>Watch Reel on Instagram</span>
-                                        <FaExternalLinkAlt size={10} />
-                                    </a>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>,
-                document.body
-            )}
 
             {/* =========================================================
                 PHOTO FULLSCREEN LIGHTBOX
@@ -1074,54 +828,116 @@ const GalleryPage = () => {
                ========================================================= */}
             {typeof document !== 'undefined' && createPortal(
                 <AnimatePresence>
-                    {selectedVideo && (
+                    {selectedMedia && (
                         <div
-                            className="youtube-modal-overlay"
-                            onClick={() => setSelectedVideo(null)}
+                            className="unified-media-modal-backdrop"
+                            onClick={() => setSelectedMedia(null)}
                             role="dialog"
                             aria-modal="true"
                         >
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="yt-modal-backdrop" />
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="media-modal-shade"
+                            />
+
                             <motion.div
                                 initial={{ scale: 0.92, opacity: 0, y: 20 }}
                                 animate={{ scale: 1, opacity: 1, y: 0 }}
                                 exit={{ scale: 0.92, opacity: 0, y: 20 }}
-                                className="youtube-player-dialog"
+                                transition={{ type: "spring", damping: 26, stiffness: 220 }}
+                                className="unified-media-dialog youtube-dialog-split"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="yt-dialog-header">
-                                    <div className="yt-dialog-badge-group">
-                                        <FaYoutube className="yt-red" size={18} />
-                                        <span className="yt-dialog-cat">{selectedVideo.category}</span>
-                                        <span className="yt-dialog-subtag">• @EASACollegeOfficial</span>
+                                {/* LEFT SIDE: YOUTUBE PLAYER EMBED */}
+                                <div className="split-dialog-left-player">
+                                    <div className="split-youtube-player-wrap">
+                                        <iframe
+                                            src={`https://www.youtube-nocookie.com/embed/${selectedMedia.youtubeId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1`}
+                                            title={selectedMedia.title}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            className="split-youtube-iframe"
+                                        />
                                     </div>
-                                    <button type="button" onClick={() => setSelectedVideo(null)} className="yt-dialog-close-btn">
-                                        <FaTimes size={14} />
-                                    </button>
                                 </div>
 
-                                <div className="yt-iframe-wrapper">
-                                    <iframe
-                                        src={`https://www.youtube-nocookie.com/embed/${selectedVideo.youtubeId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1`}
-                                        title={selectedVideo.title}
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        className="yt-iframe-player"
-                                    />
-                                </div>
+                                {/* RIGHT SIDE: DETAILS, TITLE, DESCRIPTION & ACTIONS */}
+                                <div className="split-dialog-right-details">
+                                    {/* Header: Brand & Close */}
+                                    <div className="split-details-header">
+                                        <div className="dialog-brand-box">
+                                            <FaYoutube className="yt-brand-icon" size={20} />
+                                            <span className="dialog-brand-handle">@EASACollegeOfficial</span>
+                                            <span className="dialog-type-tag yt-type-tag">YouTube Video</span>
+                                            <span className="dialog-cat-pill">{selectedMedia.category}</span>
+                                        </div>
 
-                                <div className="yt-dialog-info-footer">
-                                    <div className="yt-dialog-text-col">
-                                        <h3 className="yt-modal-video-title">{selectedVideo.title}</h3>
-                                        <p className="yt-modal-video-desc">{selectedVideo.desc}</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedMedia(null)}
+                                            className="dialog-close-btn"
+                                            aria-label="Close Player"
+                                        >
+                                            <FaTimes size={14} />
+                                        </button>
                                     </div>
-                                    <div className="yt-dialog-actions-col">
-                                        <a href={`https://www.youtube.com/watch?v=${selectedVideo.youtubeId}`} target="_blank" rel="noopener noreferrer" className="yt-direct-open-link">
-                                            <FaYoutube size={14} className="yt-red" />
-                                            <span>Open in YouTube</span>
+
+                                    {/* Body: Title, Stats & Description */}
+                                    <div className="split-details-body">
+                                        <h3 className="dialog-media-title">{selectedMedia.title}</h3>
+
+                                        <div className="dialog-stats-pills">
+                                            {selectedMedia.views && (
+                                                <span className="dialog-stat-item">
+                                                    <FaEye size={12} />
+                                                    <span>{selectedMedia.views} views</span>
+                                                </span>
+                                            )}
+                                            {selectedMedia.duration && (
+                                                <span className="dialog-stat-item">
+                                                    <FaClock size={12} style={{ color: '#fdbc12' }} />
+                                                    <span>{selectedMedia.duration}</span>
+                                                </span>
+                                            )}
+                                            <span className="dialog-stat-item">
+                                                <FaCalendarAlt size={11} style={{ color: '#fdbc12' }} />
+                                                <span>{selectedMedia.date}</span>
+                                            </span>
+                                        </div>
+
+                                        {/* Description Block */}
+                                        <div className="split-caption-block">
+                                            <h5 className="split-caption-label">
+                                                Video Description
+                                            </h5>
+                                            <div className="dialog-caption-box">
+                                                <p className="dialog-caption-text">
+                                                    {selectedMedia.desc}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer Actions */}
+                                    <div className="split-details-footer">
+                                        <a
+                                            href={`https://www.youtube.com/watch?v=${selectedMedia.youtubeId}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="dialog-external-btn yt-ext-btn"
+                                        >
+                                            <FaYoutube size={16} />
+                                            <span>Open on YouTube</span>
                                             <FaExternalLinkAlt size={10} />
                                         </a>
-                                        <button type="button" onClick={() => setSelectedVideo(null)} className="yt-modal-close-pill">
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedMedia(null)}
+                                            className="dialog-dismiss-pill"
+                                        >
                                             Close
                                         </button>
                                     </div>
@@ -1184,34 +1000,34 @@ const GalleryPage = () => {
                     background: rgba(255, 255, 255, 0.06);
                 }
 
-                .gallery-nav-pill.insta-pill.active {
-                    background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%);
-                    color: #FFFFFF;
-                    border-color: rgba(253, 29, 29, 0.5);
-                    box-shadow: 0 4px 18px rgba(225, 48, 108, 0.45);
-                }
-
-                .gallery-nav-pill.reels-pill.active {
+                .gallery-nav-pill.photo-pill.active {
                     background: linear-gradient(135deg, #2e2d78 0%, #1B2A6B 100%);
                     color: #fdbc12;
                     border-color: rgba(253, 188, 18, 0.4);
                     box-shadow: 0 4px 18px rgba(46, 45, 120, 0.5);
                 }
 
+                .gallery-nav-pill.yt-nav-pill.active {
+                    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+                    color: #FFFFFF;
+                    border-color: rgba(239, 68, 68, 0.5);
+                    box-shadow: 0 4px 18px rgba(220, 38, 38, 0.45);
+                }
+
                 .pill-icon {
                     font-size: 1.15rem;
                 }
 
-                .ig-gradient-icon {
-                    color: #E1306C;
-                }
-
-                .gallery-nav-pill.insta-pill.active .ig-gradient-icon {
-                    color: #FFFFFF;
-                }
-
-                .reels-icon {
+                .photo-icon {
                     color: #fdbc12;
+                }
+
+                .yt-icon {
+                    color: #EF4444;
+                }
+
+                .gallery-nav-pill.yt-nav-pill.active .yt-icon {
+                    color: #FFFFFF;
                 }
 
                 .pill-badge {
@@ -1222,14 +1038,38 @@ const GalleryPage = () => {
                     font-weight: 900;
                 }
 
-                .ig-badge {
-                    background: rgba(225, 48, 108, 0.3);
-                    color: #FCE7F3;
-                }
-
-                .reels-badge {
+                .photo-badge {
                     background: rgba(253, 188, 18, 0.25);
                     color: #FEF08A;
+                }
+
+                .yt-badge {
+                    background: rgba(220, 38, 38, 0.35);
+                    color: #FEE2E2;
+                }
+
+                .yt-hub-banner {
+                    border-color: rgba(220, 38, 38, 0.4) !important;
+                    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(220, 38, 38, 0.15) !important;
+                }
+
+                .yt-banner-backdrop {
+                    background-image: radial-gradient(rgba(220, 38, 38, 0.15) 1px, transparent 1px) !important;
+                }
+
+                .yt-avatar-box {
+                    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
+                    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.5) !important;
+                }
+
+                .yt-banner-icon {
+                    color: #FFFFFF !important;
+                }
+
+                .yt-badge-tag {
+                    background: rgba(220, 38, 38, 0.2) !important;
+                    border: 1px solid rgba(220, 38, 38, 0.4) !important;
+                    color: #F87171 !important;
                 }
 
                 /* =========================================================
@@ -1892,236 +1732,373 @@ const GalleryPage = () => {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    margin-bottom: 1.5rem;
-                    padding-bottom: 0.75rem;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                    margin-bottom: 1.75rem;
+                    padding-bottom: 0.85rem;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                    flex-wrap: wrap;
+                    gap: 12px;
                 }
 
                 .head-left {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
+                    gap: 14px;
                 }
 
-                .reels-badge-icon-box {
-                    width: 38px;
-                    height: 38px;
-                    border-radius: 12px;
-                    background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%);
-                    color: #FFFFFF;
+                .unified-badge-icon-box {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 14px;
+                    background: linear-gradient(135deg, #2e2d78 0%, #1a1954 100%);
+                    border: 1px solid rgba(253, 188, 18, 0.4);
+                    color: #fdbc12;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 4px 14px rgba(225, 48, 108, 0.4);
-                }
-
-                .yt-badge-icon-box {
-                    width: 38px;
-                    height: 38px;
-                    border-radius: 12px;
-                    background: #DC2626;
-                    color: #FFFFFF;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+                    box-shadow: 0 4px 16px rgba(46, 45, 120, 0.4);
                 }
 
                 .section-title {
-                    font-size: 1.25rem;
+                    font-size: 1.3rem;
                     font-weight: 800;
                     color: #FFFFFF;
                     margin: 0;
                 }
 
                 .section-sub {
-                    font-size: 0.8rem;
+                    font-size: 0.82rem;
                     color: #94A3B8;
-                    margin: 2px 0 0 0;
+                    margin: 3px 0 0 0;
                 }
 
-                .view-all-reels-link {
-                    color: #fdbc12;
-                    font-size: 0.82rem;
-                    font-weight: 800;
+                .head-channel-links {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                }
+
+                .channel-badge-link {
                     display: inline-flex;
                     align-items: center;
-                    gap: 5px;
+                    gap: 6px;
+                    padding: 6px 14px;
+                    border-radius: 50px;
+                    font-size: 0.78rem;
+                    font-weight: 800;
                     text-decoration: none;
+                    transition: all 0.25s ease;
                 }
 
-                .view-all-reels-link:hover {
+                .channel-badge-link.ig-link {
+                    background: rgba(225, 48, 108, 0.12);
+                    border: 1px solid rgba(225, 48, 108, 0.35);
+                    color: #F472B6;
+                }
+
+                .channel-badge-link.ig-link:hover {
+                    background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%);
                     color: #FFFFFF;
+                    border-color: transparent;
+                    transform: translateY(-2px);
+                }
+
+                .channel-badge-link.yt-link {
+                    background: rgba(220, 38, 38, 0.12);
+                    border: 1px solid rgba(220, 38, 38, 0.35);
+                    color: #F87171;
+                }
+
+                .channel-badge-link.yt-link:hover {
+                    background: #DC2626;
+                    color: #FFFFFF;
+                    border-color: transparent;
+                    transform: translateY(-2px);
+                }
+
+                /* EMPTY STATE */
+                .no-media-empty-state {
+                    text-align: center;
+                    padding: 4rem 1.5rem;
+                    background: rgba(17, 24, 39, 0.6);
+                    border: 1px dashed rgba(255, 255, 255, 0.15);
+                    border-radius: 20px;
+                    color: #CBD5E1;
+                    margin: 2rem 0;
+                }
+
+                .no-media-empty-state h3 {
+                    font-size: 1.3rem;
+                    font-weight: 800;
+                    color: #FFFFFF;
+                    margin: 0 0 0.5rem;
+                }
+
+                .no-media-empty-state p {
+                    color: #94A3B8;
+                    font-size: 0.88rem;
+                    margin: 0 0 1.5rem;
+                }
+
+                .reset-filters-btn {
+                    padding: 8px 20px;
+                    background: #2e2d78;
+                    border: 1px solid rgba(253, 188, 18, 0.4);
+                    color: #fdbc12;
+                    font-size: 0.85rem;
+                    font-weight: 800;
+                    border-radius: 50px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .reset-filters-btn:hover {
+                    background: #1a1954;
+                    color: #FFFFFF;
+                    transform: scale(1.05);
                 }
 
                 /* =========================================================
-                   INSTAGRAM REELS GRID (COMPACT 9:16 CARDS WITH NEON GLOW)
+                   UNIFIED VIDEO & REELS GRID (ALL IN ONE)
                    ========================================================= */
-                .reels-section-block {
-                    margin-bottom: 3rem;
+                .unified-video-section {
+                    margin-bottom: 3.5rem;
                 }
 
-                .reels-cards-grid {
+                .unified-video-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                    gap: 1.25rem;
+                    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+                    gap: 1.75rem;
                 }
 
-                .instagram-reel-card {
-                    background: rgba(17, 24, 39, 0.85);
+                .unified-media-card {
+                    background: rgba(17, 24, 39, 0.88);
                     border: 1px solid rgba(255, 255, 255, 0.08);
-                    border-radius: 18px;
+                    border-radius: 20px;
                     overflow: hidden;
-                    cursor: pointer;
                     display: flex;
                     flex-direction: column;
-                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+                    cursor: pointer;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
                     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
                     position: relative;
                 }
 
-                .instagram-reel-card:hover {
-                    border-color: rgba(225, 48, 108, 0.8);
-                    box-shadow: 0 20px 45px -8px rgba(225, 48, 108, 0.45), 0 10px 25px rgba(0, 0, 0, 0.7);
-                    transform: translateY(-8px) scale(1.03);
+                .unified-media-card:hover {
+                    transform: translateY(-8px) scale(1.02);
+                    box-shadow: 0 22px 50px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(253, 188, 18, 0.2);
                 }
 
-                .reel-thumb-wrap {
+                .unified-media-card.reel-card-type:hover {
+                    border-color: rgba(225, 48, 108, 0.7);
+                    box-shadow: 0 22px 50px -10px rgba(225, 48, 108, 0.35), 0 10px 30px rgba(0, 0, 0, 0.7);
+                }
+
+                .unified-media-card.youtube-card-type:hover {
+                    border-color: rgba(253, 188, 18, 0.6);
+                    box-shadow: 0 22px 50px -10px rgba(253, 188, 18, 0.3), 0 10px 30px rgba(0, 0, 0, 0.7);
+                }
+
+                /* Media Poster Container */
+                .media-card-poster-wrap {
                     position: relative;
-                    aspect-ratio: 9 / 16;
                     width: 100%;
                     overflow: hidden;
                     background: #0B1120;
                 }
 
-                .reel-thumb-img {
+                .media-card-poster-wrap.aspect-reel {
+                    height: 280px;
+                }
+
+                .media-card-poster-wrap.aspect-video {
+                    height: 185px;
+                }
+
+                .media-card-poster-img {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
                     transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
                 }
 
-                .instagram-reel-card:hover .reel-thumb-img {
-                    transform: scale(1.1);
+                .unified-media-card:hover .media-card-poster-img {
+                    transform: scale(1.09);
                 }
 
-                .reel-gradient-overlay {
+                .media-poster-overlay {
                     position: absolute;
                     inset: 0;
-                    background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.2) 40%, transparent 80%);
+                    background: linear-gradient(to top, rgba(17, 24, 39, 0.98) 0%, rgba(17, 24, 39, 0.2) 50%, rgba(0, 0, 0, 0.4) 100%);
                 }
 
-                .reel-top-badge {
+                /* Platform Badge */
+                .media-platform-badge {
                     position: absolute;
-                    top: 8px;
-                    left: 8px;
-                    background: rgba(0, 0, 0, 0.75);
-                    backdrop-filter: blur(8px);
-                    color: #FFFFFF;
-                    font-size: 0.65rem;
-                    font-weight: 900;
-                    padding: 2px 7px;
-                    border-radius: 50px;
+                    top: 10px;
+                    left: 10px;
                     display: inline-flex;
                     align-items: center;
-                    gap: 3px;
-                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    gap: 5px;
+                    font-size: 0.68rem;
+                    font-weight: 900;
+                    padding: 3px 9px;
+                    border-radius: 50px;
+                    backdrop-filter: blur(8px);
                     z-index: 2;
                 }
 
-                .reel-ig-badge-icon {
-                    color: #E1306C;
+                .media-platform-badge.ig-badge {
+                    background: rgba(225, 48, 108, 0.85);
+                    color: #FFFFFF;
+                    box-shadow: 0 2px 10px rgba(225, 48, 108, 0.5);
                 }
 
-                .reel-audio-tag {
+                .media-platform-badge.yt-badge {
+                    background: rgba(220, 38, 38, 0.9);
+                    color: #FFFFFF;
+                    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.5);
+                }
+
+                /* Audio / Duration tags */
+                .media-audio-tag, .media-duration-tag {
                     position: absolute;
-                    top: 8px;
-                    right: 8px;
-                    background: rgba(0, 0, 0, 0.7);
+                    top: 10px;
+                    right: 10px;
+                    background: rgba(0, 0, 0, 0.75);
                     backdrop-filter: blur(6px);
-                    color: #CBD5E1;
-                    font-size: 0.62rem;
-                    padding: 2px 6px;
-                    border-radius: 4px;
-                    max-width: 100px;
+                    color: #E2E8F0;
+                    font-size: 0.65rem;
+                    font-weight: 700;
+                    padding: 3px 8px;
+                    border-radius: 6px;
+                    max-width: 120px;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     z-index: 2;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
                 }
 
-                .reel-bottom-meta {
-                    position: absolute;
-                    bottom: 8px;
-                    left: 8px;
-                    right: 8px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    color: #CBD5E1;
-                    font-size: 0.68rem;
-                    font-weight: 800;
-                    z-index: 2;
-                }
-
-                .reel-views, .reel-likes {
-                    display: inline-flex;
-                    align-items: center;
-                    background: rgba(0, 0, 0, 0.65);
-                    backdrop-filter: blur(4px);
-                    padding: 2px 6px;
-                    border-radius: 4px;
-                }
-
-                .reel-play-hover-overlay {
+                /* Hover Play Overlay */
+                .media-hover-play-layer {
                     position: absolute;
                     inset: 0;
                     display: flex;
+                    flex-direction: column;
                     align-items: center;
                     justify-content: center;
+                    gap: 8px;
                     z-index: 3;
                     opacity: 0;
-                    transition: opacity 0.25s ease;
+                    transition: opacity 0.3s ease;
                 }
 
-                .instagram-reel-card:hover .reel-play-hover-overlay {
+                .unified-media-card:hover .media-hover-play-layer {
                     opacity: 1;
                 }
 
-                .reel-play-circle {
-                    width: 44px;
-                    height: 44px;
+                .media-play-glow-circle {
+                    width: 52px;
+                    height: 52px;
                     border-radius: 50%;
-                    background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%);
                     color: #FFFFFF;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    box-shadow: 0 0 25px rgba(225, 48, 108, 0.9);
                     transform: scale(0.85);
                     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
                 }
 
-                .instagram-reel-card:hover .reel-play-circle {
-                    transform: scale(1.12);
+                .media-play-glow-circle.ig-glow {
+                    background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%);
+                    box-shadow: 0 0 28px rgba(225, 48, 108, 0.95);
                 }
 
-                .play-triangle {
-                    margin-left: 2px;
+                .media-play-glow-circle.yt-glow {
+                    background: #DC2626;
+                    box-shadow: 0 0 28px rgba(239, 68, 68, 0.95);
                 }
 
-                .reel-info-box {
-                    padding: 0.75rem;
+                .unified-media-card:hover .media-play-glow-circle {
+                    transform: scale(1.15);
+                }
+
+                .play-triangle-center {
+                    margin-left: 3px;
+                }
+
+                .media-tap-play-hint {
+                    background: rgba(15, 23, 42, 0.85);
+                    backdrop-filter: blur(8px);
+                    color: #FFFFFF;
+                    font-size: 0.72rem;
+                    font-weight: 800;
+                    padding: 3px 10px;
+                    border-radius: 50px;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+
+                /* Bottom stats inside poster */
+                .media-poster-bottom-stats {
+                    position: absolute;
+                    bottom: 10px;
+                    left: 10px;
+                    right: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    z-index: 2;
+                }
+
+                .stat-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    background: rgba(0, 0, 0, 0.68);
+                    backdrop-filter: blur(4px);
+                    color: #E2E8F0;
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    padding: 2px 7px;
+                    border-radius: 5px;
+                }
+
+                /* Media Card Info Body */
+                .media-card-info-body {
+                    padding: 1.15rem 1.25rem;
                     display: flex;
                     flex-direction: column;
-                    gap: 2px;
+                    flex-grow: 1;
                 }
 
-                .reel-title {
-                    font-size: 0.8rem;
+                .media-meta-head {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                }
+
+                .media-cat-badge {
+                    font-size: 0.68rem;
+                    font-weight: 800;
+                    color: #fdbc12;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                .media-date-text {
+                    font-size: 0.7rem;
+                    color: #94A3B8;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .media-card-title {
+                    font-size: 0.95rem;
                     font-weight: 800;
                     color: #FFFFFF;
-                    margin: 0;
-                    line-height: 1.3;
+                    margin: 0 0 0.45rem;
+                    line-height: 1.35;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
@@ -2129,148 +2106,15 @@ const GalleryPage = () => {
                     transition: color 0.2s ease;
                 }
 
-                .instagram-reel-card:hover .reel-title {
-                    color: #F472B6;
-                }
-
-                .reel-date {
-                    font-size: 0.68rem;
-                    color: #94A3B8;
-                }
-
-                /* =========================================================
-                   YOUTUBE VIDEOS GRID (COMPACT 16:9 CARDS)
-                   ========================================================= */
-                .youtube-videos-section-block {
-                    margin-bottom: 2rem;
-                }
-
-                .videos-cards-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-                    gap: 1.5rem;
-                }
-
-                .youtube-video-card {
-                    background: rgba(17, 24, 39, 0.85);
-                    border: 1px solid rgba(255, 255, 255, 0.08);
-                    border-radius: 18px;
-                    overflow: hidden;
-                    display: flex;
-                    flex-direction: column;
-                    cursor: pointer;
-                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-                    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-                }
-
-                .youtube-video-card:hover {
-                    border-color: rgba(253, 188, 18, 0.6);
-                    box-shadow: 0 20px 45px -8px rgba(253, 188, 18, 0.3), 0 10px 25px rgba(0, 0, 0, 0.7);
-                    transform: translateY(-8px) scale(1.02);
-                }
-
-                .vcard-thumb-wrap {
-                    position: relative;
-                    height: 165px;
-                    overflow: hidden;
-                    background: #0B1120;
-                }
-
-                .vcard-thumb-img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-                }
-
-                .youtube-video-card:hover .vcard-thumb-img {
-                    transform: scale(1.08);
-                }
-
-                .vcard-thumb-shade {
-                    position: absolute;
-                    inset: 0;
-                    background: linear-gradient(to top, rgba(17, 24, 39, 0.95) 0%, transparent 60%);
-                }
-
-                .vcard-duration-badge {
-                    position: absolute;
-                    bottom: 8px;
-                    right: 8px;
-                    background: rgba(15, 23, 42, 0.9);
-                    color: #FFFFFF;
-                    font-size: 0.68rem;
-                    font-weight: 800;
-                    padding: 2px 7px;
-                    border-radius: 5px;
-                    display: inline-flex;
-                    align-items: center;
-                }
-
-                .vcard-cat-pill {
-                    position: absolute;
-                    top: 8px;
-                    left: 8px;
-                    background: rgba(15, 23, 42, 0.85);
+                .unified-media-card:hover .media-card-title {
                     color: #fdbc12;
-                    font-size: 0.65rem;
-                    font-weight: 800;
-                    padding: 2px 8px;
-                    border-radius: 50px;
                 }
 
-                .vcard-play-overlay {
-                    position: absolute;
-                    inset: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 3;
-                }
-
-                .yt-play-button-circle {
-                    width: 44px;
-                    height: 44px;
-                    border-radius: 50%;
-                    background: #DC2626;
-                    color: #FFFFFF;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.6);
-                    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
-                }
-
-                .youtube-video-card:hover .yt-play-button-circle {
-                    transform: scale(1.2);
-                    background: #EF4444;
-                    box-shadow: 0 0 25px rgba(239, 68, 68, 0.9);
-                }
-
-                .vcard-body {
-                    padding: 1rem 1.15rem;
-                    display: flex;
-                    flex-direction: column;
-                    flex-grow: 1;
-                }
-
-                .vcard-title {
-                    font-size: 0.95rem;
-                    font-weight: 800;
-                    color: #FFFFFF;
-                    margin: 0 0 0.4rem;
-                    line-height: 1.35;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                }
-
-                .vcard-desc {
+                .media-card-desc {
                     color: #94A3B8;
-                    font-size: 0.75rem;
+                    font-size: 0.78rem;
                     line-height: 1.45;
-                    margin: 0 0 0.75rem;
+                    margin: 0 0 0.85rem;
                     flex-grow: 1;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
@@ -2278,37 +2122,38 @@ const GalleryPage = () => {
                     overflow: hidden;
                 }
 
-                .vcard-footer {
+                .media-card-action-bar {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    padding-top: 0.65rem;
+                    padding-top: 0.75rem;
                     border-top: 1px solid rgba(255, 255, 255, 0.06);
                 }
 
-                .vcard-date {
-                    font-size: 0.7rem;
-                    color: #94A3B8;
-                }
-
-                .vcard-watch-link {
+                .media-play-trigger-text {
                     display: inline-flex;
                     align-items: center;
-                    gap: 4px;
-                    font-size: 0.75rem;
-                    font-weight: 800;
+                    gap: 5px;
                     color: #fdbc12;
+                    font-size: 0.78rem;
+                    font-weight: 800;
                     transition: transform 0.2s ease;
                 }
 
-                .youtube-video-card:hover .vcard-watch-link {
+                .unified-media-card:hover .media-play-trigger-text {
                     transform: translateX(3px);
                 }
 
+                .media-source-handle {
+                    font-size: 0.72rem;
+                    color: #64748B;
+                    font-weight: 700;
+                }
+
                 /* =========================================================
-                   INSTAGRAM REEL MODAL VIEWER
+                   UNIFIED IN-SITE MEDIA PLAYER MODAL
                    ========================================================= */
-                .instagram-reel-modal-backdrop {
+                .unified-media-modal-backdrop {
                     position: fixed;
                     inset: 0;
                     width: 100vw;
@@ -2321,55 +2166,139 @@ const GalleryPage = () => {
                     box-sizing: border-box;
                 }
 
-                .reel-modal-shade {
+                .media-modal-shade {
                     position: absolute;
                     inset: 0;
-                    background: rgba(3, 7, 18, 0.94);
-                    backdrop-filter: blur(16px);
+                    background: rgba(3, 7, 18, 0.95);
+                    backdrop-filter: blur(18px);
                 }
 
-                .instagram-reel-dialog {
+                /* =========================================================
+                   MODAL DIALOG: 2-COLUMN SPLIT LAYOUT (LEFT VIDEO, RIGHT DETAILS)
+                   ========================================================= */
+                .unified-media-dialog {
                     position: relative;
                     z-index: 2;
                     width: 100%;
-                    max-width: 400px;
-                    background: #0D1322;
-                    border: 1px solid rgba(225, 48, 108, 0.4);
+                    background: #0B1120;
                     border-radius: 24px;
                     overflow: hidden;
-                    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 35px rgba(225, 48, 108, 0.3);
+                    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95);
                     margin: auto;
                     color: #FFFFFF;
+                    display: grid;
+                    max-height: 88vh;
                 }
 
-                .reel-dialog-header {
+                .unified-media-dialog.youtube-dialog-split {
+                    max-width: 1060px;
+                    grid-template-columns: 1.45fr 1fr;
+                    border: 1px solid rgba(220, 38, 38, 0.45);
+                    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 45px rgba(220, 38, 38, 0.25);
+                }
+
+                /* Left Column: Player */
+                .split-dialog-left-player {
+                    background: #000000;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                    width: 100%;
+                }
+
+                .split-youtube-player-wrap {
+                    width: 100%;
+                    aspect-ratio: 16 / 9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #000000;
+                    position: relative;
+                }
+
+                .split-youtube-iframe {
+                    width: 100%;
+                    height: 100%;
+                    border: 0;
+                    display: block;
+                }
+
+                /* Right Column: Details Sheet */
+                .split-dialog-right-details {
+                    display: flex;
+                    flex-direction: column;
+                    background: linear-gradient(180deg, #0F172A 0%, #090E1A 100%);
+                    border-left: 1px solid rgba(255, 255, 255, 0.08);
+                    overflow-y: auto;
+                    max-height: 88vh;
+                    padding: 1.5rem 1.75rem;
+                    gap: 1.25rem;
+                }
+
+                .split-details-header {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    padding: 0.85rem 1.15rem;
-                    background: rgba(15, 23, 42, 0.85);
+                    padding-bottom: 1rem;
                     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                    flex-shrink: 0;
                 }
 
-                .reel-dialog-brand {
+                .dialog-brand-box {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
+                    gap: 8px;
+                    flex-wrap: wrap;
                 }
 
-                .reel-ig-brand-icon {
+                .ig-brand-icon {
                     color: #E1306C;
                 }
 
-                .reel-dialog-handle {
-                    font-size: 0.88rem;
+                .yt-brand-icon {
+                    color: #EF4444;
+                }
+
+                .dialog-brand-handle {
+                    font-size: 0.9rem;
                     font-weight: 800;
                     color: #FFFFFF;
                 }
 
-                .reel-dialog-close {
-                    width: 30px;
-                    height: 30px;
+                .dialog-type-tag {
+                    font-size: 0.65rem;
+                    font-weight: 800;
+                    padding: 2px 7px;
+                    border-radius: 50px;
+                }
+
+                .ig-type-tag {
+                    background: rgba(225, 48, 108, 0.25);
+                    color: #FCE7F3;
+                    border: 1px solid rgba(225, 48, 108, 0.4);
+                }
+
+                .yt-type-tag {
+                    background: rgba(220, 38, 38, 0.25);
+                    color: #FEE2E2;
+                    border: 1px solid rgba(220, 38, 38, 0.4);
+                }
+
+                .dialog-cat-pill {
+                    background: rgba(253, 188, 18, 0.15);
+                    color: #fdbc12;
+                    font-size: 0.68rem;
+                    font-weight: 800;
+                    padding: 2px 8px;
+                    border-radius: 50px;
+                    border: 1px solid rgba(253, 188, 18, 0.3);
+                }
+
+                .dialog-close-btn {
+                    width: 32px;
+                    height: 32px;
                     border-radius: 50%;
                     background: rgba(255, 255, 255, 0.08);
                     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -2378,100 +2307,146 @@ const GalleryPage = () => {
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
+                    transition: all 0.2s ease;
                 }
 
-                .reel-dialog-close:hover {
+                .dialog-close-btn:hover {
                     background: #EF4444;
                     color: #FFFFFF;
+                    border-color: #EF4444;
                 }
 
-                .reel-dialog-frame {
-                    position: relative;
-                    aspect-ratio: 9 / 16;
-                    max-height: 58vh;
-                    width: 100%;
-                    background: #000000;
-                    overflow: hidden;
-                }
-
-                .reel-dialog-img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-
-                .reel-dialog-overlay-content {
-                    position: absolute;
-                    inset: 0;
-                    background: linear-gradient(to top, rgba(13, 19, 34, 0.98) 0%, rgba(13, 19, 34, 0.3) 50%, transparent 100%);
+                /* Details Body */
+                .split-details-body {
                     display: flex;
                     flex-direction: column;
-                    justify-content: flex-end;
-                    padding: 1.15rem;
+                    gap: 1.15rem;
+                    flex: 1;
                 }
 
-                .reel-dialog-audio-pill {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 5px;
-                    background: rgba(0, 0, 0, 0.7);
-                    color: #CBD5E1;
-                    font-size: 0.7rem;
-                    padding: 3px 9px;
-                    border-radius: 50px;
-                    margin-bottom: 0.5rem;
-                    width: fit-content;
-                }
-
-                .reel-dialog-title {
-                    font-size: 0.95rem;
+                .dialog-media-title {
+                    font-size: 1.25rem;
                     font-weight: 800;
                     color: #FFFFFF;
-                    margin: 0 0 0.35rem;
-                }
-
-                .reel-dialog-caption {
-                    font-size: 0.78rem;
-                    color: #94A3B8;
-                    margin: 0;
                     line-height: 1.4;
+                    margin: 0;
                 }
 
-                .reel-dialog-footer {
-                    padding: 0.85rem 1.15rem;
-                    background: rgba(15, 23, 42, 0.9);
+                .dialog-stats-pills {
                     display: flex;
                     align-items: center;
-                    justify-content: space-between;
-                    gap: 10px;
+                    gap: 8px;
                     flex-wrap: wrap;
                 }
 
-                .reel-stats-col {
-                    display: flex;
-                    gap: 10px;
-                    font-size: 0.78rem;
-                    font-weight: 700;
-                    color: #CBD5E1;
-                }
-
-                .reel-stats-col span {
+                .dialog-stat-item {
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
+                    background: rgba(255, 255, 255, 0.06);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    color: #CBD5E1;
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    padding: 3px 8px;
+                    border-radius: 6px;
                 }
 
-                .reel-open-btn {
+                .dialog-stat-item.audio-track-item {
+                    background: rgba(253, 188, 18, 0.12);
+                    border-color: rgba(253, 188, 18, 0.3);
+                    color: #FEF08A;
+                }
+
+                .split-caption-block {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                    margin-top: 0.25rem;
+                }
+
+                .split-caption-label {
+                    font-size: 0.75rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                    color: #fdbc12;
+                    margin: 0;
+                }
+
+                .dialog-caption-box {
+                    background: rgba(255, 255, 255, 0.04);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 14px;
+                    padding: 1rem 1.15rem;
+                    max-height: 220px;
+                    overflow-y: auto;
+                }
+
+                .dialog-caption-text {
+                    font-size: 0.88rem;
+                    color: #CBD5E1;
+                    line-height: 1.6;
+                    margin: 0;
+                    white-space: pre-wrap;
+                }
+
+                /* Details Footer */
+                .split-details-footer {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    padding-top: 1rem;
+                    border-top: 1px solid rgba(255, 255, 255, 0.08);
+                    flex-shrink: 0;
+                    flex-wrap: wrap;
+                }
+
+                .dialog-external-btn {
                     display: inline-flex;
                     align-items: center;
                     gap: 6px;
+                    padding: 0.65rem 1.25rem;
+                    border-radius: 50px;
+                    font-size: 0.82rem;
+                    font-weight: 800;
+                    text-decoration: none;
+                    transition: transform 0.2s ease;
+                }
+
+                .dialog-external-btn.ig-ext-btn {
                     background: linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%);
                     color: #FFFFFF;
-                    font-size: 0.78rem;
-                    font-weight: 800;
-                    padding: 0.55rem 1rem;
+                    box-shadow: 0 4px 14px rgba(225, 48, 108, 0.4);
+                }
+
+                .dialog-external-btn.yt-ext-btn {
+                    background: #DC2626;
+                    color: #FFFFFF;
+                    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+                }
+
+                .dialog-external-btn:hover {
+                    transform: translateY(-2px);
+                    color: #FFFFFF;
+                }
+
+                .dialog-dismiss-pill {
+                    padding: 0.65rem 1.25rem;
+                    background: rgba(255, 255, 255, 0.08);
+                    border: 1px solid rgba(255, 255, 255, 0.15);
                     border-radius: 50px;
-                    text-decoration: none;
+                    color: #CBD5E1;
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .dialog-dismiss-pill:hover {
+                    background: rgba(255, 255, 255, 0.16);
+                    color: #FFFFFF;
                 }
 
                 /* =========================================================
@@ -2637,8 +2612,8 @@ const GalleryPage = () => {
                     margin: 0;
                 }
 
-                /* LIGHTBOX & YOUTUBE MODAL */
-                .fullscreen-lightbox-overlay, .youtube-modal-overlay {
+                /* LIGHTBOX OVERLAY */
+                .fullscreen-lightbox-overlay {
                     position: fixed;
                     inset: 0;
                     width: 100vw;
@@ -2651,7 +2626,7 @@ const GalleryPage = () => {
                     box-sizing: border-box;
                 }
 
-                .lightbox-backdrop-shade, .yt-modal-backdrop {
+                .lightbox-backdrop-shade {
                     position: absolute;
                     inset: 0;
                     background: rgba(3, 7, 18, 0.94);
@@ -2701,132 +2676,28 @@ const GalleryPage = () => {
                     border: 1px solid rgba(255, 255, 255, 0.2);
                 }
 
-                .youtube-player-dialog {
-                    position: relative;
-                    z-index: 2;
-                    width: 100%;
-                    max-width: 860px;
-                    background: #0D1322;
-                    border: 1px solid rgba(253, 188, 18, 0.35);
-                    border-radius: 24px;
-                    overflow: hidden;
-                    margin: auto;
-                    color: #FFFFFF;
-                }
-
-                .yt-dialog-header {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 1rem 1.5rem;
-                    background: rgba(15, 23, 42, 0.85);
-                }
-
-                .yt-dialog-badge-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-
-                .yt-red {
-                    color: #EF4444;
-                }
-
-                .yt-dialog-cat {
-                    font-size: 0.8rem;
-                    font-weight: 800;
-                    color: #fdbc12;
-                    text-transform: uppercase;
-                }
-
-                .yt-dialog-subtag {
-                    font-size: 0.75rem;
-                    color: #94A3B8;
-                }
-
-                .yt-dialog-close-btn {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.08);
-                    border: 1px solid rgba(255, 255, 255, 0.15);
-                    color: #CBD5E1;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                }
-
-                .yt-iframe-wrapper {
-                    position: relative;
-                    padding-bottom: 56.25%;
-                    height: 0;
-                    overflow: hidden;
-                    background: #000000;
-                }
-
-                .yt-iframe-player {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    border: 0;
-                }
-
-                .yt-dialog-info-footer {
-                    padding: 1.25rem 1.5rem;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 16px;
-                    background: rgba(15, 23, 42, 0.8);
-                }
-
-                .yt-modal-video-title {
-                    font-size: 1.05rem;
-                    font-weight: 800;
-                    margin: 0 0 0.35rem;
-                }
-
-                .yt-modal-video-desc {
-                    color: #94A3B8;
-                    font-size: 0.78rem;
-                    margin: 0;
-                }
-
-                .yt-dialog-actions-col {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-
-                .yt-direct-open-link {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 6px;
-                    padding: 0.55rem 0.95rem;
-                    background: rgba(220, 38, 38, 0.15);
-                    border: 1px solid rgba(239, 68, 68, 0.4);
-                    border-radius: 50px;
-                    color: #FFFFFF;
-                    font-size: 0.78rem;
-                    font-weight: 800;
-                    text-decoration: none;
-                }
-
-                .yt-modal-close-pill {
-                    padding: 0.55rem 0.95rem;
-                    background: rgba(255, 255, 255, 0.08);
-                    border: 1px solid rgba(255, 255, 255, 0.15);
-                    border-radius: 50px;
-                    color: #CBD5E1;
-                    font-size: 0.78rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                }
-
                 @media (max-width: 860px) {
+                    .unified-media-dialog.youtube-dialog-split {
+                        grid-template-columns: 1fr;
+                        max-height: 90vh;
+                        overflow-y: auto;
+                    }
+                    .split-dialog-left-player {
+                        min-height: unset;
+                    }
+                    .split-youtube-player-wrap,
+                    .split-youtube-iframe {
+                        aspect-ratio: 16 / 9;
+                        width: 100%;
+                        height: auto;
+                        min-height: unset;
+                    }
+                    .split-dialog-right-details {
+                        border-left: none;
+                        border-top: 1px solid rgba(255, 255, 255, 0.08);
+                        max-height: none;
+                        padding: 1.25rem 1.25rem;
+                    }
                     .ig-banner-content, .reels-banner-content {
                         flex-direction: column;
                         text-align: center;
@@ -2851,18 +2722,20 @@ const GalleryPage = () => {
                     .photos-masonry-grid {
                         columns: 2 240px;
                     }
+                    .unified-video-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                    }
                 }
 
                 @media (max-width: 600px) {
                     .gallery-main-container {
                         padding: 2.5rem 1rem 4.5rem;
                     }
-                    .instagram-posts-grid, .albums-grid, .videos-cards-grid {
+                    .instagram-posts-grid, .albums-grid {
                         grid-template-columns: 1fr;
                     }
-                    .reels-cards-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 0.85rem;
+                    .unified-video-grid {
+                        grid-template-columns: 1fr;
                     }
                     .photos-masonry-grid {
                         columns: 1 100%;
