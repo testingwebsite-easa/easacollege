@@ -20,21 +20,24 @@ function romanToNumber(roman) {
 }
 
 const VALID_CATEGORIES = [
-    'HUM', 'BSC', 'ESC', 'ESE', 'PCC', 'PEC', 'OEC', 'EEC', 'MC',
+    'HUM', 'BSC', 'ESC', 'ESE', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC',
     'HSMC', 'HS', 'BS', 'ES', 'PC', 'PE', 'OE', 'EE',
     'HUMANITIES', 'BASIC SCIENCE', 'BASIC SCIENCES', 'ENGINEERING SCIENCE', 'ENGINEERING SCIENCES',
-    'PROFESSIONAL CORE', 'PROFESSIONAL ELECTIVE', 'OPEN ELECTIVE', 'OPEN ELECTIVES',
+    'PROFESSIONAL CORE', 'PROFESSIONAL ELECTIVE', 'NON-FUNCTIONAL ELECTIVE', 'NON-FUNCTIONAL ELECTIVES',
+    'NON FUNCTIONAL ELECTIVE', 'NON FUNCTIONAL ELECTIVES', 'FUNCTIONAL ELECTIVE', 'FUNCTIONAL ELECTIVES',
+    'OPEN ELECTIVE', 'OPEN ELECTIVES',
     'EMPLOYABILITY ENHANCEMENT', 'MANDATORY', 'MANDATORY COURSE', 'MANDATORY COURSES'
 ];
 
 function normalizeCategoryType(type) {
     if (!type) return 'PCC';
     const t = String(type).toUpperCase().trim();
+    if (t === 'NFE' || t.startsWith('NON-FUNCTIONAL') || t.startsWith('NON FUNCTIONAL')) return 'NFE';
     if (t === 'HUM' || t === 'HSMC' || t === 'HS' || t.startsWith('HUMANITIES')) return 'HUM';
     if (t === 'BSC' || t === 'BS' || t.startsWith('BASIC SCIENCE')) return 'BSC';
     if (t === 'ESC' || t === 'ES' || t === 'ESE' || t.startsWith('ENGINEERING SCIENCE')) return 'ESC';
     if (t === 'PCC' || t === 'PC' || t.startsWith('PROFESSIONAL CORE')) return 'PCC';
-    if (t === 'PEC' || t === 'PE' || t.startsWith('PROFESSIONAL ELECTIVE')) return 'PEC';
+    if (t === 'PEC' || t === 'PE' || t.startsWith('PROFESSIONAL ELECTIVE') || t.startsWith('FUNCTIONAL ELECTIVE')) return 'PEC';
     if (t === 'OEC' || t === 'OE' || t.startsWith('OPEN ELECTIVE')) return 'OEC';
     if (t === 'EEC' || t === 'EE' || t.startsWith('EMPLOYABILITY')) return 'EEC';
     if (t === 'MC' || t.startsWith('MANDATORY')) return 'MC';
@@ -50,15 +53,19 @@ function isCategoryString(str) {
 const COURSE_CODE_REGEX = /^[A-Z0-9]{2,4}[A-Z]{2,4}[0-9X]{2,4}$/i;
 const LOOSE_CODE_REGEX = /^[A-Z0-9]{4,10}$/i;
 const NON_COURSE_WORDS = [
-    'THEORY', 'PRACTICAL', 'PERIODS', 'CREDIT', 'CREDITS', 'TOTAL', 'MARKS', 'WEEKS', 'CATEGORY', 'SEMESTER', 'COURSE', 'HOURS', 'VERTICAL', 'OPEN',
-    'HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC', 'HUM', 'ESE', 'CIA', 'S.NO', 'SL.NO', 'SL NO', 'S NO', 'NO', 'SERIAL NO'
+    'THEORY', 'PRACTICAL', 'PERIODS', 'CREDIT', 'CREDITS', 'TOTAL', 'TOTALS', 'MARKS', 'WEEKS', 'CATEGORY', 'SEMESTER', 'COURSE', 'HOURS', 'VERTICAL', 'OPEN',
+    'HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC', 'HUM', 'ESE', 'CIA', 'S.NO', 'SL.NO', 'SL NO', 'S NO', 'NO', 'SERIAL NO',
+    'GRAND TOTAL', 'SUB TOTAL', 'SUBTOTAL', 'TOTAL CREDITS', 'TOTAL PERIODS', 'TOTAL MARKS', 'TOTAL HOURS'
 ];
 
 function isCourseCode(str) {
     if (!str) return false;
     const s = String(str).trim().toUpperCase();
     if (NON_COURSE_WORDS.includes(s) || isCategoryString(s)) return false;
+    if (s.startsWith('TOTAL') || s.includes('TOTAL')) return false;
     if (s.length < 4 || s.length > 12) return false;
+    if (/^\d+$/.test(s)) return false; // Pure numbers are not course codes
+    if (!/[A-Z]/.test(s)) return false; // Must contain at least one letter
     if (!/\d/.test(s) && !s.includes('XX')) return false;
     return COURSE_CODE_REGEX.test(s) || LOOSE_CODE_REGEX.test(s);
 }
@@ -357,6 +364,20 @@ function parseSheetRows(rows, defaultContext) {
             continue;
         }
 
+        // Skip total / summary footer rows in tables
+        if (
+            rowStr.startsWith('TOTAL') ||
+            rowStr.includes('TOTAL CREDITS') ||
+            rowStr.includes('TOTAL PERIODS') ||
+            rowStr.includes('TOTAL CONTACT') ||
+            rowStr.includes('TOTAL HOURS') ||
+            rowStr.includes('TOTAL MARKS') ||
+            rowStr.includes('GRAND TOTAL') ||
+            rowUpper.some(c => c === 'TOTAL' || c.startsWith('TOTAL ') || c.startsWith('TOTAL:') || c.startsWith('TOTAL -') || c.startsWith('TOTAL –'))
+        ) {
+            continue;
+        }
+
         // Check for Semester / Session section banner in sheet
         if ((rowStr.includes('SEMESTER') || rowStr.includes('SESSION') || rowStr.includes('TERM')) && !rowStr.includes('END SEMESTER')) {
             const semMatch = rowStr.match(/(?:SEMESTER|SESSION|SEM|TERM)[\s_\-–—:]*([IVXLCDM\d]+)/i);
@@ -413,6 +434,11 @@ function parseSheetRows(rows, defaultContext) {
         if (rowStr.includes('PRACTICAL COURSE') || rowStr.includes('PRACTICAL COURSES') || rowStr.includes('LABORATORY COURSES') || rowStr === 'PRACTICAL' || rowStr === 'LABORATORY' || rowStr.startsWith('B. PRACTICAL') || rowStr.startsWith('B. LABORATORY')) {
             currentContext.currentCategory = 'PRACTICAL';
             currentContext.defaultCategoryType = 'ESC';
+            continue;
+        }
+        if (rowStr.includes('NON-FUNCTIONAL ELECTIVE') || rowStr.includes('NON FUNCTIONAL ELECTIVE') || rowStr === 'NFE' || rowStr.startsWith('NON-FUNCTIONAL') || rowStr.startsWith('NON FUNCTIONAL')) {
+            currentContext.currentCategory = 'NON-FUNCTIONAL ELECTIVE';
+            currentContext.defaultCategoryType = 'NFE';
             continue;
         }
         if (rowStr.includes('EMPLOYABILITY ENHANCEMENT') || rowStr.includes('EEC')) {
@@ -568,7 +594,7 @@ function parseSheetRows(rows, defaultContext) {
             }
         }
 
-        if (code) {
+        if (code && !code.toUpperCase().startsWith('TOTAL') && !code.toUpperCase().includes('TOTAL') && !title.toUpperCase().startsWith('TOTAL')) {
             // Determine category and categoryType dynamically based on all fields
             const catResult = determineSubjectCategoryAndType({
                 title,

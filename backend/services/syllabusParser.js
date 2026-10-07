@@ -57,15 +57,19 @@ function isCategoryString(str) {
 const COURSE_CODE_REGEX = /^[A-Z0-9]{2,4}[A-Z]{2,4}[0-9X]{2,4}$/i;
 const LOOSE_CODE_REGEX = /^[A-Z0-9]{4,10}$/i;
 const NON_COURSE_WORDS = [
-    'THEORY', 'PRACTICAL', 'PERIODS', 'CREDIT', 'CREDITS', 'TOTAL', 'MARKS', 'WEEKS', 'CATEGORY', 'SEMESTER', 'COURSE', 'HOURS', 'VERTICAL', 'OPEN',
-    'HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC', 'HUM', 'ESE', 'CIA', 'S.NO', 'SL.NO', 'NO'
+    'THEORY', 'PRACTICAL', 'PERIODS', 'CREDIT', 'CREDITS', 'TOTAL', 'TOTALS', 'MARKS', 'WEEKS', 'CATEGORY', 'SEMESTER', 'COURSE', 'HOURS', 'VERTICAL', 'OPEN',
+    'HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC', 'HUM', 'ESE', 'CIA', 'S.NO', 'SL.NO', 'SL NO', 'S NO', 'NO', 'SERIAL NO',
+    'GRAND TOTAL', 'SUB TOTAL', 'SUBTOTAL', 'TOTAL CREDITS', 'TOTAL PERIODS', 'TOTAL MARKS', 'TOTAL HOURS'
 ];
 
 function isCourseCode(str) {
     if (!str) return false;
     const s = str.trim().toUpperCase();
     if (NON_COURSE_WORDS.includes(s) || isCategoryString(s)) return false;
+    if (s.startsWith('TOTAL') || s.includes('TOTAL')) return false;
     if (s.length < 4 || s.length > 12) return false;
+    if (/^\d+$/.test(s)) return false; // Pure numbers are not course codes
+    if (!/[A-Z]/.test(s)) return false; // Must contain at least one letter
     if (!/\d/.test(s) && !s.includes('XX')) return false;
     return COURSE_CODE_REGEX.test(s) || LOOSE_CODE_REGEX.test(s);
 }
@@ -315,7 +319,20 @@ function parseSubjectRow(row, context) {
 
     const rowStr = rowClean.join(' ').toUpperCase();
 
-    if (rowStr.startsWith('TOTAL') || rowStr.includes('TOTAL CREDITS') || rowStr.includes('PERIODS PER WEEK')) {
+    if (
+        rowStr.startsWith('TOTAL') ||
+        rowStr.includes('TOTAL CREDITS') ||
+        rowStr.includes('TOTAL PERIODS') ||
+        rowStr.includes('TOTAL CONTACT') ||
+        rowStr.includes('TOTAL HOURS') ||
+        rowStr.includes('TOTAL MARKS') ||
+        rowStr.includes('GRAND TOTAL') ||
+        rowStr.includes('PERIODS PER WEEK') ||
+        rowClean.some(c => {
+            const up = c.toUpperCase();
+            return up === 'TOTAL' || up.startsWith('TOTAL ') || up.startsWith('TOTAL:') || up.startsWith('TOTAL -') || up.startsWith('TOTAL –');
+        })
+    ) {
         return null;
     }
     if (rowClean.every(c => ['S.NO', 'S.NO.', 'SL.NO', 'SL.NO.', 'NO', 'COURSE CODE', 'COURSE TITLE', 'CATEGORY', 'L', 'T', 'P', 'CIA', 'ESE', 'TOTAL', 'CREDITS', 'PERIODS'].includes(c.toUpperCase()))) {
@@ -334,6 +351,7 @@ function parseSubjectRow(row, context) {
     if (codeIndex === -1) return null;
 
     const code = rowClean[codeIndex].toUpperCase().trim();
+    if (code.startsWith('TOTAL') || code.includes('TOTAL')) return null;
     
     // 2. Extract Title
     let title = '';

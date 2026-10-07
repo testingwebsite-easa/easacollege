@@ -28,6 +28,7 @@ const renderPieChart = (categories, rowTotals, grandTotal) => {
         'ESC': '#10b981',  // Emerald
         'PCC': '#f59e0b',  // Amber
         'PEC': '#ec4899',  // Pink
+        'NFE': '#f97316',  // Orange (Non-Functional Elective)
         'OEC': '#8b5cf6',  // Violet
         'EEC': '#06b6d4',  // Cyan
     };
@@ -99,13 +100,14 @@ const renderPieChart = (categories, rowTotals, grandTotal) => {
 const renderCreditDistributionTable = (subjects) => {
     if (!subjects || subjects.length === 0) return null;
 
-    const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
+    const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC'];
     const categoryLabels = {
         'HUM': 'Humanities and Social Sciences including Management Courses (HUM)',
         'BSC': 'Basic Science Courses (BSC)',
         'ESC': 'Engineering Science Courses (ESC)',
         'PCC': 'Professional Core Courses (PCC)',
         'PEC': 'Professional Elective Courses (PEC)',
+        'NFE': 'Non-Functional Elective Courses (NFE)',
         'OEC': 'Open Elective Courses (OEC)',
         'EEC': 'Employability Enhancement Courses (EEC)',
         'MC': 'Mandatory Courses (MC)'
@@ -132,18 +134,21 @@ const renderCreditDistributionTable = (subjects) => {
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
+        } else if (subj.categoryType === 'NFE' || (subj.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (subj.category || '').toUpperCase().includes('NON FUNCTIONAL') || (subj.category || '').toUpperCase().includes('NFE')) {
+            cat = 'NFE';
         } else if (subj.vertical) {
             cat = 'PEC';
         } else {
-            const rawCat = (subj.categoryType || '').toUpperCase().trim();
-            if (rawCat === 'HS' || rawCat === 'HUM') cat = 'HUM';
-            else if (rawCat === 'BS' || rawCat === 'BSC') cat = 'BSC';
-            else if (rawCat === 'ES' || rawCat === 'ESC') cat = 'ESC';
-            else if (rawCat === 'PC' || rawCat === 'PCC') cat = 'PCC';
-            else if (rawCat === 'PE' || rawCat === 'PEC') cat = 'PEC';
-            else if (rawCat === 'OE' || rawCat === 'OEC') cat = 'OEC';
-            else if (rawCat === 'EE' || rawCat === 'EEC') cat = 'EEC';
-            else if (rawCat === 'MC') cat = 'MC';
+            const rawCat = (subj.categoryType || subj.category || '').toUpperCase().trim();
+            if (rawCat === 'NFE' || rawCat.includes('NON-FUNCTIONAL') || rawCat.includes('NON FUNCTIONAL')) cat = 'NFE';
+            else if (rawCat === 'HS' || rawCat === 'HUM' || rawCat.includes('HUMANITIES')) cat = 'HUM';
+            else if (rawCat === 'BS' || rawCat === 'BSC' || rawCat.includes('BASIC')) cat = 'BSC';
+            else if (rawCat === 'ES' || rawCat === 'ESC' || rawCat.includes('ENGINEERING')) cat = 'ESC';
+            else if (rawCat === 'PC' || rawCat === 'PCC' || rawCat.includes('CORE')) cat = 'PCC';
+            else if (rawCat === 'PE' || rawCat === 'PEC' || rawCat.includes('ELECTIVE')) cat = 'PEC';
+            else if (rawCat === 'OE' || rawCat === 'OEC' || rawCat.includes('OPEN')) cat = 'OEC';
+            else if (rawCat === 'EE' || rawCat === 'EEC' || rawCat.includes('EMPLOYABILITY') || rawCat.includes('PROJECT')) cat = 'EEC';
+            else if (rawCat === 'MC' || rawCat.includes('MANDATORY')) cat = 'MC';
             else cat = 'PCC';
         }
 
@@ -294,13 +299,14 @@ const formatDeptHeaderTitle = (degreePrefix, deptName, regYear) => {
 
 const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeetingDate, degreePrefix, deptName, regYear) => {
     const pageNum = ++pageTracker.current;
-    const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC'];
+    const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC'];
     const categoryLabels = {
         'HUM': 'Humanities and Social Sciences including Management Courses (HUM)',
         'BSC': 'Basic Science Courses (BSC)',
         'ESC': 'Engineering Science Courses (ESC)',
         'PCC': 'Professional Core Courses (PCC)',
         'PEC': 'Professional Elective Courses (PEC)',
+        'NFE': 'Non-Functional Elective Courses (NFE)',
         'OEC': 'Open Elective Courses (OEC)',
         'EEC': 'Employability Enhancement Courses (EEC)',
         'MC': 'Mandatory Courses (MC)'
@@ -355,6 +361,8 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
+        } else if (subj.categoryType === 'NFE' || (subj.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (subj.category || '').toUpperCase().includes('NON FUNCTIONAL') || (subj.category || '').toUpperCase().includes('NFE')) {
+            cat = 'NFE';
         } else if (subj.vertical) {
             cat = 'PEC';
         } else {
@@ -364,12 +372,14 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
             else if (['ESC', 'ES'].includes(type)) cat = 'ESC';
             else if (['PCC', 'PC'].includes(type)) cat = 'PCC';
             else if (['PEC', 'PE'].includes(type)) cat = 'PEC';
+            else if (['NFE'].includes(type)) cat = 'NFE';
             else if (['OEC', 'OE'].includes(type)) cat = 'OEC';
             else if (['EEC', 'EE'].includes(type)) cat = 'EEC';
             else if (['MC'].includes(type)) cat = 'MC';
             else {
                 const text = `${subj.categoryType || ''} ${subj.category || ''} ${subj.categoryName || ''}`.toUpperCase();
-                if (text.includes('HUMANITIES') || text.includes('MANAGEMENT') || text.includes('HUM') || text.includes('HS')) cat = 'HUM';
+                if (text.includes('NON-FUNCTIONAL') || text.includes('NON FUNCTIONAL') || text.includes('NFE')) cat = 'NFE';
+                else if (text.includes('HUMANITIES') || text.includes('MANAGEMENT') || text.includes('HUM') || text.includes('HS')) cat = 'HUM';
                 else if (text.includes('BASIC SCIENCE') || text.includes('BSC') || text.includes('BS')) cat = 'BSC';
                 else if (text.includes('ENGINEERING SCIENCE') || text.includes('ESC') || text.includes('ES')) cat = 'ESC';
                 else if (text.includes('PROFESSIONAL CORE') || text.includes('PCC') || text.includes('PC')) cat = 'PCC';
@@ -433,6 +443,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         'ESC': '#10b981',
         'PCC': '#f59e0b',
         'PEC': '#8b5cf6',
+        'NFE': '#f97316',
         'OEC': '#ec4899',
         'EEC': '#06b6d4'
     };
@@ -1419,6 +1430,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         const languageElective1 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE I'));
         const languageElective2 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE II'));
         const employabilityCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('EMPLOYABILITY') || s.categoryType === 'EEC');
+        const nonFunctionalElectiveCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('NON-FUNCTIONAL') || s.category?.toUpperCase().includes('NON FUNCTIONAL') || s.category?.toUpperCase().includes('NFE') || s.categoryType === 'NFE');
         const mandatoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('MANDATORY') || s.categoryType === 'MC');
 
         const accounted = new Set([
@@ -1428,15 +1440,17 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             ...languageElective1,
             ...languageElective2,
             ...employabilityCourses,
+            ...nonFunctionalElectiveCourses,
             ...mandatoryCourses
         ]);
         const otherCourses = subjectsForSem.filter(s => !accounted.has(s));
 
-        // Exclude Language Elective options from raw semester total sum
+        // Exclude Language Elective and Non-Functional Elective (NFE) options from raw semester total sum
         const regularCoursesForTotal = subjectsForSem.filter(s => {
             const isLang1 = languageElective1.includes(s);
             const isLang2 = languageElective2.includes(s);
-            return !isLang1 && !isLang2;
+            const isNfe = nonFunctionalElectiveCourses.includes(s);
+            return !isLang1 && !isLang2 && !isNfe;
         });
 
         const semTotalContactPeriods = regularCoursesForTotal.reduce((sum, s) => {
@@ -1534,6 +1548,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                 <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">EMPLOYABILITY ENHANCEMENT COURSE</td>
                             </tr>
                             ${renderCourseRows(employabilityCourses)}
+                        ` : ''}
+
+                        ${nonFunctionalElectiveCourses.length > 0 ? `
+                            <tr class="category-row">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: rgba(0,0,0,0.04);">NON-FUNCTIONAL ELECTIVE COURSES</td>
+                            </tr>
+                            ${renderCourseRows(nonFunctionalElectiveCourses)}
                         ` : ''}
 
                         ${mandatoryCourses.length > 0 ? `
@@ -3281,15 +3302,21 @@ const DepartmentManager = () => {
     const handleApplyScannedSubjects = async () => {
         if (!scannedWordData || scannedWordData.length === 0) return;
 
-        const preparedScanned = scannedWordData.map(s => {
-            const cleanCode = (s.code || '').trim().toUpperCase();
-            const matched = masterCourses.find(c => c.code?.toUpperCase() === cleanCode);
-            return {
-                ...s,
-                code: cleanCode,
-                creatorDept: s.creatorDept || matched?.creatorDept || matched?.sourceDept || selectedDept
-            };
-        });
+        const preparedScanned = scannedWordData
+            .filter(s => {
+                const c = (s.code || '').trim().toUpperCase();
+                const t = (s.title || '').trim().toUpperCase();
+                return c && !c.startsWith('TOTAL') && !c.includes('TOTAL') && !t.startsWith('TOTAL') && !t.includes('TOTAL CREDITS') && !t.includes('TOTAL PERIODS');
+            })
+            .map(s => {
+                const cleanCode = (s.code || '').trim().toUpperCase();
+                const matched = masterCourses.find(c => c.code?.toUpperCase() === cleanCode);
+                return {
+                    ...s,
+                    code: cleanCode,
+                    creatorDept: s.creatorDept || matched?.creatorDept || matched?.sourceDept || selectedDept
+                };
+            });
 
         let nextSubjects = [];
         if (importMode === 'replace') {
@@ -3763,6 +3790,13 @@ const DepartmentManager = () => {
             subjectToAdd.isOpenElective = false;
             subjectToAdd.vertical = Number(subjectToAdd.vertical);
             delete subjectToAdd.offeringDept;
+        } else if (courseType === 'non_functional_elective') {
+            delete subjectToAdd.vertical;
+            delete subjectToAdd.verticalName;
+            subjectToAdd.isOpenElective = false;
+            delete subjectToAdd.offeringDept;
+            subjectToAdd.category = 'NON-FUNCTIONAL ELECTIVE (NFE)';
+            subjectToAdd.categoryType = 'NFE';
         } else if (courseType === 'open_elective') {
             delete subjectToAdd.semester;
             delete subjectToAdd.vertical;
@@ -4269,15 +4303,22 @@ const DepartmentManager = () => {
                                         <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Course Type</label>
                                         <select
                                             value={courseType}
-                                            onChange={e => setCourseType(e.target.value)}
+                                            onChange={e => {
+                                                const ct = e.target.value;
+                                                setCourseType(ct);
+                                                if (ct === 'non_functional_elective') {
+                                                    setNewSubject({ ...newSubject, category: 'NON-FUNCTIONAL ELECTIVE (NFE)', categoryType: 'NFE' });
+                                                }
+                                            }}
                                             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
                                         >
                                             <option value="semester">Semester Course</option>
+                                            <option value="non_functional_elective">Non-Functional Elective (NFE)</option>
                                             <option value="professional_elective">Professional Elective (Vertical)</option>
                                             <option value="open_elective">Open Elective Course</option>
                                         </select>
                                     </div>
-                                    {courseType === 'semester' && (
+                                    {(courseType === 'semester' || courseType === 'non_functional_elective') && (
                                         <div>
                                             <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Semester</label>
                                             <input type="number" value={newSubject.semester} onChange={e => setNewSubject({ ...newSubject, semester: Number(e.target.value) })} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white' }} />
@@ -4295,13 +4336,21 @@ const DepartmentManager = () => {
                                             </div>
                                         </>
                                     )}
-                                    {courseType === 'semester' && (
+                                    {(courseType === 'semester' || courseType === 'non_functional_elective') && (
                                         <>
                                             <div>
                                                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
                                                 <select
                                                     value={newSubject.category}
-                                                    onChange={e => setNewSubject({ ...newSubject, category: e.target.value })}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        let autoCatType = newSubject.categoryType;
+                                                        if (val === 'NON-FUNCTIONAL ELECTIVE (NFE)' || val.includes('NON-FUNCTIONAL') || val.includes('NON FUNCTIONAL')) autoCatType = 'NFE';
+                                                        else if (val === 'EMPLOYABILITY ENHANCEMENT COURSE') autoCatType = 'EEC';
+                                                        else if (val === 'MANDATORY COURSES') autoCatType = 'MC';
+                                                        else if (val.includes('Language')) autoCatType = 'HUM';
+                                                        setNewSubject({ ...newSubject, category: val, categoryType: autoCatType });
+                                                    }}
                                                     style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
                                                 >
                                                     <option value="THEORY">THEORY</option>
@@ -4309,6 +4358,7 @@ const DepartmentManager = () => {
                                                     <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
                                                     <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
                                                     <option value="MANDATORY COURSES">MANDATORY COURSES</option>
+                                                    <option value="NON-FUNCTIONAL ELECTIVE (NFE)">NON-FUNCTIONAL ELECTIVE (NFE)</option>
                                                     <option value="Language Elective – I">Language Elective – I</option>
                                                     <option value="Language Elective - II">Language Elective - II</option>
                                                     <option value="Electives for Honors Degree">Electives for Honors Degree</option>
@@ -4326,6 +4376,7 @@ const DepartmentManager = () => {
                                                     <option value="ESC">ESC</option>
                                                     <option value="PCC">PCC</option>
                                                     <option value="PEC">PEC</option>
+                                                    <option value="NFE">NFE</option>
                                                     <option value="OEC">OEC</option>
                                                     <option value="EEC">EEC</option>
                                                     <option value="MC">MC</option>
@@ -4532,7 +4583,8 @@ const DepartmentManager = () => {
                                                         let cat = subj.category || 'THEORY';
                                                         const cUpper = String(cat).toUpperCase().trim();
                                                         const typeUpper = String(subj.categoryType || '').toUpperCase().trim();
-                                                        if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED') || (Number(subj.l || 0) > 0 && Number(subj.p || 0) > 0 && !cUpper.includes('THEORY') && !cUpper.includes('PRACTICAL'))) cat = 'THEORY CUM PRACTICAL';
+                                                        if (cUpper.includes('NON-FUNCTIONAL') || cUpper.includes('NON FUNCTIONAL') || cUpper.includes('NFE') || typeUpper === 'NFE') cat = 'NON-FUNCTIONAL ELECTIVE (NFE)';
+                                                        else if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED') || (Number(subj.l || 0) > 0 && Number(subj.p || 0) > 0 && !cUpper.includes('THEORY') && !cUpper.includes('PRACTICAL'))) cat = 'THEORY CUM PRACTICAL';
                                                         else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR' || (typeUpper === 'PCC' && Number(subj.l || 0) === 0 && Number(subj.p || 0) > 0)) cat = 'PRACTICAL';
                                                         else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC') || typeUpper === 'EEC') cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
                                                         else if (cUpper.includes('MANDATORY') || cUpper.includes('MC') || typeUpper === 'MC') cat = 'MANDATORY COURSES';
@@ -4578,7 +4630,7 @@ const DepartmentManager = () => {
                                                                             <React.Fragment key={catIdx}>
                                                                                 <tr>
                                                                                     <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                                                                                        {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
+                                                                                        {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : (categoryName === 'NON-FUNCTIONAL ELECTIVE (NFE)' || categoryName.includes('NON-FUNCTIONAL') || categoryName.includes('NON FUNCTIONAL')) ? 'NON-FUNCTIONAL ELECTIVE COURSES' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
                                                                                     </td>
                                                                                 </tr>
                                                                                 {sortSubjectsByCode(categorySubjects).map((subj, subjIdx) => {
@@ -5220,12 +5272,28 @@ const DepartmentManager = () => {
                                 {/* Category and Category Type */}
                                 <div>
                                     <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Category</label>
-                                    <select value={editingSubjectValue.category || 'THEORY'} onChange={e => updateEditingSubjectField('category', e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}>
+                                    <select
+                                        value={editingSubjectValue.category || 'THEORY'}
+                                        onChange={e => {
+                                            const val = e.target.value;
+                                            let autoCatType = editingSubjectValue.categoryType;
+                                            if (val === 'NON-FUNCTIONAL ELECTIVE (NFE)' || val.includes('NON-FUNCTIONAL') || val.includes('NON FUNCTIONAL')) autoCatType = 'NFE';
+                                            else if (val === 'EMPLOYABILITY ENHANCEMENT COURSE') autoCatType = 'EEC';
+                                            else if (val === 'MANDATORY COURSES') autoCatType = 'MC';
+                                            else if (val.includes('Language')) autoCatType = 'HUM';
+                                            updateEditingSubjectField('category', val);
+                                            if (autoCatType && autoCatType !== editingSubjectValue.categoryType) {
+                                                updateEditingSubjectField('categoryType', autoCatType);
+                                            }
+                                        }}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
+                                    >
                                         <option value="THEORY">THEORY</option>
                                         <option value="PRACTICAL">PRACTICAL</option>
                                         <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
                                         <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
                                         <option value="MANDATORY COURSES">MANDATORY COURSES</option>
+                                        <option value="NON-FUNCTIONAL ELECTIVE (NFE)">NON-FUNCTIONAL ELECTIVE (NFE)</option>
                                         <option value="Language Elective – I">Language Elective – I</option>
                                         <option value="Language Elective - II">Language Elective - II</option>
                                         <option value="Electives for Honors Degree">Electives for Honors Degree</option>
@@ -5239,6 +5307,7 @@ const DepartmentManager = () => {
                                         <option value="ESC">ESC</option>
                                         <option value="PCC">PCC</option>
                                         <option value="PEC">PEC</option>
+                                        <option value="NFE">NFE</option>
                                         <option value="OEC">OEC</option>
                                         <option value="EEC">EEC</option>
                                         <option value="MC">MC</option>
@@ -6804,6 +6873,7 @@ const DepartmentManager = () => {
                                                                 <option value="THEORY CUM PRACTICAL">THEORY CUM PRACTICAL</option>
                                                                 <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT</option>
                                                                 <option value="MANDATORY COURSES">MANDATORY COURSE</option>
+                                                                <option value="NON-FUNCTIONAL ELECTIVE (NFE)">NON-FUNCTIONAL ELECTIVE (NFE)</option>
                                                                 <option value="Language Elective – I">Language Elective – I</option>
                                                                 <option value="Language Elective - II">Language Elective - II</option>
                                                                 <option value="PROFESSIONAL ELECTIVE">PROFESSIONAL ELECTIVE</option>
@@ -6828,6 +6898,7 @@ const DepartmentManager = () => {
                                                                 <option value="ESC">ESC</option>
                                                                 <option value="PCC">PCC</option>
                                                                 <option value="PEC">PEC</option>
+                                                                <option value="NFE">NFE</option>
                                                                 <option value="OEC">OEC</option>
                                                                 <option value="EEC">EEC</option>
                                                                 <option value="MC">MC</option>

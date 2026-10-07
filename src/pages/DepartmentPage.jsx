@@ -1939,6 +1939,7 @@ const DepartmentPage = () => {
             'ESC': { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399', border: 'rgba(16, 185, 129, 0.3)', label: 'Engineering Sciences (ESC)' },
             'PCC': { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.3)', label: 'Professional Core (PCC)' },
             'PEC': { bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.3)', label: 'Professional Electives (PEC)' },
+            'NFE': { bg: 'rgba(249, 115, 22, 0.15)', text: '#fb923c', border: 'rgba(249, 115, 22, 0.3)', label: 'Non-Functional Elective (NFE)' },
             'OEC': { bg: 'rgba(139, 92, 246, 0.15)', text: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)', label: 'Open Electives (OEC)' },
             'EEC': { bg: 'rgba(6, 182, 212, 0.15)', text: '#22d3ee', border: 'rgba(6, 182, 212, 0.3)', label: 'Employability Enhancement (EEC)' },
             'MC': { bg: 'rgba(244, 63, 94, 0.15)', text: '#fb7185', border: 'rgba(244, 63, 94, 0.3)', label: 'Mandatory Course (MC)' },
@@ -2030,10 +2031,15 @@ const DepartmentPage = () => {
             department.curriculum.forEach((semBlock, bIdx) => {
                 const semNum = semBlock.semester ? Number(String(semBlock.semester).replace(/\D/g, '')) || (bIdx + 1) : (bIdx + 1);
                 (semBlock.courses || []).forEach(c => {
+                    const catType = c.categoryType || (
+                        (c.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (c.category || '').toUpperCase().includes('NFE') ? 'NFE' :
+                        (c.category || '').toUpperCase().includes('ELECTIVE') ? 'PEC' :
+                        (c.credits > 2 ? 'PCC' : 'ESC')
+                    );
                     allCourses.push({
                         ...c,
                         semester: semNum,
-                        categoryType: c.categoryType || (c.credits > 2 ? 'PCC' : 'ESC'),
+                        categoryType: catType,
                         contactPeriods: (c.l || 3) + (c.t || 0) + (c.p || 0),
                         cia: 40,
                         ese: 60,
@@ -2042,41 +2048,68 @@ const DepartmentPage = () => {
                 });
             });
         } else {
-            const staticSyllabus = SYLLABUS_DATA["R-2023"]?.["UG"]?.[department?.slug] || [];
+            const staticSyllabus = SYLLABUS_DATA["R-2023"]?.[department?.type || "UG"]?.[department?.slug]
+                || SYLLABUS_DATA["R-2023"]?.["UG"]?.[department?.slug]
+                || SYLLABUS_DATA["R-2023"]?.["PG"]?.[department?.slug]
+                || [];
             staticSyllabus.forEach(semBlock => {
                 (semBlock.courses || []).forEach(c => {
+                    let catType = c.categoryType;
+                    if (!catType) {
+                        const rawCat = (c.category || '').toUpperCase();
+                        if (rawCat.includes('NON-FUNCTIONAL') || rawCat.includes('NFE')) catType = 'NFE';
+                        else if (rawCat.includes('HUMANITIES')) catType = 'HUM';
+                        else if (rawCat.includes('BASIC')) catType = 'BSC';
+                        else if (rawCat.includes('ELECTIVE')) catType = 'PEC';
+                        else if (rawCat.includes('CORE')) catType = 'PCC';
+                        else if (rawCat.includes('EMPLOYABILITY') || rawCat.includes('PROJECT')) catType = 'EEC';
+                        else catType = 'ESC';
+                    }
                     allCourses.push({
                         ...c,
                         name: c.title,
                         semester: semBlock.semester,
-                        categoryType: c.category?.includes('Humanities') ? 'HUM' : c.category?.includes('Basic') ? 'BSC' : c.category?.includes('Core') ? 'PCC' : 'ESC',
-                        l: 3, t: 0, p: 0, credits: 3, contactPeriods: 3, cia: 40, ese: 60, total: 100
+                        categoryType: catType,
+                        l: c.l !== undefined ? c.l : 3,
+                        t: c.t !== undefined ? c.t : 0,
+                        p: c.p !== undefined ? c.p : 0,
+                        credits: c.credits !== undefined ? (typeof c.credits === 'number' ? c.credits : (c.credits.split('-').pop() || 3)) : 3,
+                        contactPeriods: (c.l || 3) + (c.t || 0) + (c.p || 0),
+                        cia: 40,
+                        ese: 60,
+                        total: 100
                     });
                 });
             });
         }
 
         // Available semester tabs
+        const isMba = department?.slug === 'master-of-business-administration' || department?.degree === 'MBA' || department?.name?.toLowerCase().includes('business administration');
         const totalSems = department?.type === 'PG' ? 4 : 8;
         const semTabs = [];
         for (let i = 1; i <= totalSems; i++) {
             semTabs.push({ id: String(i), label: `Semester ${i}` });
         }
-        semTabs.push({ id: 'PE', label: 'Professional Electives' });
+        semTabs.push({ id: 'PE', label: isMba ? 'Functional Electives (PEC)' : 'Professional Electives' });
+        if (isMba || allCourses.some(c => c.categoryType === 'NFE' || (c.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (c.category || '').toUpperCase().includes('NFE'))) {
+            semTabs.push({ id: 'NFE', label: 'Non-Functional Electives (NFE)' });
+        }
         semTabs.push({ id: 'OE', label: 'Open Electives' });
-        semTabs.push({ id: 'all', label: 'All Courses (1-8)' });
+        semTabs.push({ id: 'all', label: `All Courses (1-${totalSems})` });
 
         // Filter courses by semester & search
         const filteredCourses = allCourses.filter(course => {
             const matchesSearch = !curriculumSearch ||
                 (course.code || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
                 (course.title || course.name || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
-                (course.categoryType || '').toLowerCase().includes(curriculumSearch.toLowerCase());
+                (course.categoryType || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
+                (course.category || '').toLowerCase().includes(curriculumSearch.toLowerCase());
 
             if (!matchesSearch) return false;
 
             if (selectedCurriculumSem === 'all') return true;
-            if (selectedCurriculumSem === 'PE') return course.vertical || course.categoryType === 'PEC';
+            if (selectedCurriculumSem === 'PE') return (course.vertical || course.categoryType === 'PEC') && course.categoryType !== 'NFE';
+            if (selectedCurriculumSem === 'NFE') return course.categoryType === 'NFE' || (course.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (course.category || '').toUpperCase().includes('NON FUNCTIONAL') || (course.category || '').toUpperCase().includes('NFE');
             if (selectedCurriculumSem === 'OE') return course.isOpenElective || course.categoryType === 'OEC';
             return String(course.semester) === selectedCurriculumSem;
         });

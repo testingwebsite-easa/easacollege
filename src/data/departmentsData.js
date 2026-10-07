@@ -1449,7 +1449,8 @@ export const departments = [
             { title: "Human Resource Management", desc: "Strategic HR, talent acquisition, people analytics, industrial relations & organizational design.", icon: "FaUsers", tag: "Core Track" },
             { title: "Marketing Management & Digital Growth", desc: "Brand management, AI-driven digital marketing, consumer psychology & growth hacking.", icon: "FaBullseye", tag: "Trending" },
             { title: "Operations & Supply Chain", desc: "Lean manufacturing, global logistics, enterprise ERP, procurement & Total Quality Management.", icon: "FaBoxes", tag: "Industry 4.0" },
-            { title: "Business Analytics & Systems", desc: "Predictive modeling, data visualization, business intelligence (PowerBI/Tableau) & cloud strategy.", icon: "FaLaptopCode", tag: "Tech Edge" }
+            { title: "Business Analytics & Systems", desc: "Predictive modeling, data visualization, business intelligence (PowerBI/Tableau) & cloud strategy.", icon: "FaLaptopCode", tag: "Tech Edge" },
+            { title: "Non-Functional Electives (NFE)", desc: "Cross-disciplinary managerial competencies in corporate governance, design thinking, ethics & small business management.", icon: "FaGraduationCap", tag: "NFE Category" }
         ],
         programFeatures: [
             { title: "Harvard & IIM Case Pedagogy", desc: "Experiential learning through real corporate dilemmas and strategic simulation games." },

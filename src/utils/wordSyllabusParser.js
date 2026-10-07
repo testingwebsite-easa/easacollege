@@ -28,21 +28,24 @@ function romanToNumber(roman) {
 }
 
 const VALID_CATEGORIES = [
-    'HUM', 'BSC', 'ESC', 'ESE', 'PCC', 'PEC', 'OEC', 'EEC', 'MC',
+    'HUM', 'BSC', 'ESC', 'ESE', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC',
     'HSMC', 'HS', 'BS', 'ES', 'PC', 'PE', 'OE', 'EE',
     'HUMANITIES', 'BASIC SCIENCE', 'BASIC SCIENCES', 'ENGINEERING SCIENCE', 'ENGINEERING SCIENCES',
-    'PROFESSIONAL CORE', 'PROFESSIONAL ELECTIVE', 'OPEN ELECTIVE', 'OPEN ELECTIVES',
+    'PROFESSIONAL CORE', 'PROFESSIONAL ELECTIVE', 'NON-FUNCTIONAL ELECTIVE', 'NON-FUNCTIONAL ELECTIVES',
+    'NON FUNCTIONAL ELECTIVE', 'NON FUNCTIONAL ELECTIVES', 'FUNCTIONAL ELECTIVE', 'FUNCTIONAL ELECTIVES',
+    'OPEN ELECTIVE', 'OPEN ELECTIVES',
     'EMPLOYABILITY ENHANCEMENT', 'MANDATORY', 'MANDATORY COURSE', 'MANDATORY COURSES'
 ];
 
 function normalizeCategoryType(type) {
     if (!type) return 'PCC';
     const t = type.toUpperCase().trim();
+    if (t === 'NFE' || t.startsWith('NON-FUNCTIONAL') || t.startsWith('NON FUNCTIONAL')) return 'NFE';
     if (t === 'HUM' || t === 'HSMC' || t === 'HS' || t.startsWith('HUMANITIES')) return 'HUM';
     if (t === 'BSC' || t === 'BS' || t.startsWith('BASIC SCIENCE')) return 'BSC';
     if (t === 'ESC' || t === 'ES' || t === 'ESE' || t.startsWith('ENGINEERING SCIENCE')) return 'ESC';
     if (t === 'PCC' || t === 'PC' || t.startsWith('PROFESSIONAL CORE')) return 'PCC';
-    if (t === 'PEC' || t === 'PE' || t.startsWith('PROFESSIONAL ELECTIVE')) return 'PEC';
+    if (t === 'PEC' || t === 'PE' || t.startsWith('PROFESSIONAL ELECTIVE') || t.startsWith('FUNCTIONAL ELECTIVE')) return 'PEC';
     if (t === 'OEC' || t === 'OE' || t.startsWith('OPEN ELECTIVE')) return 'OEC';
     if (t === 'EEC' || t === 'EE' || t.startsWith('EMPLOYABILITY')) return 'EEC';
     if (t === 'MC' || t.startsWith('MANDATORY')) return 'MC';
@@ -58,15 +61,19 @@ function isCategoryString(str) {
 const COURSE_CODE_REGEX = /^[A-Z0-9]{2,4}[A-Z]{2,4}[0-9X]{2,4}$/i;
 const LOOSE_CODE_REGEX = /^[A-Z0-9]{4,10}$/i;
 const NON_COURSE_WORDS = [
-    'THEORY', 'PRACTICAL', 'PERIODS', 'CREDIT', 'CREDITS', 'TOTAL', 'MARKS', 'WEEKS', 'CATEGORY', 'SEMESTER', 'COURSE', 'HOURS', 'VERTICAL', 'OPEN',
-    'HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC', 'HUM', 'ESE', 'CIA', 'S.NO', 'SL.NO', 'NO'
+    'THEORY', 'PRACTICAL', 'PERIODS', 'CREDIT', 'CREDITS', 'TOTAL', 'TOTALS', 'MARKS', 'WEEKS', 'CATEGORY', 'SEMESTER', 'COURSE', 'HOURS', 'VERTICAL', 'OPEN',
+    'HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC', 'HUM', 'ESE', 'CIA', 'S.NO', 'SL.NO', 'SL NO', 'S NO', 'NO', 'SERIAL NO',
+    'GRAND TOTAL', 'SUB TOTAL', 'SUBTOTAL', 'TOTAL CREDITS', 'TOTAL PERIODS', 'TOTAL MARKS', 'TOTAL HOURS'
 ];
 
 function isCourseCode(str) {
     if (!str) return false;
     const s = str.trim().toUpperCase();
     if (NON_COURSE_WORDS.includes(s) || isCategoryString(s)) return false;
+    if (s.startsWith('TOTAL') || s.includes('TOTAL')) return false;
     if (s.length < 4 || s.length > 12) return false;
+    if (/^\d+$/.test(s)) return false; // Pure numbers are not course codes
+    if (!/[A-Z]/.test(s)) return false; // Must contain at least one letter
     if (!/\d/.test(s) && !s.includes('XX')) return false;
     return COURSE_CODE_REGEX.test(s) || LOOSE_CODE_REGEX.test(s);
 }
@@ -316,7 +323,20 @@ function parseSubjectRow(row, context) {
 
     const rowStr = rowClean.join(' ').toUpperCase();
 
-    if (rowStr.startsWith('TOTAL') || rowStr.includes('TOTAL CREDITS') || rowStr.includes('PERIODS PER WEEK')) {
+    if (
+        rowStr.startsWith('TOTAL') ||
+        rowStr.includes('TOTAL CREDITS') ||
+        rowStr.includes('TOTAL PERIODS') ||
+        rowStr.includes('TOTAL CONTACT') ||
+        rowStr.includes('TOTAL HOURS') ||
+        rowStr.includes('TOTAL MARKS') ||
+        rowStr.includes('GRAND TOTAL') ||
+        rowStr.includes('PERIODS PER WEEK') ||
+        rowClean.some(c => {
+            const up = c.toUpperCase();
+            return up === 'TOTAL' || up.startsWith('TOTAL ') || up.startsWith('TOTAL:') || up.startsWith('TOTAL -') || up.startsWith('TOTAL –');
+        })
+    ) {
         return null;
     }
     if (rowClean.every(c => ['S.NO', 'S.NO.', 'SL.NO', 'SL.NO.', 'NO', 'COURSE CODE', 'COURSE TITLE', 'CATEGORY', 'L', 'T', 'P', 'CIA', 'ESE', 'TOTAL', 'CREDITS', 'PERIODS'].includes(c.toUpperCase()))) {
@@ -335,6 +355,7 @@ function parseSubjectRow(row, context) {
     if (codeIndex === -1) return null;
 
     const code = rowClean[codeIndex].toUpperCase().trim();
+    if (code.startsWith('TOTAL') || code.includes('TOTAL')) return null;
     
     // 2. Extract Title
     let title = '';
@@ -523,8 +544,11 @@ function parseCurriculumSequential(elements) {
                 }
             }
 
-            // 3. Detect Standalone Open Elective Section Headings
-            if ((headingStr.includes('OPEN ELECTIVE COURSES') || headingStr.includes('OPEN ELECTIVES') || headingStr.includes('OEC COURSES')) && !headingStr.includes('OPEN ELECTIVE -') && !headingStr.includes('OPEN ELECTIVE –') && !headingStr.includes('OPEN ELECTIVE I')) {
+            // 3. Detect Standalone Open Elective / Non-Functional Elective Section Headings
+            if (headingStr.includes('NON-FUNCTIONAL ELECTIVE') || headingStr.includes('NON FUNCTIONAL ELECTIVE') || headingStr.includes('NFE COURSES') || headingStr === 'NFE') {
+                context.currentCategory = 'NON-FUNCTIONAL ELECTIVE';
+                context.defaultCategoryType = 'NFE';
+            } else if ((headingStr.includes('OPEN ELECTIVE COURSES') || headingStr.includes('OPEN ELECTIVES') || headingStr.includes('OEC COURSES')) && !headingStr.includes('OPEN ELECTIVE -') && !headingStr.includes('OPEN ELECTIVE –') && !headingStr.includes('OPEN ELECTIVE I')) {
                 context.isCurrentOpenElective = true;
                 context.currentVertical = null;
                 context.currentCategory = 'OPEN ELECTIVE';
@@ -628,6 +652,11 @@ function parseCurriculumSequential(elements) {
                 if (rowStr.includes('MANDATORY COURSE') || rowStr.includes('MANDATORY COURSES') || rowStr === 'MANDATORY') {
                     context.currentCategory = 'MANDATORY COURSES';
                     context.defaultCategoryType = 'MC';
+                    return;
+                }
+                if (rowStr.includes('NON-FUNCTIONAL ELECTIVE') || rowStr.includes('NON FUNCTIONAL ELECTIVE') || rowStr === 'NFE' || rowStr.startsWith('NON-FUNCTIONAL') || rowStr.startsWith('NON FUNCTIONAL')) {
+                    context.currentCategory = 'NON-FUNCTIONAL ELECTIVE';
+                    context.defaultCategoryType = 'NFE';
                     return;
                 }
                 if (rowStr.includes('LANGUAGE ELECTIVE – I') || rowStr.includes('LANGUAGE ELECTIVE - I') || rowStr.includes('LANGUAGE ELECTIVE I')) {

@@ -166,6 +166,60 @@ export const SYLLABUS_DATA = {
                     ]
                 }
             ]
+        },
+        "PG": {
+            "master-of-business-administration": [
+                {
+                    semester: 1,
+                    courses: [
+                        { code: "BA4101", title: "Economic Analysis for Business", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4102", title: "Principles of Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4103", title: "Accounting for Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4104", title: "Legal Aspects of Business", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4105", title: "Organisational Behaviour", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4106", title: "Statistics for Management", category: "Professional Core", categoryType: "PCC", credits: "3-1-0-4", type: "Theory" },
+                        { code: "BA4107", title: "Total Quality Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4111", title: "Business Communication & Presentation Lab", category: "Employability Enhancement", categoryType: "EEC", credits: "0-0-4-2", type: "Practical" }
+                    ]
+                },
+                {
+                    semester: 2,
+                    courses: [
+                        { code: "BA4201", title: "Applied Operations Research", category: "Professional Core", categoryType: "PCC", credits: "3-1-0-4", type: "Theory" },
+                        { code: "BA4202", title: "Business Research Methods", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4203", title: "Financial Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4204", title: "Human Resource Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4205", title: "Marketing Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4206", title: "Operations Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4207", title: "Business Analytics & Systems", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4211", title: "Data Analysis and Business Modeling Lab", category: "Employability Enhancement", categoryType: "EEC", credits: "0-0-4-2", type: "Practical" }
+                    ]
+                },
+                {
+                    semester: 3,
+                    courses: [
+                        { code: "BA4301", title: "International Business Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4302", title: "Strategic Management", category: "Professional Core", categoryType: "PCC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4321", title: "Security Analysis & Portfolio Management", category: "Functional Elective", categoryType: "PEC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4322", title: "Consumer Behaviour & Brand Strategy", category: "Functional Elective", categoryType: "PEC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4001", title: "Corporate Governance and Business Ethics", category: "NON-FUNCTIONAL ELECTIVE (NFE)", categoryType: "NFE", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4002", title: "Creativity, Innovation and Design Thinking", category: "NON-FUNCTIONAL ELECTIVE (NFE)", categoryType: "NFE", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4003", title: "Micro and Small Business Management", category: "NON-FUNCTIONAL ELECTIVE (NFE)", categoryType: "NFE", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4311", title: "Summer Internship & Industry Immersion", category: "Employability Enhancement", categoryType: "EEC", credits: "0-0-4-2", type: "Practical" }
+                    ]
+                },
+                {
+                    semester: 4,
+                    courses: [
+                        { code: "BA4401", title: "Project Work & Viva-Voce", category: "Project", categoryType: "EEC", credits: "0-0-12-6", type: "Practical" },
+                        { code: "BA4421", title: "Derivatives & Risk Management", category: "Functional Elective", categoryType: "PEC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4422", title: "Digital Marketing and Growth Analytics", category: "Functional Elective", categoryType: "PEC", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4004", title: "Cross Cultural Management", category: "NON-FUNCTIONAL ELECTIVE (NFE)", categoryType: "NFE", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4005", title: "Event Management and Public Relations", category: "NON-FUNCTIONAL ELECTIVE (NFE)", categoryType: "NFE", credits: "3-0-0-3", type: "Theory" },
+                        { code: "BA4006", title: "Social Entrepreneurship & Rural Development", category: "NON-FUNCTIONAL ELECTIVE (NFE)", categoryType: "NFE", credits: "3-0-0-3", type: "Theory" }
+                    ]
+                }
+            ]
         }
     }
 };

@@ -45,15 +45,19 @@ function isCategoryString(str) {
 const COURSE_CODE_REGEX = /^[A-Z0-9]{2,4}[A-Z]{2,4}[0-9X]{2,4}$/i;
 const LOOSE_CODE_REGEX = /^[A-Z0-9]{4,10}$/i;
 const NON_COURSE_WORDS = [
-    'THEORY', 'PRACTICAL', 'PERIODS', 'CREDIT', 'CREDITS', 'TOTAL', 'MARKS', 'WEEKS', 'CATEGORY', 'SEMESTER', 'COURSE', 'HOURS', 'VERTICAL', 'OPEN',
-    'HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'OEC', 'EEC', 'MC', 'HUM', 'ESE', 'CIA', 'S.NO', 'SL.NO', 'SL NO', 'S NO', 'NO', 'SERIAL NO'
+    'THEORY', 'PRACTICAL', 'PERIODS', 'CREDIT', 'CREDITS', 'TOTAL', 'TOTALS', 'MARKS', 'WEEKS', 'CATEGORY', 'SEMESTER', 'COURSE', 'HOURS', 'VERTICAL', 'OPEN',
+    'HSMC', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC', 'HUM', 'ESE', 'CIA', 'S.NO', 'SL.NO', 'SL NO', 'S NO', 'NO', 'SERIAL NO',
+    'GRAND TOTAL', 'SUB TOTAL', 'SUBTOTAL', 'TOTAL CREDITS', 'TOTAL PERIODS', 'TOTAL MARKS', 'TOTAL HOURS'
 ];
 
 function isCourseCode(str) {
     if (!str) return false;
     const s = String(str).trim().toUpperCase();
     if (NON_COURSE_WORDS.includes(s) || isCategoryString(s)) return false;
+    if (s.startsWith('TOTAL') || s.includes('TOTAL')) return false;
     if (s.length < 4 || s.length > 12) return false;
+    if (/^\d+$/.test(s)) return false; // Pure numbers are not course codes
+    if (!/[A-Z]/.test(s)) return false; // Must contain at least one letter
     if (!/\d/.test(s) && !s.includes('XX')) return false;
     return COURSE_CODE_REGEX.test(s) || LOOSE_CODE_REGEX.test(s);
 }
@@ -345,6 +349,20 @@ function parseSheetRows(rows, defaultContext) {
             continue;
         }
 
+        // Skip total / summary footer rows in tables
+        if (
+            rowStr.startsWith('TOTAL') ||
+            rowStr.includes('TOTAL CREDITS') ||
+            rowStr.includes('TOTAL PERIODS') ||
+            rowStr.includes('TOTAL CONTACT') ||
+            rowStr.includes('TOTAL HOURS') ||
+            rowStr.includes('TOTAL MARKS') ||
+            rowStr.includes('GRAND TOTAL') ||
+            rowUpper.some(c => c === 'TOTAL' || c.startsWith('TOTAL ') || c.startsWith('TOTAL:') || c.startsWith('TOTAL -') || c.startsWith('TOTAL –'))
+        ) {
+            continue;
+        }
+
         if ((rowStr.includes('SEMESTER') || rowStr.includes('SESSION') || rowStr.includes('TERM')) && !rowStr.includes('END SEMESTER')) {
             const semMatch = rowStr.match(/(?:SEMESTER|SESSION|SEM|TERM)[\s_\-–—:]*([IVXLCDM\d]+)/i);
             if (semMatch) {
@@ -543,7 +561,7 @@ function parseSheetRows(rows, defaultContext) {
             }
         }
 
-        if (code) {
+        if (code && !code.toUpperCase().startsWith('TOTAL') && !code.toUpperCase().includes('TOTAL') && !title.toUpperCase().startsWith('TOTAL')) {
             const catResult = determineSubjectCategoryAndType({
                 title,
                 code,
