@@ -99,7 +99,6 @@ const NaacFeedback = lazy(() => import('./pages/NaacFeedback'));
 const NaacExtendedProfile = lazy(() => import('./pages/NaacExtendedProfile'));
 const NaacCommittee = lazy(() => import('./pages/NaacCommittee'));
 const MandatoryDisclosurePage = lazy(() => import('./pages/MandatoryDisclosurePage'));
-const AictePage = lazy(() => import('./pages/AictePage'));
 const AicteEoaPage = lazy(() => import('./pages/AicteEoaPage'));
 const SdgsPage = lazy(() => import('./pages/SdgsPage'));
 const ObePage = lazy(() => import('./pages/ObePage'));
