@@ -16,7 +16,6 @@ import {
     FaChevronRight,
     FaPlay,
     FaYoutube,
-    FaInstagram,
     FaSearch,
     FaExternalLinkAlt,
     FaVideo,
@@ -297,14 +296,9 @@ const GalleryPage = () => {
     const tabParam = searchParams.get('tab');
     const [activeTab, setActiveTab] = useState(tabParam === 'videos' ? 'videos' : 'photos');
 
-    // Photos Session: 'albums' or 'moments'
-    const [photosSubView, setPhotosSubView] = useState('albums'); // 'albums' | 'moments'
     const [events, setEvents] = useState([]);
-    const [customInstagramMedia, setCustomInstagramMedia] = useState([]);
-    const [liveInstagramPosts, setLiveInstagramPosts] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [likedPosts, setLikedPosts] = useState({});
 
     // Videos Session State: Filter by Category & Search
     const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -326,7 +320,7 @@ const GalleryPage = () => {
         setSearchParams({ tab });
     };
 
-    // Fetch Photo Albums and Live Instagram Media from Backend
+    // Fetch Photo Albums from Backend
     useEffect(() => {
         window.scrollTo(0, 0);
         fetch(`${API_BASE_URL}/api/gallery-events`)
@@ -338,28 +332,6 @@ const GalleryPage = () => {
             })
             .catch(err => {
                 console.error("Error fetching gallery events:", err);
-            });
-
-        // Fetch Live Instagram Posts for photo moments
-        fetch(`${API_BASE_URL}/api/instagram/feed`)
-            .then(res => res.json())
-            .then(data => {
-                if (data && Array.isArray(data.posts) && data.posts.length > 0) {
-                    const mappedPosts = data.posts.map(item => ({
-                        _id: item._id || item.mediaId,
-                        shortcode: item.shortcode,
-                        image: item.mediaUrl || item.thumbnailUrl,
-                        likes: item.likes || '1.2K',
-                        comments: item.comments || '85',
-                        caption: item.caption || '',
-                        location: 'EASA College of Engineering and Technology',
-                        url: item.permalink || `https://www.instagram.com/p/${item.shortcode}/`
-                    }));
-                    setLiveInstagramPosts(mappedPosts);
-                }
-            })
-            .catch(err => {
-                console.error("Error fetching Instagram feed:", err);
             });
     }, []);
 
@@ -374,21 +346,6 @@ const GalleryPage = () => {
             document.body.style.overflow = '';
         };
     }, [selectedImage, selectedMedia]);
-
-    // Toggle Post Like Heart Animation
-    const toggleLikePost = (postId) => {
-        setLikedPosts(prev => ({
-            ...prev,
-            [postId]: !prev[postId]
-        }));
-    };
-
-    // Merge Curated and Live Photo Moments
-    const allPhotoMoments = [
-        ...liveInstagramPosts,
-        ...customInstagramMedia.filter(m => m.mediaType === 'post'),
-        ...OFFICIAL_INSTAGRAM_POSTS
-    ];
 
     // Official YouTube Videos List (No Reels)
     const combinedVideoMedia = OFFICIAL_YOUTUBE_MEDIA;
@@ -424,7 +381,7 @@ const GalleryPage = () => {
                         : "Browse campus photo albums, annual fests, technical events, and memorable student moments.")}
                 defaultImage={selectedEvent && selectedEvent.photos?.length > 0
                     ? selectedEvent.photos[0].src
-                    : OFFICIAL_INSTAGRAM_POSTS[0].image}
+                    : (events.length > 0 && events[0].photos?.length > 0 ? events[0].photos[0].src : OFFICIAL_INSTAGRAM_POSTS[0].image)}
             />
 
             <div className="gallery-main-container">
@@ -439,7 +396,7 @@ const GalleryPage = () => {
                         >
                             <FaImages className="pill-icon photo-icon" />
                             <span>Photo Gallery & Albums</span>
-                            <span className="pill-badge photo-badge">{events.length + allPhotoMoments.length}</span>
+                            <span className="pill-badge photo-badge">{events.length}</span>
                         </button>
 
                         <button
@@ -455,45 +412,11 @@ const GalleryPage = () => {
                 </div>
 
                 {/* =========================================================
-                    PHOTOS SESSION: INSTAGRAM POSTS & PHOTO ALBUMS
+                    PHOTOS SESSION: CAMPUS PHOTO ALBUMS
                    ========================================================= */}
                 {activeTab === 'photos' && (
                     <div className="photos-session-content">
-
-
-
-                        {/* SUB-VIEW SWITCHER: ALBUMS vs LIVE INSTAGRAM FEED */}
-                        <div className="photos-sub-switcher-row">
-                            <div className="sub-switcher-group">
-                                <button
-                                    type="button"
-                                    onClick={() => setPhotosSubView('albums')}
-                                    className={`sub-switcher-btn ${photosSubView === 'albums' ? 'active' : ''}`}
-                                >
-                                    <FaImages size={14} />
-                                    <span>Campus Photo Albums ({events.length})</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => { setPhotosSubView('moments'); setSelectedEvent(null); }}
-                                    className={`sub-switcher-btn ${photosSubView === 'moments' ? 'active' : ''}`}
-                                >
-                                    <FaInstagram size={14} />
-                                    <span>Live Instagram Feed (@easacollege)</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* A. LIVE INSTAGRAM FEED (SOCIABLEKIT WIDGET) */}
-                        {photosSubView === 'moments' && (
-                            <div className="live-instagram-widget-section">
-                                <InstagramFeedWidget embedId="25719657" />
-                            </div>
-                        )}
-
-                        {/* B. CAMPUS PHOTO ALBUMS */}
-                        {photosSubView === 'albums' && (
-                            <div className="photo-albums-container">
+                        <div className="photo-albums-container">
                                 <AnimatePresence>
                                     {selectedEvent && (
                                         <motion.button
@@ -571,8 +494,36 @@ const GalleryPage = () => {
                                     </div>
                                 )}
                             </div>
-                        )}
 
+                            {/* LIVE INSTAGRAM FEED SECTION */}
+                            {!selectedEvent && (
+                                <div className="instagram-live-feed-section" style={{ marginTop: '4rem', paddingTop: '2.5rem', borderTop: '1px solid var(--glass-border)' }}>
+                                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                                        <div style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '0.4rem 1.2rem',
+                                            borderRadius: '50px',
+                                            background: 'linear-gradient(135deg, rgba(225, 48, 108, 0.15) 0%, rgba(131, 58, 180, 0.15) 100%)',
+                                            border: '1px solid rgba(225, 48, 108, 0.3)',
+                                            color: '#E1306C',
+                                            fontWeight: '700',
+                                            fontSize: '0.85rem',
+                                            marginBottom: '0.75rem'
+                                        }}>
+                                            <span>LIVE SOCIAL FEED</span>
+                                        </div>
+                                        <h3 style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
+                                            Follow Our Live Moments on Instagram
+                                        </h3>
+                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>
+                                            Real-time campus highlights, events, and student stories from <a href="https://www.instagram.com/easacollege/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--secondary)', fontWeight: '700', textDecoration: 'none' }}>@easacollege</a>
+                                        </p>
+                                    </div>
+                                    <InstagramFeedWidget embedId="25719657" />
+                                </div>
+                            )}
                     </div>
                 )}
 

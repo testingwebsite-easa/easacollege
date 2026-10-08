@@ -2062,9 +2062,8 @@ h3.sub-title {
   color: #fdbc12;
 }
 
-/* =========================================================
-   GLOBAL SOCIABLEKIT BRANDING & PROFILE HEADING REMOVAL
-   ========================================================= */
+/* Hide SociableKIT Promotional Links & Watermarks */
+a[href*="sociablekit.com"],
 .sk-branding,
 .sk_branding,
 .sk-creator,
@@ -2075,133 +2074,13 @@ h3.sub-title {
 .sk-attribution,
 .sk-ig-powered-by,
 .sk-ig-link,
-a[href*="sociablekit.com"],
-div[class*="sk_branding"],
-div[class*="branding"],
 div:has(> a[href*="sociablekit.com"]),
-.sk-instagram-feed a[href*="sociablekit.com"],
-.sk-ig-bottom-btn[href*="sociablekit.com"],
-.sk-instagram-feed .sk-ig-user-profile,
-.sk_ig_user_profile,
-.sk-instagram-feed [class*="user-profile"],
-.sk-instagram-feed [class*="profile-header"],
-.sk-instagram-feed [class*="user_profile"],
-.sk-instagram-feed .sk-ig-header,
-.sk-instagram-feed .sk-ig-profile,
-.sk-instagram-feed [class*="feed-header"],
-.sk-instagram-feed [class*="feed_header"] {
+.sk-instagram-feed a[href*="sociablekit.com"] {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
+  height: 0 !important;
   pointer-events: none !important;
-  height: 0 !important;
-  width: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  position: absolute !important;
   overflow: hidden !important;
 }
-.sk-ig-all-posts {
-    grid-template-columns: repeat(4, 1fr) !important;
-}
-
-/* HIDE ONLY THE PROFILE LOGO */
-.sk-instagram-profile-pic_container {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Modal Dialog: 3/4 of Screen */
-.sk-ig-modal .modal-dialog,
-.sk_instagram_feed_modal .modal-dialog,
-.sk-ig-modal-dialog {
-  width: 75vw !important;
-  max-width: 1200px !important;
-  min-width: 320px !important;
-  margin: 30px auto !important;
-}
-
-.sk-ig-modal .modal-content,
-.sk_instagram_feed_modal .modal-content,
-.sk-ig-modal-content {
-  background: #0F172A !important;
-  border: 1px solid rgba(253, 188, 18, 0.35) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 40px rgba(46, 45, 120, 0.4) !important;
-  overflow: hidden !important;
-  color: #F1F5F9 !important;
-}
-
-.sk-ig-modal-image-holder,
-.sk-ig-modal .modal-content [class*="image-holder"],
-.sk-ig-modal .modal-content [class*="modal-left"],
-.sk-ig-modal .modal-content [class*="modal-media"] {
-  background: #030712 !important;
-}
-
-.sk-ig-modal .modal-content img,
-.sk-ig-modal .modal-content video {
-  max-height: 75vh !important;
-  object-fit: contain !important;
-}
-
-.sk-ig-modal-content-details,
-.sk-ig-modal .modal-content [class*="content-details"],
-.sk-ig-modal .modal-content [class*="modal-right"],
-.sk-ig-modal .modal-content [class*="modal-details"] {
-  background: #0F172A !important;
-  color: #F1F5F9 !important;
-}
-
-.sk-ig-modal .modal-content strong,
-.sk-ig-modal .modal-content h4,
-.sk-ig-modal .modal-content [class*="username"] {
-  color: #FFFFFF !important;
-  font-weight: 800 !important;
-}
-
-.sk-ig-modal .modal-content a {
-  color: #FDBC12 !important;
-  font-weight: 600 !important;
-}
-
-@media (max-width: 768px) {
-
-  .sk-ig-modal .modal-dialog,
-  .sk_instagram_feed_modal .modal-dialog,
-  .sk-ig-modal-dialog {
-    width: 92vw !important;
-    margin: 15px auto !important;
-  }
-}
-/* Desktop - 4 columns */
-@media (min-width: 1025px) {
-    .sk-ig-all-posts {
-        grid-template-columns: repeat(4, 1fr) !important;
-    }
-}
-
-/* Tablet - 3 columns */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .sk-ig-all-posts {
-        grid-template-columns: repeat(3, 1fr) !important;
-    }
-}
-
-/* Mobile - 2 columns */
-@media (max-width: 768px) {
-    .sk-ig-all-posts {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-}
-/* Optional: Very small mobile - 1 column */
-@media (max-width: 480px) {
-    .sk-ig-all-posts {
-        grid-template-columns: repeat(1, 1fr) !important;
-    }
-}
+

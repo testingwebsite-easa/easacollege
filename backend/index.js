@@ -4555,10 +4555,7 @@ async function syncInstagramMedia() {
     }
 }
 
-// Auto-sync every 30 minutes if token is configured
-if (process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_ACCOUNT_ID) {
-    setInterval(syncInstagramMedia, 30 * 60 * 1000);
-}
+// Instagram feed auto-sync disabled
 
 app.get('/api/instagram/feed', async (req, res) => {
     if (!isConnected) return res.json({ posts: [], reels: [] });

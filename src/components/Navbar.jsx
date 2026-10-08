@@ -600,19 +600,34 @@ const Navbar = ({ onApplyClick }) => {
             </div>
 
             {/* Main Header: Logo & Actions - Premium Feel */}
-            <div className="container header-row" style={{ padding: '0.8rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div className="container header-row" style={{ maxWidth: '100%', padding: '0.65rem 2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
 
                 {/* Left: College Logo (Desktop & Mobile) */}
-                <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => navigate('/')}>
-                    <img src={logoToDisplay} alt="EASA College Logo" style={{ height: '65px', maxHeight: '65px', width: 'auto', objectFit: 'contain' }} />
+                <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', flexShrink: 0 }} onClick={() => navigate('/')}>
+                    <img 
+                        src={logoToDisplay} 
+                        alt="EASA College Logo" 
+                        className="header-college-logo"
+                        style={{ height: '82px', maxHeight: '85px', width: 'auto', objectFit: 'contain' }} 
+                    />
                 </div>
 
-                <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <img src={accreditationsToDisplay} alt="Accreditations" style={{ height: '55px', maxHeight: '55px', width: 'auto', objectFit: 'contain' }} />
+                <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '1 1 auto', padding: '0 1rem' }}>
+                    <img 
+                        src={accreditationsToDisplay} 
+                        alt="Accreditations" 
+                        className="header-accreditations-img"
+                        style={{ height: '80px', maxHeight: '85px', width: 'auto', objectFit: 'contain' }} 
+                    />
                 </div>
 
-                <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src={yearsOfExcellence} alt="18+ Years of Excellence" style={{ height: '50px', maxHeight: '50px', width: 'auto', objectFit: 'contain' }} />
+                <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                    <img 
+                        src={yearsOfExcellence} 
+                        alt="18+ Years of Excellence" 
+                        className="header-excellence-img"
+                        style={{ height: '58px', maxHeight: '60px', width: 'auto', objectFit: 'contain' }} 
+                    />
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -887,16 +902,52 @@ const Navbar = ({ onApplyClick }) => {
             <div className={`mobile-backdrop ${isMenuOpen ? 'open' : ''}`} onClick={toggleMenu}></div>
 
             <style>{`
+                .header-college-logo {
+                    height: 82px;
+                    max-height: 85px;
+                    width: auto;
+                    object-fit: contain;
+                    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+                    image-rendering: -webkit-optimize-contrast;
+                    transition: transform 0.2s ease;
+                }
+                .header-college-logo:hover {
+                    transform: scale(1.02);
+                }
+                .header-accreditations-img {
+                    height: 80px;
+                    max-height: 85px;
+                    width: auto;
+                    object-fit: contain;
+                    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35)) contrast(1.1) brightness(1.06);
+                    image-rendering: -webkit-optimize-contrast;
+                    transition: transform 0.2s ease;
+                }
+                .header-accreditations-img:hover {
+                    transform: scale(1.02);
+                }
+                .header-excellence-img {
+                    height: 58px;
+                    max-height: 60px;
+                    width: auto;
+                    object-fit: contain;
+                    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+                }
+
                 @media (max-width: 1400px) {
                     .desktop-nav { gap: 0.5rem !important; }
                     .nav-link { font-size: 0.65rem !important; padding: 0.3rem 0.35rem !important; }
-                    .header-row img { height: 42px !important; }
+                    .header-college-logo { height: 72px !important; max-height: 75px !important; }
+                    .header-accreditations-img { height: 70px !important; max-height: 72px !important; }
+                    .header-excellence-img { height: 50px !important; max-height: 52px !important; }
                 }
 
                 @media (max-width: 1200px) {
                     .desktop-nav { gap: 0.35rem !important; }
                     .nav-link { font-size: 0.6rem !important; padding: 0.25rem 0.3rem !important; }
-                    .header-row img { height: 38px !important; }
+                    .header-college-logo { height: 64px !important; max-height: 66px !important; }
+                    .header-accreditations-img { height: 60px !important; max-height: 62px !important; }
+                    .header-excellence-img { height: 45px !important; max-height: 48px !important; }
                 }
 
                 @media (max-width: 975px) {
@@ -908,7 +959,8 @@ const Navbar = ({ onApplyClick }) => {
                         align-items: center !important;
                         justify-content: space-between !important;
                         padding: 0.5rem 1rem !important;
-                        height: 60px !important;
+                        height: auto !important;
+                        min-height: 65px !important;
                         width: 100% !important;
                         max-width: 100% !important;
                     }
@@ -918,11 +970,12 @@ const Navbar = ({ onApplyClick }) => {
                         left: 0 !important;
                         top: 0 !important;
                         transform: none !important;
-                        max-width: 70%;
+                        max-width: 78%;
                     }
 
-                    .header-row.container img {
-                        height: 40px !important;
+                    .header-college-logo {
+                        height: 52px !important;
+                        max-height: 55px !important;
                     }
 
                     .mobile-menu-btn {
