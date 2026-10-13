@@ -58,7 +58,41 @@ const newsEventsData = [
         pdf_url: ""
     }
 ];
-const heroSlidesData = [];
+const heroSlidesData = [
+    {
+        title: "Shape Your Future",
+        subtitle: "Join a community of learners and leaders dedicated to innovation.",
+        image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493559411-403043387-Placement.jpg",
+        mobileImage: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493732716-634066562-01e2c6fc_4449_40f1_9ef3_9f86ee3b61c1.png",
+        titleColor: "#ffffff",
+        subtitleColor: "#ffadad",
+        buttonBgColor: "#1B2A6B",
+        buttonTextColor: "#ffffff",
+        fit: "cover"
+    },
+    {
+        title: "World-Class Education",
+        subtitle: "Experience learning in state-of-the-art facilities and smart classrooms.",
+        image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493757227-786391741-homebanner_2.jpeg",
+        mobileImage: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493970355-600520843-c1fbe55c_eb7f_4422_a9f5_90fd7e0fbe91.png",
+        titleColor: "#ffffff",
+        subtitleColor: "#ffffff",
+        buttonBgColor: "#1B2A6B",
+        buttonTextColor: "#ffffff",
+        fit: "cover"
+    },
+    {
+        title: "Innovation & Research",
+        subtitle: "Pioneering research and development in cutting-edge technologies.",
+        image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785835802256-525839450-homebanner3_1347x481.jpg",
+        mobileImage: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493496086-65706702-94a445c1_e3be_49e0_9e07_76fbfd5dc795.png",
+        titleColor: "#ffffff",
+        subtitleColor: "#ffffff",
+        buttonBgColor: "#1B2A6B",
+        buttonTextColor: "#ffffff",
+        fit: "cover"
+    }
+];
 const galleryImagesData = [];
 const placementPartnersData = [];
 const managementTeamData = [];

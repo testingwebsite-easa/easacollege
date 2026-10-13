@@ -129,10 +129,17 @@ router.post('/scan-syllabus-excel', upload.single('file'), async (req, res) => {
     }
 });
 
+// In-memory cache for master courses
+let masterCoursesCache = { data: null, expiresAt: 0 };
+
 // GET /api/departments/all/master-courses - Aggregated shared course bank across all departments
 router.get('/all/master-courses', async (req, res) => {
+    if (masterCoursesCache.data && Date.now() < masterCoursesCache.expiresAt) {
+        return res.json(masterCoursesCache.data);
+    }
+
     try {
-        const allDeptData = await DepartmentData.find({}, 'departmentSlug subjects');
+        const allDeptData = await DepartmentData.find({}, 'departmentSlug subjects').lean();
         const courseMap = new Map();
 
         allDeptData.forEach(dept => {
@@ -141,7 +148,7 @@ router.get('/all/master-courses', async (req, res) => {
                     if (subj && subj.code) {
                         const codeKey = String(subj.code).trim().toUpperCase();
                         if (codeKey) {
-                            const subjObj = subj.toObject ? subj.toObject() : subj;
+                            const subjObj = subj;
                             const creatorDept = subjObj.creatorDept || dept.departmentSlug;
                             const existing = courseMap.get(codeKey);
                             // If not existing or existing has fewer details (e.g. no units) or this dept is the true creator, store or update
@@ -160,6 +167,7 @@ router.get('/all/master-courses', async (req, res) => {
         });
 
         const courses = Array.from(courseMap.values()).sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+        masterCoursesCache = { data: courses, expiresAt: Date.now() + 180000 };
         res.json(courses);
     } catch (err) {
         console.error('Error fetching master courses:', err);
@@ -170,7 +178,7 @@ router.get('/all/master-courses', async (req, res) => {
 // GET department data by slug
 router.get('/:slug', async (req, res) => {
     try {
-        const data = await DepartmentData.findOne({ departmentSlug: req.params.slug });
+        const data = await DepartmentData.findOne({ departmentSlug: req.params.slug }).lean();
         if (!data) {
             return res.json({ mission: [], vision: [], peo: [], pso: [], po: [] });
         }
@@ -379,6 +387,7 @@ router.put('/:slug', verifyToken, async (req, res) => {
             { new: true, upsert: true }
         );
 
+        masterCoursesCache = { data: null, expiresAt: 0 };
         res.json(updatedData);
     } catch (err) {
         console.error('Error in PUT /api/departments/:slug:', err);

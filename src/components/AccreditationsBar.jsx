@@ -7,7 +7,7 @@ import nbaLogo from '../assets/accreditations/nba_logo.svg';
 import naacLogo from '../assets/accreditations/naac_official.png';
 import emblemSvg from '../assets/accreditations/emblem_of_india.svg';
 import nirfLogo from '../assets/accreditations/nirf_official.png';
-import sdgLogo from '../assets/accreditations/sdg_official.png';
+import aicteLogo from '../assets/accreditations/aicte_official.png';
 
 export const AccreditationsBar = () => {
     return (
@@ -73,13 +73,13 @@ export const AccreditationsBar = () => {
                         </div>
                     </Link>
 
-                    {/* 5. Official UN Sustainable Development Goals Logo */}
-                    <Link to="/sdgs" className="acc-logo-link" title="United Nations Sustainable Development Goals">
+                    {/* 5. Official AICTE Logo */}
+                    <Link to="/aicte" className="acc-logo-link" title="All India Council for Technical Education (AICTE)">
                         <div className="acc-logo-box">
                             <img 
-                                src={sdgLogo} 
-                                alt="United Nations Sustainable Development Goals (SDGs) Official Logo" 
-                                className="acc-img-logo sdg-img"
+                                src={aicteLogo} 
+                                alt="All India Council for Technical Education (AICTE) Official Logo" 
+                                className="acc-img-logo aicte-img"
                                 loading="lazy"
                             />
                         </div>
@@ -167,8 +167,8 @@ export const AccreditationsBar = () => {
                     max-width: 140px;
                 }
 
-                .sdg-img {
-                    height: 56px;
+                .aicte-img {
+                    height: 60px;
                     max-width: 150px;
                 }
 
@@ -221,7 +221,7 @@ export const AccreditationsBar = () => {
                     .naac-img { height: 46px; }
                     .emblem-img { height: 44px; }
                     .nirf-img { height: 42px; }
-                    .sdg-img { height: 46px; }
+                    .aicte-img { height: 49px; }
                 }
 
                 @media (max-width: 860px) {

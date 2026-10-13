@@ -12,7 +12,7 @@ const { DepartmentData } = require('../models/Schemas');
 const getDepartmentDetails = async (req, res) => {
   try {
     const { slug } = req.params;
-    const dept = await DepartmentData.findOne({ departmentSlug: slug });
+    const dept = await DepartmentData.findOne({ departmentSlug: slug }).lean();
     if (!dept) {
       return res.status(404).json({ message: 'Department not found' });
     }

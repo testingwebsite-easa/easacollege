@@ -26,10 +26,28 @@ const NextArrow = ({ onClick }) => (
 export const HeroCarousel = ({ onApplyClick }) => {
     const defaultSlides = [
         {
-            title: "EASA College of Engineering and Technology",
-            subtitle: "Empowering Minds, Engineering the Future",
-            image: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlufknq3G5LFb-mAJV4AWzIqN0InRpsLOujTCmaHqUcJ55AAz4CYKfO0AAeJ6eNmTRrYimN2o-rBL_w7KkaROavE3zl0xUX9DSAqN8N4XmbfTalti_PeoBUJ35oq3bXawP8KsE=s680-w680-h510-rw",
-            mobileImage: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWmqJDBQfqeJLgjWVjtIUVBVC-6cYjmEvQl-Txmi8h7psEy7l8BH2xpkw8Ik-eE5mYf2wuLmhywGJjahQ-2_MWQZntPc86DUJWI5zzSGBxlh4yUeWxNZ6mvcr1_zEO_9cWQQ6NJN=s680-w680-h510-rw"
+            title: "Shape Your Future",
+            subtitle: "Join a community of learners and leaders dedicated to innovation.",
+            image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493559411-403043387-Placement.jpg",
+            mobileImage: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493732716-634066562-01e2c6fc_4449_40f1_9ef3_9f86ee3b61c1.png",
+            titleColor: "#ffffff",
+            subtitleColor: "#ffadad"
+        },
+        {
+            title: "World-Class Education",
+            subtitle: "Experience learning in state-of-the-art facilities and smart classrooms.",
+            image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493757227-786391741-homebanner_2.jpeg",
+            mobileImage: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493970355-600520843-c1fbe55c_eb7f_4422_a9f5_90fd7e0fbe91.png",
+            titleColor: "#ffffff",
+            subtitleColor: "#ffffff"
+        },
+        {
+            title: "Innovation & Research",
+            subtitle: "Pioneering research and development in cutting-edge technologies.",
+            image: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785835802256-525839450-homebanner3_1347x481.jpg",
+            mobileImage: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1785493496086-65706702-94a445c1_e3be_49e0_9e07_76fbfd5dc795.png",
+            titleColor: "#ffffff",
+            subtitleColor: "#ffffff"
         }
     ];
 

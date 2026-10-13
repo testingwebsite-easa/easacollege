@@ -39,6 +39,12 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+const compression = require('compression');
+app.use(compression({
+    level: 6,
+    threshold: 1024
+}));
+
 // Standard HTTP Security Headers & Defense in Depth
 const setSecurityHeaders = (res) => {
     res.removeHeader('X-Powered-By');
@@ -54,11 +60,21 @@ const setSecurityHeaders = (res) => {
 app.use((req, res, next) => {
     setSecurityHeaders(res);
     
-    // Prevent sensitive API response caching by proxies
-    if (req.path.startsWith('/api/')) {
+    // Smart Cache-Control headers:
+    // Only disable cache for mutations, authenticated routes, or admin/sensitive endpoints
+    const isSensitive = req.method !== 'GET' ||
+        req.path.startsWith('/api/auth') ||
+        req.path.startsWith('/api/users') ||
+        req.path.includes('/export') ||
+        req.path.startsWith('/api/job-applications');
+
+    if (isSensitive) {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
+    } else if (req.path.startsWith('/api/')) {
+        // Public GET endpoints benefit from browser/CDN caching and 304 validation
+        res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     }
     next();
 });
@@ -251,15 +267,40 @@ app.post('/api/login', async (req, res) => {
 });
 
 
-// --- In-Memory Caching Layer ---
+// --- In-Memory Caching Layer with TTL & Pattern Invalidation ---
 // This significantly speeds up read operations by avoiding DB hits for frequent requests.
-const memoryCache = {};
+const memoryCache = new Map();
 
-const getCache = (key) => memoryCache[key];
-const setCache = (key, data) => { memoryCache[key] = data; };
-const clearCache = (key) => {
-    delete memoryCache[key];
-    console.log(`Cache cleared for: ${key}`);
+const getCache = (key) => {
+    const item = memoryCache.get(key);
+    if (!item) return null;
+    if (Date.now() > item.expiresAt) {
+        memoryCache.delete(key);
+        return null;
+    }
+    return item.data;
+};
+
+const setCache = (key, data, ttlSeconds = 300) => {
+    // 5 minutes default TTL
+    memoryCache.set(key, {
+        data,
+        expiresAt: Date.now() + (ttlSeconds * 1000)
+    });
+};
+
+const clearCache = (prefixOrKey) => {
+    if (!prefixOrKey) {
+        memoryCache.clear();
+        console.log("All cache cleared.");
+        return;
+    }
+    for (const key of memoryCache.keys()) {
+        if (key === prefixOrKey || key.startsWith(prefixOrKey)) {
+            memoryCache.delete(key);
+            console.log(`Cache cleared for: ${key}`);
+        }
+    }
 };
 
 // Helper middleware or wrapper could be used, but applying directly for clarity
@@ -1238,8 +1279,12 @@ const normalizeGalleryEvent = (body) => {
 };
 
 app.get('/api/gallery-events', async (req, res) => {
+    const cached = getCache('gallery-events');
+    if (cached) return res.json(cached);
+
     try {
-        const events = await GalleryEvent.find().sort({ date: -1 });
+        const events = await GalleryEvent.find().sort({ date: -1 }).lean();
+        setCache('gallery-events', events, 300);
         res.json(events);
     } catch (err) {
         console.error("Error fetching gallery-events:", err);
@@ -1300,16 +1345,21 @@ app.delete('/api/gallery-events/:id', async (req, res) => {
 
 // --- Fest Page Routes ---
 app.get('/api/fest-page', async (req, res) => {
+    const cached = getCache('fest-page');
+    if (cached) return res.json(cached);
+
     try {
-        let page = await FestPage.findOne();
+        let page = await FestPage.findOne().lean();
         if (!page) {
-            page = new FestPage({
+            const newPage = new FestPage({
                 title: 'Dhruva Fest',
                 subtitle: 'Celebrating Talent & Culture',
                 heroImage: ''
             });
-            await page.save();
+            await newPage.save();
+            page = newPage.toObject ? newPage.toObject() : newPage;
         }
+        setCache('fest-page', page, 300);
         res.json(page);
     } catch (err) {
         console.error("Error fetching fest-page:", err);
@@ -1320,6 +1370,7 @@ app.get('/api/fest-page', async (req, res) => {
 app.put('/api/fest-page', async (req, res) => {
     try {
         const updated = await FestPage.findOneAndUpdate({}, req.body, { new: true, upsert: true });
+        clearCache('fest-page');
         res.json(updated);
     } catch (err) {
         console.error("Error updating fest-page:", err);
@@ -1330,6 +1381,7 @@ app.put('/api/fest-page', async (req, res) => {
 app.patch('/api/fest-page', async (req, res) => {
     try {
         const updated = await FestPage.findOneAndUpdate({}, { $set: req.body }, { new: true, upsert: true });
+        clearCache('fest-page');
         res.json(updated);
     } catch (err) {
         console.error("Error patching fest-page:", err);
@@ -1798,7 +1850,7 @@ app.get('/api/departments', async (req, res) => {
 
     if (!isConnected) return res.json([]); // Return empty if DB not connected
     try {
-        const depts = await Department.find().sort({ order: 1 });
+        const depts = await Department.find().sort({ order: 1 }).lean();
         // REMOVED FALLBACK: const data = depts.length ? depts : departmentsData;
         const data = depts;
         setCache('departments', data);
@@ -1989,11 +2041,16 @@ app.delete('/api/departments/:id', verifyToken, async (req, res) => {
 
 // ==================== FACULTY ROUTES ====================
 app.get('/api/faculty', async (req, res) => {
+    const { department } = req.query;
+    const cacheKey = `faculty_${department || 'all'}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json(cached);
+
     if (!isConnected) return res.json([]);
     try {
-        const { department } = req.query;
         const query = department ? { department } : {};
-        const faculty = await Faculty.find(query).sort({ order: 1 });
+        const faculty = await Faculty.find(query).sort({ order: 1 }).lean();
+        setCache(cacheKey, faculty, 300);
         res.json(faculty);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch faculty" });
@@ -2005,6 +2062,7 @@ app.post('/api/faculty', async (req, res) => {
     try {
         const item = new Faculty(req.body);
         await item.save();
+        clearCache('faculty_');
         res.status(201).json(item);
     } catch (err) {
         res.status(500).json({ error: "Failed to create faculty" });
@@ -2015,6 +2073,7 @@ app.put('/api/faculty/:id', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = await Faculty.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        clearCache('faculty_');
         res.json(item);
     } catch (err) {
         res.status(500).json({ error: "Failed to update faculty" });
@@ -2025,6 +2084,7 @@ app.patch('/api/faculty/:id', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = await Faculty.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+        clearCache('faculty_');
         res.json(item);
     } catch (err) {
         res.status(500).json({ error: "Failed to update faculty" });
@@ -2035,6 +2095,7 @@ app.delete('/api/faculty/:id', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         await Faculty.findByIdAndDelete(req.params.id);
+        clearCache('faculty_');
         res.json({ message: "Deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: "Failed to delete faculty" });
@@ -2792,6 +2853,7 @@ const handleSingleton = async (Model, req, res) => {
             Object.assign(item, req.body);
             await item.save();
         }
+        clearCache(`singleton_${Model.modelName}`);
         res.json(item);
     } catch (err) {
         console.error(`Error updating singleton ${Model.modelName}:`, err);
@@ -2800,15 +2862,21 @@ const handleSingleton = async (Model, req, res) => {
 };
 
 const getSingleton = async (Model, req, res) => {
+    const cacheKey = `singleton_${Model.modelName}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json(cached);
+
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
-        const item = await Model.findOne();
-        res.json(item || {}); // Return empty obj if not found, frontend handles it
+        const item = await Model.findOne().lean();
+        const data = item || {};
+        setCache(cacheKey, data, 300);
+        res.json(data);
     } catch (err) {
         console.error(`Error fetching singleton ${Model.modelName}:`, err);
         res.status(500).json({ error: "Failed to fetch content" });
     }
-}
+};
 
 // Institution
 app.get('/api/institution', (req, res) => getSingleton(Institution, req, res));
@@ -3537,9 +3605,13 @@ if (require.main === module) {
 }
 
 app.get('/api/placement-page', async (req, res) => {
+    const cached = getCache('placement-page');
+    if (cached) return res.json(cached);
+
     try {
-        const data = await PlacementPage.findOne();
+        const data = await PlacementPage.findOne().lean();
         if (!data) return res.json(placementPageData);
+        setCache('placement-page', data, 300);
         res.json(data);
     } catch (err) {
         console.error("Error fetching placement-page:", err);
@@ -3560,6 +3632,7 @@ app.put('/api/placement-page', async (req, res) => {
             item = new PlacementPage(updateData);
             await item.save();
         }
+        clearCache('placement-page');
         res.json(item);
     } catch (err) {
         console.error("Error updating placement-page:", err);
@@ -3575,6 +3648,7 @@ app.patch('/api/placement-page', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
     try {
         const item = await PlacementPage.findOneAndUpdate({}, { $set: req.body }, { new: true, upsert: true });
+        clearCache('placement-page');
         res.json(item);
     } catch (err) {
         console.error("Error patching placement-page:", err);
@@ -3584,8 +3658,12 @@ app.patch('/api/placement-page', async (req, res) => {
 
 // ==================== VIDEO GALLERY APIs ====================
 app.get('/api/video-gallery', async (req, res) => {
+    const cached = getCache('video-gallery');
+    if (cached) return res.json(cached);
+
     try {
-        const videos = await VideoGallery.find().sort({ createdAt: -1 });
+        const videos = await VideoGallery.find().sort({ createdAt: -1 }).lean();
+        setCache('video-gallery', videos, 300);
         res.json(videos);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch videos" });
