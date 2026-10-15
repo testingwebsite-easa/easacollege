@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaPhoneAlt, FaEnvelope, FaFileAlt, FaWhatsapp } from 'react-icons/fa';
+import { FaPhoneAlt, FaEnvelope, FaFileAlt, FaWhatsapp, FaGraduationCap, FaCommentDots } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
 import AdmissionForm from './AdmissionForm';
 import EnquiryForm from './EnquiryForm';
@@ -74,7 +74,10 @@ const StickyContactBar = () => {
                         aria-label="Admission"
                     >
                         <span className="tab-yellow-accent"></span>
-                        <span className="tab-text">Admission</span>
+                        <div className="tab-content">
+                            <FaGraduationCap className="tab-micro-icon" />
+                            <span className="tab-text">Admission</span>
+                        </div>
                     </button>
                     <button
                         onClick={() => setShowEnquiryForm(true)}
@@ -82,7 +85,10 @@ const StickyContactBar = () => {
                         aria-label="Enquire Now"
                     >
                         <span className="tab-yellow-accent"></span>
-                        <span className="tab-text">Enquire Now</span>
+                        <div className="tab-content">
+                            <FaCommentDots className="tab-micro-icon" />
+                            <span className="tab-text">Enquire Now</span>
+                        </div>
                     </button>
                 </div>
             </div>
@@ -214,7 +220,7 @@ const StickyContactBar = () => {
                     color: #fff;
                 }
 
-                /* Side Tab Buttons matching image style (Compact size) */
+                /* Side Tab Buttons - Premium & Impressive Design */
                 .vertical-tabs-container {
                     display: flex;
                     flex-direction: column;
@@ -225,80 +231,163 @@ const StickyContactBar = () => {
                 .side-tab-btn {
                     display: flex;
                     flex-direction: row;
-                    align-items: center;
+                    align-items: stretch;
                     color: #ffffff;
-                    border: none;
-                    border-radius: 6px 0 0 6px;
+                    border: 1px solid rgba(255, 255, 255, 0.18);
+                    border-right: none;
+                    border-radius: 8px 0 0 8px;
                     padding: 0;
                     cursor: pointer;
                     overflow: hidden;
-                    box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.4);
-                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+                    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
                     position: relative;
                     margin-right: 0;
+                    backdrop-filter: blur(8px);
+                    -webkit-backdrop-filter: blur(8px);
+                    touch-action: manipulation;
+                    -webkit-tap-highlight-color: transparent;
+                }
+
+                /* Subtle Shimmer Light Sweep */
+                .side-tab-btn::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(
+                        180deg,
+                        transparent 0%,
+                        rgba(255, 255, 255, 0.25) 50%,
+                        transparent 100%
+                    );
+                    transform: translateY(-110%);
+                    animation: tabShimmer 4.5s ease-in-out infinite;
+                    pointer-events: none;
+                }
+
+                @keyframes tabShimmer {
+                    0%, 75% { transform: translateY(-110%); opacity: 0; }
+                    80% { opacity: 1; }
+                    95% { transform: translateY(110%); opacity: 1; }
+                    96%, 100% { transform: translateY(110%); opacity: 0; }
                 }
 
                 .admission-tab {
-                    background: linear-gradient(180deg, #1e1b4b 0%, #030712 100%) !important;
+                    background: linear-gradient(160deg, #1e1b4b 0%, #0f172a 75%, #020617 100%) !important;
+                    border-color: rgba(129, 140, 248, 0.35) !important;
                 }
 
                 .admission-tab:hover {
                     transform: translateX(-5px);
-                    background: linear-gradient(180deg, #2e1065 0%, #1e1b4b 100%) !important;
-                    box-shadow: -6px 6px 20px rgba(0, 0, 0, 0.5);
+                    background: linear-gradient(160deg, #312e81 0%, #1e1b4b 75%, #0f172a 100%) !important;
+                    border-color: rgba(165, 180, 252, 0.6) !important;
+                    box-shadow: -6px 8px 24px rgba(30, 27, 75, 0.6), 0 0 12px rgba(99, 102, 241, 0.35) !important;
                 }
 
                 .enquiry-tab {
-                    background: linear-gradient(180deg, #c2410c 0%, #7c2d12 100%) !important;
+                    background: linear-gradient(160deg, #ea580c 0%, #c2410c 65%, #7c2d12 100%) !important;
+                    border-color: rgba(253, 186, 116, 0.4) !important;
                 }
 
                 .enquiry-tab:hover {
                     transform: translateX(-5px);
-                    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%) !important;
-                    box-shadow: -6px 6px 20px rgba(0, 0, 0, 0.5);
+                    background: linear-gradient(160deg, #f97316 0%, #ea580c 65%, #9a3412 100%) !important;
+                    border-color: rgba(254, 215, 170, 0.75) !important;
+                    box-shadow: -6px 8px 24px rgba(194, 65, 12, 0.6), 0 0 12px rgba(249, 115, 22, 0.4) !important;
                 }
 
                 .tab-yellow-accent {
-                    width: 4px;
+                    width: 3.5px;
                     align-self: stretch;
-                    background: #FCCA26;
-                    box-shadow: 0 0 8px rgba(252, 202, 38, 0.7);
+                    background: linear-gradient(180deg, #FEF08A 0%, #FBBF24 50%, #D97706 100%);
+                    box-shadow: 0 0 8px rgba(251, 191, 36, 0.65);
                     flex-shrink: 0;
+                    transition: all 0.25s ease;
                 }
 
                 .side-tab-btn:hover .tab-yellow-accent {
-                    background: #FFE066;
-                    box-shadow: 0 0 12px rgba(252, 202, 38, 1);
+                    background: linear-gradient(180deg, #FFFFFF 0%, #FDE047 50%, #F59E0B 100%);
+                    box-shadow: 0 0 12px rgba(251, 191, 36, 1);
+                }
+
+                .tab-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 5px;
+                    padding: 0.65rem 0.32rem;
+                }
+
+                .tab-micro-icon {
+                    font-size: 0.72rem;
+                    color: #FDE047;
+                    filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.6));
+                    flex-shrink: 0;
+                    transition: transform 0.25s ease;
+                }
+
+                .side-tab-btn:hover .tab-micro-icon {
+                    transform: scale(1.15);
                 }
 
                 .tab-text {
                     writing-mode: vertical-rl;
                     transform: rotate(180deg);
-                    padding: 0.8rem 0.38rem;
                     color: #ffffff;
                     font-weight: 800;
-                    font-size: 0.75rem;
+                    font-size: 0.72rem;
                     letter-spacing: 0.8px;
                     text-transform: uppercase;
                     white-space: nowrap;
                     font-family: inherit;
                     user-select: none;
+                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
                 }
 
+                /* Mobile View - Small, Unobtrusive & Highly Impressive */
                 @media (max-width: 768px) {
                     .sidebar-contact-container {
                         display: none;
                     }
                     .right-side-bar {
-                        top: 55%;
+                        top: 50%;
+                        gap: 5px;
+                        right: 0;
                     }
-                    .tab-text {
-                        padding: 0.6rem 0.3rem;
-                        font-size: 0.65rem;
-                        letter-spacing: 0.5px;
+                    .vertical-tabs-container {
+                        gap: 5px;
+                    }
+                    .side-tab-btn {
+                        border-radius: 6px 0 0 6px;
+                        border-width: 1px;
+                        box-shadow: -3px 4px 10px rgba(0, 0, 0, 0.35);
+                    }
+                    /* Generous touch target area without visual bulk */
+                    .side-tab-btn::before {
+                        content: '';
+                        position: absolute;
+                        inset: -6px -12px -6px -10px;
                     }
                     .tab-yellow-accent {
-                        width: 3px;
+                        width: 2px;
+                        box-shadow: 0 0 5px rgba(251, 191, 36, 0.7);
+                    }
+                    .tab-content {
+                        gap: 3px;
+                        padding: 0.35rem 0.15rem;
+                    }
+                    .tab-micro-icon {
+                        font-size: 0.52rem;
+                        filter: drop-shadow(0 0 3px rgba(253, 224, 71, 0.6));
+                    }
+                    .tab-text {
+                        font-size: 0.52rem;
+                        letter-spacing: 0.35px;
+                        font-weight: 700;
+                    }
+                    .side-tab-btn:active {
+                        transform: scale(0.95) translateX(-2px);
                     }
                 }
             `}</style>

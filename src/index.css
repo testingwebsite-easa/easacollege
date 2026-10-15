@@ -2194,10 +2194,10 @@ div:has(> a[href*="sociablekit.com"]),
     gap: 0.85rem !important;
   }
 
-  /* Quick Stats special adaptation for narrow 320-360px */
+  /* Quick Stats responsive: 3 on left and 3 on right */
   .stats-group {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 0.45rem !important;
     width: 100% !important;
   }
@@ -2307,11 +2307,12 @@ div:has(> a[href*="sociablekit.com"]),
     gap: 1rem !important;
   }
 
-  /* Quick stats in 2 or 3 columns */
+  /* Quick stats in 2 balanced columns (3 cards on left, 3 cards on right) */
   .stats-group {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.55rem !important;
+    width: 100% !important;
   }
 
   .modal,
@@ -2368,7 +2369,6 @@ div:has(> a[href*="sociablekit.com"]),
   }
 
   /* 2-column support for compact card decks and stats */
-  .stats-group,
   .stats-grid,
   .quick-links-grid,
   .badge-grid {

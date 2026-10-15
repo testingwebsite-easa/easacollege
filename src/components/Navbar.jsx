@@ -174,12 +174,13 @@ const NAV_ITEMS = [
         title: 'GRIEVANCES',
         children: [
             {
-                title: 'Forms',
+                title: 'Forms & Redressal',
                 children: [
-                    { title: 'Parents', href: '/grievance-parents' },
                     { title: 'Students', href: '/grievance-students' },
-                    { title: 'Faculty', href: '/grievance-faculty' },
-                    { title: 'Visitors', href: '/grievance-visitors' }
+                    { title: 'Parents', href: '/grievance-parents' },
+                    { title: 'Faculty & Staff', href: '/grievance-faculty' },
+                    { title: 'Visitors & Public', href: '/grievance-visitors' },
+                    { title: 'Track Status', href: '/grievance-track' }
                 ]
             }
         ]

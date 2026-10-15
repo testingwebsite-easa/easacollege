@@ -249,7 +249,6 @@ const DepartmentLabSchema = new mongoose.Schema({
     equipment: { type: String, default: '' },
     order: { type: Number, default: 0 }
 });
-DepartmentLabSchema.index({ department: 1 });
 
 module.exports = {
     DepartmentLab: mongoose.model('DepartmentLab', DepartmentLabSchema),

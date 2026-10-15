@@ -476,6 +476,8 @@ const {
     sustainabilityData,
     communityOutreachData,
     scholarshipsData,
+    placementPageData,
+    sportsData,
     resourcesData
 } = require('./data');
 
@@ -540,11 +542,12 @@ app.delete('/api/instagram-media/:id', verifyToken, async (req, res) => {
 
 const seedAdmin = async () => {
     try {
-        const count = await User.countDocuments();
+        const count = await User.countDocuments({ username: 'admin' });
         if (count === 0) {
             const adminPass = ADMIN_PASSWORD;
             const admin = new User({
                 username: 'admin',
+                email: 'admin@easacollege.com',
                 password: hashPassword(adminPass), // Hash password
                 role: 'admin',
                 isApproved: true
@@ -552,8 +555,101 @@ const seedAdmin = async () => {
             await admin.save();
             console.log('Initial admin user seeded.');
         }
+
+        // Seed dedicated PG Courses Syllabus Admin user
+        const pgCount = await User.countDocuments({ username: 'pgadmin' });
+        if (pgCount === 0) {
+            const pgAdmin = new User({
+                username: 'pgadmin',
+                email: 'pgadmin@easacollege.com',
+                password: hashPassword(ADMIN_PASSWORD),
+                name: 'PG Syllabus Coordinator',
+                role: 'admin',
+                department: 'Master of Business Administration',
+                isApproved: true
+            });
+            await pgAdmin.save();
+            console.log('PG Admin user seeded (username: pgadmin).');
+        }
+
+        // Seed / Synchronize all PG Course HODs with known credentials (hod@departmentname format)
+        const pgHODs = [
+            {
+                username: 'hodmba',
+                password: 'hod@mba',
+                email: 'hod.mba@ecetonline.com',
+                name: 'Dr. S. Saira Banu (MBA HOD)',
+                department: 'Master of Business Administration'
+            },
+            {
+                username: 'hodmecse',
+                password: 'hod@mecse',
+                email: 'hod.mecse@ecetonline.com',
+                name: 'M.E. CSE Coordinator & HOD',
+                department: 'me-computer-science-and-engineering'
+            },
+            {
+                username: 'hodcem',
+                password: 'hod@cem',
+                email: 'hod.cem@ecetonline.com',
+                name: 'Construction Engg & Mgmt HOD',
+                department: 'construction-engineering-and-management'
+            },
+            {
+                username: 'hodcs',
+                password: 'hod@cs',
+                email: 'hod.cs@ecetonline.com',
+                name: 'Communication Systems HOD',
+                department: 'communication-systems'
+            },
+            {
+                username: 'hodmfg',
+                password: 'hod@mfg',
+                email: 'hod.mfg@ecetonline.com',
+                name: 'Manufacturing Engg HOD',
+                department: 'manufacturing-engineering'
+            },
+            {
+                username: 'hodped',
+                password: 'hod@ped',
+                email: 'hod.ped@ecetonline.com',
+                name: 'Power Electronics & Drives HOD',
+                department: 'power-electronics-and-drives'
+            },
+            {
+                username: 'hodse',
+                password: 'hod@se',
+                email: 'hod.se@ecetonline.com',
+                name: 'Structural Engg HOD',
+                department: 'structural-engineering'
+            }
+        ];
+
+        for (const h of pgHODs) {
+            const existing = await User.findOne({ username: h.username });
+            if (!existing) {
+                const newHod = new User({
+                    username: h.username,
+                    email: h.email,
+                    password: hashPassword(h.password),
+                    name: h.name,
+                    role: 'hod',
+                    department: h.department,
+                    isApproved: true
+                });
+                await newHod.save();
+                console.log(`Seeded PG HOD: ${h.username}`);
+            } else {
+                existing.password = hashPassword(h.password);
+                existing.isApproved = true;
+                existing.role = 'hod';
+                existing.department = h.department;
+                await existing.save();
+                console.log(`Synchronized PG HOD: ${h.username} with password ${h.password}`);
+            }
+        }
     } catch (err) {
-        console.error('Error seeding admin:', err);
+        console.error('Error seeding admin/PG HODs:', err);
     }
 };
 

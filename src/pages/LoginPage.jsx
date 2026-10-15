@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
+import { FaGraduationCap, FaBookOpen, FaShieldAlt } from 'react-icons/fa';
 import API_BASE_URL from '../api';
 import '../styles/LoginPage.css';
+
+const PG_PROGRAMMES = [
+    'M.E. Computer Science & Engg',
+    'M.E. Construction Engg & Mgmt',
+    'M.E. Communication Systems',
+    'M.E. Manufacturing Engg',
+    'M.E. Power Electronics & Drives',
+    'M.E. Structural Engg',
+    'Master of Business Administration (MBA)'
+];
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -12,11 +23,36 @@ const LoginPage = () => {
     const [loginData, setLoginData] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-
     const [showPassword, setShowPassword] = useState(false);
 
-    const isAdminPath = location.pathname.includes('/admin');
-    const isSyllabusPath = location.pathname.includes('syllabus');
+    // Path & Query detections
+    const searchParams = new URLSearchParams(location.search);
+    const queryLevel = searchParams.get('level')?.toUpperCase();
+    const redirectParam = searchParams.get('redirect');
+
+    const isPGPath = location.pathname.includes('/pg') || 
+                     location.pathname.includes('pg-login') || 
+                     queryLevel === 'PG' ||
+                     (redirectParam && redirectParam.includes('level=PG'));
+
+    const isAdminPath = (location.pathname.includes('/admin') || location.pathname === '/admin/login') && 
+                        !location.pathname.includes('syllabus');
+
+    // Portal state: 'ug' | 'pg' | 'admin'
+    const [portalType, setPortalType] = useState(() => {
+        if (isPGPath) return 'pg';
+        if (isAdminPath) return 'admin';
+        return 'ug';
+    });
+
+    // Update portalType when location changes
+    useEffect(() => {
+        if (isPGPath) {
+            setPortalType('pg');
+        } else if (isAdminPath) {
+            setPortalType('admin');
+        }
+    }, [location.pathname, location.search, isPGPath, isAdminPath]);
 
     // Forgot Password States
     const [isForgotMode, setIsForgotMode] = useState(false);
@@ -38,7 +74,7 @@ const LoginPage = () => {
             if (data?.token) {
                 localStorage.setItem('authToken', data.token);
                 const roleLower = (data?.user?.role || '').toLowerCase().trim();
-                if (roleLower === 'admin' || roleLower === 'superadmin' || isAdminPath) {
+                if (roleLower === 'admin' || roleLower === 'superadmin' || portalType === 'admin') {
                     localStorage.setItem('admin_token', data.token);
                 } else {
                     localStorage.removeItem('admin_token');
@@ -49,26 +85,32 @@ const LoginPage = () => {
             const queryParams = new URLSearchParams(location.search);
             const redirectUrl = queryParams.get('redirect');
 
-            // Navigate based on role & destination
+            // Navigate based on selected portal & destination
             setTimeout(() => {
                 if (redirectUrl) {
                     navigate(redirectUrl);
-                } else if (location.pathname === '/admin/syllabus' || isSyllabusPath || location.pathname === '/login' || location.pathname === '/syllabus-login' || location.pathname === '/syllabus/login') {
+                } else if (portalType === 'pg') {
                     if (data?.user?.role === 'admin' || data?.user?.role === 'superadmin') {
-                        navigate('/admin/syllabus');
+                        navigate('/admin/syllabus?level=PG');
                     } else if (data?.user?.role === 'hod' || data?.user?.role === 'staff' || data?.user?.role === 'student') {
                         navigate('/dashboard');
                     } else {
-                        navigate('/admin/syllabus');
+                        navigate('/admin/syllabus?level=PG');
                     }
-                } else if (location.pathname === '/admin/login' || location.pathname === '/admin') {
+                } else if (portalType === 'ug') {
+                    if (data?.user?.role === 'admin' || data?.user?.role === 'superadmin') {
+                        navigate('/admin/syllabus?level=UG');
+                    } else if (data?.user?.role === 'hod' || data?.user?.role === 'staff' || data?.user?.role === 'student') {
+                        navigate('/dashboard');
+                    } else {
+                        navigate('/admin/syllabus?level=UG');
+                    }
+                } else if (portalType === 'admin') {
                     if (data?.user?.role === 'admin' || data?.user?.role === 'superadmin') {
                         navigate('/admin');
                     } else {
                         navigate('/dashboard');
                     }
-                } else if (data?.user?.role === 'admin' || data?.user?.role === 'superadmin') {
-                    navigate('/admin/syllabus');
                 } else {
                     navigate('/dashboard');
                 }
@@ -114,13 +156,53 @@ const LoginPage = () => {
         }
     };
 
+    // Header content by portal
+    const getHeaderInfo = () => {
+        if (portalType === 'pg') {
+            return {
+                title: 'EASA College',
+                subtitle: 'Postgraduate (PG) Courses Syllabus Portal',
+                badgeText: '🎓 PG Degree Programmes (M.E. & M.B.A.)',
+                badgeClass: 'portal-badge-pg',
+                headerClass: 'login-header-pg',
+                bgStyle: { background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)' },
+                buttonClass: 'auth-btn-pg',
+                buttonText: 'Login to PG Syllabus Portal'
+            };
+        }
+        if (portalType === 'admin') {
+            return {
+                title: 'EASA College',
+                subtitle: 'Central College Admin Portal',
+                badgeText: '🛡️ Central Administration',
+                badgeClass: 'portal-badge-admin',
+                headerClass: 'login-header-admin',
+                bgStyle: { background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' },
+                buttonClass: 'auth-btn-admin',
+                buttonText: 'Login as Administrator'
+            };
+        }
+        return {
+            title: 'EASA College',
+            subtitle: 'Undergraduate (UG) Course Syllabus Portal',
+            badgeText: '🏛️ B.E. & B.Tech Programmes',
+            badgeClass: 'portal-badge-ug',
+            headerClass: 'login-header-ug',
+            bgStyle: { background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' },
+            buttonClass: 'auth-btn-ug',
+            buttonText: 'Login to UG Syllabus Portal'
+        };
+    };
+
+    const headerInfo = getHeaderInfo();
+
     if (isForgotMode) {
         return (
             <div className="login-page">
                 <div className="login-container">
-                    <div className="login-header">
-                        <h1>EASA College</h1>
-                        <p>{isAdminPath ? 'Central College Admin Portal' : 'Academic & Syllabus Portal'}</p>
+                    <div className="login-header" style={headerInfo.bgStyle}>
+                        <h1>{headerInfo.title}</h1>
+                        <p>{headerInfo.subtitle}</p>
                     </div>
 
                     <div className="auth-form">
@@ -146,7 +228,7 @@ const LoginPage = () => {
                                     />
                                 </div>
 
-                                <button type="submit" className="auth-btn" disabled={forgotLoading}>
+                                <button type="submit" className={`auth-btn ${headerInfo.buttonClass}`} disabled={forgotLoading}>
                                     {forgotLoading ? 'Sending Link...' : 'Send Reset Link'}
                                 </button>
                             </form>
@@ -170,22 +252,76 @@ const LoginPage = () => {
     return (
         <div className="login-page">
             <div className="login-container">
-                <div className="login-header">
-                    <h1>EASA College</h1>
-                    <p>{isAdminPath ? 'Central College Admin Portal' : 'Academic & Syllabus Portal'}</p>
+                {/* Multi-Portal Selector Tabs */}
+                <div className="login-portal-tabs">
+                    <button
+                        type="button"
+                        className={`portal-tab ${portalType === 'ug' ? 'active-ug' : ''}`}
+                        onClick={() => { setPortalType('ug'); setError(''); }}
+                        title="Undergraduate (B.E. / B.Tech) Syllabus Portal"
+                    >
+                        <FaBookOpen />
+                        <span>UG Syllabus</span>
+                    </button>
+                    <button
+                        type="button"
+                        className={`portal-tab ${portalType === 'pg' ? 'active-pg' : ''}`}
+                        onClick={() => { setPortalType('pg'); setError(''); }}
+                        title="Postgraduate (M.E. / MBA) Courses Syllabus Portal"
+                    >
+                        <FaGraduationCap />
+                        <span>PG Courses</span>
+                    </button>
+                    <button
+                        type="button"
+                        className={`portal-tab ${portalType === 'admin' ? 'active-admin' : ''}`}
+                        onClick={() => { setPortalType('admin'); setError(''); }}
+                        title="Central College Admin Portal"
+                    >
+                        <FaShieldAlt />
+                        <span>Central Admin</span>
+                    </button>
                 </div>
 
-                {error && <div className="alert alert-error">{error}</div>}
+                {/* Dynamic Header */}
+                <div className="login-header" style={headerInfo.bgStyle}>
+                    <h1>{headerInfo.title}</h1>
+                    <p style={{ margin: '8px 0 0 0', fontWeight: '500' }}>{headerInfo.subtitle}</p>
+                    <div style={{ marginTop: '8px' }}>
+                        <span className={`portal-badge ${headerInfo.badgeClass}`}>
+                            {headerInfo.badgeText}
+                        </span>
+                    </div>
+                </div>
+
+                {error && <div className="alert alert-error" style={{ margin: '20px 30px 0 30px' }}>{error}</div>}
 
                 {/* LOGIN FORM */}
                 <form onSubmit={handleLogin} className="auth-form">
+                    {/* PG Covered Courses Preview Chips */}
+                    {portalType === 'pg' && (
+                        <div className="pg-programs-preview">
+                            <div className="pg-programs-title">
+                                <FaGraduationCap />
+                                <span>PG Program Portals Covered:</span>
+                            </div>
+                            <div className="pg-dept-chips">
+                                {PG_PROGRAMMES.map((prog, i) => (
+                                    <span key={i} className="pg-dept-chip">{prog}</span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="form-group">
-                        <label htmlFor="login-username">Username or Email</label>
+                        <label htmlFor="login-username">
+                            {portalType === 'pg' ? 'PG Faculty / HOD / Admin Username or Email' : 'Username or Email'}
+                        </label>
                         <input
                             id="login-username"
                             type="text"
                             name="username"
-                            placeholder="Enter your username or email"
+                            placeholder={portalType === 'pg' ? "Enter PG username (e.g. pgadmin or email)" : "Enter your username or email"}
                             value={loginData.username}
                             onChange={handleLoginChange}
                             required
@@ -221,6 +357,7 @@ const LoginPage = () => {
                                     alignItems: 'center',
                                     padding: '5px'
                                 }}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                             </button>
@@ -231,20 +368,34 @@ const LoginPage = () => {
                         <button 
                             type="button" 
                             onClick={() => setIsForgotMode(true)} 
-                            style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '500' }}
+                            style={{ background: 'none', border: 'none', color: portalType === 'pg' ? '#7c3aed' : '#2563eb', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}
                         >
                             Forgot Password?
                         </button>
                     </div>
 
-                    <button type="submit" className="auth-btn" disabled={loading}>
-                        {loading ? 'Logging in...' : 'Login'}
+                    <button type="submit" className={`auth-btn ${headerInfo.buttonClass}`} disabled={loading}>
+                        {loading ? 'Logging in...' : headerInfo.buttonText}
                     </button>
 
-                    <p className="auth-info-text" style={{ textAlign: 'center', marginTop: '1.5rem', color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.875rem', lineHeight: '1.4' }}>
-                        Please use your system credentials to log in.<br/>
-                        For new accounts, contact the administrator.
-                    </p>
+                    <div className="auth-info-text" style={{ textAlign: 'center', marginTop: '1.5rem', color: '#64748b', fontSize: '0.825rem', lineHeight: '1.5' }}>
+                        {portalType === 'pg' ? (
+                            <>
+                                🎓 <strong>Postgraduate Courses Portal</strong> for M.E. & M.B.A. Faculty and HODs.<br/>
+                                <span style={{ color: '#94a3b8' }}>Switch to <a href="#ug" onClick={(e) => { e.preventDefault(); setPortalType('ug'); }} style={{ color: '#2563eb', fontWeight: 'bold' }}>UG Syllabus Portal</a> or <a href="#admin" onClick={(e) => { e.preventDefault(); setPortalType('admin'); }} style={{ color: '#0f172a', fontWeight: 'bold' }}>Admin Login</a></span>
+                            </>
+                        ) : portalType === 'ug' ? (
+                            <>
+                                🏛️ <strong>Undergraduate Syllabus Portal</strong> for B.E. & B.Tech Department Curricula.<br/>
+                                <span style={{ color: '#94a3b8' }}>Switch to <a href="#pg" onClick={(e) => { e.preventDefault(); setPortalType('pg'); }} style={{ color: '#7c3aed', fontWeight: 'bold' }}>PG Courses Syllabus Portal</a> or <a href="#admin" onClick={(e) => { e.preventDefault(); setPortalType('admin'); }} style={{ color: '#0f172a', fontWeight: 'bold' }}>Admin Login</a></span>
+                            </>
+                        ) : (
+                            <>
+                                🛡️ Central Management Portal for college administrators.<br/>
+                                <span style={{ color: '#94a3b8' }}>Access <a href="#pg" onClick={(e) => { e.preventDefault(); setPortalType('pg'); }} style={{ color: '#7c3aed', fontWeight: 'bold' }}>PG Portal</a> or <a href="#ug" onClick={(e) => { e.preventDefault(); setPortalType('ug'); }} style={{ color: '#2563eb', fontWeight: 'bold' }}>UG Portal</a></span>
+                            </>
+                        )}
+                    </div>
                 </form>
             </div>
         </div>

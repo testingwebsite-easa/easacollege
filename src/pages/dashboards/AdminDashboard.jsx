@@ -758,9 +758,16 @@ const AdminDashboard = () => {
                                                     required
                                                 >
                                                     <option value="">Select Department</option>
-                                                    {staticDepartments.map(d => (
-                                                        <option key={d.id} value={d.name}>{d.name}</option>
-                                                    ))}
+                                                    <optgroup label="Postgraduate (PG) Departments">
+                                                        {staticDepartments.filter(d => d.type === 'PG').map(d => (
+                                                            <option key={d.id} value={d.name}>{d.name} ({d.degree || 'PG'})</option>
+                                                        ))}
+                                                    </optgroup>
+                                                    <optgroup label="Undergraduate (UG) Departments">
+                                                        {staticDepartments.filter(d => d.type !== 'PG').map(d => (
+                                                            <option key={d.id} value={d.name}>{d.name} (UG)</option>
+                                                        ))}
+                                                    </optgroup>
                                                 </select>
                                             </div>
                                         )}

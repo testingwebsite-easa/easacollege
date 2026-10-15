@@ -2771,7 +2771,7 @@ const mapStaticCategoryToAbbrev = (category) => {
     return 'PCC';
 };
 
-const DepartmentManager = () => {
+const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
     const { user } = useAuth();
 
     const getDeptSlug = (userDeptName) => {
@@ -2815,18 +2815,35 @@ const DepartmentManager = () => {
     const hodDeptSlug = isHOD ? getDeptSlug(user?.department) : '';
     const hodDeptObj = isHOD ? staticDepartments.find(d => d.slug === hodDeptSlug) : null;
 
+    // URL parameters resolution
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const urlLevel = urlParams?.get('level')?.toUpperCase();
+    const urlDept = urlParams?.get('dept');
+    const isUrlPG = typeof window !== 'undefined' && (window.location.pathname.includes('/pg') || urlLevel === 'PG');
+
+    const effectiveLevel = isHOD && hodDeptObj 
+        ? hodDeptObj.type 
+        : (initialLevel || (isUrlPG ? 'PG' : (urlLevel === 'UG' ? 'UG' : 'UG')));
+
     // Filter States
-    const [academicLevel, setAcademicLevel] = useState(isHOD && hodDeptObj ? hodDeptObj.type : "UG");
+    const [academicLevel, setAcademicLevel] = useState(effectiveLevel);
 
     // Extract available departments based on Level
     const filteredDepts = staticDepartments.filter(d => d.type === academicLevel);
 
-    // Determine initial department based on user role if needed, defaulting to CS
-    const initialDept = isHOD && hodDeptSlug
-        ? hodDeptSlug
-        : (filteredDepts.length > 0 ? filteredDepts[0].slug : 'computer-science-and-engineering');
+    // Determine initial department based on user role or URL params
+    const getInitialDept = () => {
+        if (isHOD && hodDeptSlug) return hodDeptSlug;
+        const requestedDept = initialDeptSlug || urlDept;
+        if (requestedDept) {
+            const match = staticDepartments.find(d => d.slug === requestedDept || d.id === requestedDept);
+            if (match) return match.slug;
+        }
+        if (filteredDepts.length > 0) return filteredDepts[0].slug;
+        return effectiveLevel === 'PG' ? 'me-computer-science-and-engineering' : 'computer-science-and-engineering';
+    };
 
-    const [selectedDept, setSelectedDept] = useState(initialDept);
+    const [selectedDept, setSelectedDept] = useState(getInitialDept);
 
     // Enforce selectedDept for HODs
     useEffect(() => {

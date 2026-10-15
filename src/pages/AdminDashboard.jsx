@@ -3928,20 +3928,27 @@ const AdminDashboard = () => {
                                                     {grievances.map(item => (
                                                         <tr key={item._id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
                                                             <td style={{ padding: '1rem' }}>
-                                                                <div>{item.name}</div>
+                                                                <div style={{ fontWeight: '700' }}>{item.name}</div>
+                                                                {item.ticketId && <div style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--primary, #1B2A6B)', fontFamily: 'monospace' }}>🎫 {item.ticketId}</div>}
                                                                 {item.rollNo && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Roll: {item.rollNo}</div>}
+                                                                {item.wardName && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Ward: {item.wardName}</div>}
+                                                                {item.employeeId && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Staff ID: {item.employeeId}</div>}
                                                                 {item.department && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Dept: {item.department}</div>}
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>
-                                                                <span style={{ fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>{item.type}</span>
+                                                                <span style={{ fontSize: '0.78rem', background: '#1B2A6B', color: 'white', padding: '3px 8px', borderRadius: '4px', fontWeight: '700' }}>{item.type || 'General'}</span>
+                                                                {item.category && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>{item.category}</div>}
+                                                                {item.priority && item.priority !== 'Normal' && (
+                                                                    <span style={{ fontSize: '0.7rem', background: '#ef4444', color: 'white', padding: '1px 5px', borderRadius: '3px', marginTop: '3px', display: 'inline-block' }}>{item.priority}</span>
+                                                                )}
                                                             </td>
                                                             <td style={{ padding: '1rem', fontWeight: 'bold' }}>{item.subject}</td>
                                                             <td style={{ padding: '1rem' }}>
-                                                                <div style={{ maxWidth: '300px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{item.message}</div>
+                                                                <div style={{ maxWidth: '300px', fontSize: '0.9rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap' }}>{item.message}</div>
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>
                                                                 <div style={{ fontSize: '0.8rem' }}>{item.email}</div>
-                                                                <div style={{ fontSize: '0.8rem' }}>{item.phone}</div>
+                                                                <div style={{ fontSize: '0.8rem', fontWeight: '600' }}>{item.phone}</div>
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>
                                                                 <select
@@ -3960,8 +3967,10 @@ const AdminDashboard = () => {
                                                                     className="custom-select"
                                                                 >
                                                                     <option value="Pending">Pending</option>
+                                                                    <option value="Under Review">Under Review</option>
                                                                     <option value="Reviewed">Reviewed</option>
                                                                     <option value="Resolved">Resolved</option>
+                                                                    <option value="Rejected">Rejected</option>
                                                                 </select>
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>

@@ -2197,7 +2197,7 @@ const DepartmentPage = () => {
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
                             <Link
-                                to="/resources/syllabus-curriculum"
+                                to={`/resources/syllabus-curriculum?level=${department?.type === 'PG' || isMba || (department?.slug || '').startsWith('me-') ? 'PG' : 'UG'}&dept=${department.slug}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 style={{
@@ -2218,25 +2218,47 @@ const DepartmentPage = () => {
                                 <FaBook /> View Full College Syllabi
                             </Link>
 
-                            <Link
-                                to={`/admin/syllabus`}
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    padding: '0.75rem 1.4rem',
-                                    borderRadius: '12px',
-                                    background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                                    color: 'white',
-                                    fontSize: '0.85rem',
-                                    fontWeight: '800',
-                                    textDecoration: 'none',
-                                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                <FaShieldAlt /> Admin: Manage Syllabus & PDF
-                            </Link>
+                            {(department?.type === 'PG' || isMba || (department?.slug || '').startsWith('me-')) ? (
+                                <Link
+                                    to={`/pg-login?redirect=${encodeURIComponent(`/admin/syllabus?level=PG&dept=${department.slug}`)}`}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '0.75rem 1.4rem',
+                                        borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                                        color: 'white',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '800',
+                                        textDecoration: 'none',
+                                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <FaGraduationCap /> PG Syllabus Login & Management
+                                </Link>
+                            ) : (
+                                <Link
+                                    to={`/syllabus-login?redirect=${encodeURIComponent(`/admin/syllabus?level=UG&dept=${department.slug}`)}`}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '0.75rem 1.4rem',
+                                        borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                                        color: 'white',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '800',
+                                        textDecoration: 'none',
+                                        boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <FaShieldAlt /> UG Syllabus Login & Management
+                                </Link>
+                            )}
                         </div>
                     </div>
 

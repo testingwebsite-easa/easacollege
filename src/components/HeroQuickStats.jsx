@@ -457,12 +457,19 @@ export const HeroQuickStats = () => {
                     }
                     .stats-main-bar {
                         border-radius: 28px;
-                        flex-direction: column;
-                        gap: 1rem;
-                        padding: 1.2rem;
+                        display: grid !important;
+                        grid-template-columns: 1fr 1fr !important;
+                        grid-template-areas: 
+                            "notch notch"
+                            "left right" !important;
+                        gap: 0.85rem !important;
+                        padding: 1.1rem 1rem !important;
                     }
                     .stats-center-notch {
-                        order: -1;
+                        grid-area: notch;
+                        justify-self: center;
+                        margin-bottom: 0.35rem;
+                        padding: 0;
                     }
                     .center-pod-inner {
                         flex-direction: row;
@@ -473,35 +480,85 @@ export const HeroQuickStats = () => {
                         margin-top: 0;
                     }
                     .stats-group {
-                        width: 100%;
+                        width: 100% !important;
+                    }
+                    .stats-group-left {
+                        grid-area: left;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        gap: 0.65rem !important;
+                        width: 100% !important;
+                    }
+                    .stats-group-right {
+                        grid-area: right;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        gap: 0.65rem !important;
+                        width: 100% !important;
+                    }
+                    .stat-pill-card {
+                        width: 100% !important;
+                        flex: 1;
+                        padding: 0.7rem 0.4rem;
+                        box-sizing: border-box;
                     }
                 }
 
                 @media (max-width: 600px) {
                     .hero-quick-stats-section {
                         margin-top: 10px;
-                        padding: 0 0.8rem 1.5rem 0.8rem;
+                        padding: 0 0.6rem 1.25rem 0.6rem;
                     }
                     .stats-main-bar {
                         border-radius: 20px;
-                        padding: 1rem 0.8rem;
+                        padding: 0.9rem 0.6rem !important;
+                        gap: 0.55rem !important;
                     }
-                    .stats-group {
-                        display: grid;
-                        grid-template-columns: repeat(3, 1fr);
-                        gap: 0.5rem;
+                    .stats-center-notch {
+                        margin-bottom: 0.2rem;
+                    }
+                    .stats-group-left {
+                        gap: 0.5rem !important;
+                    }
+                    .stats-group-right {
+                        gap: 0.5rem !important;
                     }
                     .stat-pill-card {
-                        padding: 0.6rem 0.25rem;
-                        border-width: 1.5px;
-                        border-radius: 14px;
+                        padding: 0.55rem 0.35rem !important;
+                        border-width: 1.5px !important;
+                        border-radius: 14px !important;
+                        min-height: 54px;
                     }
                     .stat-number {
-                        font-size: 1.1rem;
+                        font-size: 1.15rem !important;
                     }
                     .stat-label {
-                        font-size: 0.58rem;
-                        letter-spacing: 0px;
+                        font-size: 0.6rem !important;
+                        letter-spacing: 0px !important;
+                        max-width: 100% !important;
+                        line-height: 1.2 !important;
+                    }
+                }
+
+                @media (max-width: 380px) {
+                    .stats-main-bar {
+                        padding: 0.75rem 0.4rem !important;
+                        gap: 0.4rem !important;
+                    }
+                    .stats-group-left,
+                    .stats-group-right {
+                        gap: 0.4rem !important;
+                    }
+                    .stat-pill-card {
+                        padding: 0.45rem 0.2rem !important;
+                        border-radius: 12px !important;
+                        min-height: 48px;
+                    }
+                    .stat-number {
+                        font-size: 1.05rem !important;
+                    }
+                    .stat-label {
+                        font-size: 0.52rem !important;
                     }
                 }
             `}</style>

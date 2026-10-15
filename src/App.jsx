@@ -131,6 +131,11 @@ function App() {
             <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/syllabus/login" element={<LoginPage />} />
             <Route path="/syllabus-login" element={<LoginPage />} />
+            <Route path="/pg-login" element={<LoginPage />} />
+            <Route path="/pg/login" element={<LoginPage />} />
+            <Route path="/syllabus/pg/login" element={<LoginPage />} />
+            <Route path="/syllabus-pg-login" element={<LoginPage />} />
+            <Route path="/pg-syllabus-login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
               path="/dashboard"
@@ -148,9 +153,20 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/pg-syllabus-dashboard"
+              element={
+                <ProtectedRoute requiredRoles={['admin', 'hod', 'staff', 'student']}>
+                  <SyllabusDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/admin/syllabus" element={<AdminSyllabusPage />} />
+            <Route path="/admin/syllabus/pg" element={<AdminSyllabusPage />} />
+            <Route path="/admin/pg/syllabus" element={<AdminSyllabusPage />} />
+            <Route path="/admin/pg-syllabus" element={<AdminSyllabusPage />} />
             <Route path="/admin/curriculum" element={<AdminSyllabusPage />} />
             <Route path="/admin-syllabus" element={<AdminSyllabusPage />} />
             <Route path="/core-beliefs" element={<CoreBeliefsPage />} />
@@ -210,8 +226,15 @@ function App() {
             <Route path="/video-gallery" element={<VideoGalleryPage />} />
             <Route path="/virtual-tour" element={<VirtualTourPage />} />
 
-            {/* Grievance Pages */}
+            {/* Grievance Redressal Pages */}
+            <Route path="/grievance" element={<GrievancePage />} />
+            <Route path="/grievances" element={<GrievancePage />} />
             <Route path="/grievance/:type" element={<GrievancePage />} />
+            <Route path="/grievance-students" element={<GrievancePage defaultType="students" />} />
+            <Route path="/grievance-parents" element={<GrievancePage defaultType="parents" />} />
+            <Route path="/grievance-faculty" element={<GrievancePage defaultType="faculty" />} />
+            <Route path="/grievance-visitors" element={<GrievancePage defaultType="visitors" />} />
+            <Route path="/grievance-track" element={<GrievancePage defaultType="track" />} />
 
             {/* Dynamic Content Pages */}
             <Route path="/page/library" element={<LibraryPage />} />

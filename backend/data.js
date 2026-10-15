@@ -30,7 +30,7 @@ const newsEventsData = [
         date: "2026-02-07",
         category: "admin",
         desc: "Industry expert discusses the latest trends in AI/ML, career opportunities, and future of technology.",
-        image: "https://images.unsplash.com/photo-1515378960530-7bea60bd14d2?q=80&w=1000&auto=format&fit=crop",
+        image: "",
         pdf_url: ""
     },
     {
@@ -54,7 +54,7 @@ const newsEventsData = [
         date: "2026-02-04",
         category: "general",
         desc: "The examination schedule for Spring 2026 semester is now available. Download from the student portal.",
-        image: "https://images.unsplash.com/photo-1434951843676-96c831551d74?q=80&w=1000&auto=format&fit=crop",
+        // image: "https://images.unsplash.com/photo-1434951843676-96c831551d74?q=80&w=1000&auto=format&fit=crop",
         pdf_url: ""
     }
 ];

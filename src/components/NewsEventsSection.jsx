@@ -99,7 +99,7 @@ const FALLBACK_NEWS_EVENTS = [
         desc: "Global delegates and researchers from 12 countries present over 120 peer-reviewed papers on clean energy conversion.",
         description: "Global delegates and researchers from 12 countries present over 120 peer-reviewed papers on clean energy conversion and intelligent micro-grids.",
         content: "Organized in collaboration with IEEE Madras Section, this international conference explores breakthrough research in EV charging infrastructures, IoT sensor telemetry, and renewable micro-grid stability.",
-        image: "https://images.unsplash.com/photo-1515378960530-7bea60bd14d2?q=80&w=1000&auto=format&fit=crop",
+        image: "",
         link: "",
         pdf_url: "",
         highlights: ["120+ Research Papers", "Delegates from 12 Nations", "Scopus Indexed Proceedings"]
