@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
-const InstagramFeedWidget = ({ embedId = "25719657" }) => {
+const InstagramFeedWidget = ({ embedId = "25722309" }) => {
     const { theme } = useTheme();
 
     useEffect(() => {

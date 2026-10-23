@@ -339,8 +339,8 @@ const Navbar = ({ onApplyClick }) => {
         return items;
     }, [departments]);
 
-    const logoToDisplay = headerLogoDark;
-    const accreditationsToDisplay = accreditationsDark;
+    const logoToDisplay = headerLogoLight;
+    const accreditationsToDisplay = accreditationsLight;
 
     const toggleMobileItem = (title) => {
         setMobileExpanded(prev => ({
@@ -600,66 +600,74 @@ const Navbar = ({ onApplyClick }) => {
                 </div>
             </div>
 
-            {/* Main Header: Logo & Actions - Premium Feel */}
-            <div className="container header-row" style={{ maxWidth: '100%', padding: '0.65rem 2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
+            {/* Main Header: Logo & Actions - Clean White Center Section */}
+            <div className="header-middle-bar" style={{
+                backgroundColor: '#ffffff',
+                width: '100%',
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.06)',
+                borderBottom: '1px solid rgba(27, 42, 107, 0.12)',
+                transition: 'all 0.3s ease'
+            }}>
+                <div className="container header-row" style={{ maxWidth: '100%', padding: '0.65rem 2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
 
-                {/* Left: College Logo (Desktop & Mobile) */}
-                <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', flexShrink: 0 }} onClick={() => navigate('/')}>
-                    <img 
-                        src={logoToDisplay} 
-                        alt="EASA College Logo" 
-                        className="header-college-logo"
-                        style={{ height: '82px', maxHeight: '85px', width: 'auto', objectFit: 'contain' }} 
-                    />
-                </div>
+                    {/* Left: College Logo (Desktop & Mobile) */}
+                    <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', flexShrink: 0 }} onClick={() => navigate('/')}>
+                        <img 
+                            src={logoToDisplay} 
+                            alt="EASA College Logo" 
+                            className="header-college-logo"
+                            style={{ height: '82px', maxHeight: '85px', width: 'auto', objectFit: 'contain' }} 
+                        />
+                    </div>
 
-                <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '1 1 auto', padding: '0 1rem' }}>
-                    <img 
-                        src={accreditationsToDisplay} 
-                        alt="Accreditations" 
-                        className="header-accreditations-img"
-                        style={{ height: '80px', maxHeight: '85px', width: 'auto', objectFit: 'contain' }} 
-                    />
-                </div>
+                    <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '1 1 auto', padding: '0 1rem' }}>
+                        <img 
+                            src={accreditationsToDisplay} 
+                            alt="Accreditations" 
+                            className="header-accreditations-img"
+                            style={{ height: '80px', maxHeight: '85px', width: 'auto', objectFit: 'contain' }} 
+                        />
+                    </div>
 
-                <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                    <img 
-                        src={yearsOfExcellence} 
-                        alt="18+ Years of Excellence" 
-                        className="header-excellence-img"
-                        style={{ height: '58px', maxHeight: '60px', width: 'auto', objectFit: 'contain' }} 
-                    />
-                </div>
+                    <div className="nav-tablet-hide-mobile" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                        <img 
+                            src={yearsOfExcellence} 
+                            alt="18+ Years of Excellence" 
+                            className="header-excellence-img"
+                            style={{ height: '58px', maxHeight: '60px', width: 'auto', objectFit: 'contain' }} 
+                        />
+                    </div>
 
-                {/* Mobile Menu Toggle */}
-                <div className="mobile-menu-btn nav-tablet-show-mobile" style={{ alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
-                    <button
-                        onClick={toggleMenu}
-                        aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-                        style={{
-                            fontSize: '1.4rem',
-                            cursor: 'pointer',
-                            color: isMenuOpen ? '#fff' : 'var(--text-main)', // Adaptive color
-                            background: isMenuOpen ? 'var(--primary)' : 'var(--glass)', // Glass effect
-                            backdropFilter: 'blur(10px)',
-                            WebkitBackdropFilter: 'blur(10px)',
-                            padding: '0.6rem',
-                            borderRadius: '12px',
-                            border: '1px solid var(--glass-border)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.3s ease',
-                            boxShadow: isMenuOpen ? '0 4px 12px var(--primary-glow)' : 'none'
-                        }}
-                    >
-                        {isMenuOpen ? <FaTimes /> : <FaBars />}
-                    </button>
+                    {/* Mobile Menu Toggle */}
+                    <div className="mobile-menu-btn nav-tablet-show-mobile" style={{ alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
+                        <button
+                            onClick={toggleMenu}
+                            aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                            style={{
+                                fontSize: '1.4rem',
+                                cursor: 'pointer',
+                                color: isMenuOpen ? '#ffffff' : '#1B2A6B',
+                                background: isMenuOpen ? '#1B2A6B' : 'rgba(27, 42, 107, 0.08)',
+                                backdropFilter: 'blur(10px)',
+                                WebkitBackdropFilter: 'blur(10px)',
+                                padding: '0.6rem',
+                                borderRadius: '12px',
+                                border: '1px solid rgba(27, 42, 107, 0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.3s ease',
+                                boxShadow: isMenuOpen ? '0 4px 12px rgba(27, 42, 107, 0.3)' : 'none'
+                            }}
+                        >
+                            {isMenuOpen ? <FaTimes /> : <FaBars />}
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {/* Navigation Bar - Clean & Centered */}
-            <div className="nav-tablet-hide-mobile" style={{ borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.1)', width: '100%' }}>
+            <div className="nav-tablet-hide-mobile" style={{ borderTop: 'none', background: 'var(--nav-bg, #1B2A6B)', width: '100%', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)' }}>
                 {/* CSS for hover effect */}
                 <div className="container" style={{ maxWidth: '100%', padding: '0 1rem' }}>
                     <nav className="desktop-nav" style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', padding: '0', minHeight: '40px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -908,7 +916,6 @@ const Navbar = ({ onApplyClick }) => {
                     max-height: 85px;
                     width: auto;
                     object-fit: contain;
-                    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
                     image-rendering: -webkit-optimize-contrast;
                     transition: transform 0.2s ease;
                 }
@@ -920,7 +927,6 @@ const Navbar = ({ onApplyClick }) => {
                     max-height: 85px;
                     width: auto;
                     object-fit: contain;
-                    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35)) contrast(1.1) brightness(1.06);
                     image-rendering: -webkit-optimize-contrast;
                     transition: transform 0.2s ease;
                 }
@@ -932,7 +938,7 @@ const Navbar = ({ onApplyClick }) => {
                     max-height: 60px;
                     width: auto;
                     object-fit: contain;
-                    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+                    transition: transform 0.2s ease;
                 }
 
                 @media (max-width: 1400px) {

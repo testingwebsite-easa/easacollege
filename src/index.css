@@ -325,8 +325,6 @@ a {
   transform: translateY(0);
 }
 
-/* VideoGallery.css */
-
 /* Line clamp utilities */
 .line-clamp-1 {
   display: -webkit-box;
@@ -2593,5 +2591,6 @@ div:has(> a[href*="sociablekit.com"]),
     padding: var(--section-py) 0 !important;
   }
 }
+
 
 

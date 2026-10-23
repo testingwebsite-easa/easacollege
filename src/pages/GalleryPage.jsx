@@ -417,113 +417,113 @@ const GalleryPage = () => {
                 {activeTab === 'photos' && (
                     <div className="photos-session-content">
                         <div className="photo-albums-container">
-                                <AnimatePresence>
-                                    {selectedEvent && (
-                                        <motion.button
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            onClick={() => setSelectedEvent(null)}
-                                            className="back-to-albums-btn"
-                                        >
-                                            <FaArrowLeft />
-                                            <span>Back to All Albums</span>
-                                        </motion.button>
-                                    )}
-                                </AnimatePresence>
-
-                                {!selectedEvent ? (
-                                    <div className="albums-grid">
-                                        {events.map((event, index) => (
-                                            <motion.div
-                                                key={event._id || index}
-                                                initial={{ opacity: 0, y: 25 }}
-                                                whileInView={{ opacity: 1, y: 0 }}
-                                                viewport={{ once: true }}
-                                                transition={{ duration: 0.5, delay: index * 0.08 }}
-                                                whileHover={{ y: -8 }}
-                                                onClick={() => setSelectedEvent(event)}
-                                                className="album-card"
-                                            >
-                                                <div className="album-cover-box">
-                                                    {event.photos && event.photos.length > 0 ? (
-                                                        <img src={event.photos[0].src} alt={event.eventName} className="album-cover-img" />
-                                                    ) : (
-                                                        <div className="album-placeholder"><FaImages size={48} style={{ opacity: 0.3 }} /></div>
-                                                    )}
-                                                    <div className="album-gradient-shade" />
-                                                    <div className="album-captures-badge">
-                                                        <FaImages size={11} style={{ marginRight: '5px' }} />
-                                                        <span>{event.photos?.length || 0} Captures</span>
-                                                    </div>
-                                                </div>
-                                                <div className="album-details">
-                                                    <h3 className="album-title">{event.eventName}</h3>
-                                                    <div className="album-meta-row">
-                                                        <span className="album-date">
-                                                            <FaCalendarAlt />
-                                                            <span>{new Date(event.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                                                        </span>
-                                                        <span className="album-view-link">
-                                                            <span>Open Album</span>
-                                                            <FaChevronRight size={10} />
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="photos-masonry-grid">
-                                        {selectedEvent.photos.map((photo, index) => (
-                                            <motion.div
-                                                key={index}
-                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                whileInView={{ opacity: 1, scale: 1 }}
-                                                viewport={{ once: true }}
-                                                onClick={() => setSelectedImage(photo)}
-                                                className="masonry-photo-item"
-                                                whileHover={{ scale: 1.02, y: -4 }}
-                                            >
-                                                <img src={photo.src} alt={photo.caption || selectedEvent.eventName} className="masonry-photo-img" loading="lazy" />
-                                                <div className="photo-hover-overlay">
-                                                    <p className="photo-caption-txt">{photo.caption || "View Full Resolution"}</p>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </div>
+                            <AnimatePresence>
+                                {selectedEvent && (
+                                    <motion.button
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        onClick={() => setSelectedEvent(null)}
+                                        className="back-to-albums-btn"
+                                    >
+                                        <FaArrowLeft />
+                                        <span>Back to All Albums</span>
+                                    </motion.button>
                                 )}
-                            </div>
+                            </AnimatePresence>
 
-                            {/* LIVE INSTAGRAM FEED SECTION */}
-                            {!selectedEvent && (
-                                <div className="instagram-live-feed-section" style={{ marginTop: '4rem', paddingTop: '2.5rem', borderTop: '1px solid var(--glass-border)' }}>
-                                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                                        <div style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            padding: '0.4rem 1.2rem',
-                                            borderRadius: '50px',
-                                            background: 'linear-gradient(135deg, rgba(225, 48, 108, 0.15) 0%, rgba(131, 58, 180, 0.15) 100%)',
-                                            border: '1px solid rgba(225, 48, 108, 0.3)',
-                                            color: '#E1306C',
-                                            fontWeight: '700',
-                                            fontSize: '0.85rem',
-                                            marginBottom: '0.75rem'
-                                        }}>
-                                            <span>LIVE SOCIAL FEED</span>
-                                        </div>
-                                        <h3 style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
-                                            Follow Our Live Moments on Instagram
-                                        </h3>
-                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>
-                                            Real-time campus highlights, events, and student stories from <a href="https://www.instagram.com/easacollege/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--secondary)', fontWeight: '700', textDecoration: 'none' }}>@easacollege</a>
-                                        </p>
-                                    </div>
-                                    <InstagramFeedWidget embedId="25719657" />
+                            {!selectedEvent ? (
+                                <div className="albums-grid">
+                                    {events.map((event, index) => (
+                                        <motion.div
+                                            key={event._id || index}
+                                            initial={{ opacity: 0, y: 25 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ duration: 0.5, delay: index * 0.08 }}
+                                            whileHover={{ y: -8 }}
+                                            onClick={() => setSelectedEvent(event)}
+                                            className="album-card"
+                                        >
+                                            <div className="album-cover-box">
+                                                {event.photos && event.photos.length > 0 ? (
+                                                    <img src={event.photos[0].src} alt={event.eventName} className="album-cover-img" />
+                                                ) : (
+                                                    <div className="album-placeholder"><FaImages size={48} style={{ opacity: 0.3 }} /></div>
+                                                )}
+                                                <div className="album-gradient-shade" />
+                                                <div className="album-captures-badge">
+                                                    <FaImages size={11} style={{ marginRight: '5px' }} />
+                                                    <span>{event.photos?.length || 0} Captures</span>
+                                                </div>
+                                            </div>
+                                            <div className="album-details">
+                                                <h3 className="album-title">{event.eventName}</h3>
+                                                <div className="album-meta-row">
+                                                    <span className="album-date">
+                                                        <FaCalendarAlt />
+                                                        <span>{new Date(event.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                                                    </span>
+                                                    <span className="album-view-link">
+                                                        <span>Open Album</span>
+                                                        <FaChevronRight size={10} />
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="photos-masonry-grid">
+                                    {selectedEvent.photos.map((photo, index) => (
+                                        <motion.div
+                                            key={index}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            whileInView={{ opacity: 1, scale: 1 }}
+                                            viewport={{ once: true }}
+                                            onClick={() => setSelectedImage(photo)}
+                                            className="masonry-photo-item"
+                                            whileHover={{ scale: 1.02, y: -4 }}
+                                        >
+                                            <img src={photo.src} alt={photo.caption || selectedEvent.eventName} className="masonry-photo-img" loading="lazy" />
+                                            <div className="photo-hover-overlay">
+                                                <p className="photo-caption-txt">{photo.caption || "View Full Resolution"}</p>
+                                            </div>
+                                        </motion.div>
+                                    ))}
                                 </div>
                             )}
+                        </div>
+
+                        {/* LIVE INSTAGRAM FEED SECTION */}
+                        {!selectedEvent && (
+                            <div className="instagram-live-feed-section" style={{ marginTop: '4rem', paddingTop: '2.5rem', borderTop: '1px solid var(--glass-border)' }}>
+                                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                                    <div style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '0.4rem 1.2rem',
+                                        borderRadius: '50px',
+                                        background: 'linear-gradient(135deg, rgba(225, 48, 108, 0.15) 0%, rgba(131, 58, 180, 0.15) 100%)',
+                                        border: '1px solid rgba(225, 48, 108, 0.3)',
+                                        color: '#E1306C',
+                                        fontWeight: '700',
+                                        fontSize: '0.85rem',
+                                        marginBottom: '0.75rem'
+                                    }}>
+                                        <span>LIVE SOCIAL FEED</span>
+                                    </div>
+                                    <h3 style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
+                                        Follow Our Live Moments on Instagram
+                                    </h3>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>
+                                        Real-time campus highlights, events, and student stories from <a href="https://www.instagram.com/easacollege/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--secondary)', fontWeight: '700', textDecoration: 'none' }}>@easacollege</a>
+                                    </p>
+                                </div>
+                                <InstagramFeedWidget embedId="25722309" />
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -714,7 +714,7 @@ const GalleryPage = () => {
                                                 </div>
 
                                                 <h4 className="media-card-title" title={item.title}>{item.title}</h4>
-                                                
+
                                                 <p className="media-card-desc">
                                                     {item.desc}
                                                 </p>

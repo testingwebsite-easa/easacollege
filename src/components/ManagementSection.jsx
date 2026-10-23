@@ -18,8 +18,8 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
                 let teamList = Array.isArray(data) ? [...data] : [];
 
                 // Check if principal is already in the list
-                const hasPrincipal = teamList.some(m => 
-                    m.category === 'principal' || 
+                const hasPrincipal = teamList.some(m =>
+                    m.category === 'principal' ||
                     m.designation?.toLowerCase().includes('principal') ||
                     m.name?.toLowerCase().includes('principal')
                 );
