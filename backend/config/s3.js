@@ -2,10 +2,10 @@ const { S3Client } = require('@aws-sdk/client-s3');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '.env'), quiet: true });
 // Fallback to parent dir if needed (for local dev structure variations)
 if (!process.env.AWS_ACCESS_KEY_ID) {
-    require('dotenv').config({ path: path.join(__dirname, '../.env') });
+    require('dotenv').config({ path: path.join(__dirname, '../.env'), quiet: true });
 }
 
 const s3 = new S3Client({

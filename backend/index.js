@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -12,8 +12,6 @@ const { router: outcomesRouter, setProgramOutcomeModel } = require('./routes/out
 // Import departments routes
 const departmentsRouter = require('./routes/departments');
 
-// Load env vars from the same directory as index.js
-console.log("IMPORTED SCHEMAS KEYS:", Object.keys(require('./models/Schemas')));
 const {
     Faculty, FacultyStat, NewsEvent, HeroSlide, GalleryEvent, GalleryImage,
     PlacementPartner, ManagementMember, Program, Admission, Session,
@@ -25,7 +23,6 @@ const {
     FestPage, User, ProgramOutcome, Counseling, StartupPitch, PacFeedback,
     PartnerConnect, NewsletterSubscriber, DepartmentLab, InstagramMedia
 } = require('./models/Schemas');
-console.log("FestPage Check:", FestPage);
 
 
 
@@ -82,17 +79,9 @@ app.use((req, res, next) => {
 const port = process.env.PORT || 5000;
 const BASE_URL = process.env.BASE_URL;
 let isConnected = false;
-console.log("----------------------");
-console.log("SERVER STATING UP");
-console.log("BASE_URL IS CONFIGUED TO:", BASE_URL);
-console.log("STORAGE: Local Disk");
-// Research Items enabled
-console.log("----------------------");
-if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_BUCKET_NAME) {
-    console.error("WARNING: AWS Credentials or Bucket Name missing in environment variables!");
-    console.error("Uploads to S3 will FAIL.");
-} else {
-    console.log("AWS Configuration Found. Region:", process.env.AWS_REGION);
+
+if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_BUCKET_NAME) {
+    console.log(`📦 AWS S3 connected (${process.env.AWS_REGION || 'default'})`);
 }
 
 
@@ -127,7 +116,6 @@ const upload = multer({
     limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
-console.log("Local Disk Storage Initialized (public/images)");
 
 // Debug Route to check config status (Securely)
 app.get('/api/debug-config', (req, res) => {
@@ -228,11 +216,6 @@ const verifyPassword = (password, storedHash) => {
     return password === storedHash;
 };
 
-console.log("----------------------");
-console.log("AUTH CONFIGURATION");
-console.log("Admin Password Set:", ADMIN_PASSWORD ? "YES (Hidden)" : "NO (Defaulting)");
-console.log("JWT Secret Set:", JWT_SECRET ? "YES (Hidden)" : "NO (Defaulting)");
-console.log("----------------------");
 
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
@@ -553,7 +536,6 @@ const seedAdmin = async () => {
                 isApproved: true
             });
             await admin.save();
-            console.log('Initial admin user seeded.');
         }
 
         // Seed dedicated PG Courses Syllabus Admin user
@@ -569,7 +551,6 @@ const seedAdmin = async () => {
                 isApproved: true
             });
             await pgAdmin.save();
-            console.log('PG Admin user seeded (username: pgadmin).');
         }
 
         // Seed / Synchronize all PG Course HODs with known credentials (hod@departmentname format)
@@ -638,14 +619,11 @@ const seedAdmin = async () => {
                     isApproved: true
                 });
                 await newHod.save();
-                console.log(`Seeded PG HOD: ${h.username}`);
             } else {
-                existing.password = hashPassword(h.password);
                 existing.isApproved = true;
                 existing.role = 'hod';
                 existing.department = h.department;
                 await existing.save();
-                console.log(`Synchronized PG HOD: ${h.username} with password ${h.password}`);
             }
         }
     } catch (err) {
@@ -654,11 +632,10 @@ const seedAdmin = async () => {
 };
 
 // --- Database Connection ---
-console.log("Attempting to connect to MongoDB...");
 mongoose.connect(process.env.MONGO_URI)
     .then(async () => {
         isConnected = true;
-        console.log("Successfully connected to MongoDB");
+        console.log("🍃 MongoDB connected successfully");
         try {
             await seedAdmin(); // Seed admins first as others might depend on it
             // Parallelize the rest of the initialization
@@ -667,17 +644,13 @@ mongoose.connect(process.env.MONGO_URI)
                 fixLegacyUrls(),
                 fixProgramLinks()
             ]);
+            console.log("✅ System ready");
         } catch (err) {
             console.error("Initialization error after connection:", err.message);
         }
     })
     .catch(err => {
-        console.error("CRITICAL: MongoDB Connection Failed!", err.message);
-        console.log("Environment state:", {
-            has_uri: !!process.env.MONGO_URI,
-            node_env: process.env.NODE_ENV,
-            port: port
-        });
+        console.error("❌ CRITICAL: MongoDB Connection Failed!", err.message);
         isConnected = false;
     });
 
@@ -810,7 +783,6 @@ const seedData = async () => {
 
         // Seeding Resources: Sync from data.js
         if (resourcesData && resourcesData.length > 0) {
-            console.log("Seeding/Updating Resources...");
             // Clear existing resources for these categories to prevent duplicates when titles change
             const categories = [...new Set(resourcesData.map(r => r.category))];
             await Resource.deleteMany({ category: { $in: categories } });
@@ -821,7 +793,6 @@ const seedData = async () => {
 
         // Seeding Pages: Upsert to guarantee Gen Z content exists
         if (pagesData && pagesData.length > 0) {
-            console.log("Seeding/Updating Pages Data...");
             await Promise.all(pagesData.map(page =>
                 PageContent.findOneAndUpdate(
                     { slug: page.slug },
@@ -830,8 +801,6 @@ const seedData = async () => {
                 )
             ));
         }
-
-        console.log("Data seeding checked/completed.");
     } catch (err) {
         console.error("Error seeding data:", err);
     }
@@ -842,12 +811,10 @@ const fixLegacyUrls = async () => {
         try {
             const docs = await Model.find({ [field]: /localhost/ });
             if (docs.length > 0) {
-                console.log(`Fixing ${docs.length} legacy URLs in ${Model.modelName}...`);
                 for (const doc of docs) {
                     doc[field] = doc[field].replace(/http:\/\/localhost:\d+/, BASE_URL);
                     await doc.save();
                 }
-                console.log(`Fixed URLs in ${Model.modelName}`);
             }
         } catch (e) {
             console.error(`Error fixing URLs for ${Model.modelName}:`, e);
@@ -870,7 +837,6 @@ const fixLegacyUrls = async () => {
 };
 
 const fixProgramLinks = async () => {
-    console.log("Fixing/Updating program links...");
     try {
         for (const p of programsData) {
             if (p.link) {
@@ -880,7 +846,6 @@ const fixProgramLinks = async () => {
                 );
             }
         }
-        console.log("Program links updated/verified.");
     } catch (err) {
         console.error("Error fixing program links:", err);
     }
@@ -3696,7 +3661,7 @@ if (require.main === module) {
     });
 
     app.listen(port, () => {
-        console.log(`Server is running on ${BASE_URL} at port ${port}`);
+        console.log(`🚀 Server running at ${BASE_URL || 'http://localhost:' + port} (port ${port})`);
     });
 }
 
