@@ -644,7 +644,7 @@ mongoose.connect(process.env.MONGO_URI)
                 fixLegacyUrls(),
                 fixProgramLinks()
             ]);
-            console.log("✅ System ready");
+            console.log("✅  Ready to Hack ");
         } catch (err) {
             console.error("Initialization error after connection:", err.message);
         }
