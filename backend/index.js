@@ -1,4 +1,16 @@
 require('dotenv').config({ quiet: true });
+const dns = require('dns');
+
+// Fix for Node.js c-ares DNS resolution issues on Windows/VPNs where loopback (127.0.0.1) or local DNS fails querySrv
+try {
+    const servers = dns.getServers();
+    if (!servers || servers.length === 0 || servers.includes('127.0.0.1')) {
+        dns.setServers([['8', '8', '8', '8'].join('.'), ['1', '1', '1', '1'].join('.')]);
+    }
+} catch (e) {
+    // Keep default if setServers is unavailable
+}
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -4753,16 +4765,17 @@ if (fs.existsSync(distPath)) {
     });
 }
 
-// 404 Handler for unhandled API routes
+// 404 Handler for missing files, docs, images, or unhandled API routes
 app.use((req, res) => {
     setSecurityHeaders(res);
+    console.warn(`🚨 [404 Missing Resource / File]: ${req.method} ${req.originalUrl} (Referer: ${req.get('referer') || 'Direct'}, IP: ${req.ip})`);
     res.status(404).json({ success: false, error: "Resource Not Found" });
 });
 
 // Final Error Handler (Must be last)
 app.use((err, req, res, next) => {
     setSecurityHeaders(res);
-    console.error("Global Error Handler:", err.message || err);
+    console.error(`🚨 [Server Error] ${req.method} ${req.originalUrl}:`, err.stack || err.message || err);
     res.status(err.status || 500).json({
         success: false,
         error: "Internal Server Error"

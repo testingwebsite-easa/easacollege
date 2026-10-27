@@ -194,8 +194,6 @@ const NewsEventsSection = () => {
     const [newsData, setNewsData] = useState(FALLBACK_NEWS_EVENTS);
     const [selectedItem, setSelectedItem] = useState(null);
     const [activeCategory, setActiveCategory] = useState('ALL');
-    const [spotlightIndex, setSpotlightIndex] = useState(0);
-    const [isAutoRotate, setIsAutoRotate] = useState(true);
 
     // Fetch live announcements from backend
     useEffect(() => {
@@ -237,19 +235,6 @@ const NewsEventsSection = () => {
         return activeCategory === 'ALL' || item.category?.toLowerCase() === activeCategory.toLowerCase();
     });
 
-    // Spotlight flagship events
-    const spotlightItems = newsData.filter(item => item.isFeatured || item.category === 'Event' || item.image);
-    const featuredList = spotlightItems.length > 0 ? spotlightItems : newsData;
-
-    // Auto rotate spotlight
-    useEffect(() => {
-        if (!isAutoRotate || featuredList.length <= 1) return;
-        const interval = setInterval(() => {
-            setSpotlightIndex(prev => (prev + 1) % featuredList.length);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, [isAutoRotate, featuredList.length]);
-
     // Prevent body scroll when event detail modal is open
     useEffect(() => {
         if (selectedItem) {
@@ -261,8 +246,6 @@ const NewsEventsSection = () => {
             document.body.style.overflow = '';
         };
     }, [selectedItem]);
-
-    const currentSpotlight = featuredList[spotlightIndex] || featuredList[0] || newsData[0];
 
     const formatDate = (dateStr) => {
         if (!dateStr) return { day: '25', month: 'MAR', year: '2026', full: 'Mar 25, 2026' };
@@ -441,142 +424,6 @@ const NewsEventsSection = () => {
                     >
                         Stay updated with our academic breakthroughs, official circulars, student fests, and career drives.
                     </motion.p>
-                </div>
-
-                {/* 3. HERO SPOTLIGHT CAROUSEL BANNER */}
-                <div
-                    className="spotlight-showcase-wrapper"
-                    onMouseEnter={() => setIsAutoRotate(false)}
-                    onMouseLeave={() => setIsAutoRotate(true)}
-                >
-                    <div className="spotlight-compact-frame">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={currentSpotlight._id || spotlightIndex}
-                                initial={{ opacity: 0, x: 25 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -25 }}
-                                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                                className="spotlight-inner-grid"
-                            >
-                                {/* Spotlight Visual with Overlay */}
-                                <div className="spotlight-media-wrap">
-                                    <img
-                                        src={currentSpotlight.image || "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1000&auto=format&fit=crop"}
-                                        alt={currentSpotlight.title}
-                                        className="spotlight-img"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80";
-                                        }}
-                                    />
-                                    <div className="spotlight-media-gradient" />
-
-                                    {/* Corner Badge */}
-                                    <div className="spotlight-tags-float">
-                                        <span className={`spotlight-badge-pill ${getCategoryBadgeClass(currentSpotlight.category)}`}>
-                                            {currentSpotlight.badge || currentSpotlight.category || 'SPOTLIGHT'}
-                                        </span>
-                                    </div>
-
-                                    {/* Prev/Next Smooth Controls */}
-                                    <button
-                                        type="button"
-                                        className="spotlight-arrow-btn spot-prev"
-                                        onClick={() => setSpotlightIndex(prev => (prev - 1 + featuredList.length) % featuredList.length)}
-                                        aria-label="Previous Featured Event"
-                                    >
-                                        <FaChevronLeft size={11} />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="spotlight-arrow-btn spot-next"
-                                        onClick={() => setSpotlightIndex(prev => (prev + 1) % featuredList.length)}
-                                        aria-label="Next Featured Event"
-                                    >
-                                        <FaChevronRight size={11} />
-                                    </button>
-                                </div>
-
-                                {/* Spotlight Content */}
-                                <div className="spotlight-content-wrap">
-                                    <div className="spotlight-kicker-line">
-                                        <span className="kicker-star">★</span>
-                                        <span>FEATURED CAMPUS HIGHLIGHT</span>
-                                        <span className="spotlight-kicker-date">
-                                            <FaCalendarAlt size={10} style={{ color: '#FCCA26', marginRight: '4px' }} />
-                                            {formatDate(currentSpotlight.date).full}
-                                        </span>
-                                    </div>
-
-                                    <h3 className="spotlight-title-compact" title={currentSpotlight.title}>
-                                        {currentSpotlight.title}
-                                    </h3>
-
-                                    <div className="spotlight-chips-row">
-                                        {currentSpotlight.time && (
-                                            <span className="spot-meta-chip time-chip">
-                                                <FaClock size={11} style={{ color: '#FCCA26' }} />
-                                                <span>{currentSpotlight.time}</span>
-                                            </span>
-                                        )}
-                                        {currentSpotlight.venue && (
-                                            <span className="spot-meta-chip">
-                                                <FaMapMarkerAlt size={11} style={{ color: '#FCCA26' }} />
-                                                <span>{currentSpotlight.venue}</span>
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <p className="spotlight-desc-compact">
-                                        {currentSpotlight.desc || currentSpotlight.description}
-                                    </p>
-
-                                    {/* Action Row with Two-Door Sliding Glass Button */}
-                                    <div className="spotlight-btn-row">
-                                        <button
-                                            type="button"
-                                            onClick={() => setSelectedItem(currentSpotlight)}
-                                            className="door-glass-btn spot-action-btn"
-                                        >
-                                            <div className="door-door-left"></div>
-                                            <div className="door-door-right"></div>
-                                            <div className="door-glass-shine"></div>
-                                            <span className="door-btn-text">
-                                                Explore Full Event & Schedule
-                                                <FaArrowRight size={11} style={{ marginLeft: '6px' }} />
-                                            </span>
-                                        </button>
-
-                                        {currentSpotlight.link && (
-                                            <a
-                                                href={currentSpotlight.link}
-                                                className="spot-secondary-link"
-                                            >
-                                                <FaExternalLinkAlt size={10} />
-                                                <span>Visit Page</span>
-                                            </a>
-                                        )}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
-
-                    {/* Smooth Sleek Carousel Dots */}
-                    <div className="spotlight-sleek-dots">
-                        {featuredList.slice(0, 6).map((item, idx) => (
-                            <button
-                                key={`spot-dot-${idx}`}
-                                type="button"
-                                onClick={() => setSpotlightIndex(idx)}
-                                className={`sleek-dot-item ${spotlightIndex === idx ? 'active' : ''}`}
-                                aria-label={`Slide ${idx + 1}`}
-                            >
-                                <span className="sleek-dot-pill"></span>
-                            </button>
-                        ))}
-                    </div>
                 </div>
 
                 {/* 4. CLEAN CATEGORY FILTER PILLS */}

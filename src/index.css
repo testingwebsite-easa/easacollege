@@ -1424,11 +1424,7 @@ a {
 /* ==========================================================================
    3D DEPTH & PERSPECTIVE SYSTEM (~20% SUBTLE INTENSITY)
    ========================================================================== */
-
-.perspective-container {
-  /* Clean standard layout */
-}
-
+   
 .card-3d-subtle {
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
@@ -1946,6 +1942,7 @@ h3.sub-title {
 .hg-title-highlight {
   background: linear-gradient(135deg, #fcca26 0%, #f59e0b 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
