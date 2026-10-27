@@ -363,9 +363,26 @@ const all17SdgsData = [
     }
 ];
 
+const defaultInitiatives = [
+    {
+        title: "Annual Miyawaki Afforestation Drive",
+        image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        title: "200 kWp Rooftop Solar Grid Commissioning",
+        image: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+        title: "5 Lakh Liter Percolation & STP Reservoirs",
+        image: "https://images.unsplash.com/photo-1541888946425-d0fbb186156f?auto=format&fit=crop&q=80&w=800"
+    }
+];
+
 const SdgsPage = () => {
     const { theme } = useTheme();
     const isDark = theme !== 'light';
+    const [sdgsData, setSdgsData] = useState(all17SdgsData);
+    const [initiativeData, setInitiativeData] = useState(defaultInitiatives);
     const [flippedCards, setFlippedCards] = useState({});
     const [showAdmissionForm, setShowAdmissionForm] = useState(false);
     const [partnerModal, setPartnerModal] = useState(false);
@@ -381,6 +398,29 @@ const SdgsPage = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
+
+        const fetchSdgs = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/sdgs`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        const goals = data.filter(item => !item.category || item.category === 'goal');
+                        const inits = data.filter(item => item.category === 'initiative');
+                        if (goals.length > 0) {
+                            setSdgsData(goals);
+                        }
+                        if (inits.length > 0) {
+                            setInitiativeData(inits);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Using default SDG dataset:', err);
+            }
+        };
+
+        fetchSdgs();
     }, []);
 
     const toggleFlip = (id) => {
@@ -390,14 +430,14 @@ const SdgsPage = () => {
         }));
     };
 
-    // Calculate aggregated totals
-    const totalPolicies = all17SdgsData.reduce((acc, curr) => acc + curr.policies, 0);
-    const totalMedia = all17SdgsData.reduce((acc, curr) => acc + curr.mediaCoverage, 0);
-    const totalEvents = all17SdgsData.reduce((acc, curr) => acc + curr.events, 0);
+    // Calculate aggregated totals dynamically
+    const totalPolicies = sdgsData.reduce((acc, curr) => acc + (Number(curr.policies) || 0), 0);
+    const totalMedia = sdgsData.reduce((acc, curr) => acc + (Number(curr.mediaCoverage) || 0), 0);
+    const totalEvents = sdgsData.reduce((acc, curr) => acc + (Number(curr.events) || 0), 0);
 
     // High contrast, glowing accessible colors in dark mode for blue and dark tones
     const getThematicAccent = (item) => {
-        if (!isDark) return item.color;
+        if (!isDark) return item.color || '#10B981';
         const darkAccessiblePalette = {
             1: '#FF5A6A', // SDG 1 No Poverty (Vivid Coral Red)
             2: '#FBBF24', // SDG 2 Zero Hunger (Warm Amber)
@@ -414,10 +454,12 @@ const SdgsPage = () => {
             13: '#4ADE80', // SDG 13 Climate Action (Bright Leaf Green)
             14: '#38BDF8', // SDG 14 Life Below Water (Bright Sky Blue)
             15: '#4ADE80', // SDG 15 Life on Land (Bright Grass Green)
-            16: '#38BDF8', // SDG 16 Peace, Justice (Bright Vivid Blue - crystal clear on dark!)
-            17: '#60A5FA'  // SDG 17 Partnerships (Bright Royal Blue - crystal clear on dark!)
+            16: '#38BDF8', // SDG 16 Peace, Justice (Bright Vivid Blue)
+            17: '#60A5FA'  // SDG 17 Partnerships (Bright Royal Blue)
         };
-        return darkAccessiblePalette[item.id] || '#38BDF8';
+        const rawNum = item.goalNumber ? item.goalNumber.replace(/\D/g, '') : '';
+        const num = parseInt(rawNum || item.order || item.id, 10);
+        return darkAccessiblePalette[num] || item.color || '#38BDF8';
     };
 
     const { showToast } = useToast();
@@ -636,16 +678,24 @@ const SdgsPage = () => {
                         </h2>
                     </div>
 
-                    {all17SdgsData.map((item, index) => {
+                    {sdgsData.map((item, index) => {
+                        const itemId = item._id || item.id || `sdg-${index}`;
                         const isEven = index % 2 === 1;
-                        const isFlipped = !!flippedCards[item.id];
+                        const isFlipped = !!flippedCards[itemId];
                         const themeColor = getThematicAccent(item);
+                        const metricVal = item.metric?.value || item.metricValue || '100%';
+                        const metricLbl = item.metric?.label || item.metricLabel || 'Campus Action';
+                        const initiativesList = Array.isArray(item.initiatives) 
+                            ? item.initiatives 
+                            : (typeof item.initiatives === 'string' 
+                                ? item.initiatives.split('\n').filter(s => s.trim()) 
+                                : []);
 
                         // FLIP CARD COMPONENT (RIGHT-TO-LEFT FLIP WITH FULL-BLEED SDG LOGO ON BACK)
                         const imageCardElement = (
                             <div
                                 className={`sdg-flip-card-container ${isFlipped ? 'flipped' : ''}`}
-                                onClick={() => toggleFlip(item.id)}
+                                onClick={() => toggleFlip(itemId)}
                             >
                                 <div className="sdg-flip-card-inner">
                                     {/* FRONT FACE: Real Photo + Top Badge */}
@@ -776,17 +826,19 @@ const SdgsPage = () => {
                                 </p>
 
                                 {/* KEY INITIATIVES */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                                    <div style={{ fontSize: '0.88rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: primaryTextColor }}>
-                                        Key Institutional Initiatives:
-                                    </div>
-                                    {item.initiatives.map((init, i) => (
-                                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.92rem', color: secondaryTextColor }}>
-                                            <FaCheckCircle style={{ color: themeColor, marginTop: '0.25rem', flexShrink: 0 }} />
-                                            <span>{init}</span>
+                                {initiativesList.length > 0 && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                        <div style={{ fontSize: '0.88rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: primaryTextColor }}>
+                                            Key Institutional Initiatives:
                                         </div>
-                                    ))}
-                                </div>
+                                        {initiativesList.map((init, i) => (
+                                            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.92rem', color: secondaryTextColor }}>
+                                                <FaCheckCircle style={{ color: themeColor, marginTop: '0.25rem', flexShrink: 0 }} />
+                                                <span>{init}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                                 {/* KEY IMPACT STAT */}
                                 <div style={{
@@ -801,10 +853,10 @@ const SdgsPage = () => {
                                     width: 'fit-content'
                                 }}>
                                     <span style={{ fontSize: '1.25rem', fontWeight: '900', color: themeColor }}>
-                                        {item.metric.value}
+                                        {metricVal}
                                     </span>
                                     <span style={{ fontSize: '0.82rem', fontWeight: '700', color: primaryTextColor }}>
-                                        {item.metric.label}
+                                        {metricLbl}
                                     </span>
                                 </div>
                             </div>
@@ -812,7 +864,7 @@ const SdgsPage = () => {
 
                         return (
                             <motion.div
-                                key={item.id}
+                                key={itemId}
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true, margin: '-60px' }}
@@ -876,24 +928,14 @@ const SdgsPage = () => {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
-                        <div style={{ borderRadius: '20px', overflow: 'hidden', height: '240px', position: 'relative', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
-                            <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800" alt="Plantation Drive" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', color: '#fff', fontWeight: '800', fontSize: '0.9rem' }}>
-                                Annual Miyawaki Afforestation Drive
+                        {initiativeData.map((init, idx) => (
+                            <div key={init._id || idx} style={{ borderRadius: '20px', overflow: 'hidden', height: '240px', position: 'relative', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
+                                <img src={init.image} alt={init.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem', background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)', color: '#fff', fontWeight: '800', fontSize: '0.9rem' }}>
+                                    {init.title}
+                                </div>
                             </div>
-                        </div>
-                        <div style={{ borderRadius: '20px', overflow: 'hidden', height: '240px', position: 'relative', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
-                            <img src="https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&q=80&w=800" alt="Solar Installation" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', color: '#fff', fontWeight: '800', fontSize: '0.9rem' }}>
-                                200 kWp Rooftop Solar Grid Commissioning
-                            </div>
-                        </div>
-                        <div style={{ borderRadius: '20px', overflow: 'hidden', height: '240px', position: 'relative', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
-                            <img src="https://images.unsplash.com/photo-1541888946425-d0fbb186156f?auto=format&fit=crop&q=80&w=800" alt="Rainwater Harvesting" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', color: '#fff', fontWeight: '800', fontSize: '0.9rem' }}>
-                                5 Lakh Liter Percolation & STP Reservoirs
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </section>
 

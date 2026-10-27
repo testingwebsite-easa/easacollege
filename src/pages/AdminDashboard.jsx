@@ -255,8 +255,27 @@ const AdminDashboard = () => {
     const [counselingList, setCounselingList] = useState([]); // Career / Higher Ed Counseling
     const [startupPitches, setStartupPitches] = useState([]); // Startup EDC Pitches
     const [pacFeedbacks, setPacFeedbacks] = useState([]); // PAC Feedback
-    const [partnerConnects, setPartnerConnects] = useState([]); // SDG Partner Connect
     const [newsletterSubscribers, setNewsletterSubscribers] = useState([]); // Newsletter Subscribers
+    const [sdgs, setSdgs] = useState([]); // SDG Goals & Images
+    const [sdgFilter, setSdgFilter] = useState('all');
+    const [sdgForm, setSdgForm] = useState({
+        goalNumber: 'SDG 01',
+        title: '',
+        subTitle: '',
+        color: '#10B981',
+        bgLight: 'rgba(16, 185, 129, 0.08)',
+        icon: '',
+        image: '',
+        policies: 0,
+        mediaCoverage: 0,
+        events: 0,
+        description: '',
+        initiatives: '',
+        metricValue: '',
+        metricLabel: '',
+        category: 'goal',
+        order: 1
+    });
 
 
     // Department Form State
@@ -358,6 +377,7 @@ const AdminDashboard = () => {
                 case 'pac-feedback': endpoint = '/api/pac-feedback'; setter = setPacFeedbacks; break;
                 case 'partner-connect': endpoint = '/api/partner-connect'; setter = setPartnerConnects; break;
                 case 'newsletter': endpoint = '/api/newsletter'; setter = setNewsletterSubscribers; break;
+                case 'sdgs': endpoint = '/api/sdgs'; setter = setSdgs; break;
 
                 // Management Sub-categories (Reusable endpoint)
                 case 'leadership':
@@ -892,6 +912,7 @@ const AdminDashboard = () => {
                         case 'research-items': endpoint = '/api/research-items'; setter = setResearchItems; break;
                         case 'careers': endpoint = '/api/careers'; setter = setCareers; break;
                         case 'life-of-EASA': endpoint = '/api/life-at-EASA'; setter = setLifeOfEASA; break;
+                        case 'sdgs': endpoint = '/api/sdgs'; setter = setSdgs; break;
                         default: return;
                     }
                     handleGenericDelete(item._id, endpoint, setter);
@@ -932,6 +953,144 @@ const AdminDashboard = () => {
     const deleteMissionPoint = (index) => {
         const updated = { ...missionVision, mission: missionVision.mission.filter((_, i) => i !== index) };
         handleUpdateMissionVision(updated);
+    };
+
+    // SDG Specific Handlers
+    const handleSdgEdit = (item) => {
+        setEditingItem(item);
+        setSdgForm({
+            goalNumber: item.goalNumber || '',
+            title: item.title || '',
+            subTitle: item.subTitle || '',
+            color: item.color || '#10B981',
+            bgLight: item.bgLight || 'rgba(16, 185, 129, 0.08)',
+            icon: item.icon || '',
+            image: item.image || '',
+            policies: item.policies || 0,
+            mediaCoverage: item.mediaCoverage || 0,
+            events: item.events || 0,
+            description: item.description || '',
+            initiatives: Array.isArray(item.initiatives) ? item.initiatives.join('\n') : (item.initiatives || ''),
+            metricValue: item.metric?.value || item.metricValue || '',
+            metricLabel: item.metric?.label || item.metricLabel || '',
+            category: item.category || 'goal',
+            order: item.order || 0
+        });
+        setShowModal(true);
+    };
+
+    const handleSdgSubmit = async (e) => {
+        e.preventDefault();
+        if (!sdgForm.title?.trim()) {
+            alert('Please enter a Title for this SDG Goal / Initiative');
+            return;
+        }
+        if (!sdgForm.image?.trim()) {
+            alert('Please provide or upload an SDG image');
+            return;
+        }
+
+        const initiativesArray = typeof sdgForm.initiatives === 'string'
+            ? sdgForm.initiatives.split('\n').map(s => s.trim()).filter(Boolean)
+            : (Array.isArray(sdgForm.initiatives) ? sdgForm.initiatives : []);
+
+        const payload = {
+            goalNumber: sdgForm.goalNumber,
+            title: sdgForm.title,
+            subTitle: sdgForm.subTitle,
+            color: sdgForm.color,
+            bgLight: sdgForm.bgLight || `${sdgForm.color}14`,
+            icon: sdgForm.icon,
+            image: sdgForm.image,
+            policies: Number(sdgForm.policies) || 0,
+            mediaCoverage: Number(sdgForm.mediaCoverage) || 0,
+            events: Number(sdgForm.events) || 0,
+            description: sdgForm.description,
+            initiatives: initiativesArray,
+            metric: {
+                value: sdgForm.metricValue,
+                label: sdgForm.metricLabel
+            },
+            category: sdgForm.category || 'goal',
+            order: Number(sdgForm.order) || 0
+        };
+
+        try {
+            const url = editingItem
+                ? `${API_BASE_URL}/api/sdgs/${editingItem._id}`
+                : `${API_BASE_URL}/api/sdgs`;
+            const method = editingItem ? 'PUT' : 'POST';
+
+            const token = localStorage.getItem('admin_token') || localStorage.getItem('authToken');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const res = await fetch(url, {
+                method,
+                headers,
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                const saved = await res.json();
+                if (editingItem) {
+                    setSdgs(prev => prev.map(s => s._id === editingItem._id ? saved : s));
+                } else {
+                    setSdgs(prev => [...prev, saved]);
+                }
+                setShowModal(false);
+                setEditingItem(null);
+                setSdgForm({
+                    goalNumber: 'SDG 01',
+                    title: '',
+                    subTitle: '',
+                    color: '#10B981',
+                    bgLight: 'rgba(16, 185, 129, 0.08)',
+                    icon: '',
+                    image: '',
+                    policies: 0,
+                    mediaCoverage: 0,
+                    events: 0,
+                    description: '',
+                    initiatives: '',
+                    metricValue: '',
+                    metricLabel: '',
+                    category: 'goal',
+                    order: 1
+                });
+                alert(editingItem ? 'SDG Goal & Image updated successfully!' : 'SDG Goal created successfully!');
+            } else {
+                const errData = await res.json().catch(() => ({}));
+                alert('Failed to save SDG: ' + (errData.error || res.statusText));
+            }
+        } catch (err) {
+            console.error('Error saving SDG:', err);
+            alert('Error saving SDG item: ' + err.message);
+        }
+    };
+
+    const handleQuickImageUpdate = async (item, newImageUrl) => {
+        if (!newImageUrl) return;
+        try {
+            const token = localStorage.getItem('admin_token') || localStorage.getItem('authToken');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const res = await fetch(`${API_BASE_URL}/api/sdgs/${item._id}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({ image: newImageUrl })
+            });
+            if (res.ok) {
+                setSdgs(prev => prev.map(s => s._id === item._id ? { ...s, image: newImageUrl } : s));
+                alert(`Successfully updated image for ${item.goalNumber || item.title}!`);
+            } else {
+                alert('Failed to update image on server');
+            }
+        } catch (err) {
+            console.error('Error updating SDG image:', err);
+            alert('Error updating image: ' + err.message);
+        }
     };
 
     // Career Specific Handlers
@@ -1274,8 +1433,14 @@ const AdminDashboard = () => {
 
             <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
                 <div className="admin-sidebar-header">
-                    <h1 className="text-gradient" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Admin Panel</h1>
-                    <a href="/" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textDecoration: 'none' }}>&larr; Back to Website</a>
+                    <h1 className="text-gradient" style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>Admin Panel</h1>
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <a href="/" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textDecoration: 'none' }}>&larr; Website</a>
+                        <span style={{ color: 'var(--glass-border)', fontSize: '0.75rem' }}>•</span>
+                        <a href="/api/docs" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.82rem', color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>📖 API Docs</a>
+                        <span style={{ color: 'var(--glass-border)', fontSize: '0.75rem' }}>•</span>
+                        <a href="/health" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.82rem', color: '#34d399', textDecoration: 'none', fontWeight: 600 }}>🟢 Health</a>
+                    </div>
                 </div>
 
                 {renderGroup('forms', '📋 Form Submissions & Leads', (
@@ -1321,6 +1486,7 @@ const AdminDashboard = () => {
                         {renderTabButton('leadership', 'Leadership (Hierarchy)')}
                         {renderTabButton('administration', 'Administration')}
                         {renderTabButton('sustainability', 'Sustainability')}
+                        {renderTabButton('sdgs', '🌿 SDG Goals & Images')}
 
                         <div style={{ marginBottom: '0.5rem' }}>
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.3rem', textTransform: 'uppercase', paddingLeft: '1rem' }}>Management Members</div>
@@ -1394,6 +1560,7 @@ const AdminDashboard = () => {
                                 'institution': 'Institution',
                                 'infrastructure': 'Infrastructure',
                                 'sustainability': 'Sustainability',
+                                'sdgs': 'SDG Goals & Images Management',
                                 'community-outreach': 'Community Outreach',
                                 'research-items': 'Research Items',
                                 'careers': 'Careers',
@@ -1760,6 +1927,92 @@ const AdminDashboard = () => {
                                     />
 
                                     <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>{editingItem ? 'Update' : 'Add'}</button>
+                                </form>
+                            )}
+
+                            {activeTab === 'sdgs' && (
+                                <form onSubmit={handleSdgSubmit} style={{ display: 'grid', gap: '1rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        {renderInput('Goal Number / ID (e.g. SDG 01)', 'goalNumber', sdgForm.goalNumber, e => setSdgForm({ ...sdgForm, goalNumber: e.target.value }))}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Category</label>
+                                            <select
+                                                value={sdgForm.category}
+                                                onChange={e => setSdgForm({ ...sdgForm, category: e.target.value })}
+                                                className="custom-select"
+                                                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)' }}
+                                            >
+                                                <option value="goal">UN SDG Goal (1-17)</option>
+                                                <option value="initiative">Campus Eco Initiative / Gallery</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {renderInput('Title', 'title', sdgForm.title, e => setSdgForm({ ...sdgForm, title: e.target.value }))}
+                                    {renderInput('Subtitle / Focus Area', 'subTitle', sdgForm.subTitle, e => setSdgForm({ ...sdgForm, subTitle: e.target.value }))}
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        {renderInput('Theme Color', 'color', sdgForm.color, e => setSdgForm({ ...sdgForm, color: e.target.value }), 'color')}
+                                        {renderInput('Display Order (e.g. 1, 2, ...)', 'order', sdgForm.order, e => setSdgForm({ ...sdgForm, order: e.target.value }), 'number')}
+                                    </div>
+
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>
+                                            SDG Photo / Image <span style={{ color: '#FCCA26' }}>*</span> (Displayed on card front face)
+                                        </label>
+                                        <ImageUpload
+                                            value={sdgForm.image}
+                                            onUpload={(url) => setSdgForm({ ...sdgForm, image: url })}
+                                            placeholder="Upload or Change SDG Image"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>
+                                            Official UN SDG Icon / Logo (Displayed on 3D flip card back face & corner badge)
+                                        </label>
+                                        <ImageUpload
+                                            value={sdgForm.icon}
+                                            onUpload={(url) => setSdgForm({ ...sdgForm, icon: url })}
+                                            placeholder="Upload Official UN SDG Icon / Logo"
+                                        />
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem' }}>
+                                        {renderInput('Policies Count', 'policies', sdgForm.policies, e => setSdgForm({ ...sdgForm, policies: e.target.value }), 'number')}
+                                        {renderInput('Media Coverage', 'mediaCoverage', sdgForm.mediaCoverage, e => setSdgForm({ ...sdgForm, mediaCoverage: e.target.value }), 'number')}
+                                        {renderInput('Events Count', 'events', sdgForm.events, e => setSdgForm({ ...sdgForm, events: e.target.value }), 'number')}
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        {renderInput('Impact Metric Value (e.g. 100%, 200 kWp, ₹3.5 Cr+)', 'metricValue', sdgForm.metricValue, e => setSdgForm({ ...sdgForm, metricValue: e.target.value }))}
+                                        {renderInput('Impact Metric Label (e.g. Clean Solar Grid)', 'metricLabel', sdgForm.metricLabel, e => setSdgForm({ ...sdgForm, metricLabel: e.target.value }))}
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Main Description</label>
+                                        <textarea
+                                            value={sdgForm.description}
+                                            onChange={e => setSdgForm({ ...sdgForm, description: e.target.value })}
+                                            rows={3}
+                                            style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)', resize: 'vertical' }}
+                                        />
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                                        <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Key Initiatives (One initiative per line)</label>
+                                        <textarea
+                                            value={sdgForm.initiatives}
+                                            onChange={e => setSdgForm({ ...sdgForm, initiatives: e.target.value })}
+                                            rows={3}
+                                            placeholder={"Initiative item 1\nInitiative item 2\nInitiative item 3"}
+                                            style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'var(--bg-section)', color: 'var(--text-main)', resize: 'vertical' }}
+                                        />
+                                    </div>
+
+                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
+                                        {editingItem ? '💾 Update SDG Goal & Image' : '➕ Create SDG Goal'}
+                                    </button>
                                 </form>
                             )}
 
@@ -4574,6 +4827,282 @@ const AdminDashboard = () => {
                                     { key: 'heroImage', label: 'Hero Image', type: 'image' },
                                     { key: 'description', label: 'Main Description', type: 'textarea' },
                                 ])
+                            }
+
+                            {/* SDG GOALS & IMAGES MANAGEMENT TAB */}
+                            {
+                                activeTab === 'sdgs' && (
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <div>
+                                                <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <span>🌿</span> SDG Goals & Images Management
+                                                </h2>
+                                                <p style={{ margin: '0.4rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                    Manage photos, UN icons, and initiatives for the 17 UN Sustainable Development Goals and campus eco-projects. Changes are live on the <code>/sdgs</code> page.
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setEditingItem(null);
+                                                    setSdgForm({
+                                                        goalNumber: `SDG ${String((sdgs.filter(s => s.category !== 'initiative').length + 1)).padStart(2, '0')}`,
+                                                        title: '',
+                                                        subTitle: '',
+                                                        color: '#10B981',
+                                                        bgLight: 'rgba(16, 185, 129, 0.08)',
+                                                        icon: 'https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-01.jpg',
+                                                        image: '',
+                                                        policies: 0,
+                                                        mediaCoverage: 0,
+                                                        events: 0,
+                                                        description: '',
+                                                        initiatives: '',
+                                                        metricValue: '',
+                                                        metricLabel: '',
+                                                        category: 'goal',
+                                                        order: sdgs.length + 1
+                                                    });
+                                                    setShowModal(true);
+                                                }}
+                                                style={{
+                                                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                                                    color: '#fff',
+                                                    padding: '0.65rem 1.4rem',
+                                                    borderRadius: '8px',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 'bold',
+                                                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem'
+                                                }}
+                                            >
+                                                <span>➕</span> Add SDG Goal / Image
+                                            </button>
+                                        </div>
+
+                                        {/* Category Filter Pills */}
+                                        <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.8rem', flexWrap: 'wrap' }}>
+                                            {[
+                                                { id: 'all', label: `All Items (${sdgs.length})` },
+                                                { id: 'goal', label: `17 UN Goals (${sdgs.filter(s => !s.category || s.category === 'goal').length})` },
+                                                { id: 'initiative', label: `Eco Initiatives (${sdgs.filter(s => s.category === 'initiative').length})` }
+                                            ].map(pill => (
+                                                <button
+                                                    key={pill.id}
+                                                    onClick={() => setSdgFilter(pill.id)}
+                                                    style={{
+                                                        padding: '0.45rem 1rem',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: '700',
+                                                        border: sdgFilter === pill.id ? '1px solid #10B981' : '1px solid var(--glass-border)',
+                                                        background: sdgFilter === pill.id ? 'rgba(16, 185, 129, 0.2)' : 'var(--bg-section)',
+                                                        color: sdgFilter === pill.id ? '#10B981' : 'var(--text-main)',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s ease'
+                                                    }}
+                                                >
+                                                    {pill.label}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Cards Grid */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
+                                            {sdgs
+                                                .filter(item => sdgFilter === 'all' || (sdgFilter === 'goal' && (!item.category || item.category === 'goal')) || (sdgFilter === 'initiative' && item.category === 'initiative'))
+                                                .map(item => (
+                                                    <div
+                                                        key={item._id || item.id}
+                                                        style={{
+                                                            background: 'var(--bg-section)',
+                                                            borderRadius: '16px',
+                                                            overflow: 'hidden',
+                                                            border: '1px solid var(--glass-border)',
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+                                                        }}
+                                                    >
+                                                        {/* Image Preview with Badges */}
+                                                        <div style={{ position: 'relative', height: '200px', background: '#000', overflow: 'hidden' }}>
+                                                            {item.image ? (
+                                                                <img
+                                                                    src={item.image}
+                                                                    alt={item.title}
+                                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                                />
+                                                            ) : (
+                                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
+                                                                    No Image Uploaded
+                                                                </div>
+                                                            )}
+
+                                                            {/* Top Goal Number Pill */}
+                                                            <div style={{
+                                                                position: 'absolute',
+                                                                top: '0.8rem',
+                                                                left: '0.8rem',
+                                                                padding: '0.3rem 0.8rem',
+                                                                borderRadius: '50px',
+                                                                background: item.color || '#10B981',
+                                                                color: '#fff',
+                                                                fontWeight: '800',
+                                                                fontSize: '0.78rem',
+                                                                letterSpacing: '0.5px',
+                                                                boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+                                                            }}>
+                                                                {item.goalNumber || 'SDG'}
+                                                            </div>
+
+                                                            {/* Corner Icon Thumbnail */}
+                                                            {item.icon && (
+                                                                <div style={{
+                                                                    position: 'absolute',
+                                                                    bottom: '0.8rem',
+                                                                    right: '0.8rem',
+                                                                    width: '42px',
+                                                                    height: '42px',
+                                                                    borderRadius: '8px',
+                                                                    overflow: 'hidden',
+                                                                    border: '2px solid rgba(255,255,255,0.9)',
+                                                                    boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+                                                                    background: '#fff'
+                                                                }}>
+                                                                    <img src={item.icon} alt="Icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                </div>
+                                                            )}
+
+                                                            {/* Category Badge */}
+                                                            <div style={{
+                                                                position: 'absolute',
+                                                                top: '0.8rem',
+                                                                right: '0.8rem',
+                                                                padding: '0.25rem 0.6rem',
+                                                                borderRadius: '6px',
+                                                                background: 'rgba(0,0,0,0.65)',
+                                                                color: '#fff',
+                                                                fontSize: '0.7rem',
+                                                                fontWeight: '700',
+                                                                textTransform: 'uppercase'
+                                                            }}>
+                                                                {item.category || 'goal'}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Card Body */}
+                                                        <div style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '0.8rem' }}>
+                                                            <div>
+                                                                <h3 style={{ margin: '0 0 0.3rem', fontSize: '1.2rem', color: 'var(--text-main)' }}>
+                                                                    {item.title}
+                                                                </h3>
+                                                                {item.subTitle && (
+                                                                    <div style={{ fontSize: '0.85rem', color: item.color || 'var(--primary)', fontWeight: '700' }}>
+                                                                        {item.subTitle}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Impact Metric & Stats Bar */}
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                alignItems: 'center',
+                                                                padding: '0.6rem 0.8rem',
+                                                                background: 'rgba(255,255,255,0.03)',
+                                                                borderRadius: '10px',
+                                                                border: '1px solid var(--glass-border)',
+                                                                fontSize: '0.78rem'
+                                                            }}>
+                                                                <div>
+                                                                    <span style={{ fontWeight: '800', color: item.color || '#10B981', fontSize: '1rem' }}>
+                                                                        {item.metric?.value || item.metricValue || '100%'}
+                                                                    </span>
+                                                                    <span style={{ marginLeft: '0.4rem', color: 'var(--text-muted)' }}>
+                                                                        {item.metric?.label || item.metricLabel || ''}
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', gap: '0.6rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                                                                    <span>{item.policies || 0} Policies</span>
+                                                                    <span>•</span>
+                                                                    <span>{item.events || 0} Events</span>
+                                                                </div>
+                                                            </div>
+
+                                                            {item.description && (
+                                                                <p style={{
+                                                                    fontSize: '0.82rem',
+                                                                    color: 'var(--text-muted)',
+                                                                    margin: 0,
+                                                                    lineHeight: 1.5,
+                                                                    display: '-webkit-box',
+                                                                    WebkitLineClamp: 2,
+                                                                    WebkitBoxOrient: 'vertical',
+                                                                    overflow: 'hidden'
+                                                                }}>
+                                                                    {item.description}
+                                                                </p>
+                                                            )}
+
+                                                            {/* Direct Quick Update Image */}
+                                                            <div style={{
+                                                                marginTop: 'auto',
+                                                                paddingTop: '0.8rem',
+                                                                borderTop: '1px solid var(--glass-border)'
+                                                            }}>
+                                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block', fontWeight: '700' }}>
+                                                                    ⚡ Quick Replace Card Photo:
+                                                                </label>
+                                                                <ImageUpload
+                                                                    value={item.image}
+                                                                    onUpload={(url) => handleQuickImageUpdate(item, url)}
+                                                                    placeholder="Click or Drop New Image to Update"
+                                                                />
+                                                            </div>
+
+                                                            {/* Action Buttons */}
+                                                            <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.5rem' }}>
+                                                                <button
+                                                                    onClick={() => handleSdgEdit(item)}
+                                                                    style={{
+                                                                        flex: 1,
+                                                                        background: '#2563EB',
+                                                                        color: '#fff',
+                                                                        border: 'none',
+                                                                        padding: '0.55rem',
+                                                                        borderRadius: '8px',
+                                                                        cursor: 'pointer',
+                                                                        fontWeight: '700',
+                                                                        fontSize: '0.85rem'
+                                                                    }}
+                                                                >
+                                                                    ✏️ Edit Details
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleGenericDelete(item._id, '/api/sdgs', setSdgs)}
+                                                                    style={{
+                                                                        background: 'rgba(239, 68, 68, 0.15)',
+                                                                        color: '#EF4444',
+                                                                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                                                                        padding: '0.55rem 0.9rem',
+                                                                        borderRadius: '8px',
+                                                                        cursor: 'pointer',
+                                                                        fontWeight: '700',
+                                                                        fontSize: '0.85rem'
+                                                                    }}
+                                                                >
+                                                                    🗑️ Delete
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+                                )
                             }
 
                             {

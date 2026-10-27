@@ -2142,6 +2142,416 @@ const placementPageData = {
 const institutionData = { title: '', subtitle: '', content: '' };
 const infrastructureData = { title: '', subtitle: '', facilities: [] };
 const sustainabilityData = { title: '', subtitle: '', initiatives: [] };
+const sdgsData = [
+    {
+        goalNumber: "SDG 01",
+        title: "No Poverty",
+        subTitle: "EASA's Financial Inclusion Action Plan",
+        color: "#EB1C2D",
+        bgLight: "rgba(235, 28, 45, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-01.jpg",
+        image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=1000",
+        policies: 3,
+        mediaCoverage: 32,
+        events: 486,
+        description: "We ensure our academic programs and campus services are accessible and equitable. We foster a culture that improves financial inclusion and student resilience through exclusive scholarship programs. Over 3,000 scholarships have been awarded to undergraduate, postgraduate, and research scholars valued collectively at over ₹3.5 Crore.",
+        initiatives: [
+            "Institutional merit-cum-means fee waivers for rural farming families",
+            "Subsidized boarding, free college bus transport, and zero-interest education loan assistance",
+            "Skill-based vocational livelihood training for neighboring village communities"
+        ],
+        metric: { value: "₹3.5 Cr+", label: "Scholarships Disbursed" },
+        category: "goal",
+        order: 1
+    },
+    {
+        goalNumber: "SDG 02",
+        title: "Zero Hunger",
+        subTitle: "Sustainable Food Waste Minimization & Organic Agriculture",
+        color: "#D3A029",
+        bgLight: "rgba(211, 160, 41, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-02.jpg",
+        image: "https://images.unsplash.com/photo-1592417817098-8f3d6910985b?auto=format&fit=crop&q=80&w=1000",
+        policies: 4,
+        mediaCoverage: 19,
+        events: 320,
+        description: "EASA College addresses food security and waste reduction across all campus dining facilities. We implement sustainable farm-to-table frameworks, automated solar drip-irrigation testbeds, and daily cafeteria organic scrap composting to enrich our agricultural soil.",
+        initiatives: [
+            "5-acre experimental organic cultivation farm managed by Agri Engineering students",
+            "100% campus cafeteria organic scrap converted to bio-fertilizer via vermicomposting",
+            "Student food distribution drives to local rural rehabilitation homes"
+        ],
+        metric: { value: "100%", label: "Cafeteria Waste Composted" },
+        category: "goal",
+        order: 2
+    },
+    {
+        goalNumber: "SDG 03",
+        title: "Good Health and Well-being",
+        subTitle: "24/7 Campus Health, Counselling & Telemedicine",
+        color: "#279B48",
+        bgLight: "rgba(39, 155, 72, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-03.jpg",
+        image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1000",
+        policies: 4,
+        mediaCoverage: 18,
+        events: 276,
+        description: "EASA provides comprehensive healthcare and professional counselling for students and employees to receive psychological and physical wellness support. Our on-campus medical clinic, emergency ambulance, and regular free rural medical camps serve thousands annually.",
+        initiatives: [
+            "24/7 resident medical clinic with qualified doctor, nurse, and emergency ambulance",
+            "Free psychological counseling, wellness workshops, and annual health insurance",
+            "Bi-annual blood donation and village free general screening camps (2,500+ screened)"
+        ],
+        metric: { value: "2,500+", label: "Villagers Screened Annually" },
+        category: "goal",
+        order: 3
+    },
+    {
+        goalNumber: "SDG 04",
+        title: "Quality Education",
+        subTitle: "Industrial Co-Design & Outcome-Based Education (OBE)",
+        color: "#C31F33",
+        bgLight: "rgba(195, 31, 51, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-04.jpg",
+        image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1000",
+        policies: 15,
+        mediaCoverage: 42,
+        events: 587,
+        description: "EASA's engineering courses are co-designed with industry to align curricula with Industry 4.0 demands. Through the AICTE IDEA Lab, Outcome-Based Education (OBE), and digital library resources, students gain practical competencies for global excellence.",
+        initiatives: [
+            "NAAC 'A' Grade accredited Outcome-Based Education (OBE) curriculum",
+            "AICTE IDEA Lab with 24/7 prototyping tools: 3D printers, CNC laser routers, and IoT kits",
+            "Active NPTEL, SWAYAM, IEEE, and DELNET digital research database access"
+        ],
+        metric: { value: "100%", label: "OBE & AICTE IDEA Lab Access" },
+        category: "goal",
+        order: 4
+    },
+    {
+        goalNumber: "SDG 05",
+        title: "Gender Equality",
+        subTitle: "Empowering Women in STEM & Inclusive Leadership",
+        color: "#EF402B",
+        bgLight: "rgba(239, 64, 43, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-05.jpg",
+        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=1000",
+        policies: 8,
+        mediaCoverage: 32,
+        events: 164,
+        description: "EASA continuously works to put gender equality into practice, focusing on attracting, supporting, and promoting women in engineering. Women hold 45%+ of senior faculty and administrative leadership roles with dedicated Women in Tech coding tracks.",
+        initiatives: [
+            "Over 45% female enrollment across AI&DS, Biomedical, and Computer Science programs",
+            "Active Women Empowerment Cell & Internal Complaints Committee (ICC)",
+            "Specialized Women in Tech leadership summits and corporate hackathons"
+        ],
+        metric: { value: "45%+", label: "Women Faculty & Students" },
+        category: "goal",
+        order: 5
+    },
+    {
+        goalNumber: "SDG 06",
+        title: "Clean Water and Sanitation",
+        subTitle: "Operational Water Conservation & STP Recycling",
+        color: "#00AED9",
+        bgLight: "rgba(0, 174, 217, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-06.jpg",
+        image: "https://images.unsplash.com/photo-1541888946425-d0fbb186156f?auto=format&fit=crop&q=80&w=1000",
+        policies: 5,
+        mediaCoverage: 41,
+        events: 122,
+        description: "EASA's sustainability policies related to SDG 6 provide guidance to minimize water consumption, actively promoting efficient water usage, rainwater percolation, and 100% recycling of treated greywater across campus lawns and tree plantations.",
+        initiatives: [
+            "100 kLD Sewage Treatment Plant (STP) recycling wastewater for landscaping",
+            "5,00,000+ liters rainwater harvesting capacity recharging local groundwater aquifers",
+            "Automated sensor-based water dispensers and UV/RO purified stations in every block"
+        ],
+        metric: { value: "5,00,000 L", label: "Rainwater Harvesting" },
+        category: "goal",
+        order: 6
+    },
+    {
+        goalNumber: "SDG 07",
+        title: "Affordable and Clean Energy",
+        subTitle: "Rooftop Solar PV Generation & Smart Grid Infrastructure",
+        color: "#FDB713",
+        bgLight: "rgba(253, 183, 19, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-07.jpg",
+        image: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&q=80&w=1000",
+        policies: 3,
+        mediaCoverage: 17,
+        events: 98,
+        description: "EASA has installed rooftop solar panels across campus buildings to maximize on-site clean energy generation. Solar installation sites were selected with the assistance of EASA's Eco Club, meeting significant daytime power demands.",
+        initiatives: [
+            "200 kWp rooftop solar photovoltaic power plant connected to the institutional grid",
+            "100% campus-wide transition to energy-efficient LED and automated daylight sensors",
+            "Student-developed Solar-EV dual charging station prototype in the AICTE IDEA Lab"
+        ],
+        metric: { value: "200 kWp", label: "Solar Energy Generated" },
+        category: "goal",
+        order: 7
+    },
+    {
+        goalNumber: "SDG 08",
+        title: "Decent Work and Economic Growth",
+        subTitle: "ASCEND Career Advancement Centre & Industrial Partnerships",
+        color: "#8F1838",
+        bgLight: "rgba(143, 24, 56, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-08.jpg",
+        image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1000",
+        policies: 5,
+        mediaCoverage: 12,
+        events: 136,
+        description: "EASA's ASCEND Career Advancement Centre and Industry-Institute Partnership Cell (IIPC) prepare students for futuristic careers, driving sustainable economic growth through 85%+ consistent campus placements and startup venture support.",
+        initiatives: [
+            "350+ placement offers with top national and multinational recruitment corporations",
+            "₹12 LPA highest salary package secured in technology and core engineering verticals",
+            "Mandatory industrial internships with stipends for all pre-final year engineering students"
+        ],
+        metric: { value: "85%+", label: "Consistent Placement Rate" },
+        category: "goal",
+        order: 8
+    },
+    {
+        goalNumber: "SDG 09",
+        title: "Industry, Innovation and Infrastructure",
+        subTitle: "Nature-Inspired Solutions & Startup Incubation",
+        color: "#F36D25",
+        bgLight: "rgba(243, 109, 37, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-09.jpg",
+        image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1000",
+        policies: 4,
+        mediaCoverage: 41,
+        events: 378,
+        description: "EASA brings academicians, designers, policymakers, and industry leaders together to implement green infrastructure and technology innovation on campus. We host active incubators, seed grant funds, and subsidize student patent filings.",
+        initiatives: [
+            "28+ student-led startups incubated at the EASA Incubation & Entrepreneurship Cell",
+            "45+ patents filed by faculty and student research teams with institutional subsidies",
+            "₹85 Lakhs+ mobilized in government, MSME, and institutional seed capital grants"
+        ],
+        metric: { value: "45+", label: "Patents Published & Filed" },
+        category: "goal",
+        order: 9
+    },
+    {
+        goalNumber: "SDG 10",
+        title: "Reduced Inequalities",
+        subTitle: "Diversity and Inclusion Framework",
+        color: "#E11484",
+        bgLight: "rgba(225, 20, 132, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-10.jpg",
+        image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=1000",
+        policies: 15,
+        mediaCoverage: 26,
+        events: 154,
+        description: "Led by the core values of inclusion, passion, and equity, EASA creates an environment where everyone can contribute, grow, and succeed. A high-level committee reporting directly to the Principal oversees barrier-free campus accessibility.",
+        initiatives: [
+            "100% barrier-free campus with wheelchair ramps, tactile paths, and dedicated lifts",
+            "Bridge courses in communicative English and foundational mathematics for rural students",
+            "Active SC/ST, Minority Welfare, and Equal Opportunity Advisory Cells"
+        ],
+        metric: { value: "100%", label: "Barrier-Free Inclusive Campus" },
+        category: "goal",
+        order: 10
+    },
+    {
+        goalNumber: "SDG 11",
+        title: "Sustainable Cities and Communities",
+        subTitle: "Support of Arts, Culture, Heritage & UBA Village Adoption",
+        color: "#F99D26",
+        bgLight: "rgba(249, 157, 38, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-11.jpg",
+        image: "https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?auto=format&fit=crop&q=80&w=1000",
+        policies: 6,
+        mediaCoverage: 14,
+        events: 64,
+        description: "EASA significantly contributes to local heritage, cultural preservation, and sustainable community transport. Under the Unnat Bharat Abhiyan (UBA) government scheme, we have adopted 5 surrounding rural villages for smart water and solar electrification.",
+        initiatives: [
+            "5 rural villages adopted under Unnat Bharat Abhiyan (UBA) for solar lighting and clean water",
+            "Zero-emission campus transport routes connecting Coimbatore and Palakkad",
+            "Annual cultural fest 'Dhruva' promoting regional arts and heritage"
+        ],
+        metric: { value: "5 Villages", label: "Adopted under UBA" },
+        category: "goal",
+        order: 11
+    },
+    {
+        goalNumber: "SDG 12",
+        title: "Responsible Consumption & Production",
+        subTitle: "Circular Economy & Campus Waste Minimization",
+        color: "#CF8D2A",
+        bgLight: "rgba(207, 141, 42, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-12.jpg",
+        image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=1000",
+        policies: 6,
+        mediaCoverage: 21,
+        events: 316,
+        description: "EASA applies circular economy principles across all capital and operational projects to avoid waste and strengthen reuse. We enforce certified e-waste recycling, single-use plastic bans, and paperless digital academic governance.",
+        initiatives: [
+            "Campus-wide ban on single-use plastics and polythene disposables",
+            "Certified electronic and electrical waste disposal through authorized recyclers",
+            "Paperless autonomous examination, digital valuation, and student fee portal"
+        ],
+        metric: { value: "Zero Waste", label: "Single-Use Plastic Ban" },
+        category: "goal",
+        order: 12
+    },
+    {
+        goalNumber: "SDG 13",
+        title: "Climate Action",
+        subTitle: "Carbon Neutrality Roadmap & Afforestation",
+        color: "#48773E",
+        bgLight: "rgba(72, 119, 62, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-13.jpg",
+        image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1000",
+        policies: 13,
+        mediaCoverage: 11,
+        events: 82,
+        description: "EASA is committed to progressive carbon neutrality and is taking urgent institutional actions to combat climate change. We maintain extensive green cover, conduct certified environmental audits, and drive student eco-campaigns.",
+        initiatives: [
+            "Over 5,000+ indigenous trees maintained on campus offsetting carbon footprint",
+            "Annual Green, Energy, and Environmental audits conducted by accredited third-party auditors",
+            "Active Eco Club organizing regular tree-planting drives along Western Ghats foothills"
+        ],
+        metric: { value: "5,000+", label: "Trees Maintained on Campus" },
+        category: "goal",
+        order: 13
+    },
+    {
+        goalNumber: "SDG 14",
+        title: "Life Below Water",
+        subTitle: "Plastic Elimination & Safe Effluent Neutralization",
+        color: "#007DBC",
+        bgLight: "rgba(0, 125, 188, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-14.jpg",
+        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80&w=1000",
+        policies: 5,
+        mediaCoverage: 9,
+        events: 31,
+        description: "EASA promotes the waste hierarchy of 'Reduce, Reuse, Recycle' to protect local aquatic resources. We ensure 100% neutralization of chemistry and environmental laboratory effluents prior to safe discharge.",
+        initiatives: [
+            "Zero untreated chemical discharge from laboratory drains with specialized neutralization pits",
+            "Student-led water quality surveys in surrounding streams and lakes in Coimbatore",
+            "Awareness campaigns promoting reusable metal bottles and zero plastic litter"
+        ],
+        metric: { value: "100%", label: "Safe Neutralized Effluent" },
+        category: "goal",
+        order: 14
+    },
+    {
+        goalNumber: "SDG 15",
+        title: "Life on Land",
+        subTitle: "Western Ghats Biodiversity Reserve & Herbal Sanctuary",
+        color: "#3EB049",
+        bgLight: "rgba(62, 176, 73, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-15.jpg",
+        image: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&q=80&w=1000",
+        policies: 17,
+        mediaCoverage: 5,
+        events: 124,
+        description: "Through our institutional sustainability policy, EASA is committed to preserving local ecosystems, enhancing biodiversity, and maintaining a lush, pesticide-free botanical environment spanning 45+ scenic acres.",
+        initiatives: [
+            "Preservation of native flora and fauna across 45+ acres of campus in Western Ghats foothills",
+            "Herbal and medicinal garden maintained by the Biomedical Engineering department",
+            "Organic soil enrichment and strict prohibition of hazardous chemical pesticides"
+        ],
+        metric: { value: "45 Acres", label: "Bio-Diverse Green Ecosystem" },
+        category: "goal",
+        order: 15
+    },
+    {
+        goalNumber: "SDG 16",
+        title: "Peace, Justice & Strong Institutions",
+        subTitle: "Ethical Autonomous Governance & Anti-Ragging Integrity",
+        color: "#02558B",
+        bgLight: "rgba(2, 85, 139, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-16.jpg",
+        image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1000",
+        policies: 7,
+        mediaCoverage: 12,
+        events: 108,
+        description: "EASA upholds statutory transparency, participatory governance, and ethical integrity through institutional committees, digital grievance redressal portals, anti-ragging squads, and student councils.",
+        initiatives: [
+            "Zero tolerance anti-ragging policy with 24/7 squad monitoring and campus CCTV coverage",
+            "Online student and staff grievance redressal portal reviewed directly by the Ombudsman",
+            "Democratic student council elections and participatory institutional committees"
+        ],
+        metric: { value: "100%", label: "Statutory Transparency" },
+        category: "goal",
+        order: 16
+    },
+    {
+        goalNumber: "SDG 17",
+        title: "Partnerships for the Goals",
+        subTitle: "Commitment to Global Alliances & Industry MoUs",
+        color: "#183668",
+        bgLight: "rgba(24, 54, 104, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-17.jpg",
+        image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1000",
+        policies: 18,
+        mediaCoverage: 38,
+        events: 240,
+        description: "EASA recognizes that partnerships are vital for achieving the SDGs. Our genuine collaborations with governments, corporate tech leaders, and international universities amplify our sustainable development impact.",
+        initiatives: [
+            "45+ active MoUs with international academic universities and corporate tech giants",
+            "Active Student Chapters: IEEE, ISTE, CSI, SAE, and Institution of Engineers (India)",
+            "Collaborative community research projects funded by government and industrial bodies"
+        ],
+        metric: { value: "45+ MoUs", label: "Active Global Partnerships" },
+        category: "goal",
+        order: 17
+    },
+    {
+        goalNumber: "INITIATIVE 01",
+        title: "Annual Miyawaki Afforestation Drive",
+        subTitle: "Western Ghats Afforestation & Native Flora Preservation",
+        color: "#10B981",
+        bgLight: "rgba(16, 185, 129, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-15.jpg",
+        image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800",
+        policies: 2,
+        mediaCoverage: 8,
+        events: 15,
+        description: "Distinguished visiting dignitaries, academic scholars, and student eco-volunteers participate in our annual tree plantation and Western Ghats afforestation missions.",
+        initiatives: ["Native species planting", "Student eco-volunteers participation", "Continuous soil moisture monitoring"],
+        metric: { value: "5,000+ Trees", label: "Planted Annually" },
+        category: "initiative",
+        order: 101
+    },
+    {
+        goalNumber: "INITIATIVE 02",
+        title: "200 kWp Rooftop Solar Grid Commissioning",
+        subTitle: "Institutional Clean Renewable Energy Generation",
+        color: "#FDB713",
+        bgLight: "rgba(253, 183, 19, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-07.jpg",
+        image: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&q=80&w=800",
+        policies: 1,
+        mediaCoverage: 12,
+        events: 10,
+        description: "Institutional rooftop solar installation meeting daytime clean energy power demands.",
+        initiatives: ["200 kWp rooftop capacity", "Zero carbon emissions", "Grid-tie bidirectional metering"],
+        metric: { value: "200 kWp", label: "Clean Solar Grid" },
+        category: "initiative",
+        order: 102
+    },
+    {
+        goalNumber: "INITIATIVE 03",
+        title: "5 Lakh Liter Percolation & STP Reservoirs",
+        subTitle: "Rainwater Percolation & 100% Water Recycling",
+        color: "#00AED9",
+        bgLight: "rgba(0, 174, 217, 0.08)",
+        icon: "https://sdgs.un.org/sites/default/files/goals/E_SDG_Icons-06.jpg",
+        image: "https://images.unsplash.com/photo-1541888946425-d0fbb186156f?auto=format&fit=crop&q=80&w=800",
+        policies: 2,
+        mediaCoverage: 14,
+        events: 8,
+        description: "Rainwater harvesting and treated greywater recycling across campus lawns and plantations.",
+        initiatives: ["5 Lakh liter storage", "100% greywater recycling", "Aquifer replenishment shafts"],
+        metric: { value: "5,00,000 L", label: "Water Reservoir Capacity" },
+        category: "initiative",
+        order: 103
+    }
+];
 const communityOutreachData = { title: '', subtitle: '', projects: [] };
 const tickerAlertsData = [];
 const scholarshipsData = [
@@ -4529,5 +4939,6 @@ module.exports = {
     scholarshipsData,
     placementPageData,
     sportsData,
-    resourcesData
+    resourcesData,
+    sdgsData
 };

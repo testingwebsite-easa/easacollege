@@ -801,5 +801,25 @@ module.exports = {
         timestamp: { type: Date, default: Date.now },
         isReel: { type: Boolean, default: false },
         isActive: { type: Boolean, default: true }
+    }, { timestamps: true })),
+    SdgItem: mongoose.model('SdgItem', new mongoose.Schema({
+        goalNumber: { type: String, default: '' },
+        title: { type: String, required: true },
+        subTitle: { type: String, default: '' },
+        color: { type: String, default: '#10B981' },
+        bgLight: { type: String, default: 'rgba(16, 185, 129, 0.08)' },
+        icon: { type: String, default: '' },
+        image: { type: String, required: true },
+        description: { type: String, default: '' },
+        policies: { type: Number, default: 0 },
+        mediaCoverage: { type: Number, default: 0 },
+        events: { type: Number, default: 0 },
+        initiatives: [{ type: String }],
+        metric: {
+            value: { type: String, default: '' },
+            label: { type: String, default: '' }
+        },
+        category: { type: String, default: 'goal' },
+        order: { type: Number, default: 0 }
     }, { timestamps: true }))
 };

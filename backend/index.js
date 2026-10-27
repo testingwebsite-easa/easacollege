@@ -23,6 +23,8 @@ const { router: authRouter } = require('./routes/auth');
 const { router: outcomesRouter, setProgramOutcomeModel } = require('./routes/outcomes');
 // Import departments routes
 const departmentsRouter = require('./routes/departments');
+// Import route documentation & API explorer
+const { router: docsRouter, routesCatalog } = require('./routes/docs');
 
 const {
     Faculty, FacultyStat, NewsEvent, HeroSlide, GalleryEvent, GalleryImage,
@@ -33,7 +35,8 @@ const {
     Enquiry, TickerAlert, LibraryData, Scholarship, PopupAlert, PlacementPage,
     VideoGallery, Grievance, VirtualTour, PageHero, Sport, Moment, Advice,
     FestPage, User, ProgramOutcome, Counseling, StartupPitch, PacFeedback,
-    PartnerConnect, NewsletterSubscriber, DepartmentLab, InstagramMedia
+    PartnerConnect, NewsletterSubscriber, DepartmentLab, InstagramMedia,
+    SdgItem
 } = require('./models/Schemas');
 
 
@@ -195,9 +198,31 @@ app.use('/docs', express.static(path.join(__dirname, 'public/docs'), {
 app.use('/api/auth', authRouter);
 app.use('/api/outcomes', outcomesRouter);
 app.use('/api/departments', departmentsRouter);
+app.use('/api', docsRouter);
+
+// Convenient alias redirects for route documentation
+app.get('/api-docs', (req, res) => res.redirect('/api/docs'));
+app.get('/docs/api', (req, res) => res.redirect('/api/docs'));
+app.get('/docs', (req, res, next) => {
+    // If browsing /docs or /docs/ directly, redirect to the interactive docs
+    if (req.path === '/' || req.path === '') {
+        return res.redirect('/api/docs');
+    }
+    next();
+});
 
 app.get('/', (req, res) => {
-    res.send('Welcome to EASA College API');
+    if (req.headers.accept?.includes('text/html')) {
+        return res.redirect('/api/docs');
+    }
+    res.json({
+        service: "EASA College Backend API",
+        status: "online",
+        health: "/health",
+        apiHealth: "/api/health",
+        docs: "/api/docs",
+        routes: "/api/routes"
+    });
 });
 
 // --- Authentication ---
@@ -473,7 +498,8 @@ const {
     scholarshipsData,
     placementPageData,
     sportsData,
-    resourcesData
+    resourcesData,
+    sdgsData
 } = require('./data');
 
 // --- Instagram Media Endpoints ---
@@ -666,14 +692,81 @@ mongoose.connect(process.env.MONGO_URI)
         isConnected = false;
     });
 
-// --- Health Check Endpoint ---
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        database: isConnected ? 'connected' : 'disconnected',
-        timestamp: new Date().toISOString()
-    });
-});
+// --- Comprehensive Health & System Monitoring Endpoints ---
+const getHealthStatus = (req, res) => {
+    const dbStates = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+    const readyState = mongoose.connection.readyState;
+    const dbStatus = dbStates[readyState] || (isConnected ? 'connected' : 'disconnected');
+    const isDbHealthy = readyState === 1 || isConnected;
+
+    const uptimeSec = Math.floor(process.uptime());
+    const days = Math.floor(uptimeSec / 86400);
+    const hours = Math.floor((uptimeSec % 86400) / 3600);
+    const minutes = Math.floor((uptimeSec % 3600) / 60);
+    const seconds = uptimeSec % 60;
+    const formattedUptime = [
+        days > 0 ? `${days}d` : '',
+        hours > 0 ? `${hours}h` : '',
+        minutes > 0 ? `${minutes}m` : '',
+        `${seconds}s`
+    ].filter(Boolean).join(' ') || '0s';
+
+    const mem = process.memoryUsage();
+    const isAwsConfigured = !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_BUCKET_NAME);
+
+    const healthData = {
+        status: isDbHealthy ? 'healthy' : 'degraded',
+        timestamp: new Date().toISOString(),
+        uptime: {
+            seconds: uptimeSec,
+            human: formattedUptime
+        },
+        database: {
+            status: dbStatus,
+            readyState: readyState,
+            host: mongoose.connection.host || 'cluster0.mongodb.net',
+            name: mongoose.connection.name || 'easa-college'
+        },
+        storage: {
+            driver: isAwsConfigured ? 'aws-s3' : 'local-disk',
+            bucket: isAwsConfigured ? process.env.AWS_BUCKET_NAME : null,
+            region: isAwsConfigured ? (process.env.AWS_REGION || 'eu-north-1') : null
+        },
+        system: {
+            nodeVersion: process.version,
+            platform: process.platform,
+            pid: process.pid,
+            memory: {
+                rssMB: Math.round(mem.rss / (1024 * 1024)),
+                heapTotalMB: Math.round(mem.heapTotal / (1024 * 1024)),
+                heapUsedMB: Math.round(mem.heapUsed / (1024 * 1024)),
+                externalMB: Math.round(mem.external / (1024 * 1024))
+            }
+        },
+        apiDocsUrl: '/api/docs',
+        routesTotal: routesCatalog?.length || 0,
+        version: '1.0.0'
+    };
+
+    const statusCode = isDbHealthy || req.query.tolerant === 'true' ? 200 : 503;
+    res.status(statusCode).json(healthData);
+};
+
+// Mount root and API health endpoints
+app.get('/health', getHealthStatus);
+app.head('/health', (req, res) => res.status(isConnected ? 200 : 503).end());
+app.get('/api/health', getHealthStatus);
+app.head('/api/health', (req, res) => res.status(isConnected ? 200 : 503).end());
+
+// Fast lightweight ping endpoints (for load balancers & container orchestrators)
+const handlePing = (req, res) => res.json({ status: 'ok', pong: true, time: Date.now() });
+app.get('/health/ping', handlePing);
+app.get('/api/health/ping', handlePing);
 
 const seedData = async () => {
     try {
@@ -790,7 +883,8 @@ const seedData = async () => {
             seedIfEmpty(CommunityOutreach, communityOutreachData, {}, true),
             seedIfEmpty(Scholarship, scholarshipsData),
             seedIfEmpty(PlacementPage, placementPageData, {}, true),
-            seedIfEmpty(Sport, sportsData)
+            seedIfEmpty(Sport, sportsData),
+            seedIfEmpty(SdgItem, sdgsData)
         ]);
 
         // Seeding Resources: Sync from data.js
@@ -4616,6 +4710,100 @@ app.delete('/api/partner-connect/:id', async (req, res) => {
     }
 });
 
+// ==================== SDG GOALS & IMAGES ENDPOINTS ====================
+app.get(['/api/sdgs', '/api/sdg-images'], async (req, res) => {
+    try {
+        const { category } = req.query;
+        if (!isConnected) {
+            let filtered = sdgsData;
+            if (category) filtered = filtered.filter(item => item.category === category);
+            return res.json(filtered);
+        }
+
+        const query = {};
+        if (category) {
+            query.category = category;
+        }
+
+        let items = await SdgItem.find(query).sort({ order: 1, createdAt: 1 });
+        // Fallback to initial sdgsData if database collection is empty
+        if (!items || items.length === 0) {
+            let filtered = sdgsData;
+            if (category) filtered = filtered.filter(item => item.category === category);
+            return res.json(filtered);
+        }
+        res.json(items);
+    } catch (err) {
+        console.error("Error fetching SDGs:", err);
+        const { category } = req.query;
+        let filtered = sdgsData;
+        if (category) filtered = filtered.filter(item => item.category === category);
+        res.json(filtered);
+    }
+});
+
+app.get(['/api/sdgs/:id', '/api/sdg-images/:id'], async (req, res) => {
+    try {
+        if (!isConnected) {
+            const found = sdgsData.find(s => s._id === req.params.id || s.goalNumber === req.params.id || s.order === Number(req.params.id));
+            if (found) return res.json(found);
+            return res.status(404).json({ error: "SDG item not found" });
+        }
+        const item = await SdgItem.findById(req.params.id);
+        if (!item) return res.status(404).json({ error: "SDG item not found" });
+        res.json(item);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch SDG item" });
+    }
+});
+
+app.post(['/api/sdgs', '/api/sdg-images'], async (req, res) => {
+    try {
+        if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+        const item = new SdgItem(req.body);
+        await item.save();
+        res.status(201).json(item);
+    } catch (err) {
+        console.error("Error creating SDG item:", err);
+        res.status(500).json({ error: "Failed to create SDG item: " + err.message });
+    }
+});
+
+app.put(['/api/sdgs/:id', '/api/sdg-images/:id'], async (req, res) => {
+    try {
+        if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+        const item = await SdgItem.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!item) return res.status(404).json({ error: "SDG item not found" });
+        res.json(item);
+    } catch (err) {
+        console.error("Error updating SDG item:", err);
+        res.status(500).json({ error: "Failed to update SDG item: " + err.message });
+    }
+});
+
+app.patch(['/api/sdgs/:id', '/api/sdg-images/:id'], async (req, res) => {
+    try {
+        if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+        const item = await SdgItem.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+        if (!item) return res.status(404).json({ error: "SDG item not found" });
+        res.json(item);
+    } catch (err) {
+        console.error("Error updating SDG item:", err);
+        res.status(500).json({ error: "Failed to update SDG item: " + err.message });
+    }
+});
+
+app.delete(['/api/sdgs/:id', '/api/sdg-images/:id'], async (req, res) => {
+    try {
+        if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+        await SdgItem.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: "SDG item deleted successfully" });
+    } catch (err) {
+        console.error("Error deleting SDG item:", err);
+        res.status(500).json({ error: "Failed to delete SDG item" });
+    }
+});
+
 // ==================== NEWSLETTER SUBSCRIBERS ENDPOINTS ====================
 app.post('/api/newsletter', async (req, res) => {
     if (!isConnected) return res.status(503).json({ error: "Database not connected" });
@@ -4756,7 +4944,15 @@ if (fs.existsSync(distPath)) {
         if (req.method !== 'GET') {
             return next();
         }
-        if (req.path.startsWith('/api/') || req.path.startsWith('/images/') || req.path.startsWith('/docs/')) {
+        if (
+            req.path === '/health' ||
+            req.path.startsWith('/health/') ||
+            req.path === '/docs' ||
+            req.path.startsWith('/docs/') ||
+            req.path === '/api-docs' ||
+            req.path.startsWith('/api/') ||
+            req.path.startsWith('/images/')
+        ) {
             return next();
         }
         setSecurityHeaders(res);
