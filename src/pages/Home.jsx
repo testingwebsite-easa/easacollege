@@ -9,6 +9,7 @@ import AboutSection from '../components/AboutSection'
 import { AccreditationsBar } from '../components/AccreditationsBar'
 import Footer from '../components/Footer'
 import useScrollAnimation from '../hooks/useScrollAnimation'
+import BannerPagePopup from '../components/BannerPagePopup';
 
 const ProgramsSection = lazy(() => import('../components/ProgramsSection'))
 const PlacementSection = lazy(() => import('../components/PlacementSection'))
@@ -38,6 +39,8 @@ function Home() {
             />
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
             <HeroCarousel onApplyClick={() => setShowAdmissionForm(true)} />
+            {/* Banner popup is 100% controlled from BannerPagePopup.jsx - no need to edit Home.jsx */}
+            <BannerPagePopup />
             <HeroQuickStats />
             <LuxuryMarquee />
             <AboutSection />
