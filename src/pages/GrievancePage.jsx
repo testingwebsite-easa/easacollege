@@ -338,11 +338,13 @@ const GrievancePage = ({ defaultType }) => {
             });
 
             const result = await response.json();
+            const isSuccess = response.ok && (result.success !== false && (result.success || result.ticketId || result._id || result.grievance));
 
-            if (response.ok && result.success) {
+            if (isSuccess) {
+                const assignedTicketId = result.ticketId || result.grievance?.ticketId || (result._id ? `ECET-GRV-${result._id.slice(-6).toUpperCase()}` : 'ECET-RECORD');
                 setStatus('success');
                 setLastSubmission({
-                    ticketId: result.ticketId,
+                    ticketId: assignedTicketId,
                     type: payload.type,
                     name: formData.name,
                     category: payload.category,
@@ -355,7 +357,7 @@ const GrievancePage = ({ defaultType }) => {
                         minute: '2-digit'
                     })
                 });
-                showToast(`Grievance registered! Ticket ID: ${result.ticketId}`, 'success', 'Submitted');
+                showToast(`Grievance registered! Ticket ID: ${assignedTicketId}`, 'success', 'Submitted');
             } else {
                 setStatus('error');
                 showToast(result.error || 'Failed to submit grievance', 'error', 'Error');

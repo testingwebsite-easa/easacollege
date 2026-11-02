@@ -183,7 +183,7 @@ const AdmissionsPage = () => {
 
     // Key Stats
     const stats = [
-        { value: "2763", label: "TNEA Counselling Code", highlight: true, subtext: "Official Code" },
+        { value: "2749", label: "TNEA Counselling Code", highlight: true, subtext: "Official Code" },
         { value: "96%", label: "Placement Track Record", highlight: false, subtext: "Verified Placements" },
         { value: "₹16 LPA", label: "Highest Salary Package", highlight: false, subtext: "Top Product Tier" },
         { value: "150+", label: "Top Global Recruiters", highlight: false, subtext: "Active Partners" },
@@ -361,7 +361,7 @@ const AdmissionsPage = () => {
         {
             step: "02",
             title: "Counselling & Quota",
-            desc: "Choose EASA College (TNEA Counselling Code: 2763) or opt for direct Management / Sports Quota admission."
+            desc: "Choose EASA College (TNEA Counselling Code: 2749) or opt for direct Management / Sports Quota admission."
         },
         {
             step: "03",
@@ -467,7 +467,7 @@ const AdmissionsPage = () => {
     const faqs = [
         {
             q: "What is EASA College's TNEA Counselling Code?",
-            a: "EASA College of Engineering and Technology's official TNEA Counselling Code is 2763. You can choose code 2763 during Anna University / TNEA online counselling."
+            a: "EASA College of Engineering and Technology's official TNEA Counselling Code is 2749. You can choose code 2749 during Anna University / TNEA online counselling."
         },
         {
             q: "Can I get direct admission under Management Quota?",
@@ -511,8 +511,8 @@ const AdmissionsPage = () => {
     return (
         <div style={{ background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)', overflowX: 'hidden' }}>
             <SEO
-                title="Admissions 2026-27 | EASA College of Engineering & Technology (TNEA Code: 2763)"
-                description="Apply now for B.E., B.Tech, MBA, and M.E. programs at EASA College of Engineering & Technology, Coimbatore. TNEA Code: 2763. Explore 3D highlights, courses, scholarships, placements, and campus life."
+                title="Admissions 2026-27 | EASA College of Engineering & Technology (TNEA Code: 2749)"
+                description="Apply now for B.E., B.Tech, MBA, and M.E. programs at EASA College of Engineering & Technology, Coimbatore. TNEA Code: 2749. Explore 3D highlights, courses, scholarships, placements, and campus life."
             />
 
             <Navbar onApplyClick={() => handleOpenModal()} />
@@ -548,7 +548,7 @@ const AdmissionsPage = () => {
                     boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.2)'
                 }}>
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 10px #22c55e' }}></span>
-                    <strong style={{ color: '#ffffff' }}>TNEA CODE: 2763</strong>
+                    <strong style={{ color: '#ffffff' }}>TNEA CODE: 2749</strong>
                 </span>
                 <span style={{ color: '#ffffff' }}>🎓 Admissions Open for Academic Year 2026 - 2027 (UG / PG / Lateral Entry)</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
@@ -668,7 +668,7 @@ const AdmissionsPage = () => {
                                     boxShadow: '0 8px 24px rgba(230, 182, 39, 0.2)'
                                 }}
                             >
-                                <FaStar /> TNEA COUNSELLING CODE: 2763
+                                <FaStar /> TNEA COUNSELLING CODE: 2749
                             </motion.div>
 
                             <h1 style={{
@@ -2022,7 +2022,7 @@ const AdmissionsPage = () => {
                                 </motion.button>
 
                                 <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                                    TNEA Code: <strong style={{ color: '#ffffff' }}>2763</strong> • No Registration Charges for Initial Enquiry
+                                    TNEA Code: <strong style={{ color: '#ffffff' }}>2749</strong> • No Registration Charges for Initial Enquiry
                                 </div>
                             </div>
                         </div>

@@ -4037,54 +4037,115 @@ app.get('/api/grievances', async (req, res) => {
 });
 
 app.post('/api/grievances', async (req, res) => {
-    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    if (!isConnected) return res.status(503).json({ success: false, error: "Database not connected" });
     try {
-        const grievance = new Grievance(req.body);
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        const ticketId = req.body.ticketId || `ECET-GRV-${randomNum}`;
+
+        const grievanceData = {
+            ...req.body,
+            ticketId
+        };
+
+        const grievance = new Grievance(grievanceData);
         await grievance.save();
 
-        // --- Send Email Notifications ---
-        try {
-            const adminMail = {
-                to: process.env.SMTP_TO || 'enquiry@ecetonline.com',
-                subject: `New Grievance Submitted - ${req.body.name}`,
-                html: `
-                    <h2>New Grievance Report Received</h2>
-                    <p><strong>Name:</strong> ${req.body.name}</p>
-                    <p><strong>Email:</strong> ${req.body.email}</p>
-                    <p><strong>Type:</strong> ${req.body.type}</p>
-                    <p><strong>Subject:</strong> ${req.body.subject}</p>
-                    <p><strong>Message:</strong> ${req.body.message}</p>
-                    <hr />
-                    <p>This is an automated notification from the EASA College website.</p>
-                `
-            };
+        // Send Email Notifications asynchronously in the background so user doesn't wait
+        (async () => {
+            try {
+                const adminMail = {
+                    to: process.env.SMTP_TO || 'enquiry@ecetonline.com',
+                    subject: `[${ticketId}] New Grievance Submitted - ${grievance.name}`,
+                    html: `
+                        <h2>New Grievance Report Received</h2>
+                        <p><strong>Ticket ID:</strong> ${ticketId}</p>
+                        <p><strong>Name:</strong> ${grievance.name}</p>
+                        <p><strong>Email:</strong> ${grievance.email}</p>
+                        <p><strong>Phone:</strong> ${grievance.phone || 'N/A'}</p>
+                        <p><strong>Type:</strong> ${grievance.type}</p>
+                        <p><strong>Category:</strong> ${grievance.category || 'General'}</p>
+                        <p><strong>Priority:</strong> ${grievance.priority || 'Normal'}</p>
+                        <p><strong>Subject:</strong> ${grievance.subject}</p>
+                        <p><strong>Message:</strong></p>
+                        <blockquote style="background:#f1f5f9;padding:12px;border-left:4px solid #1B2A6B;">${grievance.message}</blockquote>
+                        <hr />
+                        <p>This is an automated notification from the EASA College website.</p>
+                    `
+                };
 
-            const userMail = {
-                to: req.body.email,
-                subject: `Grievance Acknowledged - EASA College`,
-                html: `
-                    <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
-                        <h2>Grievance Acknowledgement</h2>
-                        <p>Dear ${req.body.name},</p>
-                        <p>We have received your grievance report regarding <strong>${req.body.subject}</strong>. Our grievance committee will review the matter and take appropriate action.</p>
-                        <p>We take all concerns seriously and aim to resolve them as soon as possible.</p>
-                        <p>Best regards,<br/><strong>Grievance Committee<br/>EASA College</strong></p>
-                    </div>
-                `
-            };
+                const userMail = {
+                    to: grievance.email,
+                    subject: `Grievance Acknowledged [Ticket: ${ticketId}] - EASA College`,
+                    html: `
+                        <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:10px;">
+                            <h2 style="color:#1B2A6B;">Grievance Acknowledgement</h2>
+                            <p>Dear ${grievance.name},</p>
+                            <p>We have received your grievance report regarding <strong>${grievance.subject}</strong>.</p>
+                            <div style="background:#f8fafc; padding:15px; border-radius:8px; margin:15px 0;">
+                                <p style="margin:5px 0;"><strong>Official Ticket ID:</strong> <span style="font-family:monospace; font-size:1.15rem; color:#1B2A6B; font-weight:bold;">${ticketId}</span></p>
+                                <p style="margin:5px 0;"><strong>Category:</strong> ${grievance.category || 'General'}</p>
+                                <p style="margin:5px 0;"><strong>Status:</strong> Pending (Resolution SLA: 3–5 Working Days)</p>
+                            </div>
+                            <p>You can track the live progress of your representation at any time on our website using your Ticket ID.</p>
+                            <p>Best regards,<br/><strong>Statutory Grievance Redressal Committee<br/>EASA College of Engineering and Technology</strong></p>
+                        </div>
+                    `
+                };
 
-            await Promise.all([
-                sendEmail(adminMail),
-                sendEmail(userMail)
-            ]);
-            console.log("Grievance notification emails sent successfully");
-        } catch (mailErr) {
-            console.error("Failed to send grievance email notifications:", mailErr.message);
+                await Promise.allSettled([
+                    sendEmail(adminMail),
+                    sendEmail(userMail)
+                ]);
+                console.log(`[Grievance] Notification emails processed for ${ticketId}`);
+            } catch (mailErr) {
+                console.error("[Grievance] Failed to send grievance email notifications:", mailErr.message);
+            }
+        })();
+
+        // Instantly return 201 with success: true and ticketId
+        res.status(201).json({
+            success: true,
+            ticketId,
+            message: "Grievance registered successfully",
+            _id: grievance._id,
+            grievance
+        });
+    } catch (err) {
+        console.error("Failed to submit grievance:", err);
+        res.status(500).json({ success: false, error: "Failed to submit grievance" });
+    }
+});
+
+// Track Grievances by Ticket ID, Email, Phone, or Roll No
+app.get('/api/grievances/track/:query', async (req, res) => {
+    if (!isConnected) return res.status(503).json({ error: "Database not connected" });
+    try {
+        const query = (req.params.query || '').trim();
+        if (!query) {
+            return res.json([]);
         }
 
-        res.status(201).json(grievance);
+        const cleanDigits = query.replace(/\D/g, '');
+        const searchConditions = [
+            { ticketId: { $regex: new RegExp(`^${query}$`, 'i') } },
+            { ticketId: { $regex: new RegExp(query, 'i') } },
+            { email: { $regex: new RegExp(`^${query}$`, 'i') } },
+            { rollNo: { $regex: new RegExp(`^${query}$`, 'i') } }
+        ];
+
+        if (cleanDigits.length >= 7) {
+            searchConditions.push({ phone: { $regex: new RegExp(cleanDigits, 'i') } });
+        }
+
+        if (mongoose.Types.ObjectId.isValid(query)) {
+            searchConditions.push({ _id: query });
+        }
+
+        const grievances = await Grievance.find({ $or: searchConditions }).sort({ createdAt: -1 });
+        res.json(grievances);
     } catch (err) {
-        res.status(500).json({ error: "Failed to submit grievance" });
+        console.error("Grievance tracking error:", err);
+        res.status(500).json({ error: "Failed to track grievance" });
     }
 });
 

@@ -26,7 +26,7 @@ import {
 
 const AdmissionEnquiryAdmin = () => {
     const navigate = useNavigate();
-    const baseUrl = API_BASE_URL || 'http://localhost:5000';
+    const baseUrl = API_BASE_URL;
 
     // Auth states
     const [token, setToken] = useState(

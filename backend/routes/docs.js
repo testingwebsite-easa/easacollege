@@ -1459,9 +1459,6 @@ function renderDocsHtml(baseUrl = '') {
             <a href="/api/routes" class="btn-link" target="_blank" title="Download raw JSON schema">
                 <span>📋</span> Raw JSON
             </a>
-            <a href="/admin" class="btn-link btn-primary" title="Launch Control Panel">
-                <span>🔐</span> Admin Panel
-            </a>
         </div>
     </header>
 

@@ -2,11 +2,68 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import API_BASE_URL from '../api';
 
+// Official verified EASA College Leadership with official Amazon S3 images
+const OFFICIAL_MANAGEMENT_TEAM = [
+    {
+        _id: "lead-001",
+        name: "Late Shri T.E. Eswaramoothy",
+        designation: "Founder & Chairman",
+        category: "founder",
+        image_url: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1769498987215-989607021-founder.jpeg",
+        message: "Easa College of Engineering and Technology stands as a testament to the vision and commitment of our late founder to excellence in technical education.",
+        order: 1
+    },
+    {
+        _id: "lead-002",
+        name: "Smt. Sujatha Eswaramoorthy",
+        designation: "Chairperson",
+        category: "chairperson",
+        image_url: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1769496978582-206081635-chairperson.jpeg",
+        message: "It gives me immense pleasure to welcome you to Easa College of Engineering and Technology. Our college has seen continuous growth and success.",
+        order: 2
+    },
+    {
+        _id: "lead-003",
+        name: "Shri. T.E. Ajith",
+        designation: "Secretary & CEO",
+        category: "secretary",
+        image_url: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1769496992644-586176077-ceo.jpeg",
+        message: "As the Secretary & CEO of Easa College, I am committed to driving operational excellence and strategic growth.",
+        order: 3
+    },
+    {
+        _id: "lead-004",
+        name: "Shri. T.E. Aadarsh",
+        designation: "Correspondent",
+        category: "correspondent",
+        image_url: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1769497006357-389813990-cro.jpeg",
+        message: "In my role as Correspondent, I focus on the holistic development of our students and the continuous improvement of our campus facilities.",
+        order: 4
+    },
+    {
+        _id: "lead-005",
+        name: "Dr. Z. Robert Kennedy",
+        designation: "Principal",
+        category: "principal",
+        image_url: "https://easa-college.s3.eu-north-1.amazonaws.com/images/1769497023151-755142356-pri.jpeg",
+        message: "Welcome to Easa College of Engineering and Technology. As the Principal, I am honored to lead an institution that prioritizes academic excellence.",
+        order: 5
+    }
+];
+
 const ManagementSection = ({ category, title = "Visionary Leadership", subtitle = "Guiding EASA College towards excellence", isStatic = false }) => {
-    const [managementTeam, setManagementTeam] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
+    // Initialize immediately with the official leadership so the section never renders empty or missing cards
+    const [managementTeam, setManagementTeam] = React.useState(() => {
+        if (category) {
+            const filtered = OFFICIAL_MANAGEMENT_TEAM.filter(m => m.category === category);
+            return filtered.length > 0 ? filtered : OFFICIAL_MANAGEMENT_TEAM.slice(0, 5);
+        }
+        return isStatic ? OFFICIAL_MANAGEMENT_TEAM.slice(0, 5) : OFFICIAL_MANAGEMENT_TEAM;
+    });
+    const [loading, setLoading] = React.useState(false);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchTeam = async () => {
             try {
                 const url = category
@@ -14,52 +71,41 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
                     : `${API_BASE_URL}/api/management-team`;
 
                 const res = await fetch(url);
-                const data = await res.json();
-                let teamList = Array.isArray(data) ? [...data] : [];
+                if (!res.ok) return;
 
-                // Check if principal is already in the list
+                const data = await res.json();
+                if (!Array.isArray(data) || data.length === 0) return;
+
+                let teamList = [...data];
+
+                // Check if principal is in the list
                 const hasPrincipal = teamList.some(m =>
                     m.category === 'principal' ||
                     m.designation?.toLowerCase().includes('principal') ||
                     m.name?.toLowerCase().includes('principal')
                 );
 
-                // If not filtered to a single subcategory and principal is missing, fetch principal
+                // If not filtered to a single subcategory and principal is missing, append principal
                 if (!hasPrincipal && (!category || category === 'management' || category === 'leadership')) {
-                    try {
-                        const pRes = await fetch(`${API_BASE_URL}/api/management-team?category=principal`);
-                        const pData = await pRes.json();
-                        if (Array.isArray(pData) && pData.length > 0) {
-                            teamList.push(pData[0]);
-                        } else {
-                            // Default Principal entry if not populated yet
-                            teamList.push({
-                                name: "Dr. Z. Robert Kennedy",
-                                designation: "PRINCIPAL",
-                                image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
-                                category: "principal"
-                            });
-                        }
-                    } catch (e) {
-                        teamList.push({
-                            name: "Dr. Z. Robert Kennedy",
-                            designation: "PRINCIPAL",
-                            image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
-                            category: "principal"
-                        });
+                    const principalFallback = OFFICIAL_MANAGEMENT_TEAM.find(m => m.category === 'principal');
+                    if (principalFallback) {
+                        teamList.push(principalFallback);
                     }
                 }
 
-                const limitedData = (!category || isStatic) ? teamList.slice(0, 5) : teamList;
-                setManagementTeam(limitedData);
+                if (isMounted) {
+                    const limitedData = (!category || isStatic) ? teamList.slice(0, 5) : teamList;
+                    setManagementTeam(limitedData);
+                }
             } catch (err) {
-                console.error("Error fetching management team:", err);
+                console.error("Error fetching management team, using official default team:", err);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
 
         fetchTeam();
+        return () => { isMounted = false; };
     }, [category, isStatic]);
 
     const isScrolling = false;
@@ -317,4 +363,3 @@ const ManagementSection = ({ category, title = "Visionary Leadership", subtitle 
 };
 
 export default ManagementSection;
-

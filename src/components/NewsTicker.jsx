@@ -1,25 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE_URL from '../api';
 
+// Reliable default alerts so ticker always displays on every version/device
+const DEFAULT_ALERTS = [
+    {
+        _id: 'default-1',
+        message: 'Admissions Open for Academic Year 2026 - 2027 (TNEA Counselling Code: 2749)',
+        link: '/admissions',
+        isActive: true,
+        type: 'info'
+    },
+    {
+        _id: 'default-2',
+        message: 'Campus Recruitment Drive 2026 - 96% Placement Conversion Record with Top MNCs',
+        link: '/placement',
+        isActive: true,
+        type: 'info'
+    },
+    {
+        _id: 'default-3',
+        message: 'NOV-DEC 2025-2026 Examination Schedule & Results Released',
+        link: 'https://ecetonline.embase.in/exam/',
+        isActive: true,
+        type: 'danger'
+    }
+];
+
 const NewsTicker = () => {
-    const [alerts, setAlerts] = useState([]);
+    const [alerts, setAlerts] = useState(DEFAULT_ALERTS);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchAlerts = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/ticker-alerts`);
                 if (response.ok) {
                     const data = await response.json();
-                    setAlerts(data);
+                    if (isMounted && Array.isArray(data) && data.length > 0) {
+                        setAlerts(data);
+                    }
                 }
             } catch (error) {
                 console.error("Failed to fetch ticker alerts:", error);
+                // Keep default alerts visible on network failure
             }
         };
         fetchAlerts();
+        return () => { isMounted = false; };
     }, []);
 
-    if (alerts.length === 0) return null;
+    if (!alerts || alerts.length === 0) return null;
 
     const renderItem = (item, key) => (
         <a

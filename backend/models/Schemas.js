@@ -652,15 +652,32 @@ module.exports = {
         createdAt: { type: Date, default: Date.now }
     })),
     Grievance: mongoose.model('Grievance', new mongoose.Schema({
+        ticketId: { type: String, index: true },
         name: String,
         email: String,
         phone: String,
         type: String, // parents, students, faculty, visitors
+        category: String,
         subject: String,
         message: String,
+        priority: { type: String, default: 'Normal' },
         rollNo: String,
         department: String,
+        year: String,
+        semester: String,
+        relationship: String,
+        wardName: String,
+        wardRollNo: String,
+        wardDepartment: String,
+        wardYear: String,
+        employeeId: String,
+        designation: String,
+        facultyDepartment: String,
+        organization: String,
+        visitorType: String,
+        visitDate: String,
         status: { type: String, default: 'Pending' }, // Pending, Reviewed, Resolved
+        resolutionNotes: String,
         createdAt: { type: Date, default: Date.now }
     })),
     VirtualTour: mongoose.model('VirtualTour', new mongoose.Schema({

@@ -1,4 +1,31 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// Resolve the API base URL reliably across local development, staging, and production
+const resolveApiBaseUrl = () => {
+    const envUrl = (import.meta.env.VITE_API_URL || '').trim();
+
+    if (typeof window !== 'undefined') {
+        const host = window.location.hostname;
+        const isLocalHost = host === 'localhost' || host === '127.0.0.1' || host === '[::1]' || host.endsWith('.local');
+
+        // On deployed environments (dev / staging / prod / mobile access):
+        // If VITE_API_URL was baked in with localhost or was empty, never let it fail - fallback to live API!
+        if (!isLocalHost) {
+            if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+                return envUrl.replace(/\/+$/, '');
+            }
+            return 'https://api.ecetonline.com';
+        }
+
+        // On localhost:
+        if (envUrl) {
+            return envUrl.replace(/\/+$/, '');
+        }
+        return 'http://localhost:5000';
+    }
+
+    return envUrl && !envUrl.includes('localhost') ? envUrl.replace(/\/+$/, '') : 'https://api.ecetonline.com';
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 // Client-side cache: Memory Map + SessionStorage (for instant multi-page navigations)
 const memoryCache = new Map();
@@ -110,16 +137,45 @@ function setCachedEntry(cacheKey, data) {
     } catch (_) {}
 }
 
-// Create a synthetic Response instance from cached JSON data
+// Create a synthetic Response instance universally compatible across all browsers (old & new)
 function createCachedResponse(data) {
-    return new Response(JSON.stringify(data), {
+    try {
+        if (typeof Response === 'function') {
+            const headers = (typeof Headers === 'function')
+                ? new Headers({ 'Content-Type': 'application/json', 'X-EASA-Cache': 'HIT' })
+                : { 'Content-Type': 'application/json', 'X-EASA-Cache': 'HIT' };
+            return new Response(JSON.stringify(data), {
+                status: 200,
+                statusText: 'OK',
+                headers
+            });
+        }
+    } catch (_) {
+        // Fallback for older browsers / webviews where new Response() throws
+    }
+
+    // Universal duck-typed Response object compatible with all JS environments
+    const jsonStr = typeof data === 'string' ? data : JSON.stringify(data);
+    return {
+        ok: true,
         status: 200,
         statusText: 'OK',
-        headers: new Headers({
-            'Content-Type': 'application/json',
-            'X-EASA-Cache': 'HIT'
-        })
-    });
+        headers: {
+            get: (name) => {
+                const k = (name || '').toLowerCase();
+                if (k === 'content-type') return 'application/json';
+                if (k === 'x-easa-cache') return 'HIT';
+                return null;
+            },
+            has: (name) => {
+                const k = (name || '').toLowerCase();
+                return k === 'content-type' || k === 'x-easa-cache';
+            }
+        },
+        json: async () => (typeof data === 'object' && data !== null ? data : JSON.parse(jsonStr)),
+        text: async () => jsonStr,
+        clone: function() { return this; }
+    };
 }
 
 // Preload/prefetch an API endpoint into cache in advance
@@ -129,7 +185,7 @@ export function preloadApi(url) {
     fetch(fullUrl).catch(() => {});
 }
 
-// Enhanced fetch wrapper with caching, SWR, and request deduplication
+// Enhanced fetch wrapper with caching, SWR, request deduplication & format safety
 export async function apiFetch(input, init) {
     const urlStr = typeof input === 'string' ? input : (input?.url || '');
     const method = (init?.method || 'GET').toUpperCase();
@@ -169,8 +225,13 @@ export async function apiFetch(input, init) {
     // If cached but slightly stale (2 - 10 mins), serve stale immediately and revalidate in background (SWR)
     if (cached && (now - cached.timestamp < STALE_TTL_MS)) {
         // Trigger background revalidation
-        const bgPromise = originalFetch(input, init)
-            .then(res => res.ok ? res.clone().json() : null)
+        originalFetch(input, init)
+            .then(res => {
+                if (!res.ok) return null;
+                const ct = res.headers?.get ? res.headers.get('content-type') : '';
+                if (ct && !ct.includes('application/json') && !ct.includes('text/plain')) return null;
+                return res.clone().json();
+            })
             .then(freshData => {
                 if (freshData) setCachedEntry(cacheKey, freshData);
             })
@@ -184,6 +245,12 @@ export async function apiFetch(input, init) {
         try {
             const response = await originalFetch(input, init);
             if (response.ok) {
+                // Ensure response is actually JSON before parsing (prevent Vercel HTML rewrite crash)
+                const contentType = response.headers?.get ? response.headers.get('content-type') : '';
+                if (contentType && !contentType.includes('application/json') && !contentType.includes('text/plain')) {
+                    if (cached) return cached.data;
+                    return null;
+                }
                 const clone = response.clone();
                 const data = await clone.json();
                 setCachedEntry(cacheKey, data);
@@ -191,7 +258,7 @@ export async function apiFetch(input, init) {
             }
             return null;
         } catch (err) {
-            // If network fails (e.g., offline or cold start timeout), fallback to any stale cache
+            // If network fails (e.g. offline, timeout, cold start), fallback to any stale cache
             if (cached) {
                 return cached.data;
             }
@@ -228,7 +295,15 @@ if (typeof window !== 'undefined' && !window.__easa_fetch_optimized__) {
         const urlStr = typeof input === 'string' ? input : (input?.url || '');
         // Intercept calls targeting our API
         if (urlStr.includes('/api/')) {
-            return apiFetch(input, init);
+            let normalizedInput = input;
+            if (typeof input === 'string') {
+                if (input.startsWith('/api/')) {
+                    normalizedInput = `${API_BASE_URL}${input}`;
+                } else if (input.includes('localhost:5000/api/')) {
+                    normalizedInput = input.replace(/http:\/\/localhost:5000/, API_BASE_URL);
+                }
+            }
+            return apiFetch(normalizedInput, init);
         }
         return originalFetch(input, init);
     };

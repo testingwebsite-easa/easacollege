@@ -8,8 +8,6 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1600,
+    target: ['es2015', 'chrome64', 'edge79', 'firefox67', 'safari12'],
   },
 })
-
-
-

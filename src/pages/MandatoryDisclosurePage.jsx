@@ -52,9 +52,9 @@ const MandatoryDisclosurePage = () => {
 
     // Quick Facts / Key Statutory Identifiers
     const statutoryIdentifiers = [
-        { label: 'AICTE Permanent Institute ID', value: '1-3855581', badge: 'AICTE New Delhi' },
-        { label: 'Anna University Counseling Code', value: '2763', badge: 'TNEA Counseling' },
-        { label: 'AISHE Institutional Code', value: 'C-26915', badge: 'MoE, Govt. of India' },
+        { label: 'AICTE Permanent Institute ID', value: '1-4367535', badge: 'AICTE New Delhi' },
+        { label: 'Anna University Counseling Code', value: '2749', badge: 'TNEA Counseling' },
+        { label: 'AISHE Institutional Code', value: 'C-36991', badge: 'MoE, Govt. of India' },
         { label: 'Accreditation & Quality Status', value: "NAAC 'A' Grade Accredited", badge: 'UGC NAAC' },
         { label: 'Autonomous Status', value: 'Conferred by UGC & Anna University', badge: 'Autonomous System' },
         { label: 'Linguistic Minority Status', value: 'Malayalam Linguistic Minority', badge: 'Govt. of Tamil Nadu' },
@@ -175,7 +175,7 @@ const MandatoryDisclosurePage = () => {
             <SEO
                 title="AICTE Mandatory Disclosure | EASA College of Engineering & Technology"
                 description="Official AICTE Mandatory Disclosure for EASA College of Engineering and Technology, Coimbatore. Comprehensive statutory data on approved programs, sanctioned intake, governance, faculty, infrastructure, and statutory committees."
-                keywords="Mandatory Disclosure, AICTE Mandatory Disclosure Coimbatore, EASA College AICTE, Anna University 2763, Sanctioned Intake, Anti Ragging Committee, EOA Reports, Autonomous Engineering College"
+                keywords="Mandatory Disclosure, AICTE Mandatory Disclosure Coimbatore, EASA College AICTE, Anna University 2749, Sanctioned Intake, Anti Ragging Committee, EOA Reports, Autonomous Engineering College"
             />
             <Navbar onApplyClick={() => setShowAdmissionForm(true)} />
 
@@ -232,7 +232,7 @@ const MandatoryDisclosurePage = () => {
                                     ● Live & Verified Status
                                 </span>
                                 <span style={{ fontSize: '0.8rem', fontWeight: '800', background: 'rgba(230, 182, 39, 0.15)', color: goldAccent, padding: '0.2rem 0.65rem', borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    AICTE Permanent ID: 1-3855581
+                                    AICTE Permanent ID: 1-4367535
                                 </span>
                             </div>
                             <h1 style={{ fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)', fontWeight: '900', color: primaryTextColor, marginTop: '4px', margin: 0 }}>
@@ -800,7 +800,7 @@ const MandatoryDisclosurePage = () => {
                                         <p style={{ fontSize: '0.92rem', color: secondaryTextColor, lineHeight: '1.7' }}>
                                             65% of approved UG seats are filled through Tamil Nadu Engineering Admissions (TNEA) single-window counseling conducted by the Directorate of Technical Education (DoTE) / Anna University based on Class 12 PCM cut-off marks.
                                         </p>
-                                        <div style={{ marginTop: '1rem', fontWeight: '800', color: goldAccent }}>TNEA Counseling Code: 2763</div>
+                                        <div style={{ marginTop: '1rem', fontWeight: '800', color: goldAccent }}>TNEA Counseling Code: 2749</div>
                                     </div>
 
                                     <div style={{ padding: '1.8rem', borderRadius: '20px', background: isDark ? 'rgba(0,0,0,0.25)' : '#F8FAFC', border: '1px solid var(--glass-border)' }}>
