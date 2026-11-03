@@ -189,7 +189,6 @@ const SportsPage = () => {
                                             <div style={{ padding: '2rem' }}>
                                                 <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.8rem', color: 'var(--text-main)' }}>{sport.name}</h3>
                                                 <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.6' }}>{sport.description}</p>
-                                                <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'var(--secondary)', fontWeight: 'bold' }}>View Gallery &rarr;</p>
                                             </div>
                                         </motion.div>
                                     ))}
