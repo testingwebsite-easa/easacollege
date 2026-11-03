@@ -321,10 +321,10 @@ const DEFAULT_GALLERY_EVENTS = [
         eventName: "AICTE IDEA Lab & Tech Prototyping Expo",
         date: "2026-01-28",
         photos: [
-            { src: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1200&auto=format&fit=crop", caption: "Automated Robotics & Drone Prototyping at ₹1.2 Cr Lab" },
-            { src: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1200&auto=format&fit=crop", caption: "IoT Sensor Testing & Smart Machine Demonstrations" },
-            { src: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop", caption: "Student Hackathon Teams Live Coding Solutions" },
-            { src: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=1200&auto=format&fit=crop", caption: "3D Rapid Prototyping Machine at AICTE IDEA Lab" }
+            { src: ""},
+            { src: "" },
+            { src: "" },
+            { src: ""}
         ]
     },
     {
