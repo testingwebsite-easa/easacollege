@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../api';
 import Footer from '../components/Footer';
@@ -6,95 +6,114 @@ import Navbar from '../components/Navbar';
 import LoadingBar from '../components/LoadingBar';
 import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
-import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaUniversity, FaArrowRight, FaPlay, FaPause } from 'react-icons/fa';
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import Coverflow3D from '../components/Coverflow3D';
+import { FaTimes, FaCalendarAlt, FaMusic } from 'react-icons/fa';
 
-// LightGallery Imports
-import LightGallery from 'lightgallery/react';
-import lgThumbnail from 'lightgallery/plugins/thumbnail';
-import lgZoom from 'lightgallery/plugins/zoom';
-import 'lightgallery/css/lightgallery.css';
-import 'lightgallery/css/lg-zoom.css';
-import 'lightgallery/css/lg-thumbnail.css';
-
-
-const EventGallery = ({ event }) => {
-    const [nav1, setNav1] = useState(null);
-    const [nav2, setNav2] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const sliderRef1 = useRef(null);
-    const sliderRef2 = useRef(null);
-
-    // Flatten images for this event
-    const items = [
-        { image: event.image, title: event.title, desc: event.description },
-        ...(event.images || []).map((img, i) => ({ image: img, title: event.title, desc: `Photo ${i + 1}` }))
-    ];
-
-    useEffect(() => {
-        setNav1(sliderRef1.current);
-        setNav2(sliderRef2.current);
-    }, []);
-
-    const togglePlay = () => {
-        if (sliderRef1.current) {
-            isPlaying ? sliderRef1.current.slickPause() : sliderRef1.current.slickPlay();
-            setIsPlaying(!isPlaying);
+// Fallback high-res fest events data if API is loading or offline
+const DEFAULT_FEST_PAGE = {
+    title: "DHRUVA 2026 & SARVAM",
+    subtitle: "The Ultimate Inter-Collegiate Cultural, Arts & Tech Extravaganza at EASA College",
+    heroImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1600&auto=format&fit=crop",
+    events: [
+        {
+            title: "Pro Show & Celebrity Night",
+            description: "Electrifying live musical concerts and celebrity performances under the starlit quadrangle.",
+            image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200&auto=format&fit=crop",
+            images: [
+                "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1200&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1200&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1200&auto=format&fit=crop"
+            ]
+        },
+        {
+            title: "Choreonite & Western Dance War",
+            description: "Synchronized beats, acrobatic stunts, and jaw-dropping dance crew face-offs.",
+            image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=1200&auto=format&fit=crop",
+            images: [
+                "https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&w=1200&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?q=80&w=1200&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=1200&auto=format&fit=crop"
+            ]
+        },
+        {
+            title: "Battle of the Bands",
+            description: "High-voltage guitar riffs, heavy percussion, and soaring vocals competing for the championship trophy.",
+            image: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?q=80&w=1200&auto=format&fit=crop",
+            images: [
+                "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1200&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1200&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1200&auto=format&fit=crop"
+            ]
+        },
+        {
+            title: "Traditional Procession & Chenda Melam",
+            description: "Grand cultural opening with traditional caparisoned regalia, thalapoli, and thunderous beats echoing across campus.",
+            image: "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=1200&auto=format&fit=crop",
+            images: [
+                "https://images.unsplash.com/photo-1609137144822-411394f9d02d?q=80&w=1200&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200&auto=format&fit=crop"
+            ]
         }
-    };
+    ]
+};
 
-    const mainSettings = {
-        dots: false, infinite: true, speed: 500, slidesToShow: 1, slidesToScroll: 1,
-        arrows: true, fade: true, asNavFor: nav2, autoplay: false, autoplaySpeed: 3000
-    };
-
-    const thumbSettings = {
-        dots: false, infinite: true, speed: 500, slidesToShow: 4, slidesToScroll: 1,
-        swipeToSlide: true, focusOnSelect: true, asNavFor: nav1, centerMode: true, arrows: false,
-        responsive: [{ breakpoint: 768, settings: { slidesToShow: 3 } }, { breakpoint: 480, settings: { slidesToShow: 2 } }]
-    };
+const EventGallery = ({ event, onSelectImage }) => {
+    // Flatten images for this event into Coverflow items
+    const items = React.useMemo(() => {
+        const list = [];
+        if (event.image) {
+            list.push({
+                src: event.image,
+                title: event.title,
+                caption: event.description || ''
+            });
+        }
+        if (Array.isArray(event.images)) {
+            event.images.forEach((img, i) => {
+                const src = typeof img === 'string' ? img : (img?.url || img?.src || '');
+                if (src && src !== event.image) {
+                    list.push({
+                        src,
+                        title: `${event.title} - Moment ${i + 1}`,
+                        caption: event.description || ''
+                    });
+                }
+            });
+        }
+        return list;
+    }, [event]);
 
     return (
-        <div style={{ marginBottom: '4rem' }}>
-            <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: 'var(--secondary)' }}>{event.title}</h3>
-            <div className="gallery-wrapper" style={{ position: 'relative', background: 'var(--bg-card)', padding: '20px', borderRadius: '24px', border: '1px solid var(--glass-border)', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-                <button onClick={togglePlay} style={{ position: 'absolute', top: '30px', right: '30px', zIndex: 20, background: 'rgba(0,0,0,0.6)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-                    {isPlaying ? <FaPause size={14} /> : <FaPlay size={14} style={{ marginLeft: '2px' }} />}
-                </button>
-
-                <LightGallery speed={500} plugins={[lgThumbnail, lgZoom]} elementClassNames="lightgallery-slider-wrapper" selector=".gallery-clickable">
-                    <Slider {...mainSettings} ref={sliderRef1}>
-                        {items.map((item, index) => (
-                            <div key={index} className="gallery-main-slide">
-                                <div className="gallery-clickable" data-src={item.image} data-sub-html={`<h4>${item.title}</h4><p>${item.desc}</p>`} style={{ cursor: 'pointer', display: 'block' }}>
-                                    <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '16px', overflow: 'hidden' }}>
-                                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-
-                                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)', padding: '3rem 2rem 1.5rem', color: 'white', textAlign: 'left' }}>
-                                            <h3 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.5rem', color: '#ffeb3b', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{item.title}</h3>
-                                            <p style={{ fontSize: '1.1rem', opacity: 0.9 }}>{item.desc}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </Slider>
-                </LightGallery>
+        <div className="fest-gallery-card" style={{ marginBottom: '4.5rem' }}>
+            {/* Header info */}
+            <div className="fest-gallery-head">
+                <div className="fest-gallery-head-left">
+                    <span className="fest-badge-pill">
+                        DHRUVA SPECIAL SHOWCASE
+                    </span>
+                    <h3 className="fest-event-heading">{event.title}</h3>
+                    {event.description && (
+                        <p className="fest-event-desc">{event.description}</p>
+                    )}
+                </div>
+                <div className="fest-gallery-head-right">
+                    <span className="fest-captures-count">
+                        {items.length} 3D Captures
+                    </span>
+                </div>
             </div>
 
-            {items.length > 1 && (
-                <Slider {...thumbSettings} ref={sliderRef2} className="gallery-thumbs" style={{ marginTop: '1rem' }}>
-                    {items.map((item, index) => (
-                        <div key={index} style={{ padding: '0 8px' }}>
-                            <div className="thumb-item" style={{ height: '80px', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer' }}>
-                                <img src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
-                        </div>
-                    ))}
-                </Slider>
-            )}
+            {/* 3D Coverflow Carousel */}
+            <div className="fest-coverflow-box">
+                <Coverflow3D
+                    items={items}
+                    height="450px"
+                    autoPlay={true}
+                    interval={3800}
+                    onImageClick={(item) => onSelectImage(item)}
+                />
+            </div>
         </div>
     );
 };
@@ -102,106 +121,373 @@ const EventGallery = ({ event }) => {
 const DhruvaFestPage = () => {
     const slug = 'fest';
     const navigate = useNavigate();
-    const [pageData, setPageData] = useState(null);
+    const [pageData, setPageData] = useState(DEFAULT_FEST_PAGE);
+    const [events, setEvents] = useState(DEFAULT_FEST_PAGE.events);
     const [loading, setLoading] = useState(true);
-    const [events, setEvents] = useState([]);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchData = async () => {
-            setLoading(true);
             try {
                 const pageRes = await fetch(`${API_BASE_URL}/api/fest-page`);
-                if (!pageRes.ok) throw new Error('Page not found');
-                const pData = await pageRes.json();
-                setPageData(pData);
-                if (pData.events) setEvents(pData.events);
+                if (pageRes.ok) {
+                    const pData = await pageRes.json();
+                    if (isMounted && pData) {
+                        setPageData(pData);
+                        if (Array.isArray(pData.events) && pData.events.length > 0) {
+                            setEvents(pData.events);
+                        } else {
+                            setEvents(DEFAULT_FEST_PAGE.events);
+                        }
+                    }
+                    return;
+                }
             } catch (err) {
-                console.error(err);
-                if (!pageData) setPageData(null);
-            } finally {
-                setLoading(false);
+                console.warn("Fest API unavailable, using rich default fest data:", err);
+            }
+            if (isMounted) {
+                setPageData(DEFAULT_FEST_PAGE);
+                setEvents(DEFAULT_FEST_PAGE.events);
             }
         };
-        fetchData();
+
+        fetchData().finally(() => {
+            if (isMounted) setLoading(false);
+        });
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
+
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (selectedImage) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [selectedImage]);
 
     if (loading) return <LoadingBar />;
 
-    if (!pageData) {
-        return (
-            <div style={{ minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <Navbar />
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
-                    <h1 style={{ fontSize: '4rem', fontWeight: '900' }}>404</h1>
-                    <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>Page Not Found</p>
-                    <button onClick={() => navigate('/')} className="btn btn-primary">Return Home</button>
-                </div>
-                <Footer />
-            </div>
-        );
-    }
-
-    // Mock Gallery Data (Fallback)
     return (
-        <div style={{ background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)', position: 'relative' }}>
-            <SEO title={pageData.title} description={pageData.subtitle} image={pageData.heroImage} />
+        <div style={{ background: 'var(--bg-main)', minHeight: '100vh', color: 'var(--text-main)', position: 'relative', overflowX: 'hidden' }}>
+            <SEO 
+                title={`${pageData.title || "Dhruva Fest"} | EASA College`} 
+                description={pageData.subtitle || "Experience the vibrant celebrations of Dhruva Fest at EASA College."} 
+                image={pageData.heroImage || DEFAULT_FEST_PAGE.heroImage} 
+            />
             <Navbar />
 
             <GlobalHero
                 pageKey={slug}
-                defaultTitle={pageData.title}
-                defaultSubtitle={pageData.subtitle}
-                defaultImage={pageData.heroImage}
+                defaultTitle={pageData.title || DEFAULT_FEST_PAGE.title}
+                defaultSubtitle={pageData.subtitle || DEFAULT_FEST_PAGE.subtitle}
+                defaultImage={pageData.heroImage || DEFAULT_FEST_PAGE.heroImage}
                 minHeight="60vh"
             />
 
-            <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '5rem 2rem' }}>
-                <div style={{ marginBottom: '6rem' }}>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '3rem', textAlign: 'center', color: 'var(--secondary)', textTransform: 'uppercase' }}>Dhruva Fest Gallery</h2>
+            <div className="container fest-content-container">
+                {/* Section Introduction */}
+                <div className="fest-intro-banner">
+                    <span className="fest-sub-tag">ANNUAL CELEBRATIONS</span>
+                    <h2 className="fest-main-title">Dhruva 3D Experience & Gallery</h2>
+                    <p className="fest-main-subtitle">
+                        Immerse yourself in high-energy moments from Coimbatore's premier collegiate festival. Swipe through our interactive 3D galleries below.
+                    </p>
+                </div>
 
-                    {events.length > 0 ? (
-                        events.map((event, index) => (
-                            <EventGallery key={index} event={event} />
-                        ))
-                    ) : (
-                        <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                            <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>No events found. Will be updated soon.</p>
-                        </div>
-                    )}
+                {/* Event 3D Coverflow Galleries */}
+                <div className="fest-events-stack">
+                    {events.map((event, index) => (
+                        <EventGallery 
+                            key={index} 
+                            event={event} 
+                            onSelectImage={(item) => setSelectedImage(item)}
+                        />
+                    ))}
                 </div>
             </div>
+
+            {/* Fullscreen Photo Lightbox Modal */}
+            {selectedImage && (
+                <div 
+                    className="fest-lightbox-overlay"
+                    onClick={() => setSelectedImage(null)}
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div className="fest-lightbox-backdrop" />
+                    <div className="fest-lightbox-dialog" onClick={(e) => e.stopPropagation()}>
+                        <button 
+                            type="button" 
+                            className="fest-lightbox-close" 
+                            onClick={() => setSelectedImage(null)}
+                            aria-label="Close Lightbox"
+                        >
+                            <FaTimes size={16} />
+                        </button>
+                        <div className="fest-lightbox-media-wrap">
+                            <img 
+                                src={selectedImage.src || selectedImage.image} 
+                                alt={selectedImage.title || "Fest Moment"} 
+                                className="fest-lightbox-img" 
+                            />
+                        </div>
+                        <div className="fest-lightbox-caption-bar">
+                            <h3>{selectedImage.title}</h3>
+                            {selectedImage.caption && <p>{selectedImage.caption}</p>}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <Footer />
 
             <style>{`
-                .slick-arrow::before {
+                .fest-content-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 4.5rem 1.5rem;
+                }
+
+                .fest-intro-banner {
+                    text-align: center;
+                    max-width: 800px;
+                    margin: 0 auto 4rem auto;
+                }
+
+                .fest-sub-tag {
+                    display: inline-block;
+                    font-size: 0.8rem;
+                    font-weight: 800;
+                    letter-spacing: 2px;
+                    text-transform: uppercase;
                     color: var(--secondary);
-                    font-size: 30px;
-                    opacity: 0.8;
+                    margin-bottom: 0.75rem;
+                    background: rgba(230, 182, 39, 0.12);
+                    padding: 6px 16px;
+                    border-radius: 50px;
+                    border: 1px solid rgba(230, 182, 39, 0.25);
                 }
-                .slick-prev { left: 25px; z-index: 10; }
-                .slick-next { right: 25px; z-index: 10; }
-                
-                .gallery-thumbs .slick-slide {
-                    padding: 0 5px;
-                    opacity: 0.6;
-                    transition: all 0.3s;
+
+                .fest-main-title {
+                    font-size: clamp(2rem, 3.5vw, 3rem);
+                    font-weight: 900;
+                    color: var(--text-main);
+                    margin: 0 0 1rem 0;
+                    text-transform: uppercase;
+                    letter-spacing: -0.5px;
                 }
-                .gallery-thumbs .slick-center {
-                    opacity: 1;
-                    transform: scale(1.05);
+
+                .fest-main-subtitle {
+                    font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+                    color: var(--text-muted);
+                    line-height: 1.6;
+                    margin: 0;
                 }
-                .gallery-thumbs .slick-center .thumb-item {
-                    border-color: var(--secondary) !important;
+
+                .fest-gallery-card {
+                    background: var(--bg-card);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 28px;
+                    padding: 2.2rem;
+                    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+                    transition: border-color 0.3s ease;
                 }
-                
-                @media (max-width: 768px) {
-                    .gallery-main-slide > div {
-                        height: 300px !important;
+
+                .fest-gallery-card:hover {
+                    border-color: rgba(230, 182, 39, 0.3);
+                }
+
+                .fest-gallery-head {
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 1rem;
+                    margin-bottom: 2rem;
+                    padding-bottom: 1.25rem;
+                    border-bottom: 1px solid var(--glass-border);
+                }
+
+                .fest-gallery-head-left {
+                    flex: 1;
+                    min-width: 260px;
+                }
+
+                .fest-badge-pill {
+                    display: inline-block;
+                    font-size: 0.72rem;
+                    font-weight: 800;
+                    letter-spacing: 1.5px;
+                    text-transform: uppercase;
+                    color: #FCCA26;
+                    margin-bottom: 0.4rem;
+                }
+
+                .fest-event-heading {
+                    font-size: clamp(1.4rem, 2.5vw, 2rem);
+                    font-weight: 800;
+                    color: var(--text-main);
+                    margin: 0 0 0.5rem 0;
+                }
+
+                .fest-event-desc {
+                    font-size: 0.95rem;
+                    color: var(--text-muted);
+                    margin: 0;
+                    max-width: 700px;
+                    line-height: 1.5;
+                }
+
+                .fest-captures-count {
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    padding: 6px 14px;
+                    border-radius: 50px;
+                    background: var(--glass-highlight);
+                    border: 1px solid var(--glass-border);
+                    color: var(--text-muted);
+                    display: inline-flex;
+                    align-items: center;
+                }
+
+                .fest-coverflow-box {
+                    width: 100%;
+                    max-width: 100%;
+                    overflow: hidden;
+                    box-sizing: border-box;
+                }
+
+                /* Lightbox Modal */
+                .fest-lightbox-overlay {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 999999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1.5rem;
+                }
+
+                .fest-lightbox-backdrop {
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(8, 12, 22, 0.92);
+                    backdrop-filter: blur(12px);
+                }
+
+                .fest-lightbox-dialog {
+                    position: relative;
+                    max-width: 950px;
+                    width: 100%;
+                    max-height: 90vh;
+                    background: #0f172a;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    border-radius: 24px;
+                    overflow: hidden;
+                    box-shadow: 0 35px 80px rgba(0, 0, 0, 0.8);
+                    z-index: 10;
+                    display: flex;
+                    flex-direction: column;
+                    animation: festFadeZoomIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+                }
+
+                @keyframes festFadeZoomIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.92);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
                     }
                 }
-                .lg-backdrop {
-                    background-color: rgba(0,0,0,0.9);
+
+                .fest-lightbox-close {
+                    position: absolute;
+                    top: 16px;
+                    right: 16px;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: rgba(15, 23, 42, 0.8);
+                    backdrop-filter: blur(8px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    color: #ffffff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    z-index: 20;
+                    transition: all 0.25s ease;
+                }
+
+                .fest-lightbox-close:hover {
+                    background: #EF4444;
+                    color: #ffffff;
+                    transform: scale(1.1);
+                }
+
+                .fest-lightbox-media-wrap {
+                    position: relative;
+                    width: 100%;
+                    max-height: 68vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #000000;
+                    overflow: hidden;
+                }
+
+                .fest-lightbox-img {
+                    max-width: 100%;
+                    max-height: 68vh;
+                    object-fit: contain;
+                    display: block;
+                }
+
+                .fest-lightbox-caption-bar {
+                    padding: 1.25rem 1.8rem;
+                    background: #0f172a;
+                    border-top: 1px solid rgba(255, 255, 255, 0.1);
+                    color: #ffffff;
+                }
+
+                .fest-lightbox-caption-bar h3 {
+                    font-size: 1.2rem;
+                    font-weight: 800;
+                    color: #FCCA26;
+                    margin: 0 0 0.35rem 0;
+                }
+
+                .fest-lightbox-caption-bar p {
+                    font-size: 0.9rem;
+                    color: rgba(255, 255, 255, 0.8);
+                    margin: 0;
+                    line-height: 1.4;
+                }
+
+                @media (max-width: 768px) {
+                    .fest-content-container {
+                        padding: 3rem 1rem;
+                    }
+                    .fest-gallery-card {
+                        padding: 1.25rem;
+                        border-radius: 20px;
+                    }
+                    .fest-lightbox-overlay {
+                        padding: 0.75rem;
+                    }
+                    .fest-lightbox-dialog {
+                        border-radius: 18px;
+                    }
                 }
             `}</style>
         </div>

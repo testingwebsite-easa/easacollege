@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import GlobalHero from '../components/GlobalHero';
+import Coverflow3D from '../components/Coverflow3D';
 import InstagramFeedWidget from '../components/InstagramFeedWidget';
 import {
     FaTimes,
@@ -44,7 +45,7 @@ const OFFICIAL_INSTAGRAM_POSTS = [
     {
         _id: "ig-post-001",
         shortcode: "C9xPq19LzA8",
-        image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&auto=format&fit=crop",
+        image: "https://res.cloudinary.com/dbvw9cwo/image/upload/f_auto,q_auto/IMG_20250910_114314",
         likes: "1,248",
         comments: "86",
         caption: "Golden hour over the 25-acre green EASA campus! 🌿🏛️ Welcoming our new engineering cohort for academic year 2026. #EASACollege #CampusLife #EngineeringCoimbatore #GreenCampus",
@@ -102,7 +103,7 @@ const OFFICIAL_INSTAGRAM_POSTS = [
         image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1200&auto=format&fit=crop",
         likes: "3,120",
         comments: "240",
-        caption: "Caps in the air, dreams in motion! 🎓 Celebrating our 16th Graduation Ceremony. Congratulations to all university gold medalists and graduates! #GraduationDay #EASAAlumni #ClassOf2026",
+        caption: "Caps in the air, dreams in motion! 🎓 Celebrating our 14th Graduation Ceremony. Congratulations to all university gold medalists and graduates! #GraduationDay #EASAAlumni #ClassOf2026",
         date: "1 MONTH AGO",
         location: "EASA Main Auditorium",
         url: "https://www.instagram.com/easacollege/p/C4fJy62WzN9/"
@@ -118,14 +119,14 @@ const OFFICIAL_INSTAGRAM_REELS = [
         shortcode: "C1hR8Y9PzX4",
         mediaType: "instagram_reel",
         isShort: true,
-        title: "16th Graduation Ceremony & Degree Conferral 🎓✨",
+        title: "14th Graduation Ceremony & Degree Conferral 🎓✨",
         thumbnail: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop",
         audioTrack: "Convocation Anthem - easacollege",
         views: "24.2K",
         likes: "1.6K",
         date: "2025-03-26",
         category: "Graduation",
-        caption: "Honoring academic excellence and brilliant milestones at the 16th Graduation Ceremony of EASA College. #EASACollege #GraduationDay #Convocation #Autonomous",
+        caption: "Honoring academic excellence and brilliant milestones at the 14th Graduation Ceremony of EASA College. #EASACollege #GraduationDay #Convocation #Autonomous",
         url: "https://www.instagram.com/easacollege/reel/C1hR8Y9PzX4/"
     },
     {
@@ -289,6 +290,56 @@ const OFFICIAL_YOUTUBE_MEDIA = [
     }
 ];
 
+// Fallback high-res campus photo albums
+const DEFAULT_GALLERY_EVENTS = [
+    {
+        _id: "album-dhruva-2026",
+        eventName: "SARVAM Cultural Fest",
+        date: "2026-03-21",
+        photos: [
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/f_auto,q_auto/IMG_20250910_114314", caption: "Campus Highlights & Moments" },
+            { src: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200&auto=format&fit=crop", caption: "DHRUVA Pro Show & DJ Night Grand Concert" },
+            { src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop", caption: "Choreonite Western Dance Crew Competition" },
+            { src: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1200&auto=format&fit=crop", caption: "Battle of the Bands Heavy Percussion Showcase" },
+            { src: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1200&auto=format&fit=crop", caption: "Auditorium Crowd Energy & Fest Glow" },
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/f_auto,q_auto/IMG_20250910_114314", caption: "Traditional Chenda Melam Grand Opening Procession" }
+        ]
+    },
+    {
+        _id: "album-grad-2026",
+        eventName: "14th Graduation Ceremony & Convocation",
+        date: "2026-02-14",
+        photos: [
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687909/IMG_20260913_125154.jpg" },
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687090/ROY_5333.jpgF" },
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687089/ROY_5330.jpg" },
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793686442/ROY_5323.jpg" },
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687085/IMG-20260913-WA0024.jpg" }
+        ]
+    },
+    {
+        _id: "album-idea-lab",
+        eventName: "AICTE IDEA Lab & Tech Prototyping Expo",
+        date: "2026-01-28",
+        photos: [
+            { src: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1200&auto=format&fit=crop", caption: "Automated Robotics & Drone Prototyping at ₹1.2 Cr Lab" },
+            { src: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1200&auto=format&fit=crop", caption: "IoT Sensor Testing & Smart Machine Demonstrations" },
+            { src: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop", caption: "Student Hackathon Teams Live Coding Solutions" },
+            { src: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=1200&auto=format&fit=crop", caption: "3D Rapid Prototyping Machine at AICTE IDEA Lab" }
+        ]
+    },
+    {
+        _id: "album-sports-2026",
+        eventName: "Anna University Athletics Zone Championship",
+        date: "2026-01-15",
+        photos: [
+            { src: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop", caption: "Track & Field Sprinters Sprinting for Gold" },
+            { src: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1200&auto=format&fit=crop", caption: "Football Champions Lifting the Anna University Trophy" },
+            { src: "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?q=80&w=1200&auto=format&fit=crop", caption: "Badminton Inter-College Final Match Point" }
+        ]
+    }
+];
+
 const GalleryPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -296,7 +347,7 @@ const GalleryPage = () => {
     const tabParam = searchParams.get('tab');
     const [activeTab, setActiveTab] = useState(tabParam === 'videos' ? 'videos' : 'photos');
 
-    const [events, setEvents] = useState([]);
+    const [events, setEvents] = useState(DEFAULT_GALLERY_EVENTS);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
 
@@ -331,9 +382,45 @@ const GalleryPage = () => {
                 }
             })
             .catch(err => {
-                console.error("Error fetching gallery events:", err);
+                console.warn("Using default campus photo albums:", err);
             });
     }, []);
+
+    // Featured Highlights for 3D Coverflow on the main Photos tab
+    const featuredPhotos = React.useMemo(() => {
+        const list = [];
+        const targetPhotoUrl = "https://res.cloudinary.com/dbvw9cwo/image/upload/f_auto,q_auto/IMG_20250910_114314";
+
+        // Always put this photo at the beginning of the 3D Carousel
+        list.push({
+            src: targetPhotoUrl,
+            title: "Campus Highlights & Moments",
+            caption: "EASA College of Engineering and Technology"
+        });
+
+        const sourceList = events && events.length > 0 ? events : DEFAULT_GALLERY_EVENTS;
+        sourceList.forEach(evt => {
+            if (Array.isArray(evt.photos)) {
+                evt.photos.forEach(p => {
+                    if (p && p.src && p.src !== targetPhotoUrl) {
+                        list.push({
+                            src: p.src,
+                            title: evt.eventName,
+                            caption: p.caption || evt.eventName
+                        });
+                    }
+                });
+            }
+        });
+        if (list.length === 0) {
+            return OFFICIAL_INSTAGRAM_POSTS.map(p => ({
+                src: p.image,
+                title: p.location || "EASA College Campus",
+                caption: p.caption
+            }));
+        }
+        return list.slice(0, 10);
+    }, [events]);
 
     // Lock body scroll when any modal is open
     useEffect(() => {
@@ -395,8 +482,8 @@ const GalleryPage = () => {
                             className={`gallery-nav-pill photo-pill ${activeTab === 'photos' ? 'active' : ''}`}
                         >
                             <FaImages className="pill-icon photo-icon" />
-                            <span>Photo Gallery & Albums</span>
-                            <span className="pill-badge photo-badge">{events.length}</span>
+                            <span>Photo Gallery</span>
+                            <span className="pill-badge photo-badge">{featuredPhotos.length}</span>
                         </button>
 
                         <button
@@ -433,64 +520,101 @@ const GalleryPage = () => {
                             </AnimatePresence>
 
                             {!selectedEvent ? (
-                                <div className="albums-grid">
-                                    {events.map((event, index) => (
-                                        <motion.div
-                                            key={event._id || index}
-                                            initial={{ opacity: 0, y: 25 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true }}
-                                            transition={{ duration: 0.5, delay: index * 0.08 }}
-                                            whileHover={{ y: -8 }}
-                                            onClick={() => setSelectedEvent(event)}
-                                            className="album-card"
-                                        >
-                                            <div className="album-cover-box">
-                                                {event.photos && event.photos.length > 0 ? (
-                                                    <img src={event.photos[0].src} alt={event.eventName} className="album-cover-img" />
-                                                ) : (
-                                                    <div className="album-placeholder"><FaImages size={48} style={{ opacity: 0.3 }} /></div>
-                                                )}
-                                                <div className="album-gradient-shade" />
-                                                <div className="album-captures-badge">
-                                                    <FaImages size={11} style={{ marginRight: '5px' }} />
-                                                    <span>{event.photos?.length || 0} Captures</span>
-                                                </div>
-                                            </div>
-                                            <div className="album-details">
-                                                <h3 className="album-title">{event.eventName}</h3>
-                                                <div className="album-meta-row">
-                                                    <span className="album-date">
-                                                        <FaCalendarAlt />
-                                                        <span>{new Date(event.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                                                    </span>
-                                                    <span className="album-view-link">
-                                                        <span>Open Album</span>
-                                                        <FaChevronRight size={10} />
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
+                                <>
+                                    {/* 3D COVERFLOW FEATURED CAMPUS CAPTURES */}
+                                    <div className="gallery-featured-3d-wrap" style={{ marginBottom: '3.5rem' }}>
+                                        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+                                            <h2 style={{ fontSize: 'clamp(1.6rem, 2.8vw, 2.3rem)', fontWeight: '900', color: 'var(--text-main)', margin: '0 0 0.5rem' }}>
+                                                Featured Campus Highlights
+                                            </h2>
+                                            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: '0 auto', maxWidth: '620px' }}>
+                                                Swipe through high-energy campus events, achievements, and celebrations. Click any 3D capture to view in full resolution.
+                                            </p>
+                                        </div>
+
+                                        <Coverflow3D
+                                            items={featuredPhotos}
+                                            height="460px"
+                                            autoPlay={true}
+                                            interval={4000}
+                                            showThumbs={false}
+                                            showControls={false}
+                                            onImageClick={(photo) => setSelectedImage(photo)}
+                                        />
+                                    </div>
+                                </>
                             ) : (
-                                <div className="photos-masonry-grid">
-                                    {selectedEvent.photos.map((photo, index) => (
-                                        <motion.div
-                                            key={index}
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            whileInView={{ opacity: 1, scale: 1 }}
-                                            viewport={{ once: true }}
-                                            onClick={() => setSelectedImage(photo)}
-                                            className="masonry-photo-item"
-                                            whileHover={{ scale: 1.02, y: -4 }}
-                                        >
-                                            <img src={photo.src} alt={photo.caption || selectedEvent.eventName} className="masonry-photo-img" loading="lazy" />
-                                            <div className="photo-hover-overlay">
-                                                <p className="photo-caption-txt">{photo.caption || "View Full Resolution"}</p>
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                                <div className="album-detail-view">
+                                    {/* 3D COVERFLOW FOR SELECTED ALBUM */}
+                                    <div className="album-3d-coverflow-header" style={{ marginBottom: '3.5rem' }}>
+                                        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+                                            <span style={{
+                                                fontSize: '0.75rem',
+                                                fontWeight: 800,
+                                                letterSpacing: '1.5px',
+                                                textTransform: 'uppercase',
+                                                color: 'var(--secondary)',
+                                                display: 'inline-block',
+                                                marginBottom: '0.4rem'
+                                            }}>
+                                                INTERACTIVE 3D ALBUM
+                                            </span>
+                                            <h2 style={{ fontSize: 'clamp(1.5rem, 2.6vw, 2.2rem)', fontWeight: 800, margin: '0 0 0.5rem', color: 'var(--text-main)' }}>
+                                                {selectedEvent.eventName}
+                                            </h2>
+                                            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', margin: 0 }}>
+                                                {new Date(selectedEvent.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} • {selectedEvent.photos?.length || 0} Captures
+                                            </p>
+                                        </div>
+
+                                        <Coverflow3D
+                                            items={selectedEvent.photos || []}
+                                            height="460px"
+                                            autoPlay={true}
+                                            interval={3500}
+                                            showThumbs={false}
+                                            showControls={false}
+                                            onImageClick={(photo) => setSelectedImage(photo)}
+                                        />
+                                    </div>
+
+                                    {/* SECTION HEADER BEFORE MASONRY */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        flexWrap: 'wrap',
+                                        gap: '10px',
+                                        margin: '2.5rem 0 1.5rem',
+                                        paddingBottom: '0.85rem',
+                                        borderBottom: '1px solid var(--glass-border)'
+                                    }}>
+                                        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                                            All Photos ({selectedEvent.photos?.length || 0})
+                                        </h3>
+                                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                            Click any capture to view in full resolution
+                                        </span>
+                                    </div>
+
+                                    <div className="photos-masonry-grid">
+                                        {selectedEvent.photos.map((photo, index) => (
+                                            <motion.div
+                                                key={index}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                whileInView={{ opacity: 1, scale: 1 }}
+                                                viewport={{ once: true }}
+                                                onClick={() => setSelectedImage(photo)}
+                                                className="masonry-photo-item"
+                                                whileHover={{ scale: 1.02, y: -4 }}
+                                            >
+                                                <img src={photo.src} alt={photo.caption || selectedEvent.eventName} className="masonry-photo-img" loading="lazy" />
+                                                <div className="photo-hover-overlay">
+                                                    <p className="photo-caption-txt">{photo.caption || "View Full Resolution"}</p>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
