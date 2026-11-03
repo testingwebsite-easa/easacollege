@@ -294,7 +294,7 @@ const OFFICIAL_YOUTUBE_MEDIA = [
 const DEFAULT_GALLERY_EVENTS = [
     {
         _id: "album-dhruva-2026",
-        eventName: "SARVAM Cultural Fest",
+        eventName: "Cultural Fest",
         date: "2026-03-21",
         photos: [
             { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/f_auto,q_auto/IMG_20250910_114314", caption: "Campus Highlights & Moments" },
