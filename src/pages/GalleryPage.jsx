@@ -298,11 +298,10 @@ const DEFAULT_GALLERY_EVENTS = [
         date: "2026-03-21",
         photos: [
             { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/f_auto,q_auto/IMG_20250910_114314", caption: "Campus Highlights & Moments" },
-            { src: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200&auto=format&fit=crop", caption: "DHRUVA Pro Show & DJ Night Grand Concert" },
-            { src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop", caption: "Choreonite Western Dance Crew Competition" },
-            { src: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1200&auto=format&fit=crop", caption: "Battle of the Bands Heavy Percussion Showcase" },
-            { src: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1200&auto=format&fit=crop", caption: "Auditorium Crowd Energy & Fest Glow" },
-            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/f_auto,q_auto/IMG_20250910_114314", caption: "Traditional Chenda Melam Grand Opening Procession" }
+            { src: "" },
+            { src: "" },
+            { src: "" },
+            { src: ""}
         ]
     },
     {
@@ -311,7 +310,7 @@ const DEFAULT_GALLERY_EVENTS = [
         date: "2026-02-14",
         photos: [
             { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687909/IMG_20260913_125154.jpg" },
-            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687090/ROY_5333.jpgF" },
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687090/ROY_5333.jpg" },
             { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687089/ROY_5330.jpg" },
             { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793686442/ROY_5323.jpg" },
             { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793687085/IMG-20260913-WA0024.jpg" }
@@ -389,37 +388,41 @@ const GalleryPage = () => {
     // Featured Highlights for 3D Coverflow on the main Photos tab
     const featuredPhotos = React.useMemo(() => {
         const list = [];
+        const seenUrls = new Set();
+
+        const addPhoto = (src, title, caption) => {
+            if (!src || typeof src !== 'string' || seenUrls.has(src)) return;
+            seenUrls.add(src);
+            list.push({ src, title: title || "EASA Campus Moment", caption: caption || title || "" });
+        };
+
+        // 1. Initial featured campus photo
         const targetPhotoUrl = "https://res.cloudinary.com/dbvw9cwo/image/upload/f_auto,q_auto/IMG_20250910_114314";
+        addPhoto(targetPhotoUrl, "Campus Highlights & Moments", "EASA College of Engineering and Technology");
 
-        // Always put this photo at the beginning of the 3D Carousel
-        list.push({
-            src: targetPhotoUrl,
-            title: "Campus Highlights & Moments",
-            caption: "EASA College of Engineering and Technology"
-        });
-
-        const sourceList = events && events.length > 0 ? events : DEFAULT_GALLERY_EVENTS;
-        sourceList.forEach(evt => {
+        // 2. Combine database events with local custom events (DEFAULT_GALLERY_EVENTS)
+        const combinedEvents = [...(Array.isArray(events) ? events : []), ...DEFAULT_GALLERY_EVENTS];
+        combinedEvents.forEach(evt => {
+            if (!evt) return;
+            if (evt.image) {
+                addPhoto(evt.image, evt.eventName || "Campus Capture", evt.shortDescription || evt.eventName || "");
+            }
             if (Array.isArray(evt.photos)) {
                 evt.photos.forEach(p => {
-                    if (p && p.src && p.src !== targetPhotoUrl) {
-                        list.push({
-                            src: p.src,
-                            title: evt.eventName,
-                            caption: p.caption || evt.eventName
-                        });
+                    if (p && p.src) {
+                        addPhoto(p.src, evt.eventName || "Campus Capture", p.caption || evt.eventName || "");
                     }
                 });
             }
         });
+
         if (list.length === 0) {
-            return OFFICIAL_INSTAGRAM_POSTS.map(p => ({
-                src: p.image,
-                title: p.location || "EASA College Campus",
-                caption: p.caption
-            }));
+            OFFICIAL_INSTAGRAM_POSTS.forEach(p => {
+                addPhoto(p.image, p.location || "EASA College Campus", p.caption);
+            });
         }
-        return list.slice(0, 10);
+
+        return list.slice(0, 30);
     }, [events]);
 
     // Lock body scroll when any modal is open
