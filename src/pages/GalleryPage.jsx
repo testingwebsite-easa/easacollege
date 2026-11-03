@@ -332,11 +332,12 @@ const DEFAULT_GALLERY_EVENTS = [
         eventName: "Anna University Athletics Zone Championship",
         date: "2026-01-15",
         photos: [
-            { src: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop", caption: "Track & Field Sprinters Sprinting for Gold" },
-            { src: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1200&auto=format&fit=crop", caption: "Football Champions Lifting the Anna University Trophy" },
-            { src: "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?q=80&w=1200&auto=format&fit=crop", caption: "Badminton Inter-College Final Match Point" }
+            { src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX5AChi3qt5S_pDrS_L9NSooBBfp6R00F6ps9Sx0RaQ&s=10" },
+            { src: "https://res.cloudinary.com/dbvw9cwo/image/upload/v1793696319/WhatsApp_Image_2026-11-03_at_2.24.09_PM.jpg" },
+           { src:"https://res.cloudinary.com/dbvw9cwo/image/upload/v1793696319/WhatsApp_Image_2026-11-03_at_2.24.09_PM_7.jpg"},
+           {  src:"https://res.cloudinary.com/dbvw9cwo/image/upload/v1793696319/WhatsApp_Image_2026-11-03_at_2.24.09_PM_8.jpg"}
         ]
-    }
+    }               
 ];
 
 const GalleryPage = () => {
