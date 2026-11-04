@@ -127,7 +127,7 @@ function determineSubjectCategoryAndType({
     title = '',
     code = '',
     l = 3,
-    t = 0,
+    _t = 0,
     p = 0,
     credits = 3,
     rawCategory = '',
@@ -534,7 +534,7 @@ function parseCurriculumSequential(elements) {
 
             // 2. Detect Vertical Section Headings
             if (headingStr.includes('VERTICAL')) {
-                const vertMatch = headingStr.match(/VERTICAL\s*[-–—:]?\s*([IVXLCDM\d]+)(?:\s*[:\-]\s*(.*))?/i);
+                const vertMatch = headingStr.match(/VERTICAL\s*[-–—:]?\s*([IVXLCDM\d]+)(?:\s*[:-]\s*(.*))?/i);
                 if (vertMatch) {
                     context.currentVertical = romanToNumber(vertMatch[1]);
                     context.currentVerticalName = vertMatch[2] ? cleanText(vertMatch[2]) : `Vertical ${context.currentVertical}`;
@@ -600,7 +600,7 @@ function parseCurriculumSequential(elements) {
 
                 // Check if this row is a Vertical switch header
                 if (rowStr.includes('VERTICAL') && !isCourseCode(rowClean[0]) && !isCourseCode(rowClean[1])) {
-                    const vertMatch = rowStr.match(/VERTICAL\s*[-–—:]?\s*([IVXLCDM\d]+)(?:\s*[:\-]\s*(.*))?/i);
+                    const vertMatch = rowStr.match(/VERTICAL\s*[-–—:]?\s*([IVXLCDM\d]+)(?:\s*[:-]\s*(.*))?/i);
                     if (vertMatch) {
                         context.currentVertical = romanToNumber(vertMatch[1]);
                         context.currentVerticalName = vertMatch[2] ? cleanText(vertMatch[2]) : `Vertical ${context.currentVertical}`;
@@ -775,7 +775,7 @@ function parseDetailedSyllabi(rawText) {
         }
 
         if (currentSection === 'objectives') {
-            const objText = line.replace(/^[•\-\*\d\.\)]+\s*/, '').trim();
+            const objText = line.replace(/^[•\-*\d.)]+\s*/, '').trim();
             if (objText && objText.length > 5 && !upper.startsWith('TOTAL')) {
                 currentSubject.objectives.push(objText);
             }
@@ -796,7 +796,7 @@ function parseDetailedSyllabi(rawText) {
                 if (coIndex <= 5) {
                     currentSubject.outcomes.push({
                         coNo: `CO ${coIndex}`,
-                        outcome: line.replace(/^[•\-\*\d\.\)]+\s*/, '').trim(),
+                        outcome: line.replace(/^[•\-*\d.)]+\s*/, '').trim(),
                         rbtLevel: 'K2'
                     });
                 }
@@ -807,15 +807,15 @@ function parseDetailedSyllabi(rawText) {
             }
         } else if (currentSection === 'textbooks') {
             if (line.length > 5 && !upper.includes('REFERENCE')) {
-                currentSubject.textbooks.push(line.replace(/^\d+[\.\)]\s*/, '').trim());
+                currentSubject.textbooks.push(line.replace(/^\d+[.)]\s*/, '').trim());
             }
         } else if (currentSection === 'references') {
             if (line.length > 5 && !upper.includes('WEB')) {
-                currentSubject.references.push(line.replace(/^\d+[\.\)]\s*/, '').trim());
+                currentSubject.references.push(line.replace(/^\d+[.)]\s*/, '').trim());
             }
         } else if (currentSection === 'webReferences') {
             if (line.length > 5) {
-                currentSubject.webReferences.push(line.replace(/^\d+[\.\)]\s*/, '').trim());
+                currentSubject.webReferences.push(line.replace(/^\d+[.)]\s*/, '').trim());
             }
         }
     }
@@ -849,13 +849,6 @@ export async function parseWordSyllabusClient(fileOrBuffer) {
         const elements = parseSequentialElementsDOM(html);
         const curriculumSubjects = parseCurriculumSequential(elements);
         const detailedSyllabi = parseDetailedSyllabi(rawText);
-
-        const createDefaultMapping = () => [1, 2, 3, 4, 5].map(num => {
-            const mapObj = { coNo: `CO ${num}` };
-            for (let i = 1; i <= 12; i++) mapObj[`po${i}`] = '-';
-            for (let i = 1; i <= 3; i++) mapObj[`pso${i}`] = '-';
-            return mapObj;
-        });
 
         const mergedSubjects = [...curriculumSubjects];
 

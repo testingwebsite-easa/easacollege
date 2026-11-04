@@ -84,7 +84,7 @@ export const setupInspectProtection = () => {
         // Keeping console clean while retaining error reports
       }
     }, 2000);
-  } catch (err) {
+  } catch {
     // Ignore any timer restrictions
   }
 };

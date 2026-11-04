@@ -18,7 +18,7 @@ const ForeignLanguageSection = lazy(() => import('../components/ForeignLanguageS
 const NewsEventsSection = lazy(() => import('../components/NewsEventsSection'))
 const HomeGalleryButton = lazy(() => import('../components/HomeGalleryButton'))
 const ManagementSection = lazy(() => import('../components/ManagementSection'))
-const AdmissionForm = lazy(() => import('../components/AdmissionForm'))
+import AdmissionForm from '../components/AdmissionForm'
 
 function Home() {
     useScrollAnimation();

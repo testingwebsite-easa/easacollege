@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { FaCheckCircle, FaUniversity, FaUserGraduate, FaBriefcase, FaGlobe, FaTimes, FaAward, FaMedal, FaIndustry, FaLeaf, FaFutbol, FaBed, FaCertificate, FaHandshake } from 'react-icons/fa';
 import API_BASE_URL from '../api';
-import { departments as departmentsData } from '../data/departmentsData';
+
 import { useTheme } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
 
 const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
     const { theme } = useTheme();
     const { showToast } = useToast();
-    if (!isOpen) return null;
+
 
     const [formData, setFormData] = useState({
         name: '',
@@ -26,7 +26,7 @@ const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
     const [errors, setErrors] = useState({});
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [departments, setDepartments] = useState(departmentsData);
+
 
     useEffect(() => {
         const fetchStates = async () => {
@@ -53,16 +53,17 @@ const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
         }
     }, [formData.state, statesData]);
 
-    const checkScroll = () => {
-        document.body.style.overflow = isOpen ? 'hidden' : 'unset';
-    }
+
+
     // Lock body scroll when open
-    React.useEffect(() => {
+    useEffect(() => {
+        if (!isOpen) return;
+        const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
         return () => {
-            document.body.style.overflow = 'unset';
+            document.body.style.overflow = prevOverflow || 'unset';
         };
-    }, []);
+    }, [isOpen]);
 
     const validate = () => {
         const newErrors = {};
@@ -181,6 +182,8 @@ const AdmissionForm = ({ isOpen, onClose, initialCourse = '' }) => {
         transition: '0.3s',
         appearance: 'auto'
     };
+
+    if (!isOpen) return null;
 
     return (
         <div style={{

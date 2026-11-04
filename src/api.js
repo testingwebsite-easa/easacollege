@@ -73,7 +73,9 @@ export function clearApiCache(pathPrefix) {
         memoryCache.clear();
         try {
             sessionStorage.removeItem('__easa_api_cache__');
-        } catch (_) {}
+        } catch {
+            // Storage access restricted
+        }
         return;
     }
 
@@ -98,7 +100,9 @@ export function clearApiCache(pathPrefix) {
                 sessionStorage.setItem('__easa_api_cache__', JSON.stringify(parsed));
             }
         }
-    } catch (_) {}
+    } catch {
+        // Storage access restricted
+    }
 }
 
 // Read cache entry from memory or sessionStorage
@@ -116,7 +120,9 @@ function getCachedEntry(cacheKey) {
                 return entry;
             }
         }
-    } catch (_) {}
+    } catch {
+        // Storage access restricted
+    }
 
     return null;
 }
@@ -134,7 +140,9 @@ function setCachedEntry(cacheKey, data) {
         const parsed = raw ? JSON.parse(raw) : {};
         parsed[cacheKey] = entry;
         sessionStorage.setItem('__easa_api_cache__', JSON.stringify(parsed));
-    } catch (_) {}
+    } catch {
+        // Storage write restricted
+    }
 }
 
 // Create a synthetic Response instance universally compatible across all browsers (old & new)
@@ -150,7 +158,7 @@ function createCachedResponse(data) {
                 headers
             });
         }
-    } catch (_) {
+    } catch {
         // Fallback for older browsers / webviews where new Response() throws
     }
 
@@ -217,7 +225,7 @@ export async function apiFetch(input, init) {
         try {
             const data = await inFlightRequests.get(cacheKey);
             return createCachedResponse(data);
-        } catch (err) {
+        } catch {
             // In case the shared request failed, fall through to fresh fetch
         }
     }
@@ -313,7 +321,9 @@ if (typeof window !== 'undefined' && !window.__easa_fetch_optimized__) {
         setTimeout(() => {
             try {
                 originalFetch(`${API_BASE_URL}/api/health`, { cache: 'no-store' }).catch(() => {});
-            } catch (_) {}
+            } catch {
+                // Ignore background pre-warm errors
+            }
         }, 80);
     }
 }

@@ -74,7 +74,7 @@ function determineSubjectCategoryAndType({
     title = '',
     code = '',
     l = 3,
-    t = 0,
+    _t = 0,
     p = 0,
     credits = 3,
     rawCategory = '',
@@ -195,7 +195,7 @@ function parseNumber(val, defaultVal = 0) {
     if (str === '' || str === '-' || str === '–' || str === '—' || str.toUpperCase() === 'NIL' || str.toUpperCase() === 'NA' || str.toUpperCase() === 'N/A') {
         return 0;
     }
-    const clean = str.replace(/[^\d\.]/g, '').trim();
+    const clean = str.replace(/[^\d.]/g, '').trim();
     const num = parseFloat(clean);
     return isNaN(num) ? defaultVal : num;
 }
@@ -325,7 +325,7 @@ function detectSheetContext(sheetName) {
     }
 
     // Detect Vertical Sheet (e.g. "Vertical 1", "PE Vertical 2", "Track 3")
-    const vertMatch = s.match(/(?:VERTICAL|TRACK|PE[\s_\-]?VERTICAL)[\s_\-:]*([IVXLCDM\d]+)(?:[\s_\-:]*(.*))?/i);
+    const vertMatch = s.match(/(?:VERTICAL|TRACK|PE[\s_-]?VERTICAL)[\s_\-:]*([IVXLCDM\d]+)(?:[\s_\-:]*(.*))?/i);
     if (vertMatch) {
         vertical = romanToNumber(vertMatch[1]) || parseInt(vertMatch[1], 10) || 1;
         verticalName = vertMatch[2] ? cleanStr(vertMatch[2]) : `Vertical ${vertical}`;
@@ -393,7 +393,7 @@ function parseSheetRows(rows, defaultContext) {
 
         // Check for Vertical section banner in sheet
         if (rowStr.includes('VERTICAL') && !isCourseCode(rowClean[0]) && !isCourseCode(rowClean[1])) {
-            const vertMatch = rowStr.match(/VERTICAL\s*[-–—:_]?\s*([IVXLCDM\d]+)(?:\s*[:\-]\s*(.*))?/i);
+            const vertMatch = rowStr.match(/VERTICAL\s*[-–—:_]?\s*([IVXLCDM\d]+)(?:\s*[:-]\s*(.*))?/i);
             if (vertMatch) {
                 const vNum = romanToNumber(vertMatch[1]) || parseInt(vertMatch[1], 10);
                 currentContext.vertical = vNum || 1;
