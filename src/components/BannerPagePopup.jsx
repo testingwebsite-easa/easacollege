@@ -11,42 +11,40 @@ import defaultBannerImg from '../assets/about-main.webp';
  */
 export const POPUP_CONFIG = {
   // 1. SHOW / HIDE POPUP:
-  // Set to 'true' to show popup on website, or 'false' to disable it completely
   isEnabled: true,
 
   // 2. BANNER IMAGE:
-  // Use 'defaultBannerImg' (from src/assets/about-main.webp),
-  // OR paste any URL e.g. "https://example.com/banner.jpg"
   imageSrc: defaultBannerImg,
 
-  // 3. ALT TEXT (for accessibility):
+  // 3. ALT TEXT:
   altText: "EASA College of Engineering and Technology Announcement",
 
-  // 4. CLICK DESTINATION LINK:
-  // When user clicks the banner image:
-  // e.g. "/admissions", "https://easacollege.com", or "#" / "" if not clickable
+  // 4. CLICK DESTINATION LINK (leave '#' if not linking anywhere):
   linkUrl: "#",
 
   // 5. OPEN LINK IN NEW TAB?
-  // true = open in new tab | false = open in current tab
   openInNewTab: false,
 
-  // 6. FREQUENCY:
-  // "always"  -> Pops up every time user loads or refreshes the page
-  // "once"    -> Pops up only once per browser visit (uses sessionStorage)
+  // 6. FREQUENCY: 'always' (every load) or 'once' (once per session)
   frequency: "always",
 
-  // 7. DELAY BEFORE SHOWING (in milliseconds):
-  // 0 = instant, 300 = 0.3 seconds, 1000 = 1 second
+  // 7. DELAY BEFORE SHOWING (ms):
   delayMs: 300,
 
-  // 8. SHOW BOTTOM "CLOSE" BAR:
-  // true = show footer bar with close button | false = image only with top-right 'X'
-  showBottomBar: true,
+  // 8. SHOW TOP-RIGHT 'X' CLOSE BUTTON:
+  // true = show 'X' button | false = hide 'X' button (100% pure image)
+  showCloseButton: true,
+
+  // 9. SHOW BOTTOM "CLOSE" BAR:
+  // false = image only with no bottom bar | true = show footer bar with close button
+  showBottomBar: false,
+
+  // 10. FULL IMAGE PRESENTATION SIZE:
+  maxWidth: "1100px",
+  maxHeight: "88vh",
 };
 
 const BannerPopup = (props) => {
-  // Merge config with any optional props passed from outside
   const isEnabled = props.isEnabled ?? POPUP_CONFIG.isEnabled;
   const imageSrc = props.imageSrc ?? POPUP_CONFIG.imageSrc;
   const altText = props.altText ?? POPUP_CONFIG.altText;
@@ -54,23 +52,22 @@ const BannerPopup = (props) => {
   const openInNewTab = props.openInNewTab ?? POPUP_CONFIG.openInNewTab;
   const frequency = props.frequency ?? POPUP_CONFIG.frequency;
   const delayMs = props.delayMs ?? POPUP_CONFIG.delayMs;
+  const showCloseButton = props.showCloseButton ?? POPUP_CONFIG.showCloseButton;
   const showBottomBar = props.showBottomBar ?? POPUP_CONFIG.showBottomBar;
+  const maxWidth = props.maxWidth ?? POPUP_CONFIG.maxWidth;
+  const maxHeight = props.maxHeight ?? POPUP_CONFIG.maxHeight;
 
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // If disabled in config, don't show
     if (!isEnabled) {
       return;
     }
 
-    // If frequency is 'once', check whether it has already been shown in this session
     if (frequency === 'once') {
       const hasShown = sessionStorage.getItem('easa_banner_popup_shown');
       if (hasShown) return;
     }
-
-    // Timer delay before showing
     const timer = setTimeout(() => {
       setIsOpen(true);
       if (frequency === 'once') {
@@ -80,8 +77,6 @@ const BannerPopup = (props) => {
 
     return () => clearTimeout(timer);
   }, [isEnabled, frequency, delayMs]);
-
-  // Close popup on 'Escape' key
   useEffect(() => {
     if (!isOpen) return;
 
@@ -95,7 +90,7 @@ const BannerPopup = (props) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  // If disabled or closed, render nothing
+
   if (!isEnabled || !isOpen) return null;
 
   const isClickable = Boolean(linkUrl && linkUrl !== '#' && linkUrl !== '');
@@ -120,68 +115,85 @@ const BannerPopup = (props) => {
         animation: 'easaFadeIn 0.25s ease-out',
       }}
     >
-      {/* Modal Card */}
+      {/* Modal Card - hugs the image boundaries precisely */}
       <div
         onClick={(e) => e.stopPropagation()} // Prevent close on clicking modal card
         style={{
           position: 'relative',
-          maxWidth: '650px',
-          width: '100%',
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
-          overflow: 'hidden',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 'fit-content',
+          height: 'fit-content',
+          maxWidth: maxWidth || 'min(92vw, 1100px)',
+          maxHeight: maxHeight || '86vh',
+          backgroundColor: 'transparent',
+          borderRadius: '24px',
           animation: 'easaScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* Top-Right Close Button ('×') */}
-        <button
-          onClick={() => setIsOpen(false)}
-          aria-label="Close popup"
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            zIndex: 10,
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.65)',
-            color: '#ffffff',
-            border: 'none',
-            fontSize: '22px',
-            lineHeight: 1,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'background-color 0.2s, transform 0.15s',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.85)')}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.65)')}
-        >
-          &times;
-        </button>
+        {/* Top-Right Close Button ('×') - attached directly to the curved edge of the image */}
+        {showCloseButton && (
+          <button
+            onClick={() => setIsOpen(false)}
+            aria-label="Close popup"
+            title="Close popup"
+            style={{
+              position: 'absolute',
+              top: '14px',
+              right: '14px',
+              zIndex: 20,
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(0, 0, 0, 0.65)',
+              color: '#ffffff',
+              border: '2px solid rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              fontSize: '22px',
+              lineHeight: 1,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.5)',
+              transition: 'background-color 0.2s, transform 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.65)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            &times;
+          </button>
+        )}
 
-        {/* Banner Image Content */}
-        <div style={{ position: 'relative', width: '100%', lineHeight: 0 }}>
+        {/* Banner Image Content - with curved rounded edges */}
+        <div style={{ position: 'relative', lineHeight: 0, borderRadius: '24px', overflow: 'hidden' }}>
           {isClickable ? (
             <a
               href={linkUrl}
               target={openInNewTab ? '_blank' : '_self'}
               rel={openInNewTab ? 'noopener noreferrer' : undefined}
               onClick={() => setIsOpen(false)}
-              style={{ display: 'block', textDecoration: 'none' }}
+              style={{ display: 'block', textDecoration: 'none', borderRadius: '24px', overflow: 'hidden' }}
             >
               <img
                 src={imageSrc}
                 alt={altText}
                 style={{
-                  width: '100%',
-                  height: 'auto',
-                  maxHeight: '78vh',
-                  objectFit: 'contain',
                   display: 'block',
+                  width: 'auto',
+                  height: 'auto',
+                  maxWidth: maxWidth || 'min(92vw, 1100px)',
+                  maxHeight: maxHeight || '86vh',
+                  borderRadius: '24px',
+                  boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.75)',
                   cursor: 'pointer',
                   transition: 'opacity 0.2s',
                 }}
@@ -193,12 +205,17 @@ const BannerPopup = (props) => {
             <img
               src={imageSrc}
               alt={altText}
+              onClick={() => setIsOpen(false)}
+              title="Click anywhere to close"
               style={{
-                width: '100%',
-                height: 'auto',
-                maxHeight: '78vh',
-                objectFit: 'contain',
                 display: 'block',
+                width: 'auto',
+                height: 'auto',
+                maxWidth: maxWidth || 'min(92vw, 1100px)',
+                maxHeight: maxHeight || '86vh',
+                borderRadius: '24px',
+                boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.75)',
+                cursor: 'pointer',
               }}
             />
           )}
