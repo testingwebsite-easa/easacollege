@@ -297,6 +297,389 @@ const formatDeptHeaderTitle = (degreePrefix, deptName, regYear) => {
     return `${cleanPrefix ? `${cleanPrefix} ` : ''}${formattedDept} (${reg})`.trim();
 };
 
+const getPdfPaginationScript = (maxContentHeightMm, startPageNum) => `
+<script>
+(function paginatePdfPages() {
+    if (window.__pdfPaginated) return;
+    window.__pdfPaginated = true;
+
+    var MAX_HEIGHT_MM = ${maxContentHeightMm};
+    var START_PAGE_NUM = ${startPageNum};
+    var INLINE_TAGS = {
+        A: 1, ABBR: 1, B: 1, BDI: 1, BDO: 1, BR: 1, CITE: 1, CODE: 1, DATA: 1, DFN: 1,
+        EM: 1, I: 1, IMG: 1, KBD: 1, LABEL: 1, MARK: 1, Q: 1, S: 1, SAMP: 1, SMALL: 1,
+        SPAN: 1, STRONG: 1, SUB: 1, SUP: 1, SVG: 1, TIME: 1, U: 1, VAR: 1, WBR: 1
+    };
+
+    function measurePxPerMm() {
+        var probe = document.createElement('div');
+        probe.style.cssText = 'position:absolute;left:-9999px;top:0;width:100mm;height:100mm;padding:0;margin:0;border:0;visibility:hidden;pointer-events:none;';
+        document.body.appendChild(probe);
+        var h = probe.getBoundingClientRect().height;
+        document.body.removeChild(probe);
+        return h > 0 ? h / 100 : (96 / 25.4);
+    }
+
+    function getDirectHeader(page) {
+        for (var i = 0; i < page.children.length; i++) {
+            if (page.children[i].classList.contains('pdf-header')) return page.children[i];
+        }
+        return null;
+    }
+
+    function getDirectFooter(page) {
+        for (var i = page.children.length - 1; i >= 0; i--) {
+            if (page.children[i].classList.contains('pdf-footer')) return page.children[i];
+        }
+        return null;
+    }
+
+    function normalizePage(page) {
+        var header = getDirectHeader(page);
+        var footer = getDirectFooter(page);
+        var body = null;
+        var extraNodes = [];
+        for (var i = 0; i < page.children.length; i++) {
+            var ch = page.children[i];
+            if (ch === header || ch === footer) continue;
+            if (!body && (ch.classList.contains('page-body') || ch.classList.contains('syllabus-page-content')) && page.children.length <= 3) {
+                body = ch;
+            } else {
+                extraNodes.push(ch);
+            }
+        }
+        if (!body) {
+            body = document.createElement('div');
+            body.className = 'page-body';
+            extraNodes.forEach(function (n) { body.appendChild(n); });
+            if (footer) {
+                page.insertBefore(body, footer);
+            } else {
+                page.appendChild(body);
+            }
+        } else if (extraNodes.length > 0) {
+            extraNodes.forEach(function (n) { body.appendChild(n); });
+        }
+        return { header: header, body: body, footer: footer };
+    }
+
+    function enterMeasureMode(page, body, footer) {
+        page.style.setProperty('min-height', '0px', 'important');
+        page.style.setProperty('height', 'auto', 'important');
+        page.style.setProperty('justify-content', 'flex-start', 'important');
+        body.style.setProperty('flex', '0 0 auto', 'important');
+        if (footer) {
+            footer.style.setProperty('margin-top', '0px', 'important');
+        }
+    }
+
+    function exitMeasureMode(page, body, footer) {
+        page.style.removeProperty('min-height');
+        page.style.removeProperty('height');
+        page.style.removeProperty('justify-content');
+        body.style.removeProperty('flex');
+        if (footer) {
+            footer.style.removeProperty('margin-top');
+        }
+    }
+
+    function isHeadingOrLabel(el) {
+        if (!el || el.nodeType !== 1) return false;
+        var tag = el.tagName;
+        if (/^H[1-6]$/.test(tag)) return true;
+        if (el.classList.contains('section-title') || el.classList.contains('title-block')) return true;
+        if (tag === 'P' && el.getBoundingClientRect().height < 42) {
+            var txt = (el.textContent || '').trim();
+            if (txt.length < 140) return true;
+        }
+        if (tag === 'DIV' && el.children.length === 0 && el.getBoundingClientRect().height < 45) {
+            var cs = getComputedStyle(el);
+            if ((parseInt(cs.fontWeight, 10) >= 600 || cs.fontWeight === 'bold') && (el.textContent || '').trim().length < 160) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function isTotalFooterNode(el) {
+        if (!el || el.nodeType !== 1) return false;
+        var txt = (el.textContent || '').trim();
+        return /^TOTAL\\s*:/i.test(txt) && txt.length < 60;
+    }
+
+    function isGroupHeaderRow(tr) {
+        if (!tr) return false;
+        if (tr.classList.contains('category-row')) return true;
+        if (tr.cells && tr.cells.length === 1 && (tr.cells[0].colSpan || 1) >= 4) {
+            var txt = (tr.textContent || '').trim();
+            if (!/^TOTAL$/i.test(txt)) return true;
+        }
+        return false;
+    }
+
+    function isTotalRow(tr) {
+        if (!tr || !tr.cells || tr.cells.length === 0) return false;
+        var firstTxt = (tr.cells[0].textContent || '').trim();
+        return /^TOTAL$/i.test(firstTxt);
+    }
+
+    function isSplittableElement(el, availableHeightPx) {
+        if (!el || el.nodeType !== 1) return false;
+        if (el.classList.contains('title-block') || el.classList.contains('pie-chart-block') || el.classList.contains('co-po-block')) return false;
+        var tag = el.tagName;
+        var rect = el.getBoundingClientRect();
+        var cs = getComputedStyle(el);
+
+        if (tag === 'TABLE') {
+            var tbody = el.tBodies && el.tBodies.length === 1 ? el.tBodies[0] : null;
+            if (!tbody || tbody.rows.length < 2) return false;
+            if (tbody.querySelector('[rowspan]')) return false;
+            var avoidBreak = cs.pageBreakInside === 'avoid' || cs.breakInside === 'avoid';
+            if (avoidBreak && rect.height < availableHeightPx * 0.8) return false;
+            return true;
+        }
+
+        if (tag === 'OL' || tag === 'UL') {
+            return el.children.length >= 2;
+        }
+
+        if (tag !== 'DIV' && tag !== 'SECTION' && tag !== 'ARTICLE') return false;
+        if (el.querySelector('svg') && rect.height < availableHeightPx * 0.85) return false;
+        if (cs.display && cs.display.indexOf('flex') !== -1 && cs.flexDirection !== 'column') return false;
+
+        var avoid = cs.pageBreakInside === 'avoid' || cs.breakInside === 'avoid';
+        if (avoid && rect.height < availableHeightPx * 0.8) return false;
+
+        var hasBlockChild = false;
+        for (var i = 0; i < el.children.length; i++) {
+            if (!INLINE_TAGS[el.children[i].tagName]) {
+                hasBlockChild = true;
+                break;
+            }
+        }
+        return hasBlockChild;
+    }
+
+    function splitTable(table, maxBodyBottom) {
+        var tbody = table.tBodies[0];
+        var rows = Array.prototype.slice.call(tbody.rows);
+        if (rows.length < 2) return null;
+
+        if (table.tHead && table.tHead.getBoundingClientRect().bottom > maxBodyBottom) {
+            return null;
+        }
+
+        var splitIdx = -1;
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].getBoundingClientRect().bottom > maxBodyBottom) {
+                splitIdx = i;
+                break;
+            }
+        }
+        if (splitIdx === -1) {
+            splitIdx = rows.length - 1;
+        }
+
+        if (splitIdx === rows.length - 1 && isTotalRow(rows[splitIdx]) && rows.length >= 3) {
+            splitIdx--;
+        }
+
+        while (splitIdx > 0 && isGroupHeaderRow(rows[splitIdx - 1])) {
+            splitIdx--;
+        }
+
+        if (splitIdx <= 0) return null;
+
+        var cloneTable = table.cloneNode(false);
+        var colgroup = table.querySelector('colgroup');
+        if (colgroup) cloneTable.appendChild(colgroup.cloneNode(true));
+        if (table.tHead) cloneTable.appendChild(table.tHead.cloneNode(true));
+
+        var cloneTbody = tbody.cloneNode(false);
+        for (var j = splitIdx; j < rows.length; j++) {
+            cloneTbody.appendChild(rows[j]);
+        }
+        cloneTable.appendChild(cloneTbody);
+
+        if (table.tFoot) {
+            cloneTable.appendChild(table.tFoot);
+        }
+
+        table.style.marginBottom = '4px';
+        return cloneTable;
+    }
+
+    function splitList(listEl, maxBodyBottom) {
+        var items = Array.prototype.slice.call(listEl.children);
+        if (items.length < 2) return null;
+
+        var splitIdx = -1;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].getBoundingClientRect().bottom > maxBodyBottom) {
+                splitIdx = i;
+                break;
+            }
+        }
+        if (splitIdx === -1) splitIdx = items.length - 1;
+        if (splitIdx <= 0) return null;
+
+        var cloneList = listEl.cloneNode(false);
+        if (listEl.tagName === 'OL') {
+            var baseStart = (typeof listEl.start === 'number' && listEl.start > 0) ? listEl.start : 1;
+            cloneList.start = baseStart + splitIdx;
+        }
+        for (var j = splitIdx; j < items.length; j++) {
+            cloneList.appendChild(items[j]);
+        }
+        listEl.style.marginBottom = '4px';
+        return cloneList;
+    }
+
+    function splitContainer(container, maxBodyBottom, availableHeightPx, isRootBody) {
+        var children = Array.prototype.slice.call(container.children);
+        if (children.length === 0) return null;
+
+        var overflowIdx = -1;
+        for (var i = 0; i < children.length; i++) {
+            if (children[i].getBoundingClientRect().bottom > maxBodyBottom) {
+                overflowIdx = i;
+                break;
+            }
+        }
+        if (overflowIdx === -1) return null;
+
+        var target = children[overflowIdx];
+        var targetRect = target.getBoundingClientRect();
+        var canTryInnerSplit = isSplittableElement(target, availableHeightPx) &&
+            (targetRect.top < maxBodyBottom - 22 || overflowIdx === 0);
+
+        if (canTryInnerSplit) {
+            var splitPart = null;
+            if (target.tagName === 'TABLE') {
+                splitPart = splitTable(target, maxBodyBottom);
+            } else if (target.tagName === 'OL' || target.tagName === 'UL') {
+                splitPart = splitList(target, maxBodyBottom);
+            } else {
+                splitPart = splitContainer(target, maxBodyBottom, availableHeightPx, false);
+            }
+            if (splitPart) {
+                var outWrap = container.cloneNode(false);
+                outWrap.appendChild(splitPart);
+                for (var k = overflowIdx + 1; k < children.length; k++) {
+                    outWrap.appendChild(children[k]);
+                }
+                return outWrap;
+            }
+        }
+
+        var moveFromIdx = overflowIdx;
+        while (moveFromIdx > 0 && isHeadingOrLabel(children[moveFromIdx - 1])) {
+            moveFromIdx--;
+        }
+
+        if (moveFromIdx > 1 && moveFromIdx === children.length - 1 && isTotalFooterNode(children[moveFromIdx])) {
+            moveFromIdx--;
+            while (moveFromIdx > 0 && isHeadingOrLabel(children[moveFromIdx - 1])) {
+                moveFromIdx--;
+            }
+        }
+
+        if (moveFromIdx === 1 && moveFromIdx === children.length - 1 && isTotalFooterNode(children[moveFromIdx])) {
+            var prevChild = children[0];
+            if (isSplittableElement(prevChild, availableHeightPx)) {
+                var forcedCutoff = prevChild.getBoundingClientRect().bottom - 20;
+                var forcedSplit = prevChild.tagName === 'TABLE'
+                    ? splitTable(prevChild, forcedCutoff)
+                    : (prevChild.tagName === 'OL' || prevChild.tagName === 'UL')
+                        ? splitList(prevChild, forcedCutoff)
+                        : splitContainer(prevChild, forcedCutoff, availableHeightPx, false);
+                if (forcedSplit) {
+                    var totalWrap = container.cloneNode(false);
+                    totalWrap.appendChild(forcedSplit);
+                    totalWrap.appendChild(children[1]);
+                    return totalWrap;
+                }
+            }
+        }
+
+        if (moveFromIdx === 0) {
+            if (!isRootBody) return null;
+            if (children.length > 1) {
+                moveFromIdx = 1;
+            } else {
+                return null;
+            }
+        }
+
+        var movedWrap = container.cloneNode(false);
+        for (var m = moveFromIdx; m < children.length; m++) {
+            movedWrap.appendChild(children[m]);
+        }
+        return movedWrap;
+    }
+
+    function createContinuationPage(sourcePage, header, overflowBody, footer) {
+        var newPage = sourcePage.cloneNode(false);
+        newPage.style.removeProperty('min-height');
+        newPage.style.removeProperty('height');
+        newPage.style.removeProperty('justify-content');
+        if (header) {
+            newPage.appendChild(header.cloneNode(true));
+        }
+        overflowBody.style.removeProperty('flex');
+        overflowBody.style.marginTop = '0px';
+        newPage.appendChild(overflowBody);
+        if (footer) {
+            newPage.appendChild(footer.cloneNode(true));
+        }
+        return newPage;
+    }
+
+    var pxPerMm = measurePxPerMm();
+    var maxHeightPx = MAX_HEIGHT_MM * pxPerMm;
+    var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+    var guard = 0;
+
+    for (var p = 0; p < pages.length && guard < 2000; p++) {
+        guard++;
+        var page = pages[p];
+        var parts = normalizePage(page);
+        if (!parts.body || parts.body.children.length === 0) continue;
+
+        enterMeasureMode(page, parts.body, parts.footer);
+
+        var topAnchor = parts.header ? parts.header.getBoundingClientRect().top : parts.body.getBoundingClientRect().top;
+        var bottomAnchor = parts.footer ? parts.footer.getBoundingClientRect().bottom : parts.body.getBoundingClientRect().bottom;
+        var naturalHeight = bottomAnchor - topAnchor;
+
+        if (naturalHeight > maxHeightPx) {
+            var footerHeight = parts.footer ? parts.footer.getBoundingClientRect().height : 0;
+            var bodyTop = parts.body.getBoundingClientRect().top;
+            var maxBodyBottom = topAnchor + maxHeightPx - footerHeight - 8;
+            var availableBodyHeight = Math.max(120, maxBodyBottom - bodyTop);
+
+            var overflowBody = splitContainer(parts.body, maxBodyBottom, availableBodyHeight, true);
+            if (overflowBody && overflowBody.children.length > 0 && parts.body.children.length > 0) {
+                var nextPage = createContinuationPage(page, parts.header, overflowBody, parts.footer);
+                page.parentNode.insertBefore(nextPage, page.nextSibling);
+                pages.splice(p + 1, 0, nextPage);
+            }
+        }
+
+        exitMeasureMode(page, parts.body, parts.footer);
+    }
+
+    var allPages = document.querySelectorAll('.page');
+    for (var idx = 0; idx < allPages.length; idx++) {
+        var centerEl = allPages[idx].querySelector('.pdf-footer .footer-center');
+        if (centerEl) {
+            centerEl.textContent = String(START_PAGE_NUM + idx);
+        }
+    }
+})();
+</script>
+`;
+
 const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeetingDate, degreePrefix, deptName, regYear) => {
     const pageNum = ++pageTracker.current;
     const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC'];
@@ -481,7 +864,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
     });
 
     const svgPieChartHTML = grandTotal > 0 ? `
-        <div style="margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 40px; font-family: Arial, sans-serif;">
+        <div class="pie-chart-block" style="margin-top: 18px; page-break-inside: avoid; display: flex; justify-content: center; align-items: center; gap: 40px; font-family: Arial, sans-serif;">
             <svg width="150" height="150" viewBox="0 0 100 100" style="display: block;">
                 <circle cx="50" cy="50" r="36" fill="#fff" stroke="#000" stroke-width="0.5" />
                 ${slices.map(slice => `<path d="${slice.d}" fill="${slice.color}" stroke="#fff" stroke-width="0.5" />`).join('')}
@@ -506,7 +889,7 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
                 <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear || 'R-2023')}</div>
             </div>
             
-            <div class="title-block" style="margin-top: 15px; margin-bottom: 20px;">
+            <div class="title-block" style="margin-top: 8px; margin-bottom: 12px;">
                 <h1 style="font-size: 12pt; text-align: center; text-decoration: underline;">SUMMARY OF CREDIT DISTRIBUTION</h1>
             </div>
 
@@ -1010,7 +1393,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
         const renderExperimentsTableHTML = (expList, title = "List of Exercises") => {
             if (!expList || expList.length === 0) return '';
             return `
-                <div style="margin-top: 4px; margin-bottom: 4px; page-break-inside: avoid;">
+                <div style="margin-top: 4px; margin-bottom: 4px;">
                     <h4 style="font-size: 9pt; font-weight: bold; font-family: Arial, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 2px; margin: 0 0 3px 0; text-transform: uppercase;">${title}</h4>
                     <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; font-size: 9pt; text-align: center;">
                         <thead>
@@ -1225,7 +1608,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
             <div class="syllabus-page-content" style="flex: 1 1 auto;">
                 ${(textbooks.length > 0 || references.length > 0 || webReferences.length > 0) ? `
-                <div class="section-container" style="margin-top: 4px; margin-bottom: 6px; page-break-inside: avoid;">
+                <div class="section-container" style="margin-top: 4px; margin-bottom: 6px;">
                     ${textbooks.length > 0 ? `
                     <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Text Book${textbooks.length > 1 ? 's' : ''}</h4>
                     <ol style="margin: 0 0 4px 0; padding-left: 18px;">
@@ -1249,76 +1632,78 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 </div>
                 ` : ''}
 
-                <div style="font-size: 8.5pt; font-weight: bold; margin-top: 4px; margin-bottom: 2px; font-family: Arial, sans-serif; text-align: center; text-transform: uppercase;">
-                    Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
-                </div>
+                <div class="co-po-block" style="margin-top: 4px; margin-bottom: 4px; page-break-inside: avoid;">
+                    <div style="font-size: 8.5pt; font-weight: bold; margin-top: 0; margin-bottom: 2px; font-family: Arial, sans-serif; text-align: center; text-transform: uppercase;">
+                        Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
+                    </div>
 
-                <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 4px; font-size: 9pt; border: 1.5px solid #000; text-align: center; page-break-inside: avoid;">
-                    <thead>
-                        <tr style="background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                            <th rowspan="2" style="border: 1.5px solid #000; padding: 2px; width: 10%; font-size: 9pt;">COs</th>
-                            <th colspan="${poCount}" style="border: 1.5px solid #000; padding: 2px; font-size: 9pt;">POs</th>
-                            <th colspan="${psoCount}" style="border: 1.5px solid #000; padding: 2px; font-size: 9pt;">PSOs</th>
-                        </tr>
-                        <tr style="background-color: #f2f2f2; font-family: Arial, sans-serif;">
-                            ${poList && poList.length > 0
-                    ? poList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
-                    : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
-                }
-                            ${psoList && psoList.length > 0
-                    ? psoList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
-                    : [1, 2, 3].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
-                }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${coPoMapping.map(row => `
-                            <tr>
-                                <td style="border: 1.5px solid #000; padding: 1.5px; font-weight: bold; font-size: 9pt;">${row.coNo}</td>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 4px; font-size: 9pt; border: 1.5px solid #000; text-align: center;">
+                        <thead>
+                            <tr style="background-color: #f2f2f2; font-family: Arial, sans-serif;">
+                                <th rowspan="2" style="border: 1.5px solid #000; padding: 2px; width: 10%; font-size: 9pt;">COs</th>
+                                <th colspan="${poCount}" style="border: 1.5px solid #000; padding: 2px; font-size: 9pt;">POs</th>
+                                <th colspan="${psoCount}" style="border: 1.5px solid #000; padding: 2px; font-size: 9pt;">PSOs</th>
+                            </tr>
+                            <tr style="background-color: #f2f2f2; font-family: Arial, sans-serif;">
                                 ${poList && poList.length > 0
-                        ? poList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`po${i + 1}`] || '-'}</td>`).join('')
-                        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`po${n}`] || '-'}</td>`).join('')
+                        ? poList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
+                        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
                     }
                                 ${psoList && psoList.length > 0
-                        ? psoList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`pso${i + 1}`] || '-'}</td>`).join('')
-                        : [1, 2, 3].map(n => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`pso${n}`] || '-'}</td>`).join('')
+                        ? psoList.map((_, i) => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${i + 1}</th>`).join('')
+                        : [1, 2, 3].map(n => `<th style="border: 1.5px solid #000; padding: 1px; width: 6%; font-size: 7.5pt;">${n}</th>`).join('')
                     }
                             </tr>
-                        `).join('')}
-                        <tr style="font-weight: bold; background-color: #f9f9f9;">
-                            <td style="border: 1.5px solid #000; padding: 1.5px; font-size: 9pt;">Average</td>
-                            ${poList && poList.length > 0
-                    ? poList.map((_, i) => {
-                        const validValues = coPoMapping.map(r => Number(r[`po${i + 1}`])).filter(v => !isNaN(v) && v > 0);
-                        const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                        return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
-                    }).join('')
-                    : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => {
-                        const validValues = coPoMapping.map(r => Number(r[`po${n}`])).filter(v => !isNaN(v) && v > 0);
-                        const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                        return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
-                    }).join('')
-                }
-                            ${psoList && psoList.length > 0
-                    ? psoList.map((_, i) => {
-                        const validValues = coPoMapping.map(r => Number(r[`pso${i + 1}`])).filter(v => !isNaN(v) && v > 0);
-                        const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                        return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
-                    }).join('')
-                    : [1, 2, 3].map(n => {
-                        const validValues = coPoMapping.map(r => Number(r[`pso${n}`])).filter(v => !isNaN(v) && v > 0);
-                        const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
-                        return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
-                    }).join('')
-                }
-                            </tr>
-                    </tbody>
-                </table>
-                <div style="display: flex; justify-content: space-between; font-size: 7.5pt; margin-top: 1px; margin-bottom: 2px;">
-                    <span>3 - High</span>
-                    <span>2 - Medium</span>
-                    <span>1 - Low</span>
-                    <span>"-" - No Correlation</span>
+                        </thead>
+                        <tbody>
+                            ${coPoMapping.map(row => `
+                                <tr>
+                                    <td style="border: 1.5px solid #000; padding: 1.5px; font-weight: bold; font-size: 9pt;">${row.coNo}</td>
+                                    ${poList && poList.length > 0
+                            ? poList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`po${i + 1}`] || '-'}</td>`).join('')
+                            : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`po${n}`] || '-'}</td>`).join('')
+                        }
+                                    ${psoList && psoList.length > 0
+                            ? psoList.map((_, i) => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`pso${i + 1}`] || '-'}</td>`).join('')
+                            : [1, 2, 3].map(n => `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${row[`pso${n}`] || '-'}</td>`).join('')
+                        }
+                                </tr>
+                            `).join('')}
+                            <tr style="font-weight: bold; background-color: #f9f9f9;">
+                                <td style="border: 1.5px solid #000; padding: 1.5px; font-size: 9pt;">Average</td>
+                                ${poList && poList.length > 0
+                        ? poList.map((_, i) => {
+                            const validValues = coPoMapping.map(r => Number(r[`po${i + 1}`])).filter(v => !isNaN(v) && v > 0);
+                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                            return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
+                        }).join('')
+                        : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(n => {
+                            const validValues = coPoMapping.map(r => Number(r[`po${n}`])).filter(v => !isNaN(v) && v > 0);
+                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                            return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
+                        }).join('')
+                    }
+                                ${psoList && psoList.length > 0
+                        ? psoList.map((_, i) => {
+                            const validValues = coPoMapping.map(r => Number(r[`pso${i + 1}`])).filter(v => !isNaN(v) && v > 0);
+                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                            return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
+                        }).join('')
+                        : [1, 2, 3].map(n => {
+                            const validValues = coPoMapping.map(r => Number(r[`pso${n}`])).filter(v => !isNaN(v) && v > 0);
+                            const avg = validValues.length > 0 ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : '-';
+                            return `<td style="border: 1.5px solid #000; padding: 1px; font-size: 9pt;">${avg}</td>`;
+                        }).join('')
+                    }
+                                </tr>
+                        </tbody>
+                    </table>
+                    <div style="display: flex; justify-content: space-between; font-size: 7.5pt; margin-top: 1px; margin-bottom: 2px;">
+                        <span>3 - High</span>
+                        <span>2 - Medium</span>
+                        <span>1 - Low</span>
+                        <span>"-" - No Correlation</span>
+                    </div>
                 </div>
 
                 ${renderAssessmentComponentsHTML(subj)}
@@ -1496,8 +1881,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         };
 
         return `
-            <div style="page-break-inside: avoid; margin-bottom: 25px;">
-                <h3 style="font-size: 9pt; font-weight: bold; text-align: center; margin-bottom: 8px; font-family: Arial, sans-serif;">
+            <div class="semester-block" style="margin-bottom: 2px;">
+                <h3 style="font-size: 9pt; font-weight: bold; text-align: center; margin: 2px 0 4px 0; font-family: Arial, sans-serif;">
                     SEMESTER ${semNum}
                 </h3>
                 
@@ -1581,11 +1966,11 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 </table>
 
                 ${languageElective1.length > 0 ? `
-                <div style="margin-top: 12px; page-break-inside: avoid;">
-                    <table class="curriculum-table">
+                <div class="lang-elective-block" style="margin-top: 6px; page-break-inside: avoid;">
+                    <table class="curriculum-table" style="margin-top: 0; margin-bottom: 4px;">
                         <thead>
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 4px 8px; border: 1.5px solid #000; text-transform: uppercase;">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 3px 6px; border: 1.5px solid #000; text-transform: uppercase;">
                                     LANGUAGE ELECTIVE – I
                                 </td>
                             </tr>
@@ -1615,11 +2000,11 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 ` : ''}
 
                 ${languageElective2.length > 0 ? `
-                <div style="margin-top: 12px; page-break-inside: avoid;">
-                    <table class="curriculum-table">
+                <div class="lang-elective-block" style="margin-top: 6px; page-break-inside: avoid;">
+                    <table class="curriculum-table" style="margin-top: 0; margin-bottom: 4px;">
                         <thead>
                             <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 4px 8px; border: 1.5px solid #000; text-transform: uppercase;">
+                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 3px 6px; border: 1.5px solid #000; text-transform: uppercase;">
                                     LANGUAGE ELECTIVE – II
                                 </td>
                             </tr>
@@ -1661,19 +2046,40 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
+            @page {
+                size: A4 portrait;
+                margin: 12mm 15mm 12mm 15mm;
+            }
+
             /* Default typography with full Tamil Unicode font fallback */
             body {
                 font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
-                font-size: 9pt;
+                color: #000;
+                background: #fff;
+                margin: 0;
+                padding: 0;
+                font-size: 11pt;
+                line-height: 1.4;
             }
-            
-            /* Apply consistent font family to all elements on content pages (page 2 onwards) except headers and footers */
+
             .print-table .page,
             .page {
                 font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
+                position: relative;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
             }
-            
-            /* Header and Footer styles (exempt from the content page font/size overrides) */
+
+            .page-body,
+            .syllabus-page-content {
+                flex: 1 1 auto;
+                display: block;
+                width: 100%;
+            }
+
+            /* Header and Footer styles (exempt from content page font/size overrides) */
             .pdf-header, .pdf-header * {
                 font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif !important;
                 font-size: 9.5pt !important;
@@ -1689,39 +2095,23 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 font-style: normal !important;
                 font-weight: bold !important;
             }
-            @page {
-                size: A4;
-                margin: 15mm 15mm 20mm 15mm;
-            }
-            body {
-                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
-                color: #000;
-                background: #fff;
-                margin: 0;
-                padding: 0;
-                font-size: 11pt;
-                line-height: 1.4;
-            }
-            .page {
-                position: relative;
-                box-sizing: border-box;
-                padding-top: 20px;
-                padding-bottom: 20px;
-            }
-            
+
             /* Header */
-            .pdf-header {
+            .pdf-header,
+            .pdf-header-inner {
                 display: flex;
                 justify-content: space-between;
                 align-items: flex-end;
                 border-bottom: 1.5px solid #000;
-                padding-bottom: 5px;
-                margin-bottom: 25px;
+                padding-bottom: 4px;
+                margin-bottom: 10px;
                 font-size: 9.5pt;
                 font-weight: bold;
-                font-family: Arial, sans-serif;
+                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
                 font-style: italic;
                 position: relative;
+                width: 100%;
+                flex-shrink: 0;
             }
             .pdf-header .left-col {
                 text-align: left;
@@ -1729,20 +2119,23 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             .pdf-header .right-col {
                 text-align: right;
             }
-            
+
             /* Footer */
-            .pdf-footer {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
+            .pdf-footer,
+            .pdf-footer-inner {
+                position: relative;
                 display: flex;
                 justify-content: space-between;
                 align-items: flex-end;
+                border-top: 1px solid #000;
+                padding-top: 5px;
+                margin-top: auto;
                 font-size: 9pt;
-                font-family: Arial, sans-serif;
+                font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
                 font-style: italic;
                 color: #000;
+                width: 100%;
+                flex-shrink: 0;
             }
             .pdf-footer .footer-left {
                 text-align: left;
@@ -1750,9 +2143,11 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             .pdf-footer .footer-right {
                 text-align: right;
             }
-            .pdf-footer .footer-center {
+            .pdf-footer .footer-center,
+            .pdf-footer-inner .footer-center {
                 position: absolute;
                 left: 50%;
+                bottom: 0;
                 transform: translateX(-50%);
                 text-align: center;
                 font-style: normal;
@@ -1861,13 +2256,21 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             table.curriculum-table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-top: 10px;
-                margin-bottom: 25px;
-                font-size: 9pt;
+                margin-top: 4px;
+                margin-bottom: 8px;
+                font-size: 8.5pt;
+                line-height: 1.25;
+            }
+            table.curriculum-table thead {
+                display: table-header-group;
+            }
+            table.curriculum-table tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             table.curriculum-table th, table.curriculum-table td {
                 border: 1px solid #000;
-                padding: 5px 6px;
+                padding: 3.5px 5px;
                 text-align: left;
                 vertical-align: middle;
             }
@@ -1882,7 +2285,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             table.curriculum-table tr.category-row td {
                 font-weight: bold;
                 background-color: rgba(0, 0, 0, 0.03);
-                padding: 4px 6px;
+                padding: 3px 5px;
             }
             
             .cover-border {
@@ -1910,19 +2313,15 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 .cover-page, .page, .syllabus-subject-block {
                     background: #fff;
                     width: 210mm;
-                    min-height: auto;
-                    margin: 20px auto;
+                    min-height: 297mm;
+                    margin: 16px auto;
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-                    padding: 20mm 15mm;
+                    padding: 12mm 15mm;
                     box-sizing: border-box;
                     position: relative;
                 }
                 .cover-page {
-                    min-height: 297mm;
                     margin-top: 60px;
-                }
-                .page {
-                    min-height: 297mm;
                 }
                 .preview-bar {
                     position: fixed;
@@ -2028,7 +2427,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 }
                 .page {
                     width: 100% !important;
-                    min-height: 255mm !important;
+                    min-height: 266mm !important;
                     height: auto !important;
                     max-height: none !important;
                     margin: 0 !important;
@@ -2038,12 +2437,16 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     background: #fff !important;
                     page-break-after: always !important;
                     break-after: page !important;
-                    page-break-inside: avoid !important;
-                    break-inside: avoid !important;
+                    page-break-inside: auto !important;
+                    break-inside: auto !important;
                     display: flex !important;
                     flex-direction: column !important;
-                    justify-content: space-between !important;
+                    justify-content: flex-start !important;
                     overflow: visible !important;
+                }
+                .page:last-child {
+                    page-break-after: avoid !important;
+                    break-after: avoid !important;
                 }
                 .syllabus-subject-block {
                     width: 100% !important;
@@ -2064,8 +2467,8 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     justify-content: space-between !important;
                     align-items: flex-end !important;
                     border-bottom: 1.5px solid #000 !important;
-                    padding-bottom: 5px !important;
-                    margin-bottom: 15px !important;
+                    padding-bottom: 4px !important;
+                    margin-bottom: 10px !important;
                     font-size: 9.5pt !important;
                     font-weight: bold !important;
                     font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif !important;
@@ -2093,6 +2496,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 .pdf-footer-inner .footer-center {
                     position: absolute !important;
                     left: 50% !important;
+                    bottom: 0 !important;
                     transform: translateX(-50%) !important;
                     text-align: center !important;
                     font-style: normal !important;
@@ -2257,9 +2661,9 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <div class="page">
                     ${getHeaderHTML()}
                     ${index === 0 ? `
-                    <div class="title-block" style="margin-top: 15px; margin-bottom: 20px;">
-                        <h1 style="font-size: 15pt; font-family: Arial, sans-serif;">${degreePrefix ? `${degreePrefix.toUpperCase()} ` : ''}${deptName.toUpperCase()}</h1>
-                        <h2 style="font-size: 11pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.5; margin-top: 10px;">
+                    <div class="title-block" style="margin-top: 2px; margin-bottom: 8px;">
+                        <h1 style="font-size: 14pt; font-family: Arial, sans-serif; margin: 0 0 4px 0;">${degreePrefix ? `${degreePrefix.toUpperCase()} ` : ''}${deptName.toUpperCase()}</h1>
+                        <h2 style="font-size: 10.5pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.35; margin-top: 2px;">
                             REGULATION – ${regYear.replace('R-', '')}<br>
                             CHOICE BASED CREDIT SYSTEM<br>
                             CURRICULUM
@@ -2423,14 +2827,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         <!-- DETAILED SYLLABI -->
         ${subjects && subjects.length > 0 ? getDetailedSyllabiHTML(subjects, regYear, pageTracker, bosMeetingDate, acMeetingDate, deptData.po, deptData.pso, degreePrefix, deptName) : ''}
         
-        <!-- No auto-print on load -->
+        ${getPdfPaginationScript(264, 2)}
     </body>
     </html>
     `;
 
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
+    if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        printWindow.focus();
+    } else {
+        alert("Please allow popups for this site to preview and print the curriculum PDF.");
+    }
 };
 
 const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) => {
@@ -2488,6 +2898,10 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
+            @page {
+                size: A4 portrait;
+                margin: 8mm 12mm 8mm 12mm;
+            }
             body {
                 font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif;
                 font-size: 9pt;
@@ -2504,15 +2918,26 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
                 position: relative;
                 box-sizing: border-box;
                 page-break-after: always;
+                break-after: page;
+                page-break-inside: auto;
+                break-inside: auto;
                 display: flex;
                 flex-direction: column;
-                justify-content: space-between;
-                min-height: 280mm;
+                justify-content: flex-start;
+                min-height: 273mm;
             }
             .page:last-child {
                 page-break-after: avoid;
+                break-after: avoid;
             }
-            .pdf-header {
+            .page-body,
+            .syllabus-page-content {
+                flex: 1 1 auto;
+                display: block;
+                width: 100%;
+            }
+            .pdf-header,
+            .pdf-header-inner {
                 font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif !important;
                 font-size: 9.5pt !important;
                 border-bottom: 1.5px solid #000;
@@ -2523,32 +2948,54 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
                 align-items: center;
                 font-weight: bold !important;
                 font-style: italic !important;
+                width: 100%;
+                flex-shrink: 0;
             }
             .pdf-header, .pdf-header * {
                 font-style: italic !important;
                 font-weight: bold !important;
             }
-            .pdf-footer {
+            .pdf-footer,
+            .pdf-footer-inner {
+                position: relative;
                 font-family: Arial, 'Noto Sans Tamil', 'Mukta Malar', 'Latha', 'Nirmala UI', 'Vijaya', 'Arial Unicode MS', sans-serif !important;
                 font-size: 9pt !important;
                 border-top: 1px solid #000;
                 padding-top: 4px;
-                margin-top: 4px;
+                margin-top: auto;
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
+                align-items: flex-end;
                 font-style: italic !important;
+                width: 100%;
+                flex-shrink: 0;
             }
             .pdf-footer, .pdf-footer * {
                 font-style: italic !important;
             }
-            .pdf-footer .footer-center, .pdf-footer .footer-center * {
+            .pdf-footer .footer-center,
+            .pdf-footer .footer-center * {
                 font-style: normal !important;
                 font-weight: bold !important;
+            }
+            .pdf-footer .footer-center,
+            .pdf-footer-inner .footer-center {
+                position: absolute;
+                left: 50%;
+                bottom: 0;
+                transform: translateX(-50%);
+                text-align: center;
             }
             table {
                 width: 100%;
                 border-collapse: collapse;
+            }
+            thead {
+                display: table-header-group;
+            }
+            tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             @media screen {
                 body {
@@ -2563,11 +3010,14 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
                     background: #fff;
                     width: 210mm;
                     min-height: 297mm;
-                    margin: 20px auto;
+                    margin: 16px auto;
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-                    padding: 12mm 15mm;
+                    padding: 8mm 12mm;
                     box-sizing: border-box;
                     position: relative;
+                }
+                .preview-bar + .page {
+                    margin-top: 32px;
                 }
                 .preview-bar {
                     position: fixed;
@@ -2636,15 +3086,23 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
                 }
                 .page {
                     width: 100% !important;
-                    min-height: 280mm !important;
+                    min-height: 273mm !important;
+                    height: auto !important;
                     padding: 0 !important;
                     box-shadow: none !important;
                     margin: 0 !important;
                     border: none !important;
-                    page-break-after: always;
+                    page-break-after: always !important;
+                    break-after: page !important;
+                    page-break-inside: auto !important;
+                    break-inside: auto !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    justify-content: flex-start !important;
                 }
                 .page:last-child {
-                    page-break-after: avoid;
+                    page-break-after: avoid !important;
+                    break-after: avoid !important;
                 }
             }
         </style>
@@ -2658,6 +3116,7 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
             </div>
         </div>
         ${detailedSyllabiHTML}
+        ${getPdfPaginationScript(272, 1)}
     </body>
     </html>
     `;

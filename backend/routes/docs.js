@@ -8,6 +8,26 @@
 
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+
+// Load EASA College Logo (Base64) for instant, self-contained rendering
+let collegeLogoBase64 = '';
+try {
+    const candidatePaths = [
+        path.join(__dirname, '../public/images/logo.webp'),
+        path.join(__dirname, '../../public/images/logo.webp'),
+        path.join(__dirname, '../../src/assets/logos.webp')
+    ];
+    for (const p of candidatePaths) {
+        if (fs.existsSync(p)) {
+            collegeLogoBase64 = `data:image/webp;base64,${fs.readFileSync(p).toString('base64')}`;
+            break;
+        }
+    }
+} catch (e) {
+    // fallback gracefully
+}
 
 // Authoritative Catalog of EASA College Backend Routes
 const routesCatalog = [
@@ -867,7 +887,7 @@ function renderDocsHtml(baseUrl = '') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EASA College | REST API Documentation & Route Explorer</title>
-    <link rel="icon" type="image/webp" href="/assets/logos-CAistHu7.webp">
+    <link rel="icon" type="image/webp" href="${collegeLogoBase64 || '/images/logo.webp'}">
     <style>
         :root {
             --bg-body: #0b0f19;
@@ -937,15 +957,13 @@ function renderDocsHtml(baseUrl = '') {
         .header-logo {
             width: 44px;
             height: 44px;
-            background: linear-gradient(135deg, #1e3a8a, #0284c7);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.2rem;
-            color: #ffffff;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #ffffff;
             box-shadow: 0 4px 14px var(--primary-glow);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            flex-shrink: 0;
+            display: block;
         }
 
         .header-title h1 {
@@ -953,87 +971,7 @@ function renderDocsHtml(baseUrl = '') {
             font-weight: 700;
             color: #ffffff;
             letter-spacing: -0.02em;
-        }
-
-        .header-title p {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .health-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #34d399;
-            padding: 0.4rem 0.85rem;
-            border-radius: 9999px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .health-badge:hover {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: #34d399;
-            transform: translateY(-1px);
-        }
-
-        .health-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 10px #10b981;
-            animation: pulse-dot 2s infinite;
-        }
-
-        @keyframes pulse-dot {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
-        .btn-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.45rem 0.9rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            background: #1e293b;
-            color: #f1f5f9;
-            border: 1px solid var(--border);
-        }
-
-        .btn-link:hover {
-            background: #334155;
-            color: #ffffff;
-            border-color: var(--primary);
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            color: #ffffff;
-            border-color: #3b82f6;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-            box-shadow: 0 4px 12px var(--primary-glow);
+            margin: 0;
         }
 
         /* Main Container */
@@ -1444,21 +1382,10 @@ function renderDocsHtml(baseUrl = '') {
     <!-- Header -->
     <header class="header">
         <div class="header-brand">
-            <div class="header-logo">E</div>
+            <img src="${collegeLogoBase64 || '/images/logo.webp'}" alt="EASA College Logo" class="header-logo" />
             <div class="header-title">
                 <h1>EASA College REST API Explorer</h1>
-                <p>Autonomous Institution • Approved by AICTE • Affiliated to Anna University</p>
             </div>
-        </div>
-
-        <div class="header-actions">
-            <a href="/api/health" class="health-badge" id="healthBadge" target="_blank" title="Check server health">
-                <span class="health-dot" id="healthDot"></span>
-                <span id="healthText">Pinging Server...</span>
-            </a>
-            <a href="/api/routes" class="btn-link" target="_blank" title="Download raw JSON schema">
-                <span>📋</span> Raw JSON
-            </a>
         </div>
     </header>
 
@@ -1720,32 +1647,6 @@ function renderDocsHtml(baseUrl = '') {
                 applyFilters();
             });
         });
-
-        // Live Health Check Ping
-        async function checkServerHealth() {
-            const dot = document.getElementById('healthDot');
-            const text = document.getElementById('healthText');
-            try {
-                const res = await fetch('/api/health');
-                const data = await res.json();
-                if (data.status === 'healthy' || data.status === 'ok') {
-                    text.textContent = '🟢 Server Online (' + (data.uptime?.human || 'healthy') + ')';
-                    dot.style.background = '#10b981';
-                    dot.style.boxShadow = '0 0 10px #10b981';
-                } else {
-                    text.textContent = '🟡 Degraded: ' + (data.database?.status || 'db connecting');
-                    dot.style.background = '#f59e0b';
-                    dot.style.boxShadow = '0 0 10px #f59e0b';
-                }
-            } catch (err) {
-                text.textContent = '🔴 Server Offline';
-                dot.style.background = '#ef4444';
-                dot.style.boxShadow = '0 0 10px #ef4444';
-            }
-        }
-
-        checkServerHealth();
-        setInterval(checkServerHealth, 30000);
     </script>
 </body>
 </html>`;
