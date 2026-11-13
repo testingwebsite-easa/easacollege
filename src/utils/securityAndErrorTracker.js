@@ -1,9 +1,9 @@
 /**
  * Security & Error Tracking Module for EASA College
  * 
- * 1. Inspect Protection:
- *    - Disabled in production (deployed environments) to protect source code & prevent inspection.
- *    - Enabled on localhost (development) so developers can freely inspect and debug.
+ * 1. Inspect & DevTools:
+ *    - Inspect, Right-Click, and DevTools shortcuts are enabled by default for development & debugging.
+ *    - To optionally disable inspect in specific builds, set VITE_DISABLE_INSPECT=true in .env.
  * 
  * 2. Missing File & Error Logging:
  *    - Intercepts failed resources (missing images, scripts, stylesheets, media 404s).
@@ -26,13 +26,15 @@ export const isLocalEnvironment = () => {
 export const setupInspectProtection = () => {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-  // On localhost / development, keep inspect fully functional
-  if (isLocalEnvironment()) {
-    console.info('🛠️ [Dev Mode]: Running on localhost. DevTools and Inspect are enabled.');
+  // Inspect and DevTools are enabled by default (right-click, F12, DevTools shortcuts)
+  const isInspectDisabled = import.meta.env.VITE_DISABLE_INSPECT === 'true';
+
+  if (!isInspectDisabled) {
+    console.info('🛠️ DevTools and Inspect are enabled.');
     return;
   }
 
-  console.info('🔒 [Production Mode]: Security protection active. Inspect and DevTools shortcuts disabled.');
+  console.info('🔒 Security protection active. Inspect and DevTools shortcuts disabled.');
 
   // 1. Disable right-click context menu
   document.addEventListener('contextmenu', (e) => {
@@ -75,18 +77,6 @@ export const setupInspectProtection = () => {
       return false;
     }
   }, { capture: true });
-
-  // 3. Clear console in production if developer tools are forced open
-  try {
-    setInterval(() => {
-      // Optional security banner in production console
-      if (window.console && typeof window.console.clear === 'function') {
-        // Keeping console clean while retaining error reports
-      }
-    }, 2000);
-  } catch {
-    // Ignore any timer restrictions
-  }
 };
 
 export const setupErrorAndMissingFileTracker = () => {

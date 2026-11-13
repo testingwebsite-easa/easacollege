@@ -7,7 +7,7 @@ import App from './App.jsx'
 import { LoaderProvider } from './context/LoaderContext.jsx'
 import initProtectionAndTracking, { isLocalEnvironment } from './utils/securityAndErrorTracker'
 
-// Initialize protection (disabled inspect in production, enabled on localhost) and error/missing-file logger
+// Initialize error/missing-file logger and security tracking (DevTools & Inspect enabled)
 initProtectionAndTracking();
 
 class ErrorBoundary extends React.Component {
