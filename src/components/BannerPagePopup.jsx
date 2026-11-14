@@ -40,8 +40,8 @@ export const POPUP_CONFIG = {
   showBottomBar: false,
 
   // 10. FULL IMAGE PRESENTATION SIZE:
-  maxWidth: "1100px",
-  maxHeight: "88vh",
+  maxWidth: "min(92vw, 1100px)",
+  maxHeight: "86vh",
 };
 
 const BannerPopup = (props) => {
@@ -80,6 +80,9 @@ const BannerPopup = (props) => {
   useEffect(() => {
     if (!isOpen) return;
 
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setIsOpen(false);
@@ -87,13 +90,19 @@ const BannerPopup = (props) => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen]);
-
 
   if (!isEnabled || !isOpen) return null;
 
   const isClickable = Boolean(linkUrl && linkUrl !== '#' && linkUrl !== '');
+
+  // Dynamic responsive viewport-aware constraints:
+  const resolvedMaxWidth = maxWidth ? `min(calc(100vw - 28px), ${maxWidth})` : 'min(calc(100vw - 28px), 1100px)';
+  const resolvedMaxHeight = maxHeight ? `min(calc(100dvh - 28px), ${maxHeight})` : 'min(calc(100dvh - 28px), 86vh)';
 
   return (
     <div
@@ -101,34 +110,41 @@ const BannerPopup = (props) => {
       role="dialog"
       aria-label={altText}
       onClick={() => setIsOpen(false)} // Clicking backdrop closes popup
+      className="easa-popup-overlay"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 99999,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.78)',
+        backdropFilter: 'blur(5px)',
+        WebkitBackdropFilter: 'blur(5px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        touchAction: 'pan-y',
         animation: 'easaFadeIn 0.25s ease-out',
       }}
     >
       {/* Modal Card - hugs the image boundaries precisely */}
       <div
         onClick={(e) => e.stopPropagation()} // Prevent close on clicking modal card
+        className="easa-popup-card"
         style={{
           position: 'relative',
-          display: 'inline-flex',
+          display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           width: 'fit-content',
           height: 'fit-content',
-          maxWidth: maxWidth || 'min(92vw, 1100px)',
-          maxHeight: maxHeight || '86vh',
+          maxWidth: resolvedMaxWidth,
+          maxHeight: resolvedMaxHeight,
+          boxSizing: 'border-box',
           backgroundColor: 'transparent',
-          borderRadius: '24px',
+          borderRadius: '20px',
           animation: 'easaScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
@@ -138,17 +154,18 @@ const BannerPopup = (props) => {
             onClick={() => setIsOpen(false)}
             aria-label="Close popup"
             title="Close popup"
+            className="easa-popup-close-btn"
             style={{
               position: 'absolute',
-              top: '14px',
-              right: '14px',
-              zIndex: 20,
+              top: '12px',
+              right: '12px',
+              zIndex: 30,
               width: '38px',
               height: '38px',
               borderRadius: '50%',
-              backgroundColor: 'rgba(0, 0, 0, 0.65)',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
               color: '#ffffff',
-              border: '2px solid rgba(255, 255, 255, 0.85)',
+              border: '2px solid rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(6px)',
               WebkitBackdropFilter: 'blur(6px)',
               fontSize: '22px',
@@ -159,13 +176,14 @@ const BannerPopup = (props) => {
               justifyContent: 'center',
               boxShadow: '0 4px 14px rgba(0, 0, 0, 0.5)',
               transition: 'background-color 0.2s, transform 0.15s',
+              touchAction: 'manipulation',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
-              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.92)';
+              e.currentTarget.style.transform = 'scale(1.08)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.65)';
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
               e.currentTarget.style.transform = 'scale(1)';
             }}
           >
@@ -174,26 +192,50 @@ const BannerPopup = (props) => {
         )}
 
         {/* Banner Image Content - with curved rounded edges */}
-        <div style={{ position: 'relative', lineHeight: 0, borderRadius: '24px', overflow: 'hidden' }}>
+        <div
+          className="easa-popup-img-wrapper"
+          style={{
+            position: 'relative',
+            lineHeight: 0,
+            borderRadius: '20px',
+            overflow: 'hidden',
+            maxWidth: '100%',
+            maxHeight: resolvedMaxHeight,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.75)',
+            boxSizing: 'border-box',
+          }}
+        >
           {isClickable ? (
             <a
               href={linkUrl}
               target={openInNewTab ? '_blank' : '_self'}
               rel={openInNewTab ? 'noopener noreferrer' : undefined}
               onClick={() => setIsOpen(false)}
-              style={{ display: 'block', textDecoration: 'none', borderRadius: '24px', overflow: 'hidden' }}
+              style={{
+                display: 'block',
+                textDecoration: 'none',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                maxWidth: '100%',
+                maxHeight: '100%',
+              }}
             >
               <img
                 src={imageSrc}
                 alt={altText}
+                className="easa-popup-img"
                 style={{
                   display: 'block',
                   width: 'auto',
                   height: 'auto',
-                  maxWidth: maxWidth || 'min(92vw, 1100px)',
-                  maxHeight: maxHeight || '86vh',
-                  borderRadius: '24px',
-                  boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.75)',
+                  maxWidth: resolvedMaxWidth,
+                  maxHeight: resolvedMaxHeight,
+                  objectFit: 'contain',
+                  borderRadius: '20px',
+                  boxSizing: 'border-box',
                   cursor: 'pointer',
                   transition: 'opacity 0.2s',
                 }}
@@ -207,14 +249,16 @@ const BannerPopup = (props) => {
               alt={altText}
               onClick={() => setIsOpen(false)}
               title="Click anywhere to close"
+              className="easa-popup-img"
               style={{
                 display: 'block',
                 width: 'auto',
                 height: 'auto',
-                maxWidth: maxWidth || 'min(92vw, 1100px)',
-                maxHeight: maxHeight || '86vh',
-                borderRadius: '24px',
-                boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.75)',
+                maxWidth: resolvedMaxWidth,
+                maxHeight: resolvedMaxHeight,
+                objectFit: 'contain',
+                borderRadius: '20px',
+                boxSizing: 'border-box',
                 cursor: 'pointer',
               }}
             />
@@ -231,6 +275,10 @@ const BannerPopup = (props) => {
               alignItems: 'center',
               justifyContent: isClickable ? 'space-between' : 'flex-end',
               borderTop: '1px solid #f3f4f6',
+              width: '100%',
+              boxSizing: 'border-box',
+              borderBottomLeftRadius: '20px',
+              borderBottomRightRadius: '20px',
             }}
           >
             {isClickable && (
@@ -271,7 +319,7 @@ const BannerPopup = (props) => {
         )}
       </div>
 
-      {/* Embedded Animations */}
+      {/* Embedded Animations & Responsive Rules */}
       <style>{`
         @keyframes easaFadeIn {
           from { opacity: 0; }
@@ -280,6 +328,36 @@ const BannerPopup = (props) => {
         @keyframes easaScaleUp {
           from { opacity: 0; transform: scale(0.92); }
           to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 640px) {
+          .easa-popup-overlay {
+            padding: 12px !important;
+          }
+          .easa-popup-card {
+            max-width: calc(100vw - 24px) !important;
+            max-height: calc(100dvh - 24px) !important;
+            border-radius: 16px !important;
+          }
+          .easa-popup-img-wrapper {
+            border-radius: 16px !important;
+            max-width: calc(100vw - 24px) !important;
+            max-height: calc(100dvh - 24px) !important;
+          }
+          .easa-popup-img {
+            max-width: calc(100vw - 24px) !important;
+            max-height: calc(100dvh - 24px) !important;
+            border-radius: 16px !important;
+            object-fit: contain !important;
+          }
+          .easa-popup-close-btn {
+            top: 8px !important;
+            right: 8px !important;
+            width: 34px !important;
+            height: 34px !important;
+            font-size: 19px !important;
+            background-color: rgba(0, 0, 0, 0.75) !important;
+          }
         }
       `}</style>
     </div>
