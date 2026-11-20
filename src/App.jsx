@@ -2,6 +2,8 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
+import DCSSummary from "./components/DCSSummary";
+
 const MissionPage = lazy(() => import('./pages/MissionPage'));
 const CoreBeliefsPage = lazy(() => import('./pages/CoreBeliefsPage'));
 const InstitutionPage = lazy(() => import('./pages/InstitutionPage'));
@@ -316,6 +318,8 @@ function App() {
             <Route path="/page/cafeteria" element={<CafeteriaPage />} />
             <Route path="/page/food-court" element={<FoodCourtPage />} />
             <Route path="/page/:slug" element={<DynamicPage />} />
+
+            <Route path="/dcs-summary" element={<DCSSummary />} />
 
             {/* 404 Catch-all */}
             <Route path="*" element={<NotFoundPage />} />
