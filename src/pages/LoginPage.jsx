@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 import { FaGraduationCap, FaBookOpen, FaShieldAlt } from 'react-icons/fa';
+import ThemeToggle from '../components/ThemeToggle';
 import API_BASE_URL from '../api';
 import '../styles/LoginPage.css';
 
@@ -199,6 +200,15 @@ const LoginPage = () => {
     if (isForgotMode) {
         return (
             <div className="login-page">
+                <div className="login-top-bar">
+                    <Link to="/" className="login-back-home" title="Back to Website Home">
+                        ← Back to Website
+                    </Link>
+                    <div className="login-theme-toggle-box">
+                        <ThemeToggle />
+                    </div>
+                </div>
+
                 <div className="login-container">
                     <div className="login-header" style={headerInfo.bgStyle}>
                         <h1>{headerInfo.title}</h1>
@@ -206,8 +216,8 @@ const LoginPage = () => {
                     </div>
 
                     <div className="auth-form">
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#333', marginBottom: '0.5rem', textAlign: 'center' }}>Forgot Password</h2>
-                        <p style={{ color: '#666', fontSize: '0.875rem', marginBottom: '1.5rem', textAlign: 'center', lineHeight: '1.4' }}>
+                        <h2 className="forgot-title">Forgot Password</h2>
+                        <p className="forgot-desc">
                             Enter your email address and we'll send you a link to reset your password.
                         </p>
 
@@ -238,7 +248,7 @@ const LoginPage = () => {
                             <button 
                                 type="button" 
                                 onClick={() => { setIsForgotMode(false); setForgotSuccess(''); setForgotError(''); }} 
-                                style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', fontSize: '0.875rem', fontWeight: '600' }}
+                                className="forgot-back-btn"
                             >
                                 Back to Login
                             </button>
@@ -251,6 +261,15 @@ const LoginPage = () => {
 
     return (
         <div className="login-page">
+            <div className="login-top-bar">
+                <Link to="/" className="login-back-home" title="Back to Website Home">
+                    ← Back to Website
+                </Link>
+                <div className="login-theme-toggle-box">
+                    <ThemeToggle />
+                </div>
+            </div>
+
             <div className="login-container">
                 {/* Multi-Portal Selector Tabs */}
                 <div className="login-portal-tabs">
@@ -344,19 +363,7 @@ const LoginPage = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                style={{
-                                    position: 'absolute',
-                                    right: '10px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#666',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    padding: '5px'
-                                }}
+                                className="password-toggle-btn"
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}

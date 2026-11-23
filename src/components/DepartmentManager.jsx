@@ -31,6 +31,7 @@ const renderPieChart = (categories, rowTotals, grandTotal) => {
         'NFE': '#f97316',  // Orange (Non-Functional Elective)
         'OEC': '#8b5cf6',  // Violet
         'EEC': '#06b6d4',  // Cyan
+        'IPR': '#84cc16',  // Lime / Green
     };
 
     let cumulativeAngle = 0;
@@ -100,7 +101,11 @@ const renderPieChart = (categories, rowTotals, grandTotal) => {
 const renderCreditDistributionTable = (subjects) => {
     if (!subjects || subjects.length === 0) return null;
 
+    const hasIPR = (subjects || []).some(s => (s.categoryType || '').toUpperCase() === 'IPR' || (s.category || '').toUpperCase().includes('IPR') || (s.category || '').toUpperCase().includes('RESEARCH METHODOLOGY'));
     const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC'];
+    if (hasIPR) {
+        categories.push('IPR');
+    }
     const categoryLabels = {
         'HUM': 'Humanities and Social Sciences including Management Courses (HUM)',
         'BSC': 'Basic Science Courses (BSC)',
@@ -110,11 +115,12 @@ const renderCreditDistributionTable = (subjects) => {
         'NFE': 'Non-Functional Elective Courses (NFE)',
         'OEC': 'Open Elective Courses (OEC)',
         'EEC': 'Employability Enhancement Courses (EEC)',
-        'MC': 'Mandatory Courses (MC)'
+        'MC': 'Mandatory Courses (MC)',
+        'IPR': 'Research Methodology and IPR (IPR)'
     };
 
     const distribution = {};
-    categories.forEach(cat => {
+    [...categories, 'IPR'].forEach(cat => {
         distribution[cat] = Array(8).fill(0);
     });
 
@@ -134,13 +140,16 @@ const renderCreditDistributionTable = (subjects) => {
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
+        } else if (subj.categoryType === 'IPR' || (subj.categoryType || '').toUpperCase() === 'IPR' || (subj.category || '').toUpperCase().includes('IPR') || (subj.category || '').toUpperCase().includes('RESEARCH METHODOLOGY')) {
+            cat = 'IPR';
         } else if (subj.categoryType === 'NFE' || (subj.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (subj.category || '').toUpperCase().includes('NON FUNCTIONAL') || (subj.category || '').toUpperCase().includes('NFE')) {
             cat = 'NFE';
         } else if (subj.vertical) {
             cat = 'PEC';
         } else {
             const rawCat = (subj.categoryType || subj.category || '').toUpperCase().trim();
-            if (rawCat === 'NFE' || rawCat.includes('NON-FUNCTIONAL') || rawCat.includes('NON FUNCTIONAL')) cat = 'NFE';
+            if (rawCat === 'IPR' || rawCat.includes('IPR') || rawCat.includes('RESEARCH METHODOLOGY')) cat = 'IPR';
+            else if (rawCat === 'NFE' || rawCat.includes('NON-FUNCTIONAL') || rawCat.includes('NON FUNCTIONAL')) cat = 'NFE';
             else if (rawCat === 'HS' || rawCat === 'HUM' || rawCat.includes('HUMANITIES')) cat = 'HUM';
             else if (rawCat === 'BS' || rawCat === 'BSC' || rawCat.includes('BASIC')) cat = 'BSC';
             else if (rawCat === 'ES' || rawCat === 'ESC' || rawCat.includes('ENGINEERING')) cat = 'ESC';
@@ -419,8 +428,11 @@ const getPdfPaginationScript = (maxContentHeightMm, startPageNum) => `
 
     function isTotalRow(tr) {
         if (!tr || !tr.cells || tr.cells.length === 0) return false;
-        var firstTxt = (tr.cells[0].textContent || '').trim();
-        return /^TOTAL$/i.test(firstTxt);
+        for (var c = 0; c < Math.min(tr.cells.length, 3); c++) {
+            var txt = (tr.cells[c].textContent || '').trim();
+            if (/^TOTAL(\b|:|\s)/i.test(txt) || /^TOTAL$/i.test(txt)) return true;
+        }
+        return false;
     }
 
     function isSplittableElement(el, availableHeightPx) {
@@ -480,7 +492,16 @@ const getPdfPaginationScript = (maxContentHeightMm, startPageNum) => `
             splitIdx = rows.length - 1;
         }
 
-        if (splitIdx === rows.length - 1 && isTotalRow(rows[splitIdx]) && rows.length >= 3) {
+        if (rows.length >= 4) {
+            if (isTotalRow(rows[rows.length - 1])) {
+                if (splitIdx >= rows.length - 1) {
+                    splitIdx = rows.length - 2;
+                }
+                if (splitIdx === rows.length - 2 && rows.length >= 4) {
+                    splitIdx = rows.length - 3;
+                }
+            }
+        } else if (splitIdx === rows.length - 1 && isTotalRow(rows[splitIdx]) && rows.length >= 3) {
             splitIdx--;
         }
 
@@ -682,7 +703,12 @@ const getPdfPaginationScript = (maxContentHeightMm, startPageNum) => `
 
 const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeetingDate, degreePrefix, deptName, regYear) => {
     const pageNum = ++pageTracker.current;
+    const isPG = (degreePrefix || '').toUpperCase().includes('M.') || (deptName || '').toUpperCase().includes('M.E.') || (deptName || '').toUpperCase().includes('M.TECH');
+    const hasIPR = isPG || (subjects || []).some(s => (s.categoryType || '').toUpperCase() === 'IPR' || (s.category || '').toUpperCase().includes('IPR') || (s.category || '').toUpperCase().includes('RESEARCH METHODOLOGY'));
     const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC'];
+    if (hasIPR) {
+        categories.push('IPR');
+    }
     const categoryLabels = {
         'HUM': 'Humanities and Social Sciences including Management Courses (HUM)',
         'BSC': 'Basic Science Courses (BSC)',
@@ -692,11 +718,12 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         'NFE': 'Non-Functional Elective Courses (NFE)',
         'OEC': 'Open Elective Courses (OEC)',
         'EEC': 'Employability Enhancement Courses (EEC)',
-        'MC': 'Mandatory Courses (MC)'
+        'MC': 'Mandatory Courses (MC)',
+        'IPR': 'Research Methodology and IPR (IPR)'
     };
 
     const distribution = {};
-    categories.forEach(cat => {
+    [...categories, 'IPR'].forEach(cat => {
         distribution[cat] = Array(8).fill(0);
     });
 
@@ -744,13 +771,16 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         let cat = 'PCC';
         if (subj.isOpenElective) {
             cat = 'OEC';
+        } else if (subj.categoryType === 'IPR' || (subj.categoryType || '').toUpperCase() === 'IPR' || (subj.category || '').toUpperCase().includes('IPR') || (subj.category || '').toUpperCase().includes('RESEARCH METHODOLOGY')) {
+            cat = 'IPR';
         } else if (subj.categoryType === 'NFE' || (subj.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (subj.category || '').toUpperCase().includes('NON FUNCTIONAL') || (subj.category || '').toUpperCase().includes('NFE')) {
             cat = 'NFE';
         } else if (subj.vertical) {
             cat = 'PEC';
         } else {
             const type = (subj.categoryType || '').toUpperCase().trim();
-            if (['HUM', 'HS', 'HSS'].includes(type)) cat = 'HUM';
+            if (['IPR'].includes(type)) cat = 'IPR';
+            else if (['HUM', 'HS', 'HSS'].includes(type)) cat = 'HUM';
             else if (['BSC', 'BS'].includes(type)) cat = 'BSC';
             else if (['ESC', 'ES'].includes(type)) cat = 'ESC';
             else if (['PCC', 'PC'].includes(type)) cat = 'PCC';
@@ -761,7 +791,8 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
             else if (['MC'].includes(type)) cat = 'MC';
             else {
                 const text = `${subj.categoryType || ''} ${subj.category || ''} ${subj.categoryName || ''}`.toUpperCase();
-                if (text.includes('NON-FUNCTIONAL') || text.includes('NON FUNCTIONAL') || text.includes('NFE')) cat = 'NFE';
+                if (text.includes('IPR') || text.includes('RESEARCH METHODOLOGY')) cat = 'IPR';
+                else if (text.includes('NON-FUNCTIONAL') || text.includes('NON FUNCTIONAL') || text.includes('NFE')) cat = 'NFE';
                 else if (text.includes('HUMANITIES') || text.includes('MANAGEMENT') || text.includes('HUM') || text.includes('HS')) cat = 'HUM';
                 else if (text.includes('BASIC SCIENCE') || text.includes('BSC') || text.includes('BS')) cat = 'BSC';
                 else if (text.includes('ENGINEERING SCIENCE') || text.includes('ESC') || text.includes('ES')) cat = 'ESC';
@@ -828,7 +859,8 @@ const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeet
         'PEC': '#8b5cf6',
         'NFE': '#f97316',
         'OEC': '#ec4899',
-        'EEC': '#06b6d4'
+        'EEC': '#06b6d4',
+        'IPR': '#84cc16'
     };
 
     let startAngle = 0;
@@ -1282,12 +1314,14 @@ const formatCategoryWithCode = (rawCatName, catType, category) => {
         'PC': 'Professional Core Course (PCC)',
         'PEC': 'Professional Elective Course (PEC)',
         'PE': 'Professional Elective Course (PEC)',
+        'NFE': 'Non-Functional Elective Course (NFE)',
         'OEC': 'Open Elective Course (OEC)',
         'OE': 'Open Elective Course (OEC)',
         'EEC': 'Employability Enhancement Course (EEC)',
         'EE': 'Employability Enhancement Course (EEC)',
         'MC': 'Mandatory Course (MC)',
-        'AC': 'Audit Course (AC)'
+        'AC': 'Audit Course (AC)',
+        'IPR': 'Research Methodology and IPR (IPR)'
     };
 
     if (raw) {
@@ -1295,6 +1329,8 @@ const formatCategoryWithCode = (rawCatName, catType, category) => {
             return raw;
         }
         const upper = raw.toUpperCase();
+        if (upper.includes('RESEARCH METHODOLOGY') || upper.includes('IPR')) return 'Research Methodology and IPR (IPR)';
+        if (upper.includes('NON-FUNCTIONAL') || upper.includes('NON FUNCTIONAL') || upper === 'NFE') return 'Non-Functional Elective Course (NFE)';
         if (upper.includes('HUMANITIES') || upper.includes('SOCIAL SCIENCES') || upper.includes('MANAGEMENT')) return 'Humanities, Social Sciences and Management Course (HUM)';
         if (upper.includes('BASIC SCIENCE')) return 'Basic Science Course (BSC)';
         if (upper.includes('ENGINEERING SCIENCE')) return 'Engineering Science Course (ESC)';
@@ -1419,11 +1455,10 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
             `;
         };
 
-        const pageNum1 = ++pageTracker.current;
-        const pageNum2 = isInduction ? null : ++pageTracker.current;
+        const pageNum = ++pageTracker.current;
 
         return `
-        <!-- Syllabus Subject Page 1: ${(subj.code || '').toUpperCase()} -->
+        <!-- Syllabus Subject: ${(subj.code || '').toUpperCase()} -->
         <div class="page syllabus-page">
             <div class="pdf-header pdf-header-inner">
                 <div class="left-col">EASA College of Engineering and Technology</div>
@@ -1460,7 +1495,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                         <td rowspan="2" style="width: 18%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt;">
                             ${(subj.code || '').toUpperCase()}
                         </td>
-                        <td rowspan="2" style="width: 58%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt; text-transform: uppercase;">
+                        <td rowspan="2" style="width: 58%; border: 1.5px solid #000; padding: 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 9.5pt;">
                             ${subj.title || ''}
                             ${subtitleStr}
                         </td>
@@ -1490,7 +1525,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
 
                 ${objectives.length > 0 ? `
                 <div class="section-container" style="margin-bottom: 6px; page-break-inside: avoid;">
-                    <h3 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">COURSE OBJECTIVES</h3>
+                    <h3 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif;">Course Objectives</h3>
                     <p style="font-size: 9pt; margin: 0 0 2px 0;">The course is intended to make the students to</p>
                     <ol style="margin: 0; padding-left: 18px;">
                         ${objectives.map(obj => (obj && obj.trim()) ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;">${obj}</li>` : '').join('')}
@@ -1502,7 +1537,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                 <table style="width: 100%; border-collapse: collapse; margin-top: 4px; margin-bottom: 14px; font-size: 9pt; border: 1.5px solid #000; page-break-inside: avoid;">
                     <thead>
                         <tr>
-                            <th colspan="3" style="border: 1.5px solid #000; padding: 2.5px; text-align: center; font-weight: bold; font-family: Arial, sans-serif; text-transform: uppercase; font-size: 8.5pt;">Course Outcomes</th>
+                            <th colspan="3" style="border: 1.5px solid #000; padding: 2.5px; text-align: center; font-weight: bold; font-family: Arial, sans-serif; font-size: 8.5pt;">Course Outcomes</th>
                         </tr>
                         <tr>
                             <th colspan="3" style="border: 1.5px solid #000; padding: 2px 4px; text-align: left; font-weight: normal; font-size: 9pt;">On successful completion of the course, students will be able to</th>
@@ -1563,7 +1598,7 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                         ${renderExperimentsTableHTML(experiments, "List of Exercises")}
                     ` : units.map((unit, uIdx) => {
             const unitNo = unit.unitNo || `UNIT ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][uIdx] || (uIdx + 1)}`;
-            const unitTitle = unit.title ? unit.title.toUpperCase() : '';
+            const unitTitle = unit.title || '';
             const thisUnitPeriods = (unit.periods !== undefined && unit.periods !== null && String(unit.periods).trim() !== '') ? unit.periods : defaultUnitPeriods;
             const topicsStr = Array.isArray(unit.topics) ? unit.topics.filter(t => t && t.trim() !== '').join(', ') : (unit.topics || '');
 
@@ -1589,51 +1624,44 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                     </div>
                 </div>
                 `}
-            </div>
 
-            <div class="pdf-footer pdf-footer-inner">
-                <div class="footer-left">Passed in Board of Studies Meeting on ${bosMeetingDate}</div>
-                <div class="footer-center">${pageNum1}</div>
-                <div class="footer-right">Approved in Academic Council Meeting on ${acMeetingDate}</div>
-            </div>
-        </div>
-
-        ${isInduction ? '' : `
-        <!-- Syllabus Subject Page 2: ${(subj.code || '').toUpperCase()} -->
-        <div class="page syllabus-page">
-            <div class="pdf-header pdf-header-inner">
-                <div class="left-col">EASA College of Engineering and Technology</div>
-                <div class="right-col">${formatDeptHeaderTitle(degreePrefix, deptName, regYear)}</div>
-            </div>
-
-            <div class="syllabus-page-content" style="flex: 1 1 auto;">
-                ${(textbooks.length > 0 || references.length > 0 || webReferences.length > 0) ? `
-                <div class="section-container" style="margin-top: 4px; margin-bottom: 6px;">
+                ${(!isInduction && (textbooks.length > 0 || references.length > 0 || webReferences.length > 0)) ? `
+                <div class="section-container" style="margin-top: 6px; margin-bottom: 6px; word-break: break-word; overflow-wrap: anywhere;">
                     ${textbooks.length > 0 ? `
-                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Text Book${textbooks.length > 1 ? 's' : ''}</h4>
-                    <ol style="margin: 0 0 4px 0; padding-left: 18px;">
-                        ${textbooks.map(tb => tb.trim() ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;">${tb}</li>` : '').join('')}
+                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif;">Text Book${textbooks.length > 1 ? 's' : ''}</h4>
+                    <ol style="margin: 0 0 4px 0; padding-left: 18px; word-break: break-word; overflow-wrap: anywhere;">
+                        ${textbooks.map(tb => {
+                            const cleanTb = (tb || '').trim().replace(/\u00a0/g, ' ');
+                            return cleanTb ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify; word-break: break-word; overflow-wrap: anywhere;">${cleanTb}</li>` : '';
+                        }).join('')}
                     </ol>
                     ` : ''}
 
                     ${references.length > 0 ? `
-                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">References Books</h4>
-                    <ol style="margin: 0 0 4px 0; padding-left: 18px;">
-                        ${references.map(ref => ref.trim() ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;">${ref}</li>` : '').join('')}
+                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif;">References Books</h4>
+                    <ol style="margin: 0 0 4px 0; padding-left: 18px; word-break: break-word; overflow-wrap: anywhere;">
+                        ${references.map(ref => {
+                            const cleanRef = (ref || '').trim().replace(/\u00a0/g, ' ');
+                            return cleanRef ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify; word-break: break-word; overflow-wrap: anywhere;">${cleanRef}</li>` : '';
+                        }).join('')}
                     </ol>
                     ` : ''}
 
                     ${webReferences.length > 0 ? `
-                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif; text-transform: uppercase;">Additional / Web References</h4>
-                    <ol style="margin: 0; padding-left: 18px;">
-                        ${webReferences.map(wr => wr.trim() ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify;"><a href="${wr}" style="color: #000; text-decoration: underline;">${wr}</a></li>` : '').join('')}
+                    <h4 style="font-size: 9.5pt; font-weight: bold; margin: 0 0 2px 0; font-family: Arial, sans-serif;">Additional / Web References</h4>
+                    <ol style="margin: 0; padding-left: 18px; word-break: break-word; overflow-wrap: anywhere;">
+                        ${webReferences.map(wr => {
+                            const cleanWr = (wr || '').trim().replace(/\u00a0/g, ' ');
+                            return cleanWr ? `<li style="margin-bottom: 2px; font-size: 9pt; line-height: 1.35; text-align: justify; word-break: break-word; overflow-wrap: anywhere;"><a href="${cleanWr}" target="_blank" rel="noopener noreferrer" style="color: #000; text-decoration: underline; word-break: break-all; overflow-wrap: anywhere;">${cleanWr}</a></li>` : '';
+                        }).join('')}
                     </ol>
                     ` : ''}
                 </div>
                 ` : ''}
 
-                <div class="co-po-block" style="margin-top: 4px; margin-bottom: 4px; page-break-inside: avoid;">
-                    <div style="font-size: 8.5pt; font-weight: bold; margin-top: 0; margin-bottom: 2px; font-family: Arial, sans-serif; text-align: center; text-transform: uppercase;">
+                ${!isInduction ? `
+                <div class="co-po-block" style="margin-top: 6px; margin-bottom: 4px; page-break-inside: avoid;">
+                    <div style="font-size: 8.5pt; font-weight: bold; margin-top: 0; margin-bottom: 2px; font-family: Arial, sans-serif; text-align: center;">
                         Mapping of Course Outcomes (COs) with Programme Outcomes (POs) & Programme Specific Outcomes (PSOs)
                     </div>
 
@@ -1705,17 +1733,17 @@ const getDetailedSyllabiHTML = (subjects, regYear, pageTracker, bosMeetingDate, 
                         <span>"-" - No Correlation</span>
                     </div>
                 </div>
+                ` : ''}
 
-                ${renderAssessmentComponentsHTML(subj)}
+                ${!isInduction ? renderAssessmentComponentsHTML(subj) : ''}
             </div>
 
             <div class="pdf-footer pdf-footer-inner">
                 <div class="footer-left">Passed in Board of Studies Meeting on ${bosMeetingDate}</div>
-                <div class="footer-center">${pageNum2}</div>
+                <div class="footer-center">${pageNum}</div>
                 <div class="footer-right">Approved in Academic Council Meeting on ${acMeetingDate}</div>
             </div>
         </div>
-        `}
         `;
     }).join('');
 };
@@ -1724,7 +1752,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
     if (!deptData) return;
 
     const deptName = deptData.name || "Mechanical Engineering";
-    const subjects = deptData.subjects || [];
+    const rawSubjects = deptData.subjects || [];
+    const subjects = rawSubjects.filter(s => {
+        if (!s) return false;
+        const c = (s.code || '').trim().toUpperCase();
+        const t = (s.title || '').trim().toUpperCase();
+        return !c.startsWith('TOTAL') && !c.includes('TOTAL') && !t.startsWith('TOTAL') && !t.includes('TOTAL CREDITS') && !t.includes('TOTAL PERIODS');
+    });
 
     // Determine regulation year
     let regYear = regYearInput || deptData.regulation;
@@ -1806,17 +1840,25 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     // Helper to render semester table HTML
     const renderSemesterTableHTML = (semNum) => {
-        const subjectsForSem = sortSubjectsByCode(semestersGrouped[semNum] || []);
+        const subjectsForSem = sortSubjectsByCode((semestersGrouped[semNum] || []).filter(s => {
+            if (!s) return false;
+            const c = (s.code || '').trim().toUpperCase();
+            const t = (s.title || '').trim().toUpperCase();
+            return !c.startsWith('TOTAL') && !c.includes('TOTAL') && !t.startsWith('TOTAL') && !t.includes('TOTAL CREDITS') && !t.includes('TOTAL PERIODS');
+        }));
         if (subjectsForSem.length === 0) return '';
 
-        const theoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'THEORY' || (s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('PRACTICAL') && !s.category?.toUpperCase().includes('LANGUAGE') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
-        const practicalCourses = subjectsForSem.filter(s => s.category?.toUpperCase() === 'PRACTICAL' || ((s.category?.toUpperCase().includes('PRACTICAL') || s.category?.toUpperCase().includes('LAB')) && !s.category?.toUpperCase().includes('THEORY') && !s.category?.toUpperCase().includes('EMPLOYABILITY') && !s.category?.toUpperCase().includes('MANDATORY')));
-        const theoryCumPracticalCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('THEORY') && s.category?.toUpperCase().includes('PRACTICAL'));
-        const languageElective1 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE I'));
-        const languageElective2 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE II'));
         const employabilityCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('EMPLOYABILITY') || s.categoryType === 'EEC');
         const nonFunctionalElectiveCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('NON-FUNCTIONAL') || s.category?.toUpperCase().includes('NON FUNCTIONAL') || s.category?.toUpperCase().includes('NFE') || s.categoryType === 'NFE');
         const mandatoryCourses = subjectsForSem.filter(s => s.category?.toUpperCase().includes('MANDATORY') || s.categoryType === 'MC');
+        const languageElective1 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - I') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE I'));
+        const languageElective2 = subjectsForSem.filter(s => s.category?.toUpperCase().includes('LANGUAGE ELECTIVE – II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE - II') || s.category?.toUpperCase().includes('LANGUAGE ELECTIVE II'));
+
+        const isSpecialCategory = (s) => employabilityCourses.includes(s) || nonFunctionalElectiveCourses.includes(s) || mandatoryCourses.includes(s) || languageElective1.includes(s) || languageElective2.includes(s);
+
+        const theoryCumPracticalCourses = subjectsForSem.filter(s => !isSpecialCategory(s) && s.category?.toUpperCase().includes('THEORY') && s.category?.toUpperCase().includes('PRACTICAL'));
+        const theoryCourses = subjectsForSem.filter(s => !isSpecialCategory(s) && !theoryCumPracticalCourses.includes(s) && (s.category?.toUpperCase() === 'THEORY' || s.category?.toUpperCase().includes('THEORY') || s.categoryType === 'IPR' || s.category?.toUpperCase().includes('IPR') || s.category?.toUpperCase().includes('RESEARCH METHODOLOGY')));
+        const practicalCourses = subjectsForSem.filter(s => !isSpecialCategory(s) && !theoryCumPracticalCourses.includes(s) && (s.category?.toUpperCase() === 'PRACTICAL' || s.category?.toUpperCase().includes('PRACTICAL') || s.category?.toUpperCase().includes('LAB')));
 
         const accounted = new Set([
             ...theoryCourses,
@@ -1864,46 +1906,46 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 }
                 return `
                 <tr>
-                    <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                    <td>${s.title}</td>
-                    <td class="center" style="font-family: Arial, sans-serif;">${s.categoryType || 'PCC'}</td>
-                    <td class="center">${s.l ?? 0}</td>
-                    <td class="center">${s.t ?? 0}</td>
-                    <td class="center">${s.p ?? 0}</td>
-                    <td class="center">${s.contactPeriods || (Number(s.l || 0) + Number(s.t || 0) + Number(s.p || 0))}</td>
-                    <td class="center" style="font-weight: bold;">${s.credits ?? 0}</td>
-                    <td class="center">${s.cia !== undefined ? s.cia : 40}</td>
-                    <td class="center">${s.ese !== undefined ? s.ese : 60}</td>
-                    <td class="center">${s.total !== undefined ? s.total : 100}</td>
+                    <td class="center" style="font-family: monospace; font-weight: bold; white-space: nowrap;">${(s.code || '').toUpperCase()}</td>
+                    <td style="line-height: 1.25;">${s.title}</td>
+                    <td class="center" style="font-family: Arial, sans-serif; white-space: nowrap;">${s.categoryType || 'PCC'}</td>
+                    <td class="center" style="white-space: nowrap;">${s.l ?? 0}</td>
+                    <td class="center" style="white-space: nowrap;">${s.t ?? 0}</td>
+                    <td class="center" style="white-space: nowrap;">${s.p ?? 0}</td>
+                    <td class="center" style="white-space: nowrap;">${s.contactPeriods || (Number(s.l || 0) + Number(s.t || 0) + Number(s.p || 0))}</td>
+                    <td class="center" style="font-weight: bold; white-space: nowrap;">${s.credits ?? 0}</td>
+                    <td class="center" style="white-space: nowrap;">${s.cia !== undefined ? s.cia : 40}</td>
+                    <td class="center" style="white-space: nowrap;">${s.ese !== undefined ? s.ese : 60}</td>
+                    <td class="center" style="white-space: nowrap; font-weight: bold;">${s.total !== undefined ? s.total : 100}</td>
                 </tr>
                 `;
             }).join('');
         };
 
         return `
-            <div class="semester-block" style="margin-bottom: 2px;">
-                <h3 style="font-size: 9pt; font-weight: bold; text-align: center; margin: 2px 0 4px 0; font-family: Arial, sans-serif;">
+            <div class="semester-block" style="margin-bottom: 12px; page-break-inside: auto;">
+                <h3 style="font-size: 9pt; font-weight: bold; text-align: center; margin: 6px 0 4px 0; font-family: Arial, sans-serif;">
                     SEMESTER ${semNum}
                 </h3>
                 
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif;">Course Code</th>
-                            <th rowSpan="2" style="width: 42%; font-size: 9pt; font-family: Arial, sans-serif;">Course</th>
-                            <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Category</th>
-                            <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 9pt; font-family: Arial, sans-serif;">Credit</th>
-                            <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                            <th rowSpan="2" style="width: 11%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
+                            <th rowSpan="2" style="width: 35%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course</th>
+                            <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Category</th>
+                            <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
+                            <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
+                            <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
+                            <th colSpan="3" style="width: 21%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
                         </tr>
                         <tr>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">T</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">P</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">CIA</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">ESE</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">Total</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1975,21 +2017,21 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                 </td>
                             </tr>
                             <tr>
-                                <th rowSpan="2" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif;">Course Code</th>
-                                <th rowSpan="2" style="width: 42%; font-size: 9pt; font-family: Arial, sans-serif;">Course</th>
-                                <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Category</th>
-                                <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
-                                <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                                <th rowSpan="2" style="width: 5%; font-size: 9pt; font-family: Arial, sans-serif;">Credit</th>
-                                <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                                <th rowSpan="2" style="width: 11%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
+                                <th rowSpan="2" style="width: 35%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course</th>
+                                <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Category</th>
+                                <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
+                                <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
+                                <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
+                                <th colSpan="3" style="width: 21%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
                             </tr>
                             <tr>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">T</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">P</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">CIA</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">ESE</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">Total</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2009,21 +2051,21 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                                 </td>
                             </tr>
                             <tr>
-                                <th rowSpan="2" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif;">Course Code</th>
-                                <th rowSpan="2" style="width: 42%; font-size: 9pt; font-family: Arial, sans-serif;">Course</th>
-                                <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Category</th>
-                                <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Periods / Week</th>
-                                <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif;">Total Contact Periods</th>
-                                <th rowSpan="2" style="width: 5%; font-size: 9pt; font-family: Arial, sans-serif;">Credit</th>
-                                <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px;">Marks</th>
+                                <th rowSpan="2" style="width: 11%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
+                                <th rowSpan="2" style="width: 35%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course</th>
+                                <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Category</th>
+                                <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
+                                <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
+                                <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
+                                <th colSpan="3" style="width: 21%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
                             </tr>
                             <tr>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">L</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">T</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">P</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">CIA</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">ESE</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px;">Total</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
+                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2077,6 +2119,21 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 flex: 1 1 auto;
                 display: block;
                 width: 100%;
+                box-sizing: border-box;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            ol, ul {
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            li {
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            a {
+                word-break: break-all;
+                overflow-wrap: anywhere;
             }
 
             /* Header and Footer styles (exempt from content page font/size overrides) */
@@ -2245,11 +2302,19 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             ol, ul {
                 margin: 0 0 15px 0;
                 padding-left: 20px;
+                word-break: break-word;
+                overflow-wrap: anywhere;
             }
             li {
                 margin-bottom: 6px;
                 text-align: justify;
                 font-size: 10.5pt;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            a {
+                word-break: break-all;
+                overflow-wrap: anywhere;
             }
             
             /* Table Styles */
@@ -2260,6 +2325,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 margin-bottom: 8px;
                 font-size: 8.5pt;
                 line-height: 1.25;
+                table-layout: fixed;
             }
             table.curriculum-table thead {
                 display: table-header-group;
@@ -2270,17 +2336,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             }
             table.curriculum-table th, table.curriculum-table td {
                 border: 1px solid #000;
-                padding: 3.5px 5px;
+                padding: 3px 2px;
                 text-align: left;
                 vertical-align: middle;
+                box-sizing: border-box;
             }
             table.curriculum-table th {
                 font-weight: bold;
                 text-align: center;
                 font-family: Arial, sans-serif;
             }
-            table.curriculum-table td.center {
+            table.curriculum-table td.center,
+            table.curriculum-table th.center {
                 text-align: center;
+                white-space: nowrap;
             }
             table.curriculum-table tr.category-row td {
                 font-weight: bold;
@@ -2654,30 +2723,24 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         </div>
         ` : ''}
 
-        <!-- CURRICULUM PAGES -->
-        ${(() => {
-            return sortedSemesters.map((semNum, index) => {
-                return `
-                <div class="page">
-                    ${getHeaderHTML()}
-                    ${index === 0 ? `
-                    <div class="title-block" style="margin-top: 2px; margin-bottom: 8px;">
-                        <h1 style="font-size: 14pt; font-family: Arial, sans-serif; margin: 0 0 4px 0;">${degreePrefix ? `${degreePrefix.toUpperCase()} ` : ''}${deptName.toUpperCase()}</h1>
-                        <h2 style="font-size: 10.5pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.35; margin-top: 2px;">
-                            REGULATION – ${regYear.replace('R-', '')}<br>
-                            CHOICE BASED CREDIT SYSTEM<br>
-                            CURRICULUM
-                        </h2>
-                    </div>
-                    ` : ''}
-                    
-                    ${renderSemesterTableHTML(semNum)}
-                    
-                    ${getFooterHTML(++pageTracker.current)}
-                </div>
-                `;
-            }).join('');
-        })()}
+        <!-- CURRICULUM PAGES (CONTINUOUS) -->
+        ${sortedSemesters.length > 0 ? `
+        <div class="page curriculum-page">
+            ${getHeaderHTML()}
+            <div class="title-block" style="margin-top: 2px; margin-bottom: 8px;">
+                <h1 style="font-size: 14pt; font-family: Arial, sans-serif; margin: 0 0 4px 0;">${degreePrefix ? `${degreePrefix.toUpperCase()} ` : ''}${deptName.toUpperCase()}</h1>
+                <h2 style="font-size: 10.5pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.35; margin-top: 2px;">
+                    REGULATION – ${regYear.replace('R-', '')}<br>
+                    CHOICE BASED CREDIT SYSTEM<br>
+                    CURRICULUM
+                </h2>
+            </div>
+            
+            ${sortedSemesters.map(semNum => renderSemesterTableHTML(semNum)).join('')}
+            
+            ${getFooterHTML(++pageTracker.current)}
+        </div>
+        ` : ''}
 
         <!-- PROFESSIONAL ELECTIVES PAGE -->
         ${sortedVerticals.length > 0 ? `
@@ -2692,20 +2755,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 15%; font-size: 9pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
-                            <th rowSpan="2" style="width: 43%; font-size: 9pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
-                            <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 10%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 7%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
-                            <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
+                            <th rowSpan="2" style="width: 12%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
+                            <th rowSpan="2" style="width: 38%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course Title</th>
+                            <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
+                            <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
+                            <th rowSpan="2" style="width: 8%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
+                            <th colSpan="3" style="width: 22%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
                         </tr>
                         <tr>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">L</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">T</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">P</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">CIA</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">ESE</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Total</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2724,16 +2787,16 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     ${subjectsForVert.map(s => {
                         return `
                             <tr>
-                                <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                <td>${s.title}</td>
-                                <td class="center">${s.l}</td>
-                                <td class="center">${s.t}</td>
-                                <td class="center">${s.p}</td>
-                                <td class="center">${s.contactPeriods}</td>
-                                <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                <td class="center">${s.cia}</td>
-                                <td class="center">${s.ese}</td>
-                                <td class="center">${s.total}</td>
+                                <td class="center" style="font-family: monospace; font-weight: bold; white-space: nowrap;">${(s.code || '').toUpperCase()}</td>
+                                <td style="line-height: 1.25;">${s.title}</td>
+                                <td class="center" style="white-space: nowrap;">${s.l}</td>
+                                <td class="center" style="white-space: nowrap;">${s.t}</td>
+                                <td class="center" style="white-space: nowrap;">${s.p}</td>
+                                <td class="center" style="white-space: nowrap;">${s.contactPeriods}</td>
+                                <td class="center" style="font-weight: bold; white-space: nowrap;">${s.credits}</td>
+                                <td class="center" style="white-space: nowrap;">${s.cia}</td>
+                                <td class="center" style="white-space: nowrap;">${s.ese}</td>
+                                <td class="center" style="white-space: nowrap; font-weight: bold;">${s.total}</td>
                             </tr>
                         `;
                     }).join('')}
@@ -2761,20 +2824,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <table class="curriculum-table">
                     <thead>
                         <tr>
-                            <th rowSpan="2" style="width: 15%; font-size: 9pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Code</th>
-                            <th rowSpan="2" style="width: 51%; font-size: 9pt; font-family: Arial, sans-serif; vertical-align: middle;">Course Title</th>
-                            <th colSpan="3" style="width: 12%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 9%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 5%; font-size: 9pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Credit</th>
-                            <th colSpan="3" style="width: 13%; font-size: 9pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Marks</th>
+                            <th rowSpan="2" style="width: 12%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
+                            <th rowSpan="2" style="width: 38%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course Title</th>
+                            <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
+                            <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
+                            <th rowSpan="2" style="width: 8%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
+                            <th colSpan="3" style="width: 22%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
                         </tr>
                         <tr>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">L</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">T</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">P</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">CIA</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">ESE</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px; text-align: center;">Total</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
+                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2797,16 +2860,16 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     ${deptSubjects.map(s => {
                         return `
                             <tr>
-                                <td class="center" style="font-family: monospace; font-weight: bold;">${(s.code || '').toUpperCase()}</td>
-                                <td>${s.title}</td>
-                                <td class="center">${s.l}</td>
-                                <td class="center">${s.t}</td>
-                                <td class="center">${s.p}</td>
-                                <td class="center">${s.contactPeriods}</td>
-                                <td class="center" style="font-weight: bold;">${s.credits}</td>
-                                <td class="center">${s.cia}</td>
-                                <td class="center">${s.ese}</td>
-                                <td class="center">${s.total}</td>
+                                <td class="center" style="font-family: monospace; font-weight: bold; white-space: nowrap;">${(s.code || '').toUpperCase()}</td>
+                                <td style="line-height: 1.25;">${s.title}</td>
+                                <td class="center" style="white-space: nowrap;">${s.l}</td>
+                                <td class="center" style="white-space: nowrap;">${s.t}</td>
+                                <td class="center" style="white-space: nowrap;">${s.p}</td>
+                                <td class="center" style="white-space: nowrap;">${s.contactPeriods}</td>
+                                <td class="center" style="font-weight: bold; white-space: nowrap;">${s.credits}</td>
+                                <td class="center" style="white-space: nowrap;">${s.cia}</td>
+                                <td class="center" style="white-space: nowrap;">${s.ese}</td>
+                                <td class="center" style="white-space: nowrap; font-weight: bold;">${s.total}</td>
                             </tr>
                         `;
                     }).join('')}
@@ -2935,6 +2998,21 @@ const exportSubjectSyllabusPDF = (subj, deptData, academicLevel, regYearInput) =
                 flex: 1 1 auto;
                 display: block;
                 width: 100%;
+                box-sizing: border-box;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            ol, ul {
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            li {
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+            a {
+                word-break: break-all;
+                overflow-wrap: anywhere;
             }
             .pdf-header,
             .pdf-header-inner {
@@ -3219,6 +3297,8 @@ const getDefaultOutcomes = (code, title) => {
 
 const mapStaticCategoryToAbbrev = (category) => {
     const raw = (category || '').toUpperCase().trim();
+    if (raw.includes('IPR') || raw.includes('RESEARCH METHODOLOGY') || raw === 'IPR') return 'IPR';
+    if (raw.includes('NON-FUNCTIONAL') || raw.includes('NON FUNCTIONAL') || raw === 'NFE') return 'NFE';
     if (raw.includes('HUMANITIES') || raw === 'HS' || raw === 'HUM') return 'HUM';
     if (raw.includes('BASIC SCIENCE') || raw === 'BS' || raw === 'BSC') return 'BSC';
     if (raw.includes('ENGINEERING SCIENCE') || raw === 'ES' || raw === 'ESC') return 'ESC';
@@ -4825,6 +4905,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                                         else if (val === 'EMPLOYABILITY ENHANCEMENT COURSE') autoCatType = 'EEC';
                                                         else if (val === 'MANDATORY COURSES') autoCatType = 'MC';
                                                         else if (val.includes('Language')) autoCatType = 'HUM';
+                                                        else if (val.includes('IPR') || val.includes('RESEARCH METHODOLOGY')) autoCatType = 'IPR';
                                                         setNewSubject({ ...newSubject, category: val, categoryType: autoCatType });
                                                     }}
                                                     style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--bg-main)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none', cursor: 'pointer' }}
@@ -4835,6 +4916,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                                     <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
                                                     <option value="MANDATORY COURSES">MANDATORY COURSES</option>
                                                     <option value="NON-FUNCTIONAL ELECTIVE (NFE)">NON-FUNCTIONAL ELECTIVE (NFE)</option>
+                                                    <option value="RESEARCH METHODOLOGY AND IPR">RESEARCH METHODOLOGY AND IPR</option>
                                                     <option value="Language Elective – I">Language Elective – I</option>
                                                     <option value="Language Elective - II">Language Elective - II</option>
                                                     <option value="Electives for Honors Degree">Electives for Honors Degree</option>
@@ -4856,6 +4938,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                                     <option value="OEC">OEC</option>
                                                     <option value="EEC">EEC</option>
                                                     <option value="MC">MC</option>
+                                                    <option value="IPR">IPR</option>
                                                 </select>
                                             </div>
                                         </>
@@ -5757,6 +5840,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                             else if (val === 'EMPLOYABILITY ENHANCEMENT COURSE') autoCatType = 'EEC';
                                             else if (val === 'MANDATORY COURSES') autoCatType = 'MC';
                                             else if (val.includes('Language')) autoCatType = 'HUM';
+                                            else if (val.includes('IPR') || val.includes('RESEARCH METHODOLOGY')) autoCatType = 'IPR';
                                             updateEditingSubjectField('category', val);
                                             if (autoCatType && autoCatType !== editingSubjectValue.categoryType) {
                                                 updateEditingSubjectField('categoryType', autoCatType);
@@ -5770,6 +5854,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                         <option value="EMPLOYABILITY ENHANCEMENT COURSE">EMPLOYABILITY ENHANCEMENT COURSE</option>
                                         <option value="MANDATORY COURSES">MANDATORY COURSES</option>
                                         <option value="NON-FUNCTIONAL ELECTIVE (NFE)">NON-FUNCTIONAL ELECTIVE (NFE)</option>
+                                        <option value="RESEARCH METHODOLOGY AND IPR">RESEARCH METHODOLOGY AND IPR</option>
                                         <option value="Language Elective – I">Language Elective – I</option>
                                         <option value="Language Elective - II">Language Elective - II</option>
                                         <option value="Electives for Honors Degree">Electives for Honors Degree</option>
@@ -5787,6 +5872,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                         <option value="OEC">OEC</option>
                                         <option value="EEC">EEC</option>
                                         <option value="MC">MC</option>
+                                        <option value="IPR">IPR</option>
                                     </select>
                                 </div>
 
@@ -7378,6 +7464,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                                                 <option value="OEC">OEC</option>
                                                                 <option value="EEC">EEC</option>
                                                                 <option value="MC">MC</option>
+                                                                <option value="IPR">IPR</option>
                                                             </select>
                                                         </td>
                                                         <td style={{ padding: '0.35rem 0.4rem', textAlign: 'center' }}>
@@ -7509,7 +7596,6 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                 </div>
                             )}
                         </div>
-
                         {/* Modal Footer */}
                         <div style={{
                             padding: '1rem 1.5rem',

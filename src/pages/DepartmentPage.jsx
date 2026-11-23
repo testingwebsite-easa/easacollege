@@ -1943,6 +1943,7 @@ const DepartmentPage = () => {
             'OEC': { bg: 'rgba(139, 92, 246, 0.15)', text: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)', label: 'Open Electives (OEC)' },
             'EEC': { bg: 'rgba(6, 182, 212, 0.15)', text: '#22d3ee', border: 'rgba(6, 182, 212, 0.3)', label: 'Employability Enhancement (EEC)' },
             'MC': { bg: 'rgba(244, 63, 94, 0.15)', text: '#fb7185', border: 'rgba(244, 63, 94, 0.3)', label: 'Mandatory Course (MC)' },
+            'IPR': { bg: 'rgba(132, 204, 22, 0.15)', text: '#a3e635', border: 'rgba(132, 204, 22, 0.3)', label: 'Research Methodology & IPR (IPR)' },
         };
 
         const getCategoryBadge = (cat) => {
@@ -2032,6 +2033,7 @@ const DepartmentPage = () => {
                 const semNum = semBlock.semester ? Number(String(semBlock.semester).replace(/\D/g, '')) || (bIdx + 1) : (bIdx + 1);
                 (semBlock.courses || []).forEach(c => {
                     const catType = c.categoryType || (
+                        (c.category || '').toUpperCase().includes('IPR') || (c.category || '').toUpperCase().includes('RESEARCH METHODOLOGY') ? 'IPR' :
                         (c.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (c.category || '').toUpperCase().includes('NFE') ? 'NFE' :
                         (c.category || '').toUpperCase().includes('ELECTIVE') ? 'PEC' :
                         (c.credits > 2 ? 'PCC' : 'ESC')
@@ -2057,7 +2059,8 @@ const DepartmentPage = () => {
                     let catType = c.categoryType;
                     if (!catType) {
                         const rawCat = (c.category || '').toUpperCase();
-                        if (rawCat.includes('NON-FUNCTIONAL') || rawCat.includes('NFE')) catType = 'NFE';
+                        if (rawCat.includes('IPR') || rawCat.includes('RESEARCH METHODOLOGY')) catType = 'IPR';
+                        else if (rawCat.includes('NON-FUNCTIONAL') || rawCat.includes('NFE')) catType = 'NFE';
                         else if (rawCat.includes('HUMANITIES')) catType = 'HUM';
                         else if (rawCat.includes('BASIC')) catType = 'BSC';
                         else if (rawCat.includes('ELECTIVE')) catType = 'PEC';
