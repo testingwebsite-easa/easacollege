@@ -1,0 +1,15 @@
+{
+  "short_name": "EASA College",
+  "name": "EASA College of Engineering and Technology",
+  "icons": [
+    {
+      "src": "/images/logo.webp",
+      "type": "image/webp",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "display": "standalone"
+}

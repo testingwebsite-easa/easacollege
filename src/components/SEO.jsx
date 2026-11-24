@@ -10,8 +10,8 @@ const SEO = ({ title, description, keywords, image, url, type = 'website', schem
     // Mix of standard SEO keywords and trending terms
     const defaultKeywords = 'EASA College, Engineering, Technology, Coimbatore, Best Engineering College, B.E, B.Tech, Artificial Intelligence, Robotics, Campus Vibe, Student Life, Innovation Hub, Future Tech, Top Placements, Engineering Careers';
 
-    const defaultImage = '/logo.png';
-    const siteUrl = 'https://easacollege.ac.in';
+    const defaultImage = '/images/logo.webp';
+    const siteUrl = 'https://easacollege.com';
     const themeColor = '#0f172a'; // Dark modern theme color for text bubbles etc on mobile
 
     const currentTitle = title ? `${title} | ${siteTitle}` : siteTitle;
@@ -25,7 +25,7 @@ const SEO = ({ title, description, keywords, image, url, type = 'website', schem
         "@type": "CollegeOrUniversity",
         "name": "EASA College of Engineering and Technology",
         "url": siteUrl,
-        "logo": `${siteUrl}/logo.png`,
+        "logo": `${siteUrl}/images/logo.webp`,
         "sameAs": [
             "https://www.facebook.com/easacollege",
             "https://www.instagram.com/easacollege",

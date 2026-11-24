@@ -2720,7 +2720,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; border-bottom: 1.5px solid #000; padding-bottom: 12px; margin-bottom: 20px;">
                     <!-- Left: College Logo -->
                     <div style="flex: 0 0 75px; display: flex; align-items: center; justify-content: flex-start;">
-                        <img src="${collegeLogo}" style="height: 70px; padding-left: 150px; object-fit: contain;" />
+                        <img src="${collegeLogo}" alt="EASA College Logo" style="height: 70px; padding-left: 150px; object-fit: contain;" />
                     </div>
                 </div>
 

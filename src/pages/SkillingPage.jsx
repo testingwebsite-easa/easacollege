@@ -409,7 +409,8 @@ const SkillingPage = () => {
                                             </div>
                                         </div>
                                         <a
-                                            href="#"
+                                            href={file.url || "#download"}
+                                            aria-label={`Download ${file.title}`}
                                             style={{ background: 'var(--secondary)', color: 'var(--bg-dark)', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', boxShadow: '0 5px 15px rgba(230, 182, 39, 0.3)' }}
                                             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}

@@ -2591,7 +2591,7 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; border-bottom: 1.5px solid #000; padding-bottom: 12px; margin-bottom: 20px;">
                     <!-- Left: College Logo -->
                     <div style="flex: 0 0 75px; display: flex; margin-left: 120px; align-items: center; justify-content: flex-start;">
-                        <img src="${collegeLogo}" style="height: 70px; object-fit: contain;" />
+                        <img src="${collegeLogo}" alt="EASA College Logo" style="height: 70px; object-fit: contain;" />
                     </div>             
                 </div>
 
@@ -7599,7 +7599,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                         {/* Modal Footer */}
                         <div style={{
                             padding: '1rem 1.5rem',
-                            borderTop: '1px solid var(--glass-border)',
+                        borderTop: '1px solid var(--glass-border)',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',

@@ -338,9 +338,13 @@ const Footer = ({ onOpenAdmission, showAdmissionCTA = true }) => {
                     <p>&copy; {new Date().getFullYear()} EASA College of Engineering and Technology. All rights reserved.</p>
 
                     <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-                        {['Privacy Policy', 'Terms of Use', 'Sitemap'].map(item => (
-                            <a key={item} href="#" style={{ color: 'inherit', textDecoration: 'none', transition: '0.2s' }} onMouseOver={e => e.currentTarget.style.color = 'var(--secondary)'} onMouseOut={e => e.currentTarget.style.color = 'inherit'}>
-                                {item}
+                        {[
+                            { name: 'Privacy Policy', path: '/page/privacy-policy' },
+                            { name: 'Terms of Use', path: '/page/terms-of-use' },
+                            { name: 'Sitemap', path: '/sitemap.xml' }
+                        ].map(item => (
+                            <a key={item.name} href={item.path} style={{ color: 'inherit', textDecoration: 'none', transition: '0.2s' }} onMouseOver={e => e.currentTarget.style.color = 'var(--secondary)'} onMouseOut={e => e.currentTarget.style.color = 'inherit'}>
+                                {item.name}
                             </a>
                         ))}
                     </div>

@@ -433,14 +433,14 @@ const Navbar = ({ onApplyClick }) => {
 
                                 {/* Continuous Internal Assessment */}
                                 <div className="dropdown-item-container" style={{ position: 'relative', overflow: 'visible' }}>
-                                    <a href="#" className="dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                    <button type="button" className="dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', font: 'inherit', color: 'inherit' }}
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
                                             setMobileExpanded(prev => ({ ...prev, 'EXAM_CIA': !prev['EXAM_CIA'] }));
                                         }}>
                                         Continuous Internal Assessment <span style={{ fontSize: '0.8em' }}>{mobileExpanded['EXAM_CIA'] ? '▼' : '▶'}</span>
-                                    </a>
+                                    </button>
                                     <div className="dropdown-menu-nested" style={{
                                         position: 'absolute', right: '100%', top: 0, minWidth: '200px',
                                         background: theme === 'dark' ? '#000' : '#fff',
@@ -454,14 +454,14 @@ const Navbar = ({ onApplyClick }) => {
 
                                 {/* End Semester Examination */}
                                 <div className="dropdown-item-container" style={{ position: 'relative', overflow: 'visible' }}>
-                                    <a href="#" className="dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                    <button type="button" className="dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', font: 'inherit', color: 'inherit' }}
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
                                             setMobileExpanded(prev => ({ ...prev, 'EXAM_ESE': !prev['EXAM_ESE'] }));
                                         }}>
                                         End Semester Examination <span style={{ fontSize: '0.8em' }}>{mobileExpanded['EXAM_ESE'] ? '▼' : '▶'}</span>
-                                    </a>
+                                    </button>
                                     <div className="dropdown-menu-nested" style={{
                                         position: 'absolute', right: '100%', top: 0, minWidth: '220px',
                                         background: theme === 'dark' ? '#000' : '#fff',
@@ -472,14 +472,14 @@ const Navbar = ({ onApplyClick }) => {
 
                                         {/* Theory Examination */}
                                         <div className="dropdown-item-container" style={{ position: 'relative', overflow: 'visible' }}>
-                                            <a href="#" className="dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                            <button type="button" className="dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', font: 'inherit', color: 'inherit' }}
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
                                                     setMobileExpanded(prev => ({ ...prev, 'EXAM_THEORY': !prev['EXAM_THEORY'] }));
                                                 }}>
                                                 Theory Examination <span style={{ fontSize: '0.8em' }}>{mobileExpanded['EXAM_THEORY'] ? '▼' : '▶'}</span>
-                                            </a>
+                                            </button>
                                             <div className="dropdown-menu-nested" style={{
                                                 position: 'absolute', right: '100%', top: 0, minWidth: '200px',
                                                 background: theme === 'dark' ? '#000' : '#fff',
@@ -493,14 +493,14 @@ const Navbar = ({ onApplyClick }) => {
 
                                         {/* Practical Examination */}
                                         <div className="dropdown-item-container" style={{ position: 'relative', overflow: 'visible' }}>
-                                            <a href="#" className="dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                            <button type="button" className="dropdown-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', font: 'inherit', color: 'inherit' }}
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
                                                     setMobileExpanded(prev => ({ ...prev, 'EXAM_PRACTICAL': !prev['EXAM_PRACTICAL'] }));
                                                 }}>
                                                 Practical Examination <span style={{ fontSize: '0.8em' }}>{mobileExpanded['EXAM_PRACTICAL'] ? '▼' : '▶'}</span>
-                                            </a>
+                                            </button>
                                             <div className="dropdown-menu-nested" style={{
                                                 position: 'absolute', right: '100%', top: 0, minWidth: '200px',
                                                 background: theme === 'dark' ? '#000' : '#fff',
@@ -565,8 +565,8 @@ const Navbar = ({ onApplyClick }) => {
                                 color: theme === 'dark' ? '#fff' : '#000',
                                 display: mobileExpanded['PAY_UTILITY'] ? 'block' : 'none'
                             }}>
-                                <a href="#" className="dropdown-item">College Fee</a>
-                                <a href="#" className="dropdown-item">Exam Fee</a>
+                                <a href="/page/college-fee" className="dropdown-item">College Fee</a>
+                                <a href="/page/exam-fee" className="dropdown-item">Exam Fee</a>
                             </div>
                         </div>
                         <div style={{ width: '1px', height: '14px', background: 'var(--glass-border)' }}></div>
