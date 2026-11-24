@@ -384,25 +384,6 @@ const LoginPage = () => {
                     <button type="submit" className={`auth-btn ${headerInfo.buttonClass}`} disabled={loading}>
                         {loading ? 'Logging in...' : headerInfo.buttonText}
                     </button>
-
-                    <div className="auth-info-text" style={{ textAlign: 'center', marginTop: '1.5rem', color: '#64748b', fontSize: '0.825rem', lineHeight: '1.5' }}>
-                        {portalType === 'pg' ? (
-                            <>
-                                🎓 <strong>Postgraduate Courses Portal</strong> for M.E. & M.B.A. Faculty and HODs.<br/>
-                                <span style={{ color: '#94a3b8' }}>Switch to <a href="#ug" onClick={(e) => { e.preventDefault(); setPortalType('ug'); }} style={{ color: '#2563eb', fontWeight: 'bold' }}>UG Syllabus Portal</a> or <a href="#admin" onClick={(e) => { e.preventDefault(); setPortalType('admin'); }} style={{ color: '#0f172a', fontWeight: 'bold' }}>Admin Login</a></span>
-                            </>
-                        ) : portalType === 'ug' ? (
-                            <>
-                                🏛️ <strong>Undergraduate Syllabus Portal</strong> for B.E. & B.Tech Department Curricula.<br/>
-                                <span style={{ color: '#94a3b8' }}>Switch to <a href="#pg" onClick={(e) => { e.preventDefault(); setPortalType('pg'); }} style={{ color: '#7c3aed', fontWeight: 'bold' }}>PG Courses Syllabus Portal</a> or <a href="#admin" onClick={(e) => { e.preventDefault(); setPortalType('admin'); }} style={{ color: '#0f172a', fontWeight: 'bold' }}>Admin Login</a></span>
-                            </>
-                        ) : (
-                            <>
-                                🛡️ Central Management Portal for college administrators.<br/>
-                                <span style={{ color: '#94a3b8' }}>Access <a href="#pg" onClick={(e) => { e.preventDefault(); setPortalType('pg'); }} style={{ color: '#7c3aed', fontWeight: 'bold' }}>PG Portal</a> or <a href="#ug" onClick={(e) => { e.preventDefault(); setPortalType('ug'); }} style={{ color: '#2563eb', fontWeight: 'bold' }}>UG Portal</a></span>
-                            </>
-                        )}
-                    </div>
                 </form>
             </div>
         </div>
