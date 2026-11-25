@@ -268,7 +268,7 @@ module.exports = {
         username: { type: String, required: true, unique: true },
         email: { type: String, required: true, unique: true },
         password: { type: String, required: true },
-        role: { type: String, required: true, enum: ['admin', 'hod', 'staff', 'student'] },
+        role: { type: String, required: true, enum: ['admin', 'hod', 'staff', 'student', 'coe'] },
         department: { type: String }, // For HOD, Staff, Student
         employeeId: { type: String }, // For Staff
         studentId: { type: String }, // For Student
@@ -837,6 +837,42 @@ module.exports = {
             label: { type: String, default: '' }
         },
         category: { type: String, default: 'goal' },
+        order: { type: Number, default: 0 }
+    }, { timestamps: true })),
+    CertificateApplication: mongoose.model('CertificateApplication', new mongoose.Schema({
+        applicationId: { type: String, required: true, unique: true, index: true },
+        dateOfApplication: { type: String, required: true },
+        registrationNumber: { type: String, required: true, trim: true, uppercase: true, index: true },
+        studentName: { type: String, required: true, trim: true },
+        department: { type: String, required: true, trim: true, index: true },
+        batch: { type: String, required: true, trim: true, index: true },
+        contactNumber: { type: String, required: true, trim: true },
+        email: { type: String, required: true, trim: true, lowercase: true },
+        fatherName: { type: String, required: true, trim: true },
+        passingOutYear: { type: String, required: true, trim: true, index: true },
+        requiredDocuments: {
+            type: [String],
+            required: true,
+            validate: {
+                validator: (v) => Array.isArray(v) && v.length > 0,
+                message: 'At least one required document must be selected'
+            }
+        },
+        address: { type: String, required: true, trim: true },
+        status: {
+            type: String,
+            enum: ['Pending', 'Processing', 'Ready for Collection', 'Collected'],
+            default: 'Pending',
+            index: true
+        },
+        adminRemarks: { type: String, default: '', trim: true },
+        statusUpdatedAt: { type: Date },
+        submittedAt: { type: Date, default: Date.now }
+    }, { timestamps: true })),
+    CertificateDocumentOption: mongoose.model('CertificateDocumentOption', new mongoose.Schema({
+        label: { type: String, required: true, unique: true, trim: true },
+        description: { type: String, default: '', trim: true },
+        isActive: { type: Boolean, default: true },
         order: { type: Number, default: 0 }
     }, { timestamps: true }))
 };

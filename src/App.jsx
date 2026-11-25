@@ -109,6 +109,8 @@ const NbaPage = lazy(() => import('./pages/NbaPage'));
 const IdeaLabPage = lazy(() => import('./pages/IdeaLabPage'));
 const CenterOfExcellencePage = lazy(() => import('./pages/CenterOfExcellencePage'));
 const AdmissionEnquiryAdmin = lazy(() => import('./pages/AdmissionEnquiryAdmin'));
+const CertificateCollectionPage = lazy(() => import('./pages/CertificateCollectionPage'));
+const CertificateReportAdmin = lazy(() => import('./pages/CertificateReportAdmin'));
 
 
 
@@ -187,6 +189,11 @@ function App() {
             <Route path="/admin/addmission" element={<AdmissionEnquiryAdmin />} />
             <Route path="/admin/admissions" element={<AdmissionEnquiryAdmin />} />
             <Route path="/admin/enquiries" element={<AdmissionEnquiryAdmin />} />
+            <Route path="/admin/certificates" element={<CertificateReportAdmin />} />
+            <Route path="/admin/certificate-collection" element={<CertificateReportAdmin />} />
+            <Route path="/admin/certificates/login" element={<CertificateReportAdmin />} />
+            <Route path="/coe/certificate-report" element={<CertificateReportAdmin />} />
+            <Route path="/certificate-report" element={<CertificateReportAdmin />} />
             <Route path="/research" element={<ResearchPage />} />
             <Route path="/rd" element={<ResearchPage />} />
             <Route path="/rd-cell" element={<ResearchPage />} />
@@ -274,6 +281,9 @@ function App() {
             <Route path="/result-passing-board" element={<ResultPassingBoardPage />} />
             <Route path="/page/courses-registered" element={<CoursesRegisteredPage />} />
             <Route path="/courses-registered" element={<CoursesRegisteredPage />} />
+            <Route path="/certificate-collection" element={<CertificateCollectionPage />} />
+            <Route path="/coe/certificate-collection" element={<CertificateCollectionPage />} />
+            <Route path="/page/certificate-collection" element={<CertificateCollectionPage />} />
             <Route path="/page/autonomous-regulations" element={<RegulationsPage />} />
 
             <Route path="/page/fest" element={<DhruvaFestPage />} />

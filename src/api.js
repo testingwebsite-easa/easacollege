@@ -46,6 +46,7 @@ function isCacheable(urlStr, options) {
     if (
         urlStr.includes('/api/auth') ||
         urlStr.includes('/api/users') ||
+        urlStr.includes('/api/certificates') ||
         urlStr.includes('/export') ||
         urlStr.includes('/api/job-applications') ||
         urlStr.includes('/api/admissions/export')

@@ -4,6 +4,7 @@ import API_BASE_URL from '../api';
 import { departments as staticDepartments } from '../data/departmentsData';
 import ImageUpload from '../components/ImageUpload';
 import DepartmentManager from '../components/DepartmentManager';
+import CertificateCollectionAdmin from '../components/CertificateCollectionAdmin';
 
 
 // Helper Component for Dynamic JSON Lists
@@ -189,7 +190,10 @@ const AdminDashboard = () => {
         return false;
     };
 
-    const [activeTab, setActiveTab] = useState('admissions');
+    const [activeTab, setActiveTab] = useState(() => {
+        const tabParam = new URLSearchParams(window.location.search).get('tab');
+        return tabParam || 'admissions';
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -1456,6 +1460,7 @@ const AdminDashboard = () => {
                         {renderTabButton('newsletter', '📬 Newsletter Subs')}
                         {renderTabButton('alumni', '🎓 Alumni Registry')}
                         {renderTabButton('scholarships', '🏆 Scholarships')}
+                        {renderTabButton('certificates', '📜 Certificate Collection')}
                     </>
                 ))}
 
@@ -1539,6 +1544,7 @@ const AdminDashboard = () => {
                                 'partner-connect': 'SDG & Institutional Partner Connects',
                                 'newsletter': 'Newsletter Subscribers',
                                 'scholarships': 'Scholarships',
+                                'certificates': 'Certificate Collection Applications',
                                 'sessions': 'Sessions',
                                 'hero': 'Hero Section',
                                 'about': 'Faculty Stats',
@@ -4156,6 +4162,15 @@ const AdminDashboard = () => {
                                             </table>
                                         </div>
                                     </div>
+                                )
+                            }
+
+                            {/* CERTIFICATE COLLECTION TAB */}
+                            {
+                                activeTab === 'certificates' && (
+                                    <CertificateCollectionAdmin
+                                        onAuthError={(status) => handleTokenExpiry(status === 401 ? 403 : status)}
+                                    />
                                 )
                             }
 

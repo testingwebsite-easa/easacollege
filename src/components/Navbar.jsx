@@ -232,7 +232,8 @@ const UTILITY_ITEMS = [
                         ]
                     }
                 ]
-            }
+            },
+            { title: 'Certificate Collection', href: '/certificate-collection' }
         ]
     },
     {
@@ -513,6 +514,8 @@ const Navbar = ({ onApplyClick }) => {
                                         </div>
                                     </div>
                                 </div>
+
+                                <a href="/certificate-collection" className="dropdown-item">Certificate Collection</a>
                             </div>
                         </div>
                         <div style={{ width: '1px', height: '14px', background: 'var(--glass-border)' }}></div>
@@ -878,6 +881,8 @@ const Navbar = ({ onApplyClick }) => {
                                                         if (child.title === 'Application Form' && onApplyClick) {
                                                             e.preventDefault();
                                                             onApplyClick();
+                                                            toggleMenu();
+                                                        } else if (child.href && child.href !== '#') {
                                                             toggleMenu();
                                                         }
                                                     }}

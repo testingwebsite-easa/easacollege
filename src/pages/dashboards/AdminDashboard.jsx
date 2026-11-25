@@ -4,8 +4,9 @@ import API_BASE_URL from '../../api';
 import '../../styles/Dashboards.css';
 import { departments as staticDepartments } from '../../data/departmentsData';
 import { SYLLABUS_DATA, GENERIC_FIRST_YEAR } from '../../data/syllabusData';
-import { FaUsers, FaUserCheck, FaUserTimes, FaFilePdf, FaUpload, FaTrash, FaEye, FaBookOpen, FaEnvelope, FaGraduationCap, FaBars, FaTimes } from 'react-icons/fa';
+import { FaUsers, FaUserCheck, FaUserTimes, FaFilePdf, FaUpload, FaTrash, FaEye, FaBookOpen, FaEnvelope, FaGraduationCap, FaBars, FaTimes, FaCertificate } from 'react-icons/fa';
 import DepartmentManager from '../../components/DepartmentManager';
+import CertificateCollectionAdmin from '../../components/CertificateCollectionAdmin';
 
 const AdminDashboard = () => {
     const { user, logout, token } = useAuth();
@@ -528,6 +529,12 @@ const AdminDashboard = () => {
                     >
                         <FaBookOpen /> Syllabus & Departments
                     </button>
+                    <button
+                        className={`admin-tab-btn ${activeTab === 'certificates' ? 'active' : ''}`}
+                        onClick={() => { setActiveTab('certificates'); setSidebarOpen(false); }}
+                    >
+                        <FaCertificate /> Certificate Collection
+                    </button>
 
                     <div style={{ margin: '1rem 0 0.5rem 0', borderTop: '1px solid #e2e8f0', paddingTop: '0.8rem' }}>
                         <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#94a3b8', fontWeight: 'bold', padding: '0 0.5rem' }}>Admin Portals</span>
@@ -549,6 +556,7 @@ const AdminDashboard = () => {
                         {activeTab === 'pending' && 'Pending User Approvals'}
                         {activeTab === 'users' && 'User Account Directory'}
                         {activeTab === 'departments' && 'Curriculum & Department Data Manager'}
+                        {activeTab === 'certificates' && 'Certificate Collection Management'}
                     </h2>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         <a
@@ -868,6 +876,10 @@ const AdminDashboard = () => {
                         <div className="tab-content">
                             <h2>Department Data Manager</h2>
                             <DepartmentManager />
+                        </div>
+                    ) : activeTab === 'certificates' ? (
+                        <div className="tab-content">
+                            <CertificateCollectionAdmin token={token} lightTheme={true} />
                         </div>
                     ) : null}
                 </div>
