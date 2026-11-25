@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaCertificate,
@@ -37,6 +37,9 @@ import {
     CERTIFICATE_STATUSES,
     STATUS_STYLE_MAP,
     DEFAULT_CERTIFICATE_DOCUMENTS,
+    OTHER_DOCUMENT_LABEL,
+    isOtherDocumentOption,
+    formatDocumentLabel,
     getBatchYears,
     getPassingOutYears,
     buildDepartmentOptions,
@@ -80,6 +83,7 @@ const createInitialFormState = () => ({
     fatherName: '',
     passingOutYear: '',
     requiredDocuments: [],
+    otherDocument: '',
     address: ''
 });
 
@@ -100,6 +104,7 @@ const CertificateCollectionPage = () => {
     const [apiDepartments, setApiDepartments] = useState([]);
     const [documentOptions, setDocumentOptions] = useState(DEFAULT_CERTIFICATE_DOCUMENTS);
     const [loadingOptions, setLoadingOptions] = useState(true);
+    const otherDocInputRef = useRef(null);
 
     // Status Tracking Bar States
     const [trackQuery, setTrackQuery] = useState('');
@@ -132,7 +137,14 @@ const CertificateCollectionPage = () => {
                 if (optRes.status === 'fulfilled' && optRes.value.ok) {
                     const optData = await optRes.value.json();
                     if (Array.isArray(optData) && optData.length > 0) {
-                        setDocumentOptions(optData.filter(o => o.isActive !== false));
+                        const activeOpts = optData.filter(o => o.isActive !== false);
+                        const nonOtherOpts = activeOpts.filter(o => !isOtherDocumentOption(o.label || o));
+                        const otherOpt = activeOpts.find(o => isOtherDocumentOption(o.label || o)) || {
+                            label: OTHER_DOCUMENT_LABEL,
+                            description: 'Any other certificate or document not listed above (please specify)',
+                            isActive: true
+                        };
+                        setDocumentOptions([...nonOtherOpts, otherOpt]);
                     }
                 }
             } catch (err) {
@@ -176,19 +188,37 @@ const CertificateCollectionPage = () => {
     };
 
     const handleDocumentToggle = (docLabel) => {
+        const isTogglingOther = isOtherDocumentOption(docLabel);
+        const wasChecked = formData.requiredDocuments.includes(docLabel);
+
         setFormData(prev => {
             const exists = prev.requiredDocuments.includes(docLabel);
             const nextDocs = exists
                 ? prev.requiredDocuments.filter(d => d !== docLabel)
                 : [...prev.requiredDocuments, docLabel];
-            const nextState = { ...prev, requiredDocuments: nextDocs };
+            const hasOtherNow = nextDocs.some(d => isOtherDocumentOption(d));
+            const nextState = {
+                ...prev,
+                requiredDocuments: nextDocs,
+                otherDocument: hasOtherNow ? prev.otherDocument : ''
+            };
 
             const errs = validateCertificateForm(nextState);
-            setFieldErrors(fe => ({ ...fe, requiredDocuments: errs.requiredDocuments }));
+            setFieldErrors(fe => ({
+                ...fe,
+                requiredDocuments: errs.requiredDocuments,
+                otherDocument: hasOtherNow ? fe.otherDocument : undefined
+            }));
             return nextState;
         });
         setTouched(prev => ({ ...prev, requiredDocuments: true }));
         setDuplicateWarning(null);
+
+        if (isTogglingOther && !wasChecked) {
+            setTimeout(() => {
+                otherDocInputRef.current?.focus();
+            }, 50);
+        }
     };
 
     const handleReset = () => {
@@ -215,6 +245,7 @@ const CertificateCollectionPage = () => {
             fatherName: true,
             passingOutYear: true,
             requiredDocuments: true,
+            otherDocument: true,
             address: true
         };
         setTouched(allTouched);
@@ -234,8 +265,11 @@ const CertificateCollectionPage = () => {
             return;
         }
 
+        const hasOtherSelected = formData.requiredDocuments.some(d => isOtherDocumentOption(d));
+        const cleanOtherDoc = hasOtherSelected ? formData.otherDocument.trim() : '';
+
         // Session-level quick duplicate guard
-        const sessionKey = `cert_submitted_${formData.registrationNumber.trim().toUpperCase()}_${[...formData.requiredDocuments].sort().join('|')}`;
+        const sessionKey = `cert_submitted_${formData.registrationNumber.trim().toUpperCase()}_${[...formData.requiredDocuments].sort().join('|')}_${cleanOtherDoc.toLowerCase()}`;
         try {
             const prevSubmission = sessionStorage.getItem(sessionKey);
             if (prevSubmission) {
@@ -267,6 +301,7 @@ const CertificateCollectionPage = () => {
                     fatherName: formData.fatherName.trim(),
                     contactNumber: formData.contactNumber.trim(),
                     email: formData.email.trim().toLowerCase(),
+                    otherDocument: cleanOtherDoc,
                     address: formData.address.trim()
                 })
             });
@@ -626,7 +661,7 @@ const CertificateCollectionPage = () => {
                                                             fontSize: '0.76rem',
                                                             fontWeight: '700'
                                                         }}>
-                                                            {doc}
+                                                             {formatDocumentLabel(doc, rec.otherDocument)}
                                                         </span>
                                                     ))}
                                                 </div>
@@ -802,7 +837,7 @@ const CertificateCollectionPage = () => {
                                                     fontSize: '0.8rem',
                                                     fontWeight: '700'
                                                 }}>
-                                                    {doc}
+                                                    {formatDocumentLabel(doc, submittedReceipt.otherDocument)}
                                                 </span>
                                             ))}
                                         </div>
@@ -1265,6 +1300,34 @@ const CertificateCollectionPage = () => {
                                         </div>
                                     )}
                                     {fieldErrors.requiredDocuments && <p className="cert-err-msg" style={{ marginTop: '0.75rem' }}>{fieldErrors.requiredDocuments}</p>}
+
+                                    {formData.requiredDocuments.some(d => isOtherDocumentOption(d)) && (
+                                        <div style={{
+                                            marginTop: '1rem',
+                                            padding: '1rem 1.1rem',
+                                            borderRadius: '12px',
+                                            background: isDark ? 'rgba(37, 99, 235, 0.1)' : '#eff6ff',
+                                            border: `1.5px solid ${fieldErrors.otherDocument ? '#ef4444' : '#2563eb'}`
+                                        }}>
+                                            <label htmlFor="cert-otherDocument" className="cert-label">
+                                                <FaFileAlt /> Specify Other Document(s) <span className="cert-req">*</span>
+                                            </label>
+                                            <input
+                                                ref={otherDocInputRef}
+                                                id="cert-otherDocument"
+                                                type="text"
+                                                name="otherDocument"
+                                                maxLength={200}
+                                                placeholder="Enter document / certificate name (e.g. Medium of Instruction Certificate, Rank Certificate, LOR)"
+                                                value={formData.otherDocument}
+                                                onChange={handleFieldChange}
+                                                onBlur={() => handleBlur('otherDocument')}
+                                                className={`cert-input ${fieldErrors.otherDocument ? 'cert-input-err' : ''}`}
+                                                required
+                                            />
+                                            {fieldErrors.otherDocument && <p className="cert-err-msg">{fieldErrors.otherDocument}</p>}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Section 3: Communication Address */}

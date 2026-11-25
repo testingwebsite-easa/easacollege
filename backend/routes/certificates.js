@@ -18,8 +18,20 @@ const DEFAULT_DOCUMENT_OPTIONS = [
     { label: 'Course Completion Certificate', description: 'Certification of academic program completion', order: 7, isActive: true },
     { label: 'Bonafide Certificate', description: 'Bonafide student or alumni status certificate', order: 8, isActive: true },
     { label: 'Migration Certificate', description: 'University migration certificate for higher studies', order: 9, isActive: true },
-    { label: 'Official Transcripts', description: 'Sealed academic transcripts for overseas or higher education', order: 10, isActive: true }
+    { label: 'Official Transcripts', description: 'Sealed academic transcripts for overseas or higher education', order: 10, isActive: true },
+    { label: 'Others', description: 'Any other certificate or document not listed above (please specify)', order: 999, isActive: true }
 ];
+
+const isOtherDocLabel = (label) => {
+    const normalized = String(label || '').trim().toLowerCase();
+    return normalized === 'others' || normalized === 'other';
+};
+
+const formatDocsForDisplay = (docs = [], otherDocument = '') => {
+    if (!Array.isArray(docs)) return [];
+    const cleanOther = String(otherDocument || '').trim();
+    return docs.map(doc => (isOtherDocLabel(doc) && cleanOther ? `Others: ${cleanOther}` : doc));
+};
 
 const requireDb = (req, res, next) => {
     if (mongoose.connection.readyState !== 1) {
@@ -40,6 +52,16 @@ const ensureDefaultDocumentOptions = async () => {
     const count = await CertificateDocumentOption.countDocuments();
     if (count === 0) {
         await CertificateDocumentOption.insertMany(DEFAULT_DOCUMENT_OPTIONS, { ordered: false }).catch(() => {});
+        return;
+    }
+    const existingOther = await CertificateDocumentOption.findOne({
+        label: { $regex: /^others?$/i }
+    }).lean();
+    if (!existingOther) {
+        const otherOption = DEFAULT_DOCUMENT_OPTIONS.find(opt => isOtherDocLabel(opt.label));
+        if (otherOption) {
+            await CertificateDocumentOption.create(otherOption).catch(() => {});
+        }
     }
 };
 
@@ -166,7 +188,16 @@ const validatePayload = (body, isPartialUpdate = false) => {
             : [];
         if (docs.length === 0) {
             errors.requiredDocuments = 'Select at least one required document';
+        } else if (docs.some(d => isOtherDocLabel(d))) {
+            const otherDoc = String(body.otherDocument || '').trim();
+            if (!otherDoc) {
+                errors.otherDocument = 'Please specify the other document(s) required';
+            } else if (otherDoc.length < 2 || otherDoc.length > 200) {
+                errors.otherDocument = 'Other document specification must be between 2 and 200 characters';
+            }
         }
+    } else if (body.otherDocument !== undefined && String(body.otherDocument || '').trim().length > 200) {
+        errors.otherDocument = 'Other document specification must be 200 characters or fewer';
     }
 
     if (!isPartialUpdate || body.address !== undefined) {
@@ -295,6 +326,8 @@ router.post('/', requireDb, async (req, res) => {
         const normalizedDocs = Array.from(
             new Set(req.body.requiredDocuments.map(d => String(d).trim()).filter(Boolean))
         );
+        const hasOtherDoc = normalizedDocs.some(d => isOtherDocLabel(d));
+        const cleanOtherDoc = hasOtherDoc ? String(req.body.otherDocument || '').trim() : '';
 
         // Normalize phone formatting cleanly
         const { digits, hasPlus } = normalizePhone(req.body.contactNumber);
@@ -308,22 +341,33 @@ router.post('/', requireDb, async (req, res) => {
         const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
         for (const existing of existingApplications) {
             const existingDocs = Array.isArray(existing.requiredDocuments) ? existing.requiredDocuments : [];
-            const overlappingDocs = normalizedDocs.filter(doc => existingDocs.includes(doc));
+            const existingOtherDoc = String(existing.otherDocument || '').trim().toLowerCase();
+            const overlappingDocs = normalizedDocs.filter(doc => {
+                if (isOtherDocLabel(doc)) {
+                    const existingHasOther = existingDocs.some(ed => isOtherDocLabel(ed));
+                    return existingHasOther && existingOtherDoc === cleanOtherDoc.toLowerCase();
+                }
+                return existingDocs.includes(doc);
+            });
             const isRecentDoubleSubmit = existing.createdAt && new Date(existing.createdAt).getTime() > twoMinutesAgo;
             const isExactSameDocs =
                 existingDocs.length === normalizedDocs.length &&
                 overlappingDocs.length === normalizedDocs.length;
 
             if (existing.status !== 'Collected' && overlappingDocs.length > 0) {
+                const displayOverlapping = formatDocsForDisplay(overlappingDocs, cleanOtherDoc);
                 return res.status(409).json({
                     success: false,
-                    error: `An active request (${existing.applicationId}, Status: ${existing.status}) already exists for Registration Number ${normalizedRegNo} covering: ${overlappingDocs.join(', ')}.`,
+                    error: `An active request (${existing.applicationId}, Status: ${existing.status}) already exists for Registration Number ${normalizedRegNo} covering: ${displayOverlapping.join(', ')}.`,
                     duplicateApplicationId: existing.applicationId,
                     existingStatus: existing.status
                 });
             }
 
-            if (isRecentDoubleSubmit || (isExactSameDocs && existing.dateOfApplication === String(req.body.dateOfApplication).trim())) {
+            if (
+                (isRecentDoubleSubmit && isExactSameDocs) ||
+                (isExactSameDocs && existing.dateOfApplication === String(req.body.dateOfApplication).trim())
+            ) {
                 return res.status(409).json({
                     success: false,
                     error: `Duplicate submission detected. Application ${existing.applicationId} was already recorded for Registration Number ${normalizedRegNo}.`,
@@ -363,10 +407,16 @@ router.post('/', requireDb, async (req, res) => {
             fatherName: String(req.body.fatherName).trim(),
             passingOutYear: String(req.body.passingOutYear).trim(),
             requiredDocuments: normalizedDocs,
+            otherDocument: cleanOtherDoc,
             address: String(req.body.address).trim(),
             status: 'Pending',
             submittedAt
         });
+
+        const formattedDocsSummary = formatDocsForDisplay(
+            newApplication.requiredDocuments,
+            newApplication.otherDocument
+        ).join(', ');
 
         // Fire-and-forget admin notification email if SMTP is configured
         if (typeof sendEmail === 'function' && process.env.SMTP_USER && process.env.SMTP_PASS) {
@@ -386,7 +436,7 @@ router.post('/', requireDb, async (req, res) => {
                             <p><strong>Batch:</strong> ${newApplication.batch} | <strong>Passing Out Year:</strong> ${newApplication.passingOutYear}</p>
                             <p><strong>Contact Number:</strong> ${newApplication.contactNumber}</p>
                             <p><strong>Email ID:</strong> ${newApplication.email}</p>
-                            <p><strong>Required Documents:</strong> ${newApplication.requiredDocuments.join(', ')}</p>
+                            <p><strong>Required Documents:</strong> ${formattedDocsSummary}</p>
                             <p><strong>Address:</strong> ${newApplication.address}</p>
                         `
                     });
@@ -400,7 +450,7 @@ router.post('/', requireDb, async (req, res) => {
                                 <p>Your certificate collection application has been received by the Office of the Controller of Examinations (C.O.E).</p>
                                 <p><strong>Reference ID:</strong> ${applicationId}</p>
                                 <p><strong>Registration Number:</strong> ${newApplication.registrationNumber}</p>
-                                <p><strong>Required Documents:</strong> ${newApplication.requiredDocuments.join(', ')}</p>
+                                <p><strong>Required Documents:</strong> ${formattedDocsSummary}</p>
                                 <p><strong>Status:</strong> Pending</p>
                                 <p>Regards,<br/><strong>Controller of Examinations<br/>EASA College of Engineering and Technology</strong></p>
                             </div>
@@ -442,7 +492,8 @@ const buildSearchFilter = (queryParams) => {
             { studentName: regex },
             { applicationId: regex },
             { contactNumber: regex },
-            { email: regex }
+            { email: regex },
+            { otherDocument: regex }
         ];
     }
     if (department && department !== 'all') {
@@ -502,7 +553,7 @@ router.get('/export', requireDb, verifyToken, requireAdmin, async (req, res) => 
             app.passingOutYear || '',
             app.contactNumber || '',
             app.email || '',
-            Array.isArray(app.requiredDocuments) ? app.requiredDocuments.join('; ') : '',
+            formatDocsForDisplay(app.requiredDocuments, app.otherDocument).join('; '),
             app.address || '',
             app.status || 'Pending',
             app.adminRemarks || '',
@@ -534,7 +585,7 @@ const handleTrackCertificate = async (req, res) => {
             });
         }
 
-        const safeProjection = 'applicationId registrationNumber studentName department batch passingOutYear dateOfApplication requiredDocuments status adminRemarks statusUpdatedAt submittedAt createdAt';
+        const safeProjection = 'applicationId registrationNumber studentName department batch passingOutYear dateOfApplication requiredDocuments otherDocument status adminRemarks statusUpdatedAt submittedAt createdAt';
 
         const records = await CertificateApplication.find({
             $or: [
@@ -630,6 +681,7 @@ const handleUpdateApplication = async (req, res) => {
             'fatherName',
             'passingOutYear',
             'requiredDocuments',
+            'otherDocument',
             'address',
             'status',
             'adminRemarks'
@@ -655,6 +707,11 @@ const handleUpdateApplication = async (req, res) => {
                     updateData[field] = req.body[field];
                 }
             }
+        }
+
+        const effectiveDocs = updateData.requiredDocuments || existing.requiredDocuments || [];
+        if (!effectiveDocs.some(d => isOtherDocLabel(d))) {
+            updateData.otherDocument = '';
         }
 
         if (updateData.status && updateData.status !== existing.status) {

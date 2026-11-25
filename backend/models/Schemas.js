@@ -858,6 +858,7 @@ module.exports = {
                 message: 'At least one required document must be selected'
             }
         },
+        otherDocument: { type: String, default: '', trim: true },
         address: { type: String, required: true, trim: true },
         status: {
             type: String,

@@ -14,6 +14,26 @@ export const STATUS_STYLE_MAP = {
     'Collected': { bg: '#f1f5f9', color: '#334155', border: '#cbd5e1' }
 };
 
+export const OTHER_DOCUMENT_LABEL = 'Others';
+
+export const isOtherDocumentOption = (label) => {
+    const normalized = String(label || '').trim().toLowerCase();
+    return normalized === 'others' || normalized === 'other';
+};
+
+export const formatDocumentLabel = (label, otherDocument = '') => {
+    if (isOtherDocumentOption(label)) {
+        const cleanOther = String(otherDocument || '').trim();
+        return cleanOther ? `Others: ${cleanOther}` : OTHER_DOCUMENT_LABEL;
+    }
+    return label;
+};
+
+export const formatRequiredDocuments = (docs = [], otherDocument = '') => {
+    if (!Array.isArray(docs)) return [];
+    return docs.map(doc => formatDocumentLabel(doc, otherDocument));
+};
+
 export const DEFAULT_CERTIFICATE_DOCUMENTS = [
     { label: 'Provisional Certificate', description: 'Provisional degree completion certificate', isActive: true },
     { label: 'Consolidated Mark Statement', description: 'Combined marksheet covering all semesters', isActive: true },
@@ -24,7 +44,8 @@ export const DEFAULT_CERTIFICATE_DOCUMENTS = [
     { label: 'Course Completion Certificate', description: 'Certification of academic program completion', isActive: true },
     { label: 'Bonafide Certificate', description: 'Bonafide student or alumni status certificate', isActive: true },
     { label: 'Migration Certificate', description: 'University migration certificate for higher studies', isActive: true },
-    { label: 'Official Transcripts', description: 'Sealed academic transcripts for overseas or higher education', isActive: true }
+    { label: 'Official Transcripts', description: 'Sealed academic transcripts for overseas or higher education', isActive: true },
+    { label: OTHER_DOCUMENT_LABEL, description: 'Any other certificate or document not listed above (please specify)', isActive: true }
 ];
 
 export const getBatchYears = () => {
@@ -261,6 +282,13 @@ export const validateCertificateForm = (formData) => {
 
     if (!Array.isArray(formData.requiredDocuments) || formData.requiredDocuments.length === 0) {
         errors.requiredDocuments = 'Please select at least one required document.';
+    } else if (formData.requiredDocuments.some(d => isOtherDocumentOption(d))) {
+        const otherDocVal = String(formData.otherDocument || '').trim();
+        if (!otherDocVal) {
+            errors.otherDocument = 'Please specify the other document(s) you require.';
+        } else if (otherDocVal.length < 2 || otherDocVal.length > 200) {
+            errors.otherDocument = 'Please enter 2 to 200 characters specifying the other document.';
+        }
     }
 
     const addr = String(formData.address || '').trim();

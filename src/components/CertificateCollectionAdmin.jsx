@@ -21,6 +21,10 @@ import {
     CERTIFICATE_STATUSES,
     STATUS_STYLE_MAP,
     DEFAULT_CERTIFICATE_DOCUMENTS,
+    OTHER_DOCUMENT_LABEL,
+    isOtherDocumentOption,
+    formatDocumentLabel,
+    formatRequiredDocuments,
     getBatchYears,
     getPassingOutYears,
     buildDepartmentOptions,
@@ -162,7 +166,8 @@ const CertificateCollectionAdmin = ({ token: propToken, onAuthError, lightTheme 
                 const idMatch = (app.applicationId || '').toLowerCase().includes(q);
                 const phoneMatch = (app.contactNumber || '').toLowerCase().includes(q);
                 const emailMatch = (app.email || '').toLowerCase().includes(q);
-                if (!regMatch && !nameMatch && !idMatch && !phoneMatch && !emailMatch) return false;
+                const otherDocMatch = (app.otherDocument || '').toLowerCase().includes(q);
+                if (!regMatch && !nameMatch && !idMatch && !phoneMatch && !emailMatch && !otherDocMatch) return false;
             }
             if (departmentFilter !== 'all' && app.department !== departmentFilter) return false;
             if (batchFilter !== 'all' && String(app.batch) !== batchFilter) return false;
@@ -247,6 +252,7 @@ const CertificateCollectionAdmin = ({ token: propToken, onAuthError, lightTheme 
             fatherName: app.fatherName || '',
             passingOutYear: String(app.passingOutYear || ''),
             requiredDocuments: Array.isArray(app.requiredDocuments) ? [...app.requiredDocuments] : [],
+            otherDocument: app.otherDocument || '',
             address: app.address || '',
             status: app.status || 'Pending',
             adminRemarks: app.adminRemarks || ''
@@ -260,7 +266,12 @@ const CertificateCollectionAdmin = ({ token: propToken, onAuthError, lightTheme 
             const nextDocs = exists
                 ? prev.requiredDocuments.filter(d => d !== label)
                 : [...prev.requiredDocuments, label];
-            return { ...prev, requiredDocuments: nextDocs };
+            const hasOther = nextDocs.some(d => isOtherDocumentOption(d));
+            return {
+                ...prev,
+                requiredDocuments: nextDocs,
+                otherDocument: hasOther ? prev.otherDocument : ''
+            };
         });
     };
 
@@ -322,7 +333,7 @@ const CertificateCollectionAdmin = ({ token: propToken, onAuthError, lightTheme 
             'Year of Passing Out': app.passingOutYear || '',
             'Contact Number': app.contactNumber || '',
             'Email ID': app.email || '',
-            'Required Documents': Array.isArray(app.requiredDocuments) ? app.requiredDocuments.join(', ') : '',
+            'Required Documents': formatRequiredDocuments(app.requiredDocuments, app.otherDocument).join(', '),
             'Address': app.address || '',
             'Status': app.status || 'Pending',
             'Admin Remarks': app.adminRemarks || '',
@@ -772,7 +783,7 @@ const CertificateCollectionAdmin = ({ token: propToken, onAuthError, lightTheme 
                                                         fontSize: '0.73rem',
                                                         fontWeight: '700'
                                                     }}>
-                                                        {doc}
+                                                        {formatDocumentLabel(doc, app.otherDocument)}
                                                     </span>
                                                 ))}
                                             </div>
@@ -865,7 +876,7 @@ const CertificateCollectionAdmin = ({ token: propToken, onAuthError, lightTheme 
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                     {(viewingApp.requiredDocuments || []).map((doc, idx) => (
                                         <span key={idx} style={{ background: lightTheme ? '#e0e7ff' : 'rgba(59, 130, 246, 0.2)', color: lightTheme ? '#1e3a8a' : '#93c5fd', padding: '4px 10px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: '700' }}>
-                                            {doc}
+                                            {formatDocumentLabel(doc, viewingApp.otherDocument)}
                                         </span>
                                     ))}
                                 </div>
@@ -1063,7 +1074,7 @@ const CertificateCollectionAdmin = ({ token: propToken, onAuthError, lightTheme 
                             <div>
                                 <label style={{ fontSize: '0.78rem', fontWeight: '700', color: mutedCol, display: 'block', marginBottom: '6px' }}>Required Documents *</label>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '6px' }}>
-                                    {Array.from(new Set([...docOptions.map(o => o.label), ...(editForm.requiredDocuments || [])])).map(label => {
+                                    {Array.from(new Set([...docOptions.map(o => o.label), OTHER_DOCUMENT_LABEL, ...(editForm.requiredDocuments || [])])).map(label => {
                                         const checked = (editForm.requiredDocuments || []).includes(label);
                                         return (
                                             <label key={label} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0.45rem 0.6rem', borderRadius: '6px', border: `1px solid ${borderCol}`, background: cardBg, cursor: 'pointer', fontSize: '0.82rem' }}>
@@ -1074,6 +1085,22 @@ const CertificateCollectionAdmin = ({ token: propToken, onAuthError, lightTheme 
                                     })}
                                 </div>
                                 {editErrors.requiredDocuments && <small style={{ color: '#ef4444' }}>{editErrors.requiredDocuments}</small>}
+                                {(editForm.requiredDocuments || []).some(d => isOtherDocumentOption(d)) && (
+                                    <div style={{ marginTop: '0.75rem' }}>
+                                        <label style={{ fontSize: '0.78rem', fontWeight: '700', color: mutedCol, display: 'block', marginBottom: '4px' }}>
+                                            Specify Other Document(s) *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            maxLength={200}
+                                            placeholder="Enter specified other document(s)"
+                                            value={editForm.otherDocument || ''}
+                                            onChange={e => setEditForm({ ...editForm, otherDocument: e.target.value })}
+                                            style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: `1px solid ${editErrors.otherDocument ? '#ef4444' : borderCol}`, background: cardBg, color: textCol }}
+                                        />
+                                        {editErrors.otherDocument && <small style={{ color: '#ef4444' }}>{editErrors.otherDocument}</small>}
+                                    </div>
+                                )}
                             </div>
 
                             <div>
