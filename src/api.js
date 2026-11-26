@@ -12,7 +12,7 @@ const resolveApiBaseUrl = () => {
             if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
                 return envUrl.replace(/\/+$/, '');
             }
-            return 'https://api.ecetonline.com';
+            return 'https://api.easacollege.com';
         }
 
         // On localhost:
@@ -22,7 +22,7 @@ const resolveApiBaseUrl = () => {
         return 'http://localhost:5000';
     }
 
-    return envUrl && !envUrl.includes('localhost') ? envUrl.replace(/\/+$/, '') : 'https://api.ecetonline.com';
+    return envUrl && !envUrl.includes('localhost') ? envUrl.replace(/\/+$/, '') : 'https://api.easacollege.com';
 };
 
 const API_BASE_URL = resolveApiBaseUrl();
@@ -183,7 +183,7 @@ function createCachedResponse(data) {
         },
         json: async () => (typeof data === 'object' && data !== null ? data : JSON.parse(jsonStr)),
         text: async () => jsonStr,
-        clone: function() { return this; }
+        clone: function () { return this; }
     };
 }
 
@@ -191,7 +191,7 @@ function createCachedResponse(data) {
 export function preloadApi(url) {
     if (typeof window === 'undefined') return;
     const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-    fetch(fullUrl).catch(() => {});
+    fetch(fullUrl).catch(() => { });
 }
 
 // Enhanced fetch wrapper with caching, SWR, request deduplication & format safety
@@ -244,7 +244,7 @@ export async function apiFetch(input, init) {
             .then(freshData => {
                 if (freshData) setCachedEntry(cacheKey, freshData);
             })
-            .catch(() => {});
+            .catch(() => { });
         // Return stale instantly for zero-wait UI
         return createCachedResponse(cached.data);
     }
@@ -300,7 +300,7 @@ const originalFetch = (typeof window !== 'undefined' && window.fetch)
 
 if (typeof window !== 'undefined' && !window.__easa_fetch_optimized__) {
     window.__easa_fetch_optimized__ = true;
-    window.fetch = function(input, init) {
+    window.fetch = function (input, init) {
         const urlStr = typeof input === 'string' ? input : (input?.url || '');
         // Intercept calls targeting our API
         if (urlStr.includes('/api/')) {
@@ -321,7 +321,7 @@ if (typeof window !== 'undefined' && !window.__easa_fetch_optimized__) {
     if (API_BASE_URL && API_BASE_URL.startsWith('http')) {
         setTimeout(() => {
             try {
-                originalFetch(`${API_BASE_URL}/api/health`, { cache: 'no-store' }).catch(() => {});
+                originalFetch(`${API_BASE_URL}/api/health`, { cache: 'no-store' }).catch(() => { });
             } catch {
                 // Ignore background pre-warm errors
             }

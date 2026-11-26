@@ -3315,7 +3315,7 @@ const resourcesData = [
         title: "Autonomous Regulations Handbook",
         category: "Regulations",
         description: "Official handbook detailing the academic policies, curriculum structure, and examination rules under the autonomous system.",
-        fileUrl: "https://api.ecetonline.com//docs/autonomous_regulations.pdf",
+        fileUrl: "https://api.easacollege.com//docs/autonomous_regulations.pdf",
         date: new Date()
     },
     {
