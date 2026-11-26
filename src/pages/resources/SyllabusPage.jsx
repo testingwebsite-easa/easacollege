@@ -13,6 +13,12 @@ import collegeLogo from '../../assets/Logo - Blue.webp';
 
 import { SYLLABUS_DATA, GENERIC_FIRST_YEAR, getDetailedSyllabusForSubject } from '../../data/syllabusData';
 import { sanitizeCoPoMapping, sortSubjectsByCode } from '../../utils/coPoMappingUtils';
+import {
+    CURRICULUM_11_COLGROUP,
+    CURRICULUM_10_COLGROUP,
+    buildCurriculumTableHeadRows,
+    buildLanguageElectiveBlockHTML
+} from '../../utils/curriculumTableTemplate';
 
 const getRomanNumeral = (num) => {
     const roman = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -2058,24 +2064,9 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 </h3>
                 
                 <table class="curriculum-table">
+                    ${CURRICULUM_11_COLGROUP}
                     <thead>
-                        <tr>
-                            <th rowSpan="2" style="width: 11%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
-                            <th rowSpan="2" style="width: 35%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course</th>
-                            <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Category</th>
-                            <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
-                            <th colSpan="3" style="width: 21%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
-                        </tr>
-                        <tr>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
-                        </tr>
+                        ${buildCurriculumTableHeadRows({ includeCategory: true, titleLabel: 'Course' })}
                     </thead>
                     <tbody>
                         ${theoryCourses.length > 0 ? `
@@ -2136,73 +2127,9 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                     </tbody>
                 </table>
 
-                ${languageElective1.length > 0 ? `
-                <div class="lang-elective-block" style="margin-top: 6px; page-break-inside: avoid;">
-                    <table class="curriculum-table" style="margin-top: 0; margin-bottom: 4px;">
-                        <thead>
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 3px 6px; border: 1.5px solid #000; text-transform: uppercase;">
-                                    LANGUAGE ELECTIVE – I
-                                </td>
-                            </tr>
-                            <tr>
-                                <th rowSpan="2" style="width: 11%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
-                                <th rowSpan="2" style="width: 35%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course</th>
-                                <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Category</th>
-                                <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
-                                <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
-                                <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
-                                <th colSpan="3" style="width: 21%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
-                            </tr>
-                            <tr>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${renderCourseRows(languageElective1)}
-                        </tbody>
-                    </table>
-                </div>
-                ` : ''}
+                ${languageElective1.length > 0 ? buildLanguageElectiveBlockHTML('LANGUAGE ELECTIVE – I', renderCourseRows(languageElective1)) : ''}
 
-                ${languageElective2.length > 0 ? `
-                <div class="lang-elective-block" style="margin-top: 6px; page-break-inside: avoid;">
-                    <table class="curriculum-table" style="margin-top: 0; margin-bottom: 4px;">
-                        <thead>
-                            <tr class="category-row">
-                                <td colSpan="11" style="font-family: Arial, sans-serif; font-size: 8.5pt; font-weight: bold; background: #f2f2f2; text-align: left; padding: 3px 6px; border: 1.5px solid #000; text-transform: uppercase;">
-                                    LANGUAGE ELECTIVE – II
-                                </td>
-                            </tr>
-                            <tr>
-                                <th rowSpan="2" style="width: 11%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
-                                <th rowSpan="2" style="width: 35%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course</th>
-                                <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Category</th>
-                                <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
-                                <th rowSpan="2" style="width: 9%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
-                                <th rowSpan="2" style="width: 7%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
-                                <th colSpan="3" style="width: 21%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
-                            </tr>
-                            <tr>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
-                                <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${renderCourseRows(languageElective2)}
-                        </tbody>
-                    </table>
-                </div>
-                ` : ''}
+                ${languageElective2.length > 0 ? buildLanguageElectiveBlockHTML('LANGUAGE ELECTIVE – II', renderCourseRows(languageElective2)) : ''}
             </div>
         `;
     };
@@ -2465,10 +2392,12 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
             }
             table.curriculum-table th, table.curriculum-table td {
                 border: 1px solid #000;
-                padding: 3px 2px;
+                padding: 3px 4px;
                 text-align: left;
                 vertical-align: middle;
                 box-sizing: border-box;
+                word-break: normal;
+                overflow-wrap: break-word;
             }
             table.curriculum-table th {
                 font-weight: bold;
@@ -2882,23 +2811,9 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 </h3>
                 
                 <table class="curriculum-table">
+                    ${CURRICULUM_10_COLGROUP}
                     <thead>
-                        <tr>
-                            <th rowSpan="2" style="width: 12%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
-                            <th rowSpan="2" style="width: 38%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course Title</th>
-                            <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 8%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
-                            <th colSpan="3" style="width: 22%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
-                        </tr>
-                        <tr>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
-                        </tr>
+                        ${buildCurriculumTableHeadRows({ includeCategory: false, titleLabel: 'Course Title' })}
                     </thead>
                     <tbody>
                         ${(() => {
@@ -2951,23 +2866,9 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 </h3>
                 
                 <table class="curriculum-table">
+                    ${CURRICULUM_10_COLGROUP}
                     <thead>
-                        <tr>
-                            <th rowSpan="2" style="width: 12%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Course Code</th>
-                            <th rowSpan="2" style="width: 38%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle;">Course Title</th>
-                            <th colSpan="3" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Periods / Week</th>
-                            <th rowSpan="2" style="width: 10%; font-size: 8pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; line-height: 1.15;">Total Contact Periods</th>
-                            <th rowSpan="2" style="width: 8%; font-size: 8.5pt; font-family: Arial, sans-serif; text-align: center; vertical-align: middle; white-space: nowrap;">Credit</th>
-                            <th colSpan="3" style="width: 22%; font-size: 8pt; font-family: Arial, sans-serif; padding: 2px; text-align: center; vertical-align: middle; white-space: nowrap;">Marks</th>
-                        </tr>
-                        <tr>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">L</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">T</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">P</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">CIA</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">ESE</th>
-                            <th style="font-size: 7.5pt; font-family: Arial, sans-serif; padding: 2px 1px; text-align: center; white-space: nowrap;">Total</th>
-                        </tr>
+                        ${buildCurriculumTableHeadRows({ includeCategory: false, titleLabel: 'Course Title' })}
                     </thead>
                     <tbody>
                         ${(() => {
@@ -3874,13 +3775,13 @@ const SyllabusPage = () => {
                                             <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
                                                 <thead style={{ background: 'transparent' }}>
                                                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '11%', whiteSpace: 'nowrap' }}>Course Code</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '35%' }}>Course Title</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '7%', whiteSpace: 'nowrap' }}>Category</th>
-                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '10%', whiteSpace: 'nowrap' }}>Periods per Week</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '12%', whiteSpace: 'nowrap' }}>Course Code</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
+                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '9%', whiteSpace: 'nowrap' }}>Category</th>
+                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '12%', whiteSpace: 'nowrap' }}>Periods per Week</th>
                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Total Contact Periods</th>
                                                         <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '7%', whiteSpace: 'nowrap' }}>Credit</th>
-                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '21%', whiteSpace: 'nowrap' }}>Marks</th>
+                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '19%', whiteSpace: 'nowrap' }}>Marks</th>
                                                     </tr>
                                                     <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
                                                         <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>L</th>
@@ -3973,8 +3874,8 @@ const SyllabusPage = () => {
                                                         <thead style={{ background: 'transparent' }}>
                                                             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
                                                                 <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '12%', whiteSpace: 'nowrap' }}>Course Code</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '38%' }}>Course Title</th>
-                                                                <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '10%', whiteSpace: 'nowrap' }}>Periods per Week</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '36%' }}>Course Title</th>
+                                                                <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '12%', whiteSpace: 'nowrap' }}>Periods per Week</th>
                                                                 <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
                                                                 <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '8%', whiteSpace: 'nowrap' }}>Credit</th>
                                                                 <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '22%', whiteSpace: 'nowrap' }}>Marks</th>
@@ -4038,8 +3939,8 @@ const SyllabusPage = () => {
                                                     <thead style={{ background: 'transparent' }}>
                                                         <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
                                                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '12%', whiteSpace: 'nowrap' }}>Course Code</th>
-                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '38%' }}>Course Title</th>
-                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '10%', whiteSpace: 'nowrap' }}>Periods per Week</th>
+                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '36%' }}>Course Title</th>
+                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '12%', whiteSpace: 'nowrap' }}>Periods per Week</th>
                                                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
                                                             <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '8%', whiteSpace: 'nowrap' }}>Credit</th>
                                                             <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '22%', whiteSpace: 'nowrap' }}>Marks</th>

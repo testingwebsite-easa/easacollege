@@ -13,7 +13,6 @@ import BannerPagePopup from '../components/BannerPagePopup';
 
 const ProgramsSection = lazy(() => import('../components/ProgramsSection'))
 const PlacementSection = lazy(() => import('../components/PlacementSection'))
-const AlumniTalkSection = lazy(() => import('../components/AlumniTalkSection'))
 const ForeignLanguageSection = lazy(() => import('../components/ForeignLanguageSection'))
 const NewsEventsSection = lazy(() => import('../components/NewsEventsSection'))
 const HomeGalleryButton = lazy(() => import('../components/HomeGalleryButton'))
@@ -49,7 +48,6 @@ function Home() {
             <Suspense fallback={<div style={{ minHeight: '100px' }} />}>
                 <PlacementSection />
                 <ForeignLanguageSection />
-                <AlumniTalkSection />
                 <NewsEventsSection />
                 <HomeGalleryButton />
                 <ProgramsSection />

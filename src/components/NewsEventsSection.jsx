@@ -11,7 +11,6 @@ import {
     FaArrowRight,
     FaFilePdf,
     FaBell,
-    FaFire,
     FaChevronLeft,
     FaChevronRight
 } from 'react-icons/fa';
@@ -361,34 +360,6 @@ const NewsEventsSection = () => {
 
             <div className="news-main-container">
 
-                {/* 1. TOP LIVE TICKER TAPE (FAST SMOOTH MARQUEE) */}
-                <div className="breaking-ticker-tape">
-                    <div className="ticker-label">
-                        <FaFire className="ticker-fire-icon" />
-                        <span>CAMPUS LIVE</span>
-                    </div>
-                    <div className="ticker-marquee-wrapper">
-                        <div className="ticker-marquee-track">
-                            {newsData.concat(newsData).map((item, idx) => {
-                                const dObj = formatDate(item.date);
-                                return (
-                                    <div
-                                        key={`ticker-${idx}`}
-                                        className="ticker-item"
-                                        onClick={() => setSelectedItem(item)}
-                                    >
-                                        <span className="ticker-item-dot">•</span>
-                                        <span className="ticker-item-cat">[{item.category || 'UPDATE'}]</span>
-                                        <span className="ticker-item-title">{item.title}</span>
-                                        {item.time && <span className="ticker-item-time">⏰ {item.time}</span>}
-                                        <span className="ticker-item-date">({dObj.full})</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-
                 {/* 2. SECTION HEADER */}
                 <div className="news-header-center">
                     <motion.div
@@ -398,10 +369,6 @@ const NewsEventsSection = () => {
                         transition={{ duration: 0.4 }}
                         className="news-pill-tag"
                     >
-                        <span className="live-radar-ping">
-                            <span className="ping-wave"></span>
-                            <span className="ping-dot"></span>
-                        </span>
                         <span>CAMPUS PULSE & HAPPENINGS</span>
                     </motion.div>
 
@@ -412,7 +379,7 @@ const NewsEventsSection = () => {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="news-heading-title"
                     >
-                        News, Circulars & <span className="gold-shimmer-text">Live Events</span>
+                        Campus Buzz, Breakthroughs & <span className="gold-shimmer-text">Live Moments</span>
                     </motion.h2>
 
                     <motion.p
@@ -709,110 +676,6 @@ const NewsEventsSection = () => {
                     z-index: 2;
                 }
 
-                /* 1. TOP BREAKING TICKER */
-                .breaking-ticker-tape {
-                    display: flex;
-                    align-items: center;
-                    background: rgba(17, 24, 39, 0.7);
-                    backdrop-filter: blur(12px);
-                    border: 1px solid rgba(252, 202, 38, 0.25);
-                    border-radius: 50px;
-                    padding: 4px 12px 4px 5px;
-                    margin-bottom: 2.25rem;
-                    overflow: hidden;
-                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-                }
-
-                .ticker-label {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 6px;
-                    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
-                    color: #FFFFFF;
-                    font-size: 0.72rem;
-                    font-weight: 900;
-                    letter-spacing: 0.8px;
-                    padding: 5px 12px;
-                    border-radius: 50px;
-                    flex-shrink: 0;
-                    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.4);
-                }
-
-                .ticker-fire-icon {
-                    color: #FEE2E2;
-                    animation: flamePulse 1.2s infinite alternate;
-                }
-
-                @keyframes flamePulse {
-                    from { transform: scale(1); }
-                    to { transform: scale(1.2); }
-                }
-
-                .ticker-marquee-wrapper {
-                    flex-grow: 1;
-                    overflow: hidden;
-                    margin-left: 12px;
-                    mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
-                    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
-                }
-
-                .ticker-marquee-track {
-                    display: flex;
-                    align-items: center;
-                    gap: 28px;
-                    white-space: nowrap;
-                    animation: tickerSlide 22s linear infinite;
-                }
-
-                .ticker-marquee-track:hover {
-                    animation-play-state: paused;
-                }
-
-                @keyframes tickerSlide {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-50%); }
-                }
-
-                .ticker-item {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 7px;
-                    font-size: 0.82rem;
-                    color: #E2E8F0;
-                    cursor: pointer;
-                    transition: color 0.2s ease;
-                }
-
-                .ticker-item:hover {
-                    color: #FCCA26;
-                }
-
-                .ticker-item-dot {
-                    color: #FCCA26;
-                    font-size: 0.9rem;
-                }
-
-                .ticker-item-cat {
-                    color: #93C5FD;
-                    font-weight: 700;
-                    font-size: 0.72rem;
-                }
-
-                .ticker-item-title {
-                    font-weight: 600;
-                }
-
-                .ticker-item-time {
-                    color: #FCCA26;
-                    font-size: 0.72rem;
-                    font-weight: 700;
-                }
-
-                .ticker-item-date {
-                    color: #64748B;
-                    font-size: 0.72rem;
-                }
-
                 /* 2. SECTION HEADER */
                 .news-header-center {
                     text-align: center;
@@ -833,36 +696,6 @@ const NewsEventsSection = () => {
                     letter-spacing: 1px;
                     text-transform: uppercase;
                     margin-bottom: 0.85rem;
-                }
-
-                .live-radar-ping {
-                    position: relative;
-                    width: 10px;
-                    height: 10px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .ping-dot {
-                    width: 6px;
-                    height: 6px;
-                    background: #10B981;
-                    border-radius: 50%;
-                    box-shadow: 0 0 6px #10B981;
-                }
-
-                .ping-wave {
-                    position: absolute;
-                    inset: -3px;
-                    border-radius: 50%;
-                    border: 1.5px solid #10B981;
-                    animation: radarPing 1.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-                }
-
-                @keyframes radarPing {
-                    0% { transform: scale(0.5); opacity: 1; }
-                    100% { transform: scale(2.2); opacity: 0; }
                 }
 
                 .news-heading-title {

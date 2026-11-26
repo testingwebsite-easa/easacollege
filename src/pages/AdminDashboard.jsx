@@ -259,6 +259,7 @@ const AdminDashboard = () => {
     const [counselingList, setCounselingList] = useState([]); // Career / Higher Ed Counseling
     const [startupPitches, setStartupPitches] = useState([]); // Startup EDC Pitches
     const [pacFeedbacks, setPacFeedbacks] = useState([]); // PAC Feedback
+    const [partnerConnects, setPartnerConnects] = useState([]); // SDG Partner Connect
     const [newsletterSubscribers, setNewsletterSubscribers] = useState([]); // Newsletter Subscribers
     const [sdgs, setSdgs] = useState([]); // SDG Goals & Images
     const [sdgFilter, setSdgFilter] = useState('all');
@@ -419,12 +420,29 @@ const AdminDashboard = () => {
                 const data = await res.json();
 
                 // Safety check for list-based data to prevent crashes if API returns object/error
-                if (['scholarships', 'instituteMilestones', 'life-of-EASA', 'careers', 'research-items', 'gallery', 'placement', 'news', 'programs', 'management', 'sessions', 'research-courses', 'beliefs', 'departments', 'leadership', 'administration', 'governance', 'chairperson', 'secretary', 'correspondent', 'principal', 'deans', 'founder', 'pages', 'alumni', 'enquiries', 'users', 'job-applications', 'counseling', 'startup-pitches', 'pac-feedback', 'partner-connect', 'newsletter'].includes(tab) || tab === 'milestones') {
+                if ([
+                    'admissions', 'scholarships', 'hero', 'about', 'programs', 'news', 'placement',
+                    'gallery', 'beliefs', 'research-courses', 'departments', 'resources',
+                    'research-items', 'careers', 'life-of-EASA', 'milestones', 'instituteMilestones',
+                    'pages', 'alumni', 'enquiries', 'ticker-alerts', 'pageHeroes', 'video-gallery',
+                    'grievances', 'moments', 'advice', 'sports', 'users', 'job-applications',
+                    'counseling', 'startup-pitches', 'pac-feedback', 'partner-connect', 'newsletter',
+                    'sdgs', 'sessions', 'management', 'leadership', 'administration', 'governance',
+                    'chairperson', 'secretary', 'correspondent', 'principal', 'deans', 'founder'
+                ].includes(tab)) {
                     if (!Array.isArray(data)) {
                         console.error(`Expected array for ${tab} but received:`, data);
                         setter([]);
                         return;
                     }
+                }
+
+                if (tab === 'mission') {
+                    setter({
+                        vision: data?.vision || '',
+                        mission: Array.isArray(data?.mission) ? data.mission : []
+                    });
+                    return;
                 }
 
                 setter(data);
@@ -949,13 +967,13 @@ const AdminDashboard = () => {
 
     const addMissionPoint = () => {
         if (!missionForm.point) return;
-        const updated = { ...missionVision, mission: [...missionVision.mission, missionForm.point] };
+        const updated = { ...missionVision, mission: [...(missionVision?.mission || []), missionForm.point] };
         handleUpdateMissionVision(updated);
         setMissionForm({ point: '' });
     };
 
     const deleteMissionPoint = (index) => {
-        const updated = { ...missionVision, mission: missionVision.mission.filter((_, i) => i !== index) };
+        const updated = { ...missionVision, mission: (missionVision?.mission || []).filter((_, i) => i !== index) };
         handleUpdateMissionVision(updated);
     };
 
@@ -2884,8 +2902,8 @@ const AdminDashboard = () => {
                                         <h2 style={{ marginBottom: '1rem' }}>Vision Statement</h2>
                                         <div style={{ display: 'flex', gap: '1rem' }}>
                                             <textarea
-                                                value={missionVision.vision}
-                                                onChange={(e) => setMissionVision({ ...missionVision, vision: e.target.value })}
+                                                value={missionVision?.vision || ''}
+                                                onChange={(e) => setMissionVision({ ...(missionVision || { mission: [] }), vision: e.target.value })}
                                                 style={{ width: '100%', padding: '1rem', borderRadius: '8px', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', minHeight: '100px' }}
                                             />
                                             <button
@@ -2912,7 +2930,7 @@ const AdminDashboard = () => {
                                             <button onClick={addMissionPoint} className="btn btn-primary">Add</button>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                            {missionVision.mission.map((m, i) => (
+                                            {(missionVision?.mission || []).map((m, i) => (
                                                 <div key={i} style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <span>{m}</span>
                                                     <button onClick={() => deleteMissionPoint(i)} style={{ color: '#ff4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>×</button>
@@ -3528,7 +3546,7 @@ const AdminDashboard = () => {
                                                                     background: item.type === 'danger' ? 'rgba(239, 68, 68, 0.2)' : item.type === 'warning' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(59, 130, 246, 0.2)',
                                                                     color: item.type === 'danger' ? '#ef4444' : item.type === 'warning' ? '#f59e0b' : '#3b82f6'
                                                                 }}>
-                                                                    {item.type.toUpperCase()}
+                                                                    {String(item.type || 'info').toUpperCase()}
                                                                 </span>
                                                             </td>
                                                             <td style={{ padding: '1rem' }}>{item.isActive ? 'Active' : 'Inactive'}</td>
