@@ -5,10 +5,6 @@ const mongoose = require('mongoose');
 // Assuming Schemas is imported where DepartmentData is exported
 const { DepartmentData } = require('../models/Schemas');
 const { getDepartmentDetails } = require('../controllers/departmentController');
-const { parseSyllabusWordDoc } = require('../services/syllabusParser');
-const { parseSyllabusExcelDoc } = require('../services/excelSyllabusParser');
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 
 // Middleware for auth
 const { verifyToken } = require('./auth');
@@ -88,46 +84,6 @@ function sanitizeCoPoMapping(coPoMapping, outcomes, poCount = 11, psoCount = 3) 
         return mapObj;
     });
 }
-
-// POST /api/departments/scan-syllabus-word - Scan and parse Word (.docx) syllabus files
-router.post('/scan-syllabus-word', upload.single('file'), async (req, res) => {
-    try {
-        if (!req.file || !req.file.buffer) {
-            return res.status(400).json({ error: 'Please upload a valid Word document (.docx)' });
-        }
-        const fileName = (req.file.originalname || '').toLowerCase();
-        let result;
-        if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv')) {
-            result = await parseSyllabusExcelDoc(req.file.buffer);
-        } else {
-            result = await parseSyllabusWordDoc(req.file.buffer);
-        }
-        if (!result.success) {
-            return res.status(422).json({ error: result.error || 'Failed to parse syllabus document' });
-        }
-        res.json(result);
-    } catch (err) {
-        console.error('Word syllabus scan error:', err);
-        res.status(500).json({ error: 'Server error while processing Word document: ' + err.message });
-    }
-});
-
-// POST /api/departments/scan-syllabus-excel - Scan and parse Excel (.xlsx, .xls, .csv) syllabus files
-router.post('/scan-syllabus-excel', upload.single('file'), async (req, res) => {
-    try {
-        if (!req.file || !req.file.buffer) {
-            return res.status(400).json({ error: 'Please upload a valid Excel spreadsheet (.xlsx, .xls, .csv)' });
-        }
-        const result = await parseSyllabusExcelDoc(req.file.buffer);
-        if (!result.success) {
-            return res.status(422).json({ error: result.error || 'Failed to parse Excel spreadsheet' });
-        }
-        res.json(result);
-    } catch (err) {
-        console.error('Excel syllabus scan error:', err);
-        res.status(500).json({ error: 'Server error while processing Excel file: ' + err.message });
-    }
-});
 
 // In-memory cache for master courses
 let masterCoursesCache = { data: null, expiresAt: 0 };

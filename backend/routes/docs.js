@@ -348,22 +348,6 @@ const routesCatalog = [
     },
     {
         category: "Academics & Departments",
-        method: "POST",
-        path: "/api/departments/scan-syllabus-word",
-        auth: "Admin / JWT",
-        description: "Upload and parse a Word (.docx) curriculum syllabus file automatically into structured course units.",
-        requestBody: "multipart/form-data: file (.docx)"
-    },
-    {
-        category: "Academics & Departments",
-        method: "POST",
-        path: "/api/departments/scan-syllabus-excel",
-        auth: "Admin / JWT",
-        description: "Upload and parse an Excel (.xlsx) syllabus / CO-PO mapping sheet.",
-        requestBody: "multipart/form-data: file (.xlsx)"
-    },
-    {
-        category: "Academics & Departments",
         method: "GET",
         path: "/api/departments/all/master-courses",
         auth: "Public",
