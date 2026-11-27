@@ -8,8 +8,16 @@ import {
     CURRICULUM_11_COLGROUP,
     CURRICULUM_10_COLGROUP,
     buildCurriculumTableHeadRows,
-    buildLanguageElectiveBlockHTML
+    buildLanguageElectiveBlockHTML,
+    isMBADepartment,
+    classifyMbaSemesterCourses,
+    classifyMbaSubjectCategory,
+    buildMbaSemesterSectionHTML,
+    buildMbaPecSectionHTML,
+    buildMbaCreditDistributionHTML,
+    withMbaDefaultElectivesIfMissing
 } from '../utils/curriculumTableTemplate';
+import MbaCreditSummary from './MbaCreditSummary';
 import collegeLogo from '../assets/EASA College Logo.webp';
 import API_BASE_URL from '../api';
 
@@ -102,8 +110,11 @@ const renderPieChart = (categories, rowTotals, grandTotal) => {
     );
 };
 
-const renderCreditDistributionTable = (subjects) => {
+const renderCreditDistributionTable = (subjects, isMBA = false, deptName = '') => {
     if (!subjects || subjects.length === 0) return null;
+    if (isMBA) {
+        return <MbaCreditSummary subjects={subjects} deptName={deptName} />;
+    }
 
     const hasIPR = (subjects || []).some(s => (s.categoryType || '').toUpperCase() === 'IPR' || (s.category || '').toUpperCase().includes('IPR') || (s.category || '').toUpperCase().includes('RESEARCH METHODOLOGY'));
     const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC'];
@@ -707,6 +718,18 @@ const getPdfPaginationScript = (maxContentHeightMm, startPageNum) => `
 
 const getCreditDistributionHTML = (subjects, pageTracker, bosMeetingDate, acMeetingDate, degreePrefix, deptName, regYear) => {
     const pageNum = ++pageTracker.current;
+    if (isMBADepartment(deptName, degreePrefix)) {
+        return buildMbaCreditDistributionHTML({
+            rawSubjects: subjects,
+            pageNum,
+            bosMeetingDate,
+            acMeetingDate,
+            degreePrefix,
+            deptName,
+            regYear,
+            formatDeptHeaderTitle
+        });
+    }
     const isPG = (degreePrefix || '').toUpperCase().includes('M.') || (deptName || '').toUpperCase().includes('M.E.') || (deptName || '').toUpperCase().includes('M.TECH');
     const hasIPR = isPG || (subjects || []).some(s => (s.categoryType || '').toUpperCase() === 'IPR' || (s.category || '').toUpperCase().includes('IPR') || (s.category || '').toUpperCase().includes('RESEARCH METHODOLOGY'));
     const categories = ['HUM', 'BSC', 'ESC', 'PCC', 'PEC', 'NFE', 'OEC', 'EEC', 'MC'];
@@ -1802,8 +1825,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         degreePrefix = techSlugs.includes(deptData.slug || '') ? 'B.Tech.' : 'B.E.';
     }
 
+    const isMBA = isMBADepartment(deptData, degreePrefix) || isMBADepartment(deptName, degreePrefix);
+    const effectiveSubjects = isMBA ? withMbaDefaultElectivesIfMissing(subjects) : subjects;
+
     // Group subjects by semester (excluding vertical and open elective subjects)
-    const semestersGrouped = subjects.filter(s => !s.vertical && !s.isOpenElective).reduce((acc, subj) => {
+    const isPecTrackSubject = (s) => Boolean(s?.vertical) || (isMBA && Boolean(s?.verticalName && s.verticalName.trim() !== ''));
+
+    const semestersGrouped = effectiveSubjects.filter(s => !isPecTrackSubject(s) && !s.isOpenElective).reduce((acc, subj) => {
         const sem = subj.semester || 1;
         if (!acc[sem]) acc[sem] = [];
         acc[sem].push(subj);
@@ -1812,15 +1840,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     const sortedSemesters = Object.keys(semestersGrouped).sort((a, b) => Number(a) - Number(b));
 
-    // Group subjects by vertical
-    const verticalsGrouped = subjects.filter(s => s.vertical).reduce((acc, subj) => {
-        const vert = subj.vertical;
+    // Group subjects by vertical / MBA specialization stream
+    const verticalsGrouped = effectiveSubjects.filter(isPecTrackSubject).reduce((acc, subj) => {
+        const vert = subj.vertical || subj.verticalName;
         if (!acc[vert]) acc[vert] = [];
         acc[vert].push(subj);
         return acc;
     }, {});
 
-    const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => Number(a) - Number(b));
+    const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => {
+        const na = Number(a);
+        const nb = Number(b);
+        if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+        return String(a).localeCompare(String(b));
+    });
 
     // Helper to generate page header
     const getHeaderHTML = () => `
@@ -1844,6 +1877,14 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     // Helper to render semester table HTML
     const renderSemesterTableHTML = (semNum) => {
+        if (isMBA) {
+            return buildMbaSemesterSectionHTML({
+                semNum,
+                subjectsForSem: semestersGrouped[semNum] || [],
+                getRomanNumeral,
+                sortSubjectsByCode
+            });
+        }
         const subjectsForSem = sortSubjectsByCode((semestersGrouped[semNum] || []).filter(s => {
             if (!s) return false;
             const c = (s.code || '').trim().toUpperCase();
@@ -2659,18 +2700,19 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <h2 style="font-size: 10.5pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.35; margin-top: 2px;">
                     REGULATION – ${regYear.replace('R-', '')}<br>
                     CHOICE BASED CREDIT SYSTEM<br>
-                    CURRICULUM
+                    ${isMBA ? 'I TO IV SEMESTERS CURRICULUM' : 'CURRICULUM'}
                 </h2>
             </div>
             
             ${sortedSemesters.map(semNum => renderSemesterTableHTML(semNum)).join('')}
+            ${isMBA && sortedVerticals.length > 0 ? buildMbaPecSectionHTML({ sortedVerticals, verticalsGrouped, sortSubjectsByCode, getRomanNumeral }) : ''}
             
             ${getFooterHTML(++pageTracker.current)}
         </div>
         ` : ''}
 
         <!-- PROFESSIONAL ELECTIVES PAGE -->
-        ${sortedVerticals.length > 0 ? `
+        ${!isMBA && sortedVerticals.length > 0 ? `
         <div class="page">
             ${getHeaderHTML()}
             
@@ -3664,6 +3706,8 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
 
     // State for managing syllabus details
     const [selectedSyllabusSubjectIndex, setSelectedSyllabusSubjectIndex] = useState(null);
+    const [selectedSyllabusFallbackSubject, setSelectedSyllabusFallbackSubject] = useState(null);
+    const [editingFallbackCode, setEditingFallbackCode] = useState(null);
     const [syllabusEditValue, setSyllabusEditValue] = useState(null);
     const [activeSyllabusTab, setActiveSyllabusTab] = useState('objectives-outcomes');
 
@@ -3671,9 +3715,52 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
         return localStorage.getItem('authToken') || localStorage.getItem('admin_token') || localStorage.getItem('token') || (user && user.token);
     };
 
-    const handleStartManageSyllabus = (originalIndex) => {
-        const subj = data.subjects[originalIndex];
-        setSelectedSyllabusSubjectIndex(originalIndex);
+    /**
+     * Promotes default MBA catalog subjects into the persisted subjects array when an admin
+     * customizes or deletes a catalog entry, while keeping all existing DB subjects untouched.
+     */
+    const materializeCatalogSubjects = (currentSubjects, replacementSubj = null, excludeCode = null) => {
+        const enriched = withMbaDefaultElectivesIfMissing(currentSubjects || []);
+        let cleanReplacement = null;
+        if (replacementSubj) {
+            cleanReplacement = { ...replacementSubj, creatorDept: replacementSubj.creatorDept || selectedDept };
+            delete cleanReplacement.isCatalogFallback;
+        }
+        const excludeUpper = excludeCode ? String(excludeCode).trim().toUpperCase() : null;
+        const replaceTargetUpper = excludeUpper || (cleanReplacement ? String(cleanReplacement.code || '').trim().toUpperCase() : null);
+
+        const nextList = [];
+        let inserted = false;
+
+        enriched.forEach(item => {
+            const codeU = String(item?.code || '').trim().toUpperCase();
+            if (item.isCatalogFallback) {
+                if (replaceTargetUpper && codeU === replaceTargetUpper) {
+                    if (cleanReplacement && !inserted) {
+                        nextList.push(cleanReplacement);
+                        inserted = true;
+                    }
+                    return;
+                }
+                const copy = { ...item, creatorDept: item.creatorDept || selectedDept };
+                delete copy.isCatalogFallback;
+                nextList.push(copy);
+            } else {
+                nextList.push(item);
+            }
+        });
+
+        if (cleanReplacement && !inserted) {
+            nextList.push(cleanReplacement);
+        }
+        return nextList;
+    };
+
+    const handleStartManageSyllabus = (subjOrIndex) => {
+        const isCatalogObj = typeof subjOrIndex === 'object' && subjOrIndex !== null;
+        const subj = isCatalogObj ? subjOrIndex : data.subjects[subjOrIndex];
+        setSelectedSyllabusSubjectIndex(isCatalogObj ? -1 : subjOrIndex);
+        setSelectedSyllabusFallbackSubject(isCatalogObj ? { ...subjOrIndex } : null);
 
         const prefilledMapping = sanitizeCoPoMapping(
             subj.coPoMapping,
@@ -3727,7 +3814,8 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
         if (!syllabusEditValue) return;
 
         const originalIndex = selectedSyllabusSubjectIndex;
-        const currentSubject = data.subjects[originalIndex];
+        const isCatalog = originalIndex === -1;
+        const currentSubject = isCatalog ? selectedSyllabusFallbackSubject : data.subjects[originalIndex];
 
         // Permission check: only creator department or admin can update syllabus content
         const isCreator = !currentSubject?.creatorDept || currentSubject?.creatorDept === selectedDept || isAdmin;
@@ -3738,12 +3826,14 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                 type: 'warning'
             });
             setSelectedSyllabusSubjectIndex(null);
+            setSelectedSyllabusFallbackSubject(null);
             setSyllabusEditValue(null);
             return;
         }
 
         const updatedSubject = {
             ...currentSubject,
+            creatorDept: currentSubject?.creatorDept || selectedDept,
             subtitle: syllabusEditValue.subtitle,
             categoryName: syllabusEditValue.categoryName,
             prerequisites: syllabusEditValue.prerequisites,
@@ -3764,15 +3854,22 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                 (data.pso && data.pso.length > 0) ? data.pso.length : 3
             )
         };
+        delete updatedSubject.isCatalogFallback;
 
-        const updatedSubjects = [...data.subjects];
-        updatedSubjects[originalIndex] = updatedSubject;
+        let updatedSubjects;
+        if (isCatalog) {
+            updatedSubjects = materializeCatalogSubjects(data.subjects, updatedSubject, currentSubject?.code);
+        } else {
+            updatedSubjects = [...data.subjects];
+            updatedSubjects[originalIndex] = updatedSubject;
+        }
 
         const updatedData = { ...data, subjects: updatedSubjects };
         const success = await updateBackend(updatedData);
 
         if (success) {
             setSelectedSyllabusSubjectIndex(null);
+            setSelectedSyllabusFallbackSubject(null);
             setSyllabusEditValue(null);
         }
     };
@@ -3898,13 +3995,21 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
         }
     };
 
-    const handleStartEditSubject = (originalIndex) => {
-        setEditingSubjectIndex(originalIndex);
-        setEditingSubjectValue({ ...data.subjects[originalIndex] });
+    const handleStartEditSubject = (subjOrIndex) => {
+        if (typeof subjOrIndex === 'object' && subjOrIndex !== null) {
+            setEditingSubjectIndex(-1);
+            setEditingFallbackCode(subjOrIndex.code || null);
+            setEditingSubjectValue({ ...subjOrIndex });
+            return;
+        }
+        setEditingSubjectIndex(subjOrIndex);
+        setEditingFallbackCode(null);
+        setEditingSubjectValue({ ...data.subjects[subjOrIndex] });
     };
 
     const handleCancelEditSubject = () => {
         setEditingSubjectIndex(null);
+        setEditingFallbackCode(null);
         setEditingSubjectValue(null);
     };
 
@@ -3990,14 +4095,20 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
             };
         }
 
-        const updatedSubjects = [...data.subjects];
-        updatedSubjects[editingSubjectIndex] = updatedSubj;
+        let updatedSubjects;
+        if (editingSubjectIndex === -1) {
+            updatedSubjects = materializeCatalogSubjects(data.subjects, updatedSubj, editingFallbackCode || editingSubjectValue.code);
+        } else {
+            updatedSubjects = [...data.subjects];
+            updatedSubjects[editingSubjectIndex] = updatedSubj;
+        }
 
         const updatedData = { ...data, subjects: updatedSubjects };
         const success = await updateBackend(updatedData);
 
         if (success) {
             setEditingSubjectIndex(null);
+            setEditingFallbackCode(null);
             setEditingSubjectValue(null);
             fetchMasterCourses();
         }
@@ -4116,8 +4227,9 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
         }
     };
 
-    const handleDeleteSubject = (index) => {
-        const subj = data.subjects && data.subjects[index];
+    const handleDeleteSubject = (subjOrIndex) => {
+        const isCatalogObj = typeof subjOrIndex === 'object' && subjOrIndex !== null;
+        const subj = isCatalogObj ? subjOrIndex : (data.subjects && data.subjects[subjOrIndex]);
         const isCreator = !subj?.creatorDept || subj.creatorDept === selectedDept || isAdmin;
         const creatorName = subj?.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
 
@@ -4133,8 +4245,13 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
             confirmText: isCreator ? 'Delete' : 'Remove',
             cancelText: 'Cancel',
             onConfirm: async () => {
-                const newArray = [...(data.subjects || [])];
-                newArray.splice(index, 1);
+                let newArray;
+                if (isCatalogObj) {
+                    newArray = materializeCatalogSubjects(data.subjects || [], null, subj.code);
+                } else {
+                    newArray = [...(data.subjects || [])];
+                    newArray.splice(subjOrIndex, 1);
+                }
                 const updatedData = { ...data, subjects: newArray };
                 await updateBackend(updatedData);
             }
@@ -4830,10 +4947,14 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                             ) : (
                                 <div style={{ marginBottom: '2rem' }}>
                                     {(() => {
-                                        const subjectsWithIndex = (data.subjects || []).map((subj, idx) => ({ ...subj, originalIndex: idx }));
+                                        const activeAdminDept = staticDepartments.find(d => d.slug === selectedDept);
+                                        const isMBA = isMBADepartment(activeAdminDept || selectedDept) || isMBADepartment(data?.name);
+                                        const rawSubjectsWithIndex = (data.subjects || []).map((subj, idx) => ({ ...subj, originalIndex: idx }));
+                                        const subjectsWithIndex = isMBA ? withMbaDefaultElectivesIfMissing(rawSubjectsWithIndex) : rawSubjectsWithIndex;
+                                        const isPecTrackSubject = (s) => Boolean(s?.vertical) || (isMBA && Boolean(s?.verticalName && s.verticalName.trim() !== ''));
 
                                         // Group semesters (excluding verticals and open electives)
-                                        const semestersGrouped = subjectsWithIndex.filter(s => !s.vertical && !s.isOpenElective).reduce((acc, subj) => {
+                                        const semestersGrouped = subjectsWithIndex.filter(s => !isPecTrackSubject(s) && !s.isOpenElective).reduce((acc, subj) => {
                                             const sem = subj.semester || 1;
                                             if (!acc[sem]) acc[sem] = [];
                                             acc[sem].push(subj);
@@ -4842,19 +4963,288 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                         const sortedSemesters = Object.keys(semestersGrouped).sort((a, b) => Number(a) - Number(b));
 
                                         // Group verticals
-                                        const verticalsGrouped = subjectsWithIndex.filter(s => s.vertical).reduce((acc, subj) => {
-                                            const vert = subj.vertical;
+                                        const verticalsGrouped = subjectsWithIndex.filter(isPecTrackSubject).reduce((acc, subj) => {
+                                            const vert = subj.vertical || subj.verticalName;
                                             if (!acc[vert]) acc[vert] = [];
                                             acc[vert].push(subj);
                                             return acc;
                                         }, {});
-                                        const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => Number(a) - Number(b));
+                                        const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => {
+                                            const na = Number(a);
+                                            const nb = Number(b);
+                                            if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+                                            return String(a).localeCompare(String(b));
+                                        });
+
+                                        const renderActionCell = (subj, isCourseCreator, creatorName) => {
+                                            const actionTarget = typeof subj.originalIndex === 'number' ? subj.originalIndex : subj;
+                                            return (
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
+                                                <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
+                                                    <button
+                                                        onClick={() => handleStartManageSyllabus(actionTarget)}
+                                                        className={isCourseCreator ? "btn btn-primary" : "btn"}
+                                                        style={{
+                                                            padding: '0.3rem 0.5rem',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            gap: '0.25rem',
+                                                            fontSize: '0.75rem',
+                                                            whiteSpace: 'nowrap',
+                                                            background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
+                                                            border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
+                                                            color: isCourseCreator ? undefined : '#c7d2fe'
+                                                        }}
+                                                        title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
+                                                    >
+                                                        {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            exportSubjectSyllabusPDF(subj, {
+                                                                ...(data || {}),
+                                                                name: activeAdminDept ? activeAdminDept.name : (data?.name || 'Engineering Department'),
+                                                                slug: selectedDept
+                                                            }, academicLevel);
+                                                        }}
+                                                        className="btn"
+                                                        style={{
+                                                            padding: '0.3rem 0.45rem',
+                                                            background: 'rgba(16, 185, 129, 0.15)',
+                                                            border: '1px solid rgba(16, 185, 129, 0.4)',
+                                                            color: '#6ee7b7',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                        title="Print Subject Syllabus PDF"
+                                                    >
+                                                        <FaPrint size={11} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleStartEditSubject(actionTarget)}
+                                                        className="btn"
+                                                        style={{
+                                                            padding: '0.3rem 0.45rem',
+                                                            background: 'var(--bg-main)',
+                                                            border: '1px solid var(--glass-border)',
+                                                            color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                        title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
+                                                    >
+                                                        <FaEdit size={11} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteSubject(actionTarget)}
+                                                        className="btn btn-danger"
+                                                        style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                        title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
+                                                    >
+                                                        <FaTrash size={11} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            );
+                                        };
+
+                                        const renderAdminMbaHead = () => (
+                                            <thead style={{ background: 'transparent' }}>
+                                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.35rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '5%' }}>S. No.</th>
+                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '11%' }}>Course Code</th>
+                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '25%' }}>Course Title</th>
+                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.35rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '7%' }}>Category</th>
+                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '9%' }}>Periods per Week</th>
+                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.35rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '8%' }}>Total Contact Periods</th>
+                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.35rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credits</th>
+                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
+                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '16%' }}>Action</th>
+                                                </tr>
+                                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
+                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
+                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
+                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
+                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
+                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
+                                                </tr>
+                                            </thead>
+                                        );
+
+                                        const renderAdminMbaRow = (subj, sNo, rowKey) => {
+                                            const isCourseCreator = !subj.creatorDept || subj.creatorDept === selectedDept || isAdmin;
+                                            const creatorName = subj.creatorDept ? getDeptDisplayName(subj.creatorDept) : '';
+                                            const titleUpper = (subj.title || subj.name || '').toUpperCase();
+                                            const codeUpper = (subj.code || '').toUpperCase();
+                                            const isInduction = titleUpper.includes('INDUCTION') || codeUpper.includes('INDUCTION');
+                                            const isInternship = titleUpper.includes('INTERNSHIP') && Number(subj.l || 0) === 0 && Number(subj.t || 0) === 0;
+                                            const catDisplay = subj.categoryType || classifyMbaSubjectCategory(subj);
+
+                                            return (
+                                                <tr key={rowKey} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{sNo}</td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                                        <div>{subj.code}</div>
+                                                        {!isCourseCreator && (
+                                                            <span
+                                                                title={`Course created by ${creatorName}. Shared in read-only mode.`}
+                                                                style={{
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '3px',
+                                                                    fontSize: '0.68rem',
+                                                                    padding: '1px 5px',
+                                                                    borderRadius: '4px',
+                                                                    background: 'rgba(99, 102, 241, 0.15)',
+                                                                    color: '#a5b4fc',
+                                                                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                                    marginTop: '3px',
+                                                                    fontWeight: 'normal'
+                                                                }}
+                                                            >
+                                                                <FaLock size={7} /> {creatorName || 'Shared'}
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{catDisplay}</td>
+                                                    {isInduction || isInternship ? (
+                                                        <td colSpan={4} style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)', fontWeight: 'bold' }}>
+                                                            {isInduction ? '2 WEEKS' : '4 Weeks'}
+                                                        </td>
+                                                    ) : (
+                                                        <>
+                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.l ?? 0}</td>
+                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.t ?? 0}</td>
+                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.p ?? 0}</td>
+                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.contactPeriods ?? ((Number(subj.l || 0) + Number(subj.t || 0) + Number(subj.p || 0)))}</td>
+                                                        </>
+                                                    )}
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold' }}>{isInduction ? 0 : subj.credits}</td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.cia}</td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.ese}</td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 'bold' }}>{isInduction ? '-' : subj.total}</td>
+                                                    {renderActionCell(subj, isCourseCreator, creatorName)}
+                                                </tr>
+                                            );
+                                        };
 
                                         return (
                                             <>
+                                                {isMBA && sortedSemesters.length > 0 && (
+                                                    <h3 style={{ fontSize: '1.35rem', color: 'var(--text-main)', textAlign: 'center', fontWeight: 'bold', marginBottom: '1.25rem', textTransform: 'uppercase' }}>
+                                                        I TO IV SEMESTERS CURRICULUM
+                                                    </h3>
+                                                )}
+
                                                 {/* Semester Tables */}
                                                 {sortedSemesters.map(semNum => {
                                                     const subjectsForSem = semestersGrouped[semNum];
+
+                                                    if (isMBA) {
+                                                        const {
+                                                            nfeOptions,
+                                                            mandatoryCourses,
+                                                            theoryCourses,
+                                                            theoryCumPracticalCourses,
+                                                            employabilityCourses,
+                                                            practicalCourses,
+                                                            otherCourses,
+                                                            regularCoursesForTotal
+                                                        } = classifyMbaSemesterCourses(subjectsForSem, sortSubjectsByCode);
+
+                                                        const semTotalL = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.l) || 0), 0);
+                                                        const semTotalT = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.t) || 0), 0);
+                                                        const semTotalP = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.p) || 0), 0);
+                                                        const semTotalCP = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.contactPeriods ?? (Number(s.l || 0) + Number(s.t || 0) + Number(s.p || 0))) || 0), 0);
+                                                        const semTotalCredits = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
+
+                                                        const isSingleProjectSemIV = Number(semNum) === 4 && employabilityCourses.length === 1 && theoryCourses.length === 0 && practicalCourses.length === 0 && theoryCumPracticalCourses.length === 0 && mandatoryCourses.length === 0 && otherCourses.length === 0;
+                                                        let sNoCounter = 0;
+
+                                                        const mbaSections = [
+                                                            { title: 'THEORY COURSES', items: theoryCourses },
+                                                            { title: 'THEORY CUM PRACTICAL COURSES', items: theoryCumPracticalCourses },
+                                                            { title: isSingleProjectSemIV ? null : 'EMPLOYABILITY ENHANCEMENT COURSE', items: employabilityCourses },
+                                                            { title: 'PRACTICAL COURSES', items: practicalCourses },
+                                                            { title: 'MANDATORY COURSES', items: mandatoryCourses },
+                                                            { title: 'OTHER COURSES', items: otherCourses }
+                                                        ].filter(sec => sec.items.length > 0);
+
+                                                        return (
+                                                            <div key={`sem-${semNum}`} style={{ marginBottom: '2rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
+                                                                <h4 style={{ fontSize: '1.2rem', color: 'var(--primary)', marginBottom: '1.2rem', textAlign: 'center', fontWeight: 'bold' }}>
+                                                                    SEMESTER {getRomanNumeral(semNum)}
+                                                                </h4>
+                                                                <div style={{ width: '100%', overflowX: 'auto' }}>
+                                                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
+                                                                        {renderAdminMbaHead()}
+                                                                        <tbody>
+                                                                            {mbaSections.map((sec, secIdx) => (
+                                                                                <React.Fragment key={secIdx}>
+                                                                                    {sec.title && (
+                                                                                        <tr>
+                                                                                            <td colSpan="13" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                                                                                                {sec.title}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    )}
+                                                                                    {sec.items.map((subj, idx) => renderAdminMbaRow(subj, ++sNoCounter, `${semNum}-${secIdx}-${idx}`))}
+                                                                                </React.Fragment>
+                                                                            ))}
+                                                                            {!isSingleProjectSemIV && (
+                                                                                <tr style={{ background: 'rgba(255,255,255,0.04)', fontWeight: 'bold' }}>
+                                                                                    <td colSpan="4" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem', textAlign: 'center', color: 'var(--primary)' }}>TOTAL</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalL}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalT}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalP}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalCP}</td>
+                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalCredits}</td>
+                                                                                    <td colSpan="4" style={{ border: '1px solid var(--glass-border)' }}></td>
+                                                                                </tr>
+                                                                            )}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+
+                                                                {Number(semNum) === 3 && (
+                                                                    <p style={{ marginTop: '0.75rem', fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                                                        Internship – minimum of 4 weeks of internship. The report along with the company certificate should be submitted of around 40 pages. The report should be sent to the Controller of Examinations by the HOD through the Principal, before the last working day of the 3rd Semester.
+                                                                    </p>
+                                                                )}
+                                                                {Number(semNum) === 4 && (
+                                                                    <p style={{ marginTop: '0.75rem', fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                                                        <strong style={{ color: 'var(--text-main)' }}>Note :</strong> Students should select the Project Topic for their Project work only based on the selected area from two functional specialization.
+                                                                    </p>
+                                                                )}
+
+                                                                {nfeOptions.length > 0 && (
+                                                                    <div style={{ marginTop: '1.5rem' }}>
+                                                                        <h5 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '0.75rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                                            NON-FUNCTIONAL ELECTIVE (NFE)
+                                                                        </h5>
+                                                                        <div style={{ width: '100%', overflowX: 'auto' }}>
+                                                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
+                                                                                {renderAdminMbaHead()}
+                                                                                <tbody>
+                                                                                    {nfeOptions.map((subj, nIdx) => renderAdminMbaRow(subj, nIdx + 1, `nfe-${semNum}-${nIdx}`))}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        <p style={{ marginTop: '0.5rem', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                                                                            <strong style={{ color: 'var(--text-main)' }}>Note:</strong> In the First Semester students need to choose one elective from Non-Functional Stream
+                                                                        </p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }
+
                                                     const categoriesGrouped = subjectsForSem.reduce((acc, subj) => {
                                                         let cat = subj.category || 'THEORY';
                                                         const cUpper = String(cat).toUpperCase().trim();
@@ -4956,77 +5346,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.cia}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.ese}</td>
                                                                                             <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{isInduction ? '-' : subj.total}</td>
-                                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
-                                                                                                <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                                    <button
-                                                                                                        onClick={() => handleStartManageSyllabus(subj.originalIndex)}
-                                                                                                        className={isCourseCreator ? "btn btn-primary" : "btn"}
-                                                                                                        style={{
-                                                                                                            padding: '0.3rem 0.5rem',
-                                                                                                            display: 'inline-flex',
-                                                                                                            alignItems: 'center',
-                                                                                                            justifyContent: 'center',
-                                                                                                            gap: '0.25rem',
-                                                                                                            fontSize: '0.75rem',
-                                                                                                            whiteSpace: 'nowrap',
-                                                                                                            background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
-                                                                                                            border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
-                                                                                                            color: isCourseCreator ? undefined : '#c7d2fe'
-                                                                                                        }}
-                                                                                                        title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
-                                                                                                    >
-                                                                                                        {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
-                                                                                                    </button>
-                                                                                                    <button
-                                                                                                        onClick={() => {
-                                                                                                            const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
-                                                                                                            exportSubjectSyllabusPDF(subj, {
-                                                                                                                ...(data || {}),
-                                                                                                                name: activeDeptObj ? activeDeptObj.name : (data?.name || 'Engineering Department'),
-                                                                                                                slug: selectedDept
-                                                                                                            }, academicLevel);
-                                                                                                        }}
-                                                                                                        className="btn"
-                                                                                                        style={{
-                                                                                                            padding: '0.3rem 0.45rem',
-                                                                                                            background: 'rgba(16, 185, 129, 0.15)',
-                                                                                                            border: '1px solid rgba(16, 185, 129, 0.4)',
-                                                                                                            color: '#6ee7b7',
-                                                                                                            display: 'inline-flex',
-                                                                                                            alignItems: 'center',
-                                                                                                            justifyContent: 'center',
-                                                                                                            cursor: 'pointer'
-                                                                                                        }}
-                                                                                                        title="Print Subject Syllabus PDF"
-                                                                                                    >
-                                                                                                        <FaPrint size={11} />
-                                                                                                    </button>
-                                                                                                    <button
-                                                                                                        onClick={() => handleStartEditSubject(subj.originalIndex)}
-                                                                                                        className="btn"
-                                                                                                        style={{
-                                                                                                            padding: '0.3rem 0.45rem',
-                                                                                                            background: 'var(--bg-main)',
-                                                                                                            border: '1px solid var(--glass-border)',
-                                                                                                            color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
-                                                                                                            display: 'inline-flex',
-                                                                                                            alignItems: 'center',
-                                                                                                            justifyContent: 'center'
-                                                                                                        }}
-                                                                                                        title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
-                                                                                                    >
-                                                                                                        <FaEdit size={11} />
-                                                                                                    </button>
-                                                                                                    <button
-                                                                                                        onClick={() => handleDeleteSubject(subj.originalIndex)}
-                                                                                                        className="btn btn-danger"
-                                                                                                        style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                                                        title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
-                                                                                                    >
-                                                                                                        <FaTrash size={11} />
-                                                                                                    </button>
-                                                                                                </div>
-                                                                                            </td>
+                                                                                            {renderActionCell(subj, isCourseCreator, creatorName)}
                                                                                         </tr>
                                                                                     );
                                                                                 })}
@@ -5042,36 +5362,61 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                                 {/* Single Professional Electives / Vertical Table */}
                                                 {sortedVerticals.length > 0 && (
                                                     <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
-                                                        <h4 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                                                            Professional Elective Courses
+                                                        <h4 style={{ fontSize: '1.3rem', color: 'var(--primary)', marginBottom: isMBA ? '0.25rem' : '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                            {isMBA ? 'PROFESSIONAL ELECTIVE COURSES (PEC)' : 'Professional Elective Courses'}
                                                         </h4>
-                                                        <div style={{ width: '100%' }}>
+                                                        {isMBA && (
+                                                            <>
+                                                                <div style={{ fontSize: '1.05rem', color: 'var(--text-main)', marginBottom: '0.75rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                                    FUNCTIONAL SPECIALISATIONS
+                                                                </div>
+                                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                                                                    Students can take 3+3 elective courses from each specialisation
+                                                                </p>
+                                                            </>
+                                                        )}
+                                                        <div style={{ width: '100%', overflowX: 'auto' }}>
                                                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', border: '1px solid var(--glass-border)' }}>
-                                                                <thead style={{ background: 'transparent' }}>
-                                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
-                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Contact Periods</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
-                                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
-                                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Action</th>
-                                                                    </tr>
-                                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
-                                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
-                                                                    </tr>
-                                                                </thead>
+                                                                {isMBA ? renderAdminMbaHead() : (
+                                                                    <thead style={{ background: 'transparent' }}>
+                                                                        <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Course Code</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
+                                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '10%' }}>Periods per Week</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Contact Periods</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '6%' }}>Credit</th>
+                                                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.35rem', color: 'var(--text-main)', textAlign: 'center', width: '13%' }}>Marks</th>
+                                                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', color: 'var(--text-main)', textAlign: 'center', verticalAlign: 'middle', width: '15%' }}>Action</th>
+                                                                        </tr>
+                                                                        <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>L</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>T</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>P</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>CIA</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>ESE</th>
+                                                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.3rem', color: 'var(--text-muted)', textAlign: 'center' }}>Total</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                )}
                                                                 <tbody>
                                                                     {(() => {
                                                                         return sortedVerticals.map(vertNum => {
                                                                             const subjectsForVert = sortSubjectsByCode(verticalsGrouped[vertNum] || []);
                                                                             const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
                                                                             const romanNum = getRomanNumeral(vertNum);
+
+                                                                            if (isMBA) {
+                                                                                return (
+                                                                                    <React.Fragment key={`vert-${vertNum}`}>
+                                                                                        <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                                                                            <td colSpan="13" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.9rem' }}>
+                                                                                                Stream/ Specialization: {verticalName || `Specialisation ${romanNum}`}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                        {subjectsForVert.map((subj, subjIdx) => renderAdminMbaRow(subj, subjIdx + 1, `mba-pec-${vertNum}-${subjIdx}`))}
+                                                                                    </React.Fragment>
+                                                                                );
+                                                                            }
 
                                                                             return (
                                                                                 <React.Fragment key={`vert-${vertNum}`}>
@@ -5117,77 +5462,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                                                                                 <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.cia}</td>
                                                                                                 <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.ese}</td>
                                                                                                 <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{subj.total}</td>
-                                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center' }}>
-                                                                                                    <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                                        <button
-                                                                                                            onClick={() => handleStartManageSyllabus(subj.originalIndex)}
-                                                                                                            className={isCourseCreator ? "btn btn-primary" : "btn"}
-                                                                                                            style={{
-                                                                                                                padding: '0.3rem 0.5rem',
-                                                                                                                display: 'inline-flex',
-                                                                                                                alignItems: 'center',
-                                                                                                                justifyContent: 'center',
-                                                                                                                gap: '0.25rem',
-                                                                                                                fontSize: '0.75rem',
-                                                                                                                whiteSpace: 'nowrap',
-                                                                                                                background: isCourseCreator ? undefined : 'rgba(99, 102, 241, 0.15)',
-                                                                                                                border: isCourseCreator ? undefined : '1px solid rgba(99, 102, 241, 0.4)',
-                                                                                                                color: isCourseCreator ? undefined : '#c7d2fe'
-                                                                                                            }}
-                                                                                                            title={isCourseCreator ? "Manage Syllabus" : `View Syllabus (Created by ${creatorName})`}
-                                                                                                        >
-                                                                                                            {isCourseCreator ? 'Syllabus' : 'View'} {isCourseCreator ? <FaBook size={10} /> : <FaLock size={8} />}
-                                                                                                        </button>
-                                                                                                        <button
-                                                                                                            onClick={() => {
-                                                                                                                const activeDeptObj = staticDepartments.find(d => d.slug === selectedDept);
-                                                                                                                exportSubjectSyllabusPDF(subj, {
-                                                                                                                    ...(data || {}),
-                                                                                                                    name: activeDeptObj ? activeDeptObj.name : (data?.name || 'Engineering Department'),
-                                                                                                                    slug: selectedDept
-                                                                                                                }, academicLevel);
-                                                                                                            }}
-                                                                                                            className="btn"
-                                                                                                            style={{
-                                                                                                                padding: '0.3rem 0.45rem',
-                                                                                                                background: 'rgba(16, 185, 129, 0.15)',
-                                                                                                                border: '1px solid rgba(16, 185, 129, 0.4)',
-                                                                                                                color: '#6ee7b7',
-                                                                                                                display: 'inline-flex',
-                                                                                                                alignItems: 'center',
-                                                                                                                justifyContent: 'center',
-                                                                                                                cursor: 'pointer'
-                                                                                                            }}
-                                                                                                            title="Print Subject Syllabus PDF"
-                                                                                                        >
-                                                                                                            <FaPrint size={11} />
-                                                                                                        </button>
-                                                                                                        <button
-                                                                                                            onClick={() => handleStartEditSubject(subj.originalIndex)}
-                                                                                                            className="btn"
-                                                                                                            style={{
-                                                                                                                padding: '0.3rem 0.45rem',
-                                                                                                                background: 'var(--bg-main)',
-                                                                                                                border: '1px solid var(--glass-border)',
-                                                                                                                color: isCourseCreator ? 'var(--text-main)' : '#fbbf24',
-                                                                                                                display: 'inline-flex',
-                                                                                                                alignItems: 'center',
-                                                                                                                justifyContent: 'center'
-                                                                                                            }}
-                                                                                                            title={isCourseCreator ? "Edit Subject" : `Edit Curriculum Placement (Course details locked by ${creatorName})`}
-                                                                                                        >
-                                                                                                            <FaEdit size={11} />
-                                                                                                        </button>
-                                                                                                        <button
-                                                                                                            onClick={() => handleDeleteSubject(subj.originalIndex)}
-                                                                                                            className="btn btn-danger"
-                                                                                                            style={{ padding: '0.3rem 0.45rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                                                            title={isCourseCreator ? "Delete Subject" : `Remove from your department's curriculum`}
-                                                                                                        >
-                                                                                                            <FaTrash size={11} />
-                                                                                                        </button>
-                                                                                                    </div>
-                                                                                                </td>
+                                                                                                {renderActionCell(subj, isCourseCreator, creatorName)}
                                                                                             </tr>
                                                                                         );
                                                                                     })}
@@ -5366,7 +5641,7 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
                                                         </div>
                                                     </div>
                                                 )}
-                                                {renderCreditDistributionTable(data.subjects)}
+                                                {renderCreditDistributionTable(data.subjects, isMBA, activeAdminDept?.name || data?.name || 'Master of Business Administration')}
                                             </>
                                         );
                                     })()
@@ -5670,7 +5945,9 @@ const DepartmentManager = ({ initialLevel, initialDeptSlug }) => {
 
             {/* Manage Syllabus Modal */}
             {selectedSyllabusSubjectIndex !== null && syllabusEditValue !== null && (() => {
-                const currentSubject = data.subjects[selectedSyllabusSubjectIndex];
+                const currentSubject = selectedSyllabusSubjectIndex >= 0
+                    ? data.subjects[selectedSyllabusSubjectIndex]
+                    : selectedSyllabusFallbackSubject;
                 const isCreator = !currentSubject?.creatorDept || currentSubject?.creatorDept === selectedDept || isAdmin;
                 const creatorName = currentSubject?.creatorDept ? getDeptDisplayName(currentSubject.creatorDept) : '';
                 const catUp = (syllabusEditValue.category || '').toUpperCase();

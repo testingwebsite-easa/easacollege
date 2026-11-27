@@ -17,8 +17,16 @@ import {
     CURRICULUM_11_COLGROUP,
     CURRICULUM_10_COLGROUP,
     buildCurriculumTableHeadRows,
-    buildLanguageElectiveBlockHTML
+    buildLanguageElectiveBlockHTML,
+    isMBADepartment,
+    classifyMbaSemesterCourses,
+    classifyMbaSubjectCategory,
+    buildMbaSemesterSectionHTML,
+    buildMbaPecSectionHTML,
+    buildMbaCreditDistributionHTML,
+    withMbaDefaultElectivesIfMissing
 } from '../../utils/curriculumTableTemplate';
+import MbaCreditSummary from '../../components/MbaCreditSummary';
 
 const getRomanNumeral = (num) => {
     const roman = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -159,8 +167,11 @@ const renderPieChart = (categories, rowTotals, grandTotal) => {
     );
 };
 
-const renderCreditDistributionTable = (rawSubjects) => {
+const renderCreditDistributionTable = (rawSubjects, isMBA = false, deptName = '') => {
     if (!rawSubjects || rawSubjects.length === 0) return null;
+    if (isMBA) {
+        return <MbaCreditSummary subjects={rawSubjects} deptName={deptName} />;
+    }
     const subjects = rawSubjects.filter(s => s && s.code && !s.code.toUpperCase().startsWith('TOTAL') && !s.code.toUpperCase().includes('TOTAL') && !s.title?.toUpperCase().startsWith('TOTAL'));
     if (subjects.length === 0) return null;
 
@@ -775,6 +786,18 @@ const getPdfPaginationScript = (maxContentHeightMm, startPageNum) => `
 
 const getCreditDistributionHTML = (rawSubjects, pageTracker, bosMeetingDate, acMeetingDate, degreePrefix, deptName, regYear) => {
     const pageNum = ++pageTracker.current;
+    if (isMBADepartment(deptName, degreePrefix)) {
+        return buildMbaCreditDistributionHTML({
+            rawSubjects,
+            pageNum,
+            bosMeetingDate,
+            acMeetingDate,
+            degreePrefix,
+            deptName,
+            regYear,
+            formatDeptHeaderTitle
+        });
+    }
     const subjects = (rawSubjects || []).filter(s => s && s.code && !s.code.toUpperCase().startsWith('TOTAL') && !s.code.toUpperCase().includes('TOTAL') && !s.title?.toUpperCase().startsWith('TOTAL'));
     const isPG = (degreePrefix || '').toUpperCase().includes('M.') || (deptName || '').toUpperCase().includes('M.E.') || (deptName || '').toUpperCase().includes('M.TECH');
     const hasIPR = isPG || (subjects || []).some(s => (s.categoryType || '').toUpperCase() === 'IPR' || (s.category || '').toUpperCase().includes('IPR') || (s.category || '').toUpperCase().includes('RESEARCH METHODOLOGY'));
@@ -1932,8 +1955,13 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
         degreePrefix = techSlugs.includes(deptData.slug || '') ? 'B.Tech.' : 'B.E.';
     }
 
+    const isMBA = isMBADepartment(deptData, degreePrefix) || isMBADepartment(deptName, degreePrefix);
+    const effectiveSubjects = isMBA ? withMbaDefaultElectivesIfMissing(subjects) : subjects;
+
     // Group subjects by semester (excluding vertical and open elective subjects)
-    const semestersGrouped = subjects.filter(s => !s.vertical && !s.isOpenElective).reduce((acc, subj) => {
+    const isPecTrackSubject = (s) => Boolean(s?.vertical) || (isMBA && Boolean(s?.verticalName && s.verticalName.trim() !== ''));
+
+    const semestersGrouped = effectiveSubjects.filter(s => !isPecTrackSubject(s) && !s.isOpenElective).reduce((acc, subj) => {
         const sem = subj.semester || 1;
         if (!acc[sem]) acc[sem] = [];
         acc[sem].push(subj);
@@ -1942,15 +1970,20 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     const sortedSemesters = Object.keys(semestersGrouped).sort((a, b) => Number(a) - Number(b));
 
-    // Group subjects by vertical
-    const verticalsGrouped = subjects.filter(s => s.vertical).reduce((acc, subj) => {
-        const vert = subj.vertical;
+    // Group subjects by vertical / MBA specialization stream
+    const verticalsGrouped = effectiveSubjects.filter(isPecTrackSubject).reduce((acc, subj) => {
+        const vert = subj.vertical || subj.verticalName;
         if (!acc[vert]) acc[vert] = [];
         acc[vert].push(subj);
         return acc;
     }, {});
 
-    const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => Number(a) - Number(b));
+    const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => {
+        const na = Number(a);
+        const nb = Number(b);
+        if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+        return String(a).localeCompare(String(b));
+    });
 
 
     // Helper to generate page header
@@ -1975,6 +2008,14 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
 
     // Helper to render semester table HTML
     const renderSemesterTableHTML = (semNum) => {
+        if (isMBA) {
+            return buildMbaSemesterSectionHTML({
+                semNum,
+                subjectsForSem: semestersGrouped[semNum] || [],
+                getRomanNumeral,
+                sortSubjectsByCode
+            });
+        }
         const subjectsForSem = sortSubjectsByCode((semestersGrouped[semNum] || []).filter(s => {
             if (!s) return false;
             const c = (s.code || '').trim().toUpperCase();
@@ -2790,18 +2831,19 @@ const exportCurriculumPDF = (deptData, academicLevel, regYearInput, instVisionMi
                 <h2 style="font-size: 10.5pt; font-family: Arial, sans-serif; font-weight: bold; line-height: 1.35; margin-top: 2px;">
                     REGULATION – ${regYear.replace('R-', '')}<br>
                     CHOICE BASED CREDIT SYSTEM<br>
-                    CURRICULUM
+                    ${isMBA ? 'I TO IV SEMESTERS CURRICULUM' : 'CURRICULUM'}
                 </h2>
             </div>
             
             ${sortedSemesters.map(semNum => renderSemesterTableHTML(semNum)).join('')}
+            ${isMBA && sortedVerticals.length > 0 ? buildMbaPecSectionHTML({ sortedVerticals, verticalsGrouped, sortSubjectsByCode, getRomanNumeral }) : ''}
             
             ${getFooterHTML(++pageTracker.current)}
         </div>
         ` : ''}
 
         <!-- PROFESSIONAL ELECTIVES PAGE -->
-        ${sortedVerticals.length > 0 ? `
+        ${!isMBA && sortedVerticals.length > 0 ? `
         <div class="page">
             ${getHeaderHTML()}
             
@@ -3757,128 +3799,214 @@ const SyllabusPage = () => {
                             )}
 
                             {/* Dynamic Semester & Vertical Tables */}
-                            {deptData.subjects && deptData.subjects.length > 0 && (
-                                <div style={{ marginTop: '3rem' }}>
-                                    {/* Group subjects by semester (excluding verticals, open electives, and TOTAL rows) */}
-                                    {Object.entries(
-                                        deptData.subjects.filter(s => s && s.code && !s.vertical && !s.isOpenElective && !s.code.toUpperCase().startsWith('TOTAL') && !s.code.toUpperCase().includes('TOTAL') && !s.title?.toUpperCase().startsWith('TOTAL')).reduce((acc, subj) => {
-                                            const sem = subj.semester || 1;
-                                            if (!acc[sem]) acc[sem] = [];
-                                            acc[sem].push(subj);
-                                            return acc;
-                                        }, {})
-                                    ).sort((a, b) => Number(a[0]) - Number(b[0])).map(([semesterNum, subjectsForSem]) => (
-                                        <div key={`sem-${semesterNum}`} style={{ marginBottom: '3rem', width: '100%' }}>
-                                            <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold' }}>
-                                                SEMESTER {semesterNum}
+                            {deptData.subjects && deptData.subjects.length > 0 && (() => {
+                                const isMBA = isMBADepartment(deptData?.slug || selectedDept) || isMBADepartment(deptData?.name || activeDeptData?.name);
+                                const isPecTrackSubject = (s) => Boolean(s?.vertical) || (isMBA && Boolean(s?.verticalName && s.verticalName.trim() !== ''));
+
+                                const baseClean = deptData.subjects.filter(s => s && s.code && !s.code.toUpperCase().startsWith('TOTAL') && !s.code.toUpperCase().includes('TOTAL') && !s.title?.toUpperCase().startsWith('TOTAL'));
+                                const filteredClean = isMBA ? withMbaDefaultElectivesIfMissing(baseClean) : baseClean;
+
+                                const semestersGrouped = filteredClean.filter(s => !isPecTrackSubject(s) && !s.isOpenElective).reduce((acc, subj) => {
+                                    const sem = subj.semester || 1;
+                                    if (!acc[sem]) acc[sem] = [];
+                                    acc[sem].push(subj);
+                                    return acc;
+                                }, {});
+                                const sortedSemesterEntries = Object.entries(semestersGrouped).sort((a, b) => Number(a[0]) - Number(b[0]));
+
+                                const verticalsGrouped = filteredClean.filter(isPecTrackSubject).reduce((acc, subj) => {
+                                    const vert = subj.vertical || subj.verticalName;
+                                    if (!acc[vert]) acc[vert] = [];
+                                    acc[vert].push(subj);
+                                    return acc;
+                                }, {});
+                                const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => {
+                                    const na = Number(a);
+                                    const nb = Number(b);
+                                    if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+                                    return String(a).localeCompare(String(b));
+                                });
+
+                                const renderPublicMbaHead = () => (
+                                    <thead style={{ background: 'transparent' }}>
+                                        <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.35rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '5%', whiteSpace: 'nowrap' }}>S. No.</th>
+                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '12%', whiteSpace: 'nowrap' }}>Course Code</th>
+                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '27%' }}>Course Title</th>
+                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.35rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '8%', whiteSpace: 'nowrap' }}>Category</th>
+                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '12%', whiteSpace: 'nowrap' }}>Periods per Week</th>
+                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.35rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Total Contact Periods</th>
+                                            <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.35rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '7%', whiteSpace: 'nowrap' }}>Credits</th>
+                                            <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '20%', whiteSpace: 'nowrap' }}>Marks</th>
+                                        </tr>
+                                        <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>L</th>
+                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>T</th>
+                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>P</th>
+                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>CIA</th>
+                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>ESE</th>
+                                            <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>Total</th>
+                                        </tr>
+                                    </thead>
+                                );
+
+                                const renderPublicMbaRow = (subj, sNo, key) => {
+                                    const titleUpper = (subj.title || subj.name || '').toUpperCase();
+                                    const codeUpper = (subj.code || '').toUpperCase();
+                                    const isInduction = titleUpper.includes('INDUCTION') || codeUpper.includes('INDUCTION');
+                                    const isInternship = titleUpper.includes('INTERNSHIP') && Number(subj.l || 0) === 0 && Number(subj.t || 0) === 0;
+                                    const catDisplay = subj.categoryType || classifyMbaSubjectCategory(subj);
+
+                                    return (
+                                        <tr key={key}>
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{sNo}</td>
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{subj.code}</td>
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{catDisplay}</td>
+                                            {isInduction || isInternship ? (
+                                                <td colSpan={4} style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                                                    {isInduction ? '2 WEEKS' : '4 Weeks'}
+                                                </td>
+                                            ) : (
+                                                <>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.l ?? 0}</td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.t ?? 0}</td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.p ?? 0}</td>
+                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.contactPeriods ?? ((Number(subj.l || 0) + Number(subj.t || 0) + Number(subj.p || 0)))}</td>
+                                                </>
+                                            )}
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{isInduction ? 0 : subj.credits}</td>
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{isInduction ? '-' : subj.cia}</td>
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{isInduction ? '-' : subj.ese}</td>
+                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 'bold' }}>{isInduction ? '-' : subj.total}</td>
+                                        </tr>
+                                    );
+                                };
+
+                                return (
+                                    <div style={{ marginTop: '3rem' }}>
+                                        {isMBA && sortedSemesterEntries.length > 0 && (
+                                            <h3 style={{ fontSize: '1.65rem', color: 'var(--text-main)', marginBottom: '1.75rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                I TO IV SEMESTERS CURRICULUM
                                             </h3>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
-                                                <thead style={{ background: 'transparent' }}>
-                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '12%', whiteSpace: 'nowrap' }}>Course Code</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '9%', whiteSpace: 'nowrap' }}>Category</th>
-                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '12%', whiteSpace: 'nowrap' }}>Periods per Week</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Total Contact Periods</th>
-                                                        <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '7%', whiteSpace: 'nowrap' }}>Credit</th>
-                                                        <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '19%', whiteSpace: 'nowrap' }}>Marks</th>
-                                                    </tr>
-                                                    <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>L</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>T</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>P</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>CIA</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>ESE</th>
-                                                        <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>Total</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {Object.entries(
-                                                        subjectsForSem.reduce((acc, subj) => {
-                                                            let cat = subj.category || 'THEORY';
-                                                            const cUpper = String(cat).toUpperCase().trim();
-                                                            const typeUpper = String(subj.categoryType || '').toUpperCase().trim();
-                                                            if (cUpper.includes('NON-FUNCTIONAL') || cUpper.includes('NON FUNCTIONAL') || cUpper.includes('NFE') || typeUpper === 'NFE') cat = 'NON-FUNCTIONAL ELECTIVE (NFE)';
-                                                            else if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED') || (Number(subj.l || 0) > 0 && Number(subj.p || 0) > 0 && !cUpper.includes('THEORY') && !cUpper.includes('PRACTICAL'))) cat = 'THEORY CUM PRACTICAL';
-                                                            else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR' || (typeUpper === 'PCC' && Number(subj.l || 0) === 0 && Number(subj.p || 0) > 0)) cat = 'PRACTICAL';
-                                                            else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC') || typeUpper === 'EEC') cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
-                                                            else if (cUpper.includes('MANDATORY') || cUpper.includes('MC') || typeUpper === 'MC') cat = 'MANDATORY COURSES';
-                                                            else if (cUpper.includes('LANGUAGE') && (cUpper.includes('I') || cUpper.includes('1'))) cat = 'Language Elective – I';
-                                                            else if (cUpper.includes('LANGUAGE') && (cUpper.includes('II') || cUpper.includes('2'))) cat = 'Language Elective - II';
-                                                            else if (cUpper.includes('HONOR')) cat = 'Electives for Honors Degree';
-                                                            else cat = 'THEORY';
+                                        )}
 
-                                                            if (!acc[cat]) acc[cat] = [];
-                                                            acc[cat].push(subj);
-                                                            return acc;
-                                                        }, {})
-                                                    ).map(([categoryName, categorySubjects], catIndex) => (
-                                                        <React.Fragment key={catIndex}>
-                                                            <tr>
-                                                                <td colSpan="11" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                                                                    {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : (categoryName === 'NON-FUNCTIONAL ELECTIVE (NFE)' || categoryName.includes('NON-FUNCTIONAL') || categoryName.includes('NON FUNCTIONAL')) ? 'NON-FUNCTIONAL ELECTIVE COURSES' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
-                                                                </td>
-                                                            </tr>
-                                                            {sortSubjectsByCode(categorySubjects).map((subj, subjIdx) => {
-                                                                const isInduction = (subj.title || subj.name || '').toUpperCase().includes('INDUCTION') || (subj.code || '').toUpperCase().includes('INDUCTION');
-                                                                return (
-                                                                    <tr key={subjIdx}>
-                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{subj.code}</td>
-                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.categoryType}</td>
-                                                                        {isInduction ? (
-                                                                            <td colSpan={4} style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)', fontWeight: 'bold', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
-                                                                                2 WEEKS
-                                                                            </td>
-                                                                        ) : (
-                                                                            <>
-                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.l}</td>
-                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.t}</td>
-                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.p}</td>
-                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.contactPeriods}</td>
-                                                                            </>
-                                                                        )}
-                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{isInduction ? 0 : subj.credits}</td>
-                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{isInduction ? '-' : subj.cia}</td>
-                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{isInduction ? '-' : subj.ese}</td>
-                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 'bold' }}>{isInduction ? '-' : subj.total}</td>
-                                                                    </tr>
-                                                                );
-                                                            })}
-                                                        </React.Fragment>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    ))}
+                                        {/* Group subjects by semester (excluding verticals, open electives, and TOTAL rows) */}
+                                        {sortedSemesterEntries.map(([semesterNum, subjectsForSem]) => {
+                                            if (isMBA) {
+                                                const {
+                                                    nfeOptions,
+                                                    mandatoryCourses,
+                                                    theoryCourses,
+                                                    theoryCumPracticalCourses,
+                                                    employabilityCourses,
+                                                    practicalCourses,
+                                                    otherCourses,
+                                                    regularCoursesForTotal
+                                                } = classifyMbaSemesterCourses(subjectsForSem, sortSubjectsByCode);
 
-                                    {/* Group subjects by vertical */}
-                                    {(() => {
-                                        const verticalsGrouped = deptData.subjects.filter(s => s && s.code && s.vertical && !s.code.toUpperCase().startsWith('TOTAL') && !s.code.toUpperCase().includes('TOTAL') && !s.title?.toUpperCase().startsWith('TOTAL')).reduce((acc, subj) => {
-                                            const vert = subj.vertical;
-                                            if (!acc[vert]) acc[vert] = [];
-                                            acc[vert].push(subj);
-                                            return acc;
-                                        }, {});
-                                        const sortedVerticals = Object.keys(verticalsGrouped).sort((a, b) => Number(a) - Number(b));
+                                                const semTotalL = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.l) || 0), 0);
+                                                const semTotalT = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.t) || 0), 0);
+                                                const semTotalP = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.p) || 0), 0);
+                                                const semTotalCP = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.contactPeriods ?? (Number(s.l || 0) + Number(s.t || 0) + Number(s.p || 0))) || 0), 0);
+                                                const semTotalCredits = regularCoursesForTotal.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
 
-                                        if (sortedVerticals.length === 0) return null;
+                                                const isSingleProjectSemIV = Number(semesterNum) === 4 && employabilityCourses.length === 1 && theoryCourses.length === 0 && practicalCourses.length === 0 && theoryCumPracticalCourses.length === 0 && mandatoryCourses.length === 0 && otherCourses.length === 0;
+                                                let sNoCounter = 0;
 
-                                        return (
-                                            <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
-                                                <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                                                    Professional Elective Courses
-                                                </h3>
-                                                <div style={{ width: '100%' }}>
+                                                const mbaSections = [
+                                                    { title: 'THEORY COURSES', items: theoryCourses },
+                                                    { title: 'THEORY CUM PRACTICAL COURSES', items: theoryCumPracticalCourses },
+                                                    { title: isSingleProjectSemIV ? null : 'EMPLOYABILITY ENHANCEMENT COURSE', items: employabilityCourses },
+                                                    { title: 'PRACTICAL COURSES', items: practicalCourses },
+                                                    { title: 'MANDATORY COURSES', items: mandatoryCourses },
+                                                    { title: 'OTHER COURSES', items: otherCourses }
+                                                ].filter(sec => sec.items.length > 0);
+
+                                                return (
+                                                    <div key={`sem-${semesterNum}`} style={{ marginBottom: '3rem', width: '100%' }}>
+                                                        <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '1.25rem', textAlign: 'center', fontWeight: 'bold' }}>
+                                                            SEMESTER {getRomanNumeral(semesterNum)}
+                                                        </h3>
+                                                        <div style={{ overflowX: 'auto' }}>
+                                                            <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
+                                                                {renderPublicMbaHead()}
+                                                                <tbody>
+                                                                    {mbaSections.map((sec, secIdx) => (
+                                                                        <React.Fragment key={secIdx}>
+                                                                            {sec.title && (
+                                                                                <tr>
+                                                                                    <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                                                                                        {sec.title}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            )}
+                                                                            {sec.items.map((subj, idx) => renderPublicMbaRow(subj, ++sNoCounter, `${semesterNum}-${secIdx}-${idx}`))}
+                                                                        </React.Fragment>
+                                                                    ))}
+                                                                    {!isSingleProjectSemIV && (
+                                                                        <tr style={{ background: 'rgba(255,255,255,0.04)', fontWeight: 'bold' }}>
+                                                                            <td colSpan="4" style={{ border: '1px solid var(--glass-border)', padding: '0.55rem', textAlign: 'center', color: 'var(--primary)' }}>TOTAL</td>
+                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalL}</td>
+                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalT}</td>
+                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalP}</td>
+                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalCP}</td>
+                                                                            <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)' }}>{semTotalCredits}</td>
+                                                                            <td colSpan="3" style={{ border: '1px solid var(--glass-border)' }}></td>
+                                                                        </tr>
+                                                                    )}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                        {Number(semesterNum) === 3 && (
+                                                            <p style={{ marginTop: '0.75rem', fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                                                                Internship – minimum of 4 weeks of internship. The report along with the company certificate should be submitted of around 40 pages. The report should be sent to the Controller of Examinations by the HOD through the Principal, before the last working day of the 3rd Semester.
+                                                            </p>
+                                                        )}
+                                                        {Number(semesterNum) === 4 && (
+                                                            <p style={{ marginTop: '0.75rem', fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                                                                <strong style={{ color: 'var(--text-main)' }}>Note :</strong> Students should select the Project Topic for their Project work only based on the selected area from two functional specialization.
+                                                            </p>
+                                                        )}
+
+                                                        {nfeOptions.length > 0 && (
+                                                            <div style={{ marginTop: '2rem' }}>
+                                                                <h4 style={{ fontSize: '1.15rem', color: 'var(--text-main)', marginBottom: '0.75rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                                    NON-FUNCTIONAL ELECTIVE (NFE)
+                                                                </h4>
+                                                                <div style={{ overflowX: 'auto' }}>
+                                                                    <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
+                                                                        {renderPublicMbaHead()}
+                                                                        <tbody>
+                                                                            {nfeOptions.map((subj, idx) => renderPublicMbaRow(subj, idx + 1, `nfe-${semesterNum}-${idx}`))}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                <p style={{ marginTop: '0.6rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+                                                                    <strong style={{ color: 'var(--text-main)' }}>Note:</strong> In the First Semester students need to choose one elective from Non-Functional Stream
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+
+                                            return (
+                                                <div key={`sem-${semesterNum}`} style={{ marginBottom: '3rem', width: '100%' }}>
+                                                    <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold' }}>
+                                                        SEMESTER {semesterNum}
+                                                    </h3>
                                                     <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
                                                         <thead style={{ background: 'transparent' }}>
                                                             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
                                                                 <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '12%', whiteSpace: 'nowrap' }}>Course Code</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '36%' }}>Course Title</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '32%' }}>Course Title</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '9%', whiteSpace: 'nowrap' }}>Category</th>
                                                                 <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '12%', whiteSpace: 'nowrap' }}>Periods per Week</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
-                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '8%', whiteSpace: 'nowrap' }}>Credit</th>
-                                                                <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '22%', whiteSpace: 'nowrap' }}>Marks</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '9%' }}>Total Contact Periods</th>
+                                                                <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '7%', whiteSpace: 'nowrap' }}>Credit</th>
+                                                                <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '19%', whiteSpace: 'nowrap' }}>Marks</th>
                                                             </tr>
                                                             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
                                                                 <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>L</th>
@@ -3890,10 +4018,122 @@ const SyllabusPage = () => {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
+                                                            {Object.entries(
+                                                                subjectsForSem.reduce((acc, subj) => {
+                                                                    let cat = subj.category || 'THEORY';
+                                                                    const cUpper = String(cat).toUpperCase().trim();
+                                                                    const typeUpper = String(subj.categoryType || '').toUpperCase().trim();
+                                                                    if (cUpper.includes('NON-FUNCTIONAL') || cUpper.includes('NON FUNCTIONAL') || cUpper.includes('NFE') || typeUpper === 'NFE') cat = 'NON-FUNCTIONAL ELECTIVE (NFE)';
+                                                                    else if (cUpper.includes('THEORY CUM') || cUpper.includes('INTEGRATED') || (Number(subj.l || 0) > 0 && Number(subj.p || 0) > 0 && !cUpper.includes('THEORY') && !cUpper.includes('PRACTICAL'))) cat = 'THEORY CUM PRACTICAL';
+                                                                    else if (cUpper.includes('PRACTICAL') || cUpper.includes('LAB') || cUpper === 'PR' || (typeUpper === 'PCC' && Number(subj.l || 0) === 0 && Number(subj.p || 0) > 0)) cat = 'PRACTICAL';
+                                                                    else if (cUpper.includes('EMPLOYABILITY') || cUpper.includes('EEC') || typeUpper === 'EEC') cat = 'EMPLOYABILITY ENHANCEMENT COURSE';
+                                                                    else if (cUpper.includes('MANDATORY') || cUpper.includes('MC') || typeUpper === 'MC') cat = 'MANDATORY COURSES';
+                                                                    else if (cUpper.includes('LANGUAGE') && (cUpper.includes('I') || cUpper.includes('1'))) cat = 'Language Elective – I';
+                                                                    else if (cUpper.includes('LANGUAGE') && (cUpper.includes('II') || cUpper.includes('2'))) cat = 'Language Elective - II';
+                                                                    else if (cUpper.includes('HONOR')) cat = 'Electives for Honors Degree';
+                                                                    else cat = 'THEORY';
+
+                                                                    if (!acc[cat]) acc[cat] = [];
+                                                                    acc[cat].push(subj);
+                                                                    return acc;
+                                                                }, {})
+                                                            ).map(([categoryName, categorySubjects], catIndex) => (
+                                                                <React.Fragment key={catIndex}>
+                                                                    <tr>
+                                                                        <td colSpan="11" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                                                                            {categoryName === 'THEORY' ? 'THEORY COURSES' : categoryName === 'PRACTICAL' ? 'PRACTICAL COURSES' : categoryName === 'THEORY CUM PRACTICAL' ? 'THEORY CUM PRACTICAL COURSES' : categoryName === 'EMPLOYABILITY ENHANCEMENT COURSE' ? 'EMPLOYABILITY ENHANCEMENT COURSE' : (categoryName === 'NON-FUNCTIONAL ELECTIVE (NFE)' || categoryName.includes('NON-FUNCTIONAL') || categoryName.includes('NON FUNCTIONAL')) ? 'NON-FUNCTIONAL ELECTIVE COURSES' : categoryName === 'MANDATORY COURSES' ? 'MANDATORY COURSES' : categoryName}
+                                                                        </td>
+                                                                    </tr>
+                                                                    {sortSubjectsByCode(categorySubjects).map((subj, subjIdx) => {
+                                                                        const isInduction = (subj.title || subj.name || '').toUpperCase().includes('INDUCTION') || (subj.code || '').toUpperCase().includes('INDUCTION');
+                                                                        return (
+                                                                            <tr key={subjIdx}>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{subj.code}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.categoryType}</td>
+                                                                                {isInduction ? (
+                                                                                    <td colSpan={4} style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--primary)', fontWeight: 'bold', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>
+                                                                                        2 WEEKS
+                                                                                    </td>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.l}</td>
+                                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.t}</td>
+                                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.p}</td>
+                                                                                        <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.contactPeriods}</td>
+                                                                                    </>
+                                                                                )}
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{isInduction ? 0 : subj.credits}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{isInduction ? '-' : subj.cia}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{isInduction ? '-' : subj.ese}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 'bold' }}>{isInduction ? '-' : subj.total}</td>
+                                                                            </tr>
+                                                                        );
+                                                                    })}
+                                                                </React.Fragment>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            );
+                                        })}
+
+                                        {/* Group subjects by vertical */}
+                                        {sortedVerticals.length > 0 && (
+                                            <div style={{ marginTop: '3rem', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--bg-section)' }}>
+                                                <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: isMBA ? '0.25rem' : '1.5rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                    {isMBA ? 'PROFESSIONAL ELECTIVE COURSES (PEC)' : 'Professional Elective Courses'}
+                                                </h3>
+                                                {isMBA && (
+                                                    <>
+                                                        <div style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '0.75rem', textAlign: 'center', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                                            FUNCTIONAL SPECIALISATIONS
+                                                        </div>
+                                                        <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                                                            Students can take 3+3 elective courses from each specialisation
+                                                        </p>
+                                                    </>
+                                                )}
+                                                <div style={{ width: '100%', overflowX: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--bg-section)', border: '1px solid var(--glass-border)', fontSize: '0.85rem' }}>
+                                                        {isMBA ? renderPublicMbaHead() : (
+                                                            <thead style={{ background: 'transparent' }}>
+                                                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '12%', whiteSpace: 'nowrap' }}>Course Code</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.5rem', color: 'var(--primary)', textAlign: 'left', verticalAlign: 'middle', width: '36%' }}>Course Title</th>
+                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '12%', whiteSpace: 'nowrap' }}>Periods per Week</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '10%' }}>Total Contact Periods</th>
+                                                                    <th rowSpan="2" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.4rem', color: 'var(--primary)', textAlign: 'center', verticalAlign: 'middle', width: '8%', whiteSpace: 'nowrap' }}>Credit</th>
+                                                                    <th colSpan="3" style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--primary)', textAlign: 'center', width: '22%', whiteSpace: 'nowrap' }}>Marks</th>
+                                                                </tr>
+                                                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>L</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>T</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>P</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>CIA</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>ESE</th>
+                                                                    <th style={{ border: '1px solid var(--glass-border)', padding: '0.4rem', color: 'var(--text-main)', textAlign: 'center', whiteSpace: 'nowrap' }}>Total</th>
+                                                                </tr>
+                                                            </thead>
+                                                        )}
+                                                        <tbody>
                                                             {sortedVerticals.map(vertNum => {
                                                                 const subjectsForVert = sortSubjectsByCode(verticalsGrouped[vertNum] || []);
                                                                 const verticalName = subjectsForVert.find(s => s.verticalName)?.verticalName || '';
                                                                 const romanNum = getRomanNumeral(vertNum);
+
+                                                                if (isMBA) {
+                                                                    return (
+                                                                        <React.Fragment key={`vert-${vertNum}`}>
+                                                                            <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                                                                <td colSpan="12" style={{ border: '1px solid var(--glass-border)', padding: '0.6rem 0.75rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--primary)', fontSize: '0.95rem' }}>
+                                                                                    Stream/ Specialization: {verticalName || `Specialisation ${romanNum}`}
+                                                                                </td>
+                                                                            </tr>
+                                                                            {subjectsForVert.map((subj, subjIdx) => renderPublicMbaRow(subj, subjIdx + 1, `mba-pec-${vertNum}-${subjIdx}`))}
+                                                                        </React.Fragment>
+                                                                    );
+                                                                }
 
                                                                 return (
                                                                     <React.Fragment key={`vert-${vertNum}`}>
@@ -3902,22 +4142,20 @@ const SyllabusPage = () => {
                                                                                 Vertical {romanNum}: {verticalName}
                                                                             </td>
                                                                         </tr>
-                                                                        {subjectsForVert.map((subj, subjIdx) => {
-                                                                            return (
-                                                                                <tr key={subjIdx}>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{subj.code}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.l}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.t}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.p}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.contactPeriods}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{subj.credits}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.cia}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.ese}</td>
-                                                                                    <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 'bold' }}>{subj.total}</td>
-                                                                                </tr>
-                                                                            );
-                                                                        })}
+                                                                        {subjectsForVert.map((subj, subjIdx) => (
+                                                                            <tr key={subjIdx}>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.4rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{subj.code}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.5rem', color: 'var(--text-main)' }}>{subj.title}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.l}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.t}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.p}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.contactPeriods}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-main)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{subj.credits}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.cia}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.2rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{subj.ese}</td>
+                                                                                <td style={{ border: '1px solid var(--glass-border)', padding: '0.5rem 0.3rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap', fontWeight: 'bold' }}>{subj.total}</td>
+                                                                            </tr>
+                                                                        ))}
                                                                     </React.Fragment>
                                                                 );
                                                             })}
@@ -3925,8 +4163,7 @@ const SyllabusPage = () => {
                                                     </table>
                                                 </div>
                                             </div>
-                                        );
-                                    })()}
+                                        )}
 
                                     {/* Open Elective Courses */}
                                     {deptData.subjects.some(s => s.isOpenElective) && (
@@ -3997,9 +4234,14 @@ const SyllabusPage = () => {
                                             </div>
                                         </div>
                                     )}
-                                    {deptData && deptData.subjects && renderCreditDistributionTable(deptData.subjects)}
+                                    {deptData && deptData.subjects && renderCreditDistributionTable(
+                                        deptData.subjects,
+                                        isMBADepartment(deptData?.slug || selectedDept) || isMBADepartment(deptData?.name || activeDeptData?.name),
+                                        deptData?.name || activeDeptData?.name || 'Master of Business Administration'
+                                    )}
                                 </div>
-                            )}
+                            );
+                        })()}
                         </motion.div>
                     )}
 
@@ -4407,7 +4649,11 @@ const SyllabusPage = () => {
                                     </div>
                                 );
                             })}
-                            {(!deptData || !deptData.subjects || deptData.subjects.length === 0) && renderCreditDistributionTable(flattenSemesters(syllabusBreakdown))}
+                            {(!deptData || !deptData.subjects || deptData.subjects.length === 0) && renderCreditDistributionTable(
+                                flattenSemesters(syllabusBreakdown),
+                                isMBADepartment(selectedDept) || isMBADepartment(activeDeptData?.name),
+                                activeDeptData?.name || 'Master of Business Administration'
+                            )}
                         </div>
                     </div>
 

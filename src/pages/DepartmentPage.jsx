@@ -18,6 +18,14 @@ import { useAuth } from '../context/AuthContext';
 import AdmissionForm from '../components/AdmissionForm';
 import GlobalHero from '../components/GlobalHero';
 import Tilt3DCard from '../components/Tilt3DCard';
+import MbaCreditSummary from '../components/MbaCreditSummary';
+import {
+    isMBADepartment,
+    withMbaDefaultElectivesIfMissing,
+    sortMbaCourses,
+    isMbaNfeSubject,
+    isMbaNfePlaceholder
+} from '../utils/curriculumTableTemplate';
 
 const iconMap = {
     FaGraduationCap, FaBook, FaChalkboardTeacher, FaTrophy,
@@ -2000,6 +2008,7 @@ const DepartmentPage = () => {
             : [];
 
         // Build all semester courses list
+        const isMba = isMBADepartment(department);
         let allCourses = [];
         if (dynamicSubjects.length > 0) {
             allCourses = dynamicSubjects.map(s => ({
@@ -2016,16 +2025,16 @@ const DepartmentPage = () => {
                 t: s.t !== undefined ? s.t : 0,
                 p: s.p !== undefined ? s.p : 0,
                 credits: s.credits !== undefined ? s.credits : 3,
-                contactPeriods: s.contactPeriods || ((s.l || 0) + (s.t || 0) + (s.p || 0)),
-                cia: s.cia || 40,
-                ese: s.ese || 60,
-                total: s.total || 100,
+                contactPeriods: s.contactPeriods !== undefined ? s.contactPeriods : ((s.l || 0) + (s.t || 0) + (s.p || 0)),
+                cia: s.cia !== undefined ? s.cia : 40,
+                ese: s.ese !== undefined ? s.ese : 60,
+                total: s.total !== undefined ? s.total : 100,
                 isOpenElective: !!s.isOpenElective,
-                courseObjectives: s.courseObjectives || [],
+                courseObjectives: s.courseObjectives || s.objectives || [],
                 units: s.units || [],
-                courseOutcomes: s.courseOutcomes || [],
-                textBooks: s.textBooks || [],
-                referenceBooks: s.referenceBooks || [],
+                courseOutcomes: s.courseOutcomes || s.outcomes || [],
+                textBooks: s.textBooks || s.textbooks || [],
+                referenceBooks: s.referenceBooks || s.references || [],
                 webReferences: s.webReferences || []
             }));
         } else if (department.curriculum && department.curriculum.length > 0) {
@@ -2086,9 +2095,12 @@ const DepartmentPage = () => {
             });
         }
 
+        if (isMba && allCourses.length > 0) {
+            allCourses = withMbaDefaultElectivesIfMissing(allCourses);
+        }
+
         // Available semester tabs
-        const isMba = department?.slug === 'master-of-business-administration' || department?.degree === 'MBA' || department?.name?.toLowerCase().includes('business administration');
-        const totalSems = department?.type === 'PG' ? 4 : 8;
+        const totalSems = (department?.type === 'PG' || isMba) ? 4 : 8;
         const semTabs = [];
         for (let i = 1; i <= totalSems; i++) {
             semTabs.push({ id: String(i), label: `Semester ${i}` });
@@ -2101,21 +2113,34 @@ const DepartmentPage = () => {
         semTabs.push({ id: 'all', label: `All Courses (1-${totalSems})` });
 
         // Filter courses by semester & search
-        const filteredCourses = allCourses.filter(course => {
+        const hasMbaVerticals = isMba && allCourses.some(c => c.vertical || c.verticalName);
+        const hasMbaNfeOptions = isMba && allCourses.some(c => isMbaNfeSubject(c) && !isMbaNfePlaceholder(c));
+
+        const rawFilteredCourses = allCourses.filter(course => {
             const matchesSearch = !curriculumSearch ||
                 (course.code || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
                 (course.title || course.name || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
                 (course.categoryType || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
-                (course.category || '').toLowerCase().includes(curriculumSearch.toLowerCase());
+                (course.category || '').toLowerCase().includes(curriculumSearch.toLowerCase()) ||
+                (course.verticalName || '').toLowerCase().includes(curriculumSearch.toLowerCase());
 
             if (!matchesSearch) return false;
 
             if (selectedCurriculumSem === 'all') return true;
-            if (selectedCurriculumSem === 'PE') return (course.vertical || course.categoryType === 'PEC') && course.categoryType !== 'NFE';
-            if (selectedCurriculumSem === 'NFE') return course.categoryType === 'NFE' || (course.category || '').toUpperCase().includes('NON-FUNCTIONAL') || (course.category || '').toUpperCase().includes('NON FUNCTIONAL') || (course.category || '').toUpperCase().includes('NFE');
+            if (selectedCurriculumSem === 'PE') {
+                if (hasMbaVerticals) return Boolean(course.vertical || course.verticalName);
+                return (course.vertical || course.categoryType === 'PEC') && course.categoryType !== 'NFE';
+            }
+            if (selectedCurriculumSem === 'NFE') {
+                if (hasMbaNfeOptions) return isMbaNfeSubject(course) && !isMbaNfePlaceholder(course);
+                return isMbaNfeSubject(course);
+            }
             if (selectedCurriculumSem === 'OE') return course.isOpenElective || course.categoryType === 'OEC';
+            if (isMba && (course.vertical || course.verticalName)) return false;
+            if (hasMbaNfeOptions && isMbaNfeSubject(course) && !isMbaNfePlaceholder(course)) return false;
             return String(course.semester) === selectedCurriculumSem;
         });
+        const filteredCourses = isMba ? sortMbaCourses(rawFilteredCourses) : rawFilteredCourses;
 
         // Semester statistics
         const semTotalCredits = filteredCourses.reduce((sum, c) => sum + (Number(c.credits) || 0), 0);
@@ -2439,7 +2464,10 @@ const DepartmentPage = () => {
                                 </thead>
                                 <tbody>
                                     {filteredCourses.map((course, idx) => {
-                                        const isInduction = (course.title || course.name || '').toUpperCase().includes('INDUCTION') || (course.code || '').toUpperCase().includes('INDUCTION');
+                                        const titleUpper = (course.title || course.name || '').toUpperCase();
+                                        const codeUpper = (course.code || '').toUpperCase();
+                                        const isInduction = titleUpper.includes('INDUCTION') || codeUpper.includes('INDUCTION');
+                                        const isInternship = isMba && titleUpper.includes('INTERNSHIP') && Number(course.l || 0) === 0 && Number(course.t || 0) === 0;
                                         return (
                                             <tr
                                                 key={course.id || idx}
@@ -2459,13 +2487,13 @@ const DepartmentPage = () => {
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                                         <span>{course.title || course.name}</span>
                                                         {course.verticalName && (
-                                                            <span style={{ fontSize: '0.75rem', color: '#c084fc' }}>• {course.verticalName}</span>
+                                                            <span style={{ fontSize: '0.75rem', color: '#c084fc' }}>• Stream/ Specialization: {course.verticalName}</span>
                                                         )}
                                                     </div>
                                                 </td>
-                                                {isInduction ? (
+                                                {isInduction || isInternship ? (
                                                     <td colSpan={4} style={{ padding: '1rem', color: 'var(--primary)', textAlign: 'center', fontSize: '0.9rem', fontWeight: '800', letterSpacing: '0.5px' }}>
-                                                        2 WEEKS
+                                                        {isInduction ? '2 WEEKS' : '4 Weeks'}
                                                     </td>
                                                 ) : (
                                                     <>
@@ -2525,7 +2553,9 @@ const DepartmentPage = () => {
                 )}
 
                 {/* Credit Distribution Summary Matrix */}
-                {grandTotalCredits > 0 && (
+                {grandTotalCredits > 0 && (isMba ? (
+                    <MbaCreditSummary subjects={allCourses} deptName={department?.name} />
+                ) : (
                     <div style={{
                         background: 'var(--bg-card)',
                         borderRadius: '24px',
@@ -2598,7 +2628,7 @@ const DepartmentPage = () => {
                             })}
                         </div>
                     </div>
-                )}
+                ))}
 
                 {/* Detailed Subject Syllabus Modal */}
                 {selectedSubjectModal && (
